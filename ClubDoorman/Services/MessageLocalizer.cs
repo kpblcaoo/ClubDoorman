@@ -122,7 +122,7 @@ public class MessageLocalizer : IMessageLocalizer
     /// </summary>
     public string System(string key, params object[] args)
     {
-        return System(key, CultureInfo.CurrentUICulture, args);
+        return System(key, _cultureProvider.GetDefaultCulture(), args);
     }
     
     /// <summary>
