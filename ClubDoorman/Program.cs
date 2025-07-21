@@ -143,7 +143,8 @@ public class Program
                 services.AddSingleton<ICaptchaService>(provider => new CaptchaService(
                     provider.GetRequiredService<ITelegramBotClientWrapper>(),
                     provider.GetRequiredService<ILogger<CaptchaService>>(),
-                    provider.GetRequiredService<IMessageService>()));
+                    provider.GetRequiredService<IMessageService>(),
+                    provider.GetRequiredService<ICaptchaLocalizer>()));
                 services.AddSingleton<IModerationService>(provider => new ModerationService(
                     provider.GetRequiredService<ISpamHamClassifier>(),
                     provider.GetRequiredService<IMimicryClassifier>(),
@@ -163,6 +164,7 @@ public class Program
                 services.AddSingleton<IChatCultureProvider, ChatCultureProvider>();
                 services.AddSingleton<IMessageLocalizer, MessageLocalizer>();
                 services.AddSingleton<ILocalizationValidator, LocalizationValidator>();
+                services.AddSingleton<ICaptchaLocalizer, CaptchaLocalizer>();
                 services.AddSingleton<MessageTemplates>(provider => new MessageTemplates(provider.GetRequiredService<IMessageLocalizer>()));
                 services.Configure<LoggingConfiguration>(context.Configuration.GetSection("LoggingConfiguration"));
                 services.AddSingleton<ILoggingConfigurationService, LoggingConfigurationService>();

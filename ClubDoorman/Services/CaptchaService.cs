@@ -17,6 +17,7 @@ public class CaptchaService : ICaptchaService
     private readonly ITelegramBotClientWrapper _bot;
     private readonly ILogger<CaptchaService> _logger;
     private readonly IMessageService _messageService;
+    private readonly ICaptchaLocalizer _captchaLocalizer;
 
     // Черный список имен для отображения
     private readonly List<string> _namesBlacklist = ["p0rn", "porn", "порн", "п0рн", "pоrn", "пoрн", "bot"];
@@ -26,11 +27,12 @@ public class CaptchaService : ICaptchaService
     /// </summary>
     /// <param name="bot">Клиент Telegram бота</param>
     /// <param name="logger">Логгер для записи событий</param>
-    public CaptchaService(ITelegramBotClientWrapper bot, ILogger<CaptchaService> logger, IMessageService messageService)
+    public CaptchaService(ITelegramBotClientWrapper bot, ILogger<CaptchaService> logger, IMessageService messageService, ICaptchaLocalizer captchaLocalizer)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
+        _captchaLocalizer = captchaLocalizer ?? throw new ArgumentNullException(nameof(captchaLocalizer));
     }
 
     /// <summary>
@@ -77,15 +79,16 @@ public class CaptchaService : ICaptchaService
             username?.Contains("porn") == true || 
             username?.Contains("p0rn") == true)
         {
-            fullNameForDisplay = "новый участник чата";
+            fullNameForDisplay = _captchaLocalizer.GetNewParticipantName(chat.Id);
         }
 
-        var welcomeMessage = $"Привет, <a href=\"tg://user?id={user.Id}\">{System.Net.WebUtility.HtmlEncode(fullNameForDisplay)}</a>! " +
-                            $"Антиспам: на какой кнопке {Captcha.CaptchaList[correctAnswer].Description}?";
+        var userMention = $"<a href=\"tg://user?id={user.Id}\">{System.Net.WebUtility.HtmlEncode(fullNameForDisplay)}</a>";
+        var emojiDescription = _captchaLocalizer.GetEmojiDescription(correctAnswer, chat.Id);
+        var welcomeMessage = _captchaLocalizer.GetCaptchaMessage(userMention, emojiDescription, chat.Id);
 
         // Добавляем заглушку для рекламы если нужно
         var isNoAdGroup = IsNoAdGroup(chat.Id);
-        var vpnAdHtml = isNoAdGroup ? "" : "\n\n 📍 Место для рекламы\n<i>...</i>";
+        var vpnAdHtml = isNoAdGroup ? "" : _captchaLocalizer.GetAdPlaceholder(chat.Id);
         welcomeMessage += vpnAdHtml;
 
         Message captchaMessage;

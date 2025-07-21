@@ -120,7 +120,8 @@ public class IntroFlowServiceTestFactory
         return new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
             new Mock<ILogger<CaptchaService>>().Object,
-            new Mock<IMessageService>().Object
+            new Mock<IMessageService>().Object,
+            new Mock<ICaptchaLocalizer>().Object
         );
     }
 

@@ -19,13 +19,25 @@ public class CaptchaServiceTestFactory
     public Mock<ITelegramBotClientWrapper> BotMock { get; } = new();
     public Mock<ILogger<CaptchaService>> LoggerMock { get; } = new();
     public Mock<IMessageService> MessageServiceMock { get; } = new();
+    public Mock<ICaptchaLocalizer> CaptchaLocalizerMock { get; } = new();
 
     public CaptchaService CreateCaptchaService()
     {
         return new CaptchaService(
             BotMock.Object,
             LoggerMock.Object,
-            MessageServiceMock.Object
+            MessageServiceMock.Object,
+            CaptchaLocalizerMock.Object
+        );
+    }
+
+    public CaptchaService CreateCaptchaService(ICaptchaLocalizer captchaLocalizer)
+    {
+        return new CaptchaService(
+            BotMock.Object,
+            LoggerMock.Object,
+            MessageServiceMock.Object,
+            captchaLocalizer
         );
     }
 
@@ -100,7 +112,8 @@ public class CaptchaServiceTestFactory
         return new CaptchaService(
             fakeClient,
             LoggerMock.Object,
-            MessageServiceMock.Object
+            MessageServiceMock.Object,
+            CaptchaLocalizerMock.Object
         );
     }
     

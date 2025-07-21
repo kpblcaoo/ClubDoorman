@@ -12,6 +12,18 @@
   <data name="CaptchaExpired" xml:space="preserve">
     <value>⏰ Captcha expired. Please request a new one.</value>
   </data>
+  <data name="CaptchaMessage" xml:space="preserve">
+    <value>Hello, {0}! Anti-spam: which button has {1}?</value>
+  </data>
+  <data name="CaptchaAdPlaceholder" xml:space="preserve">
+    <value>
+
+ 📍 Ad space
+<i>...</i></value>
+  </data>
+  <data name="CaptchaNewParticipant" xml:space="preserve">
+    <value>new chat participant</value>
+  </data>
   <data name="WelcomeMessage" xml:space="preserve">
     <value><b>👋 Hello! I'm a modern anti-spam bot for Telegram</b>
 
@@ -76,5 +88,93 @@ I protect <b>groups</b> and <b>channels with discussions</b> from spam, flood an
   </data>
   <data name="CaptchaShown" xml:space="preserve">
     <value>🧩 Please solve the captcha to enter the chat</value>
+  </data>
+  <!-- Captcha emoji descriptions -->
+  <data name="CaptchaUnicorn" xml:space="preserve">
+    <value>unicorn</value>
+  </data>
+  <data name="CaptchaHammer" xml:space="preserve">
+    <value>hammer</value>
+  </data>
+  <data name="CaptchaCat" xml:space="preserve">
+    <value>cat</value>
+  </data>
+  <data name="CaptchaAnchor" xml:space="preserve">
+    <value>anchor</value>
+  </data>
+  <data name="CaptchaDolphin" xml:space="preserve">
+    <value>dolphin</value>
+  </data>
+  <data name="CaptchaApple" xml:space="preserve">
+    <value>apple</value>
+  </data>
+  <data name="CaptchaBall" xml:space="preserve">
+    <value>ball</value>
+  </data>
+  <data name="CaptchaHorse" xml:space="preserve">
+    <value>horse</value>
+  </data>
+  <data name="CaptchaDuck" xml:space="preserve">
+    <value>duck</value>
+  </data>
+  <data name="CaptchaRaccoon" xml:space="preserve">
+    <value>raccoon</value>
+  </data>
+  <data name="CaptchaOwl" xml:space="preserve">
+    <value>owl</value>
+  </data>
+  <data name="CaptchaTurtle" xml:space="preserve">
+    <value>turtle</value>
+  </data>
+  <data name="CaptchaCrab" xml:space="preserve">
+    <value>crab</value>
+  </data>
+  <data name="CaptchaBanana" xml:space="preserve">
+    <value>banana</value>
+  </data>
+  <data name="CaptchaWatermelon" xml:space="preserve">
+    <value>watermelon</value>
+  </data>
+  <data name="CaptchaClock" xml:space="preserve">
+    <value>clock</value>
+  </data>
+  <data name="CaptchaAirplane" xml:space="preserve">
+    <value>airplane</value>
+  </data>
+  <data name="CaptchaKnife" xml:space="preserve">
+    <value>knife</value>
+  </data>
+  <data name="CaptchaTshirt" xml:space="preserve">
+    <value>t-shirt</value>
+  </data>
+  <data name="CaptchaScissors" xml:space="preserve">
+    <value>scissors</value>
+  </data>
+  <data name="CaptchaWhale" xml:space="preserve">
+    <value>whale</value>
+  </data>
+  <data name="CaptchaElephant" xml:space="preserve">
+    <value>elephant</value>
+  </data>
+  <data name="CaptchaFlamingo" xml:space="preserve">
+    <value>flamingo</value>
+  </data>
+  <data name="CaptchaPopcorn" xml:space="preserve">
+    <value>popcorn</value>
+  </data>
+  <data name="CaptchaButterfly" xml:space="preserve">
+    <value>butterfly</value>
+  </data>
+  <data name="CaptchaCrown" xml:space="preserve">
+    <value>crown</value>
+  </data>
+  <data name="CaptchaSkull" xml:space="preserve">
+    <value>skull</value>
+  </data>
+  <data name="CaptchaBoomerang" xml:space="preserve">
+    <value>boomerang</value>
+  </data>
+  <data name="CaptchaEar" xml:space="preserve">
+    <value>ear</value>
   </data>
 </root> 

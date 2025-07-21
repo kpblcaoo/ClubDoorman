@@ -23,11 +23,13 @@ namespace ClubDoorman.Test.Unit.Services;
 public class CaptchaServiceExtendedTests
 {
     private CaptchaServiceTestFactory _factory = null!;
+    private Mock<ICaptchaLocalizer> _captchaLocalizerMock;
 
     [SetUp]
     public void Setup()
     {
         _factory = new CaptchaServiceTestFactory();
+        _captchaLocalizerMock = new Mock<ICaptchaLocalizer>();
     }
 
     #region CreateCaptchaAsync Tests
@@ -36,7 +38,7 @@ public class CaptchaServiceExtendedTests
     public async Task CreateCaptchaAsync_ValidParameters_CreatesCaptchaSuccessfully()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
         var joinMessage = CreateTestMessage();
@@ -58,7 +60,7 @@ public class CaptchaServiceExtendedTests
     public async Task CreateCaptchaAsync_NullChat_ThrowsArgumentNullException()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var user = CreateTestUser();
 
         // Act & Assert
@@ -71,7 +73,7 @@ public class CaptchaServiceExtendedTests
     public async Task CreateCaptchaAsync_NullUser_ThrowsArgumentNullException()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
 
         // Act & Assert
@@ -84,7 +86,7 @@ public class CaptchaServiceExtendedTests
     public async Task CreateCaptchaAsync_UserWithInappropriateName_UsesGenericName()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser(firstName: "p0rn", lastName: "user");
 
@@ -101,7 +103,7 @@ public class CaptchaServiceExtendedTests
     public async Task CreateCaptchaAsync_UserWithInappropriateUsername_UsesGenericName()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser(username: "porn_user");
 
@@ -117,7 +119,7 @@ public class CaptchaServiceExtendedTests
     public async Task CreateCaptchaAsync_WithoutJoinMessage_CreatesCaptchaSuccessfully()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
 
@@ -133,7 +135,7 @@ public class CaptchaServiceExtendedTests
     public async Task CreateCaptchaAsync_MultipleUsers_CreatesUniqueCaptchas()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user1 = CreateTestUser(id: 1);
         var user2 = CreateTestUser(id: 2);
@@ -158,7 +160,7 @@ public class CaptchaServiceExtendedTests
     public async Task ValidateCaptchaAsync_CorrectAnswer_ReturnsTrue()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
         var captchaInfo = await service.CreateCaptchaAsync(chat, user);
@@ -175,7 +177,7 @@ public class CaptchaServiceExtendedTests
     public async Task ValidateCaptchaAsync_IncorrectAnswer_ReturnsFalse()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
         var captchaInfo = await service.CreateCaptchaAsync(chat, user);
@@ -193,7 +195,7 @@ public class CaptchaServiceExtendedTests
     public async Task ValidateCaptchaAsync_EmptyKey_ReturnsFalse()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
 
         // Act
         var result = await service.ValidateCaptchaAsync("", 0);
@@ -206,7 +208,7 @@ public class CaptchaServiceExtendedTests
     public async Task ValidateCaptchaAsync_NullKey_ReturnsFalse()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
 
         // Act
         var result = await service.ValidateCaptchaAsync(null!, 0);
@@ -219,7 +221,7 @@ public class CaptchaServiceExtendedTests
     public async Task ValidateCaptchaAsync_NonExistentKey_ReturnsFalse()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
 
         // Act
         var result = await service.ValidateCaptchaAsync("non_existent_key", 0);
@@ -232,7 +234,7 @@ public class CaptchaServiceExtendedTests
     public async Task ValidateCaptchaAsync_AfterValidation_CaptchaRemoved()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
         await service.CreateCaptchaAsync(chat, user);
@@ -254,7 +256,7 @@ public class CaptchaServiceExtendedTests
     public async Task GetCaptchaInfo_ExistingCaptcha_ReturnsCaptchaInfo()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
         var originalCaptcha = await service.CreateCaptchaAsync(chat, user);
@@ -274,7 +276,7 @@ public class CaptchaServiceExtendedTests
     public async Task GetCaptchaInfo_NonExistentCaptcha_ReturnsNull()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
 
         // Act
         var result = service.GetCaptchaInfo("non_existent_key");
@@ -287,7 +289,7 @@ public class CaptchaServiceExtendedTests
     public async Task GetCaptchaInfo_AfterValidation_ReturnsNull()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
         await service.CreateCaptchaAsync(chat, user);
@@ -309,7 +311,7 @@ public class CaptchaServiceExtendedTests
     public async Task RemoveCaptcha_ExistingCaptcha_ReturnsTrue()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
         await service.CreateCaptchaAsync(chat, user);
@@ -326,7 +328,7 @@ public class CaptchaServiceExtendedTests
     public async Task RemoveCaptcha_NonExistentCaptcha_ReturnsFalse()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
 
         // Act
         var result = service.RemoveCaptcha("non_existent_key");
@@ -339,7 +341,7 @@ public class CaptchaServiceExtendedTests
     public async Task RemoveCaptcha_AfterRemoval_CaptchaNotAccessible()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
         await service.CreateCaptchaAsync(chat, user);
@@ -361,7 +363,7 @@ public class CaptchaServiceExtendedTests
     public void GenerateKey_ValidParameters_ReturnsExpectedKey()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chatId = 123456L;
         var userId = 789L;
 
@@ -376,7 +378,7 @@ public class CaptchaServiceExtendedTests
     public void GenerateKey_DifferentParameters_ReturnsDifferentKeys()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
 
         // Act
         var key1 = service.GenerateKey(1, 1);
@@ -393,7 +395,7 @@ public class CaptchaServiceExtendedTests
     public void GenerateKey_SameParameters_ReturnsSameKey()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chatId = 123L;
         var userId = 456L;
 
@@ -413,7 +415,7 @@ public class CaptchaServiceExtendedTests
     public async Task BanExpiredCaptchaUsersAsync_NoExpiredCaptchas_CompletesSuccessfully()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
 
         // Act & Assert
         Assert.DoesNotThrowAsync(() => service.BanExpiredCaptchaUsersAsync());
@@ -423,7 +425,7 @@ public class CaptchaServiceExtendedTests
     public async Task BanExpiredCaptchaUsersAsync_WithActiveCaptchas_CompletesSuccessfully()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
         await service.CreateCaptchaAsync(chat, user);
@@ -440,7 +442,7 @@ public class CaptchaServiceExtendedTests
     public async Task CreateCaptchaAsync_TelegramApiError_ThrowsException()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
 
@@ -454,7 +456,7 @@ public class CaptchaServiceExtendedTests
     public async Task ValidateCaptchaAsync_ConcurrentValidation_HandlesCorrectly()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
         var captchaInfo = await service.CreateCaptchaAsync(chat, user);
@@ -478,7 +480,7 @@ public class CaptchaServiceExtendedTests
     public async Task CreateCaptchaAsync_MultipleCaptchasSameUser_HandlesCorrectly()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
 
@@ -499,7 +501,7 @@ public class CaptchaServiceExtendedTests
     public async Task CreateCaptchaAsync_CancellationToken_RespectsCancellation()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var user = CreateTestUser();
         var cts = new CancellationTokenSource();
@@ -519,7 +521,7 @@ public class CaptchaServiceExtendedTests
     public async Task CreateCaptchaAsync_LargeBatch_HandlesCorrectly()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var tasks = new List<Task<CaptchaInfo>>();
 
@@ -541,7 +543,7 @@ public class CaptchaServiceExtendedTests
     public async Task ValidateCaptchaAsync_LargeBatch_HandlesCorrectly()
     {
         // Arrange
-        var service = _factory.CreateCaptchaService();
+        var service = _factory.CreateCaptchaService(_captchaLocalizerMock.Object);
         var chat = CreateTestChat();
         var captchas = new List<(string key, int answer)>();
 

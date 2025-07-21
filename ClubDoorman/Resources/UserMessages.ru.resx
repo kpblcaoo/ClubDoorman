@@ -12,6 +12,18 @@
   <data name="CaptchaExpired" xml:space="preserve">
     <value>⏰ Капча истекла. Запросите новую.</value>
   </data>
+  <data name="CaptchaMessage" xml:space="preserve">
+    <value>Привет, {0}! Антиспам: на какой кнопке {1}?</value>
+  </data>
+  <data name="CaptchaAdPlaceholder" xml:space="preserve">
+    <value>
+
+ 📍 Место для рекламы
+<i>...</i></value>
+  </data>
+  <data name="CaptchaNewParticipant" xml:space="preserve">
+    <value>новый участник чата</value>
+  </data>
   <data name="WelcomeMessage" xml:space="preserve">
     <value><b>👋 Привет! Я современный антиспам-бот для Telegram</b>
 
@@ -76,5 +88,93 @@
   </data>
   <data name="CaptchaShown" xml:space="preserve">
     <value>🧩 Пожалуйста, пройдите капчу для входа в чат</value>
+  </data>
+  <!-- Captcha emoji descriptions -->
+  <data name="CaptchaUnicorn" xml:space="preserve">
+    <value>единорог</value>
+  </data>
+  <data name="CaptchaHammer" xml:space="preserve">
+    <value>молоток</value>
+  </data>
+  <data name="CaptchaCat" xml:space="preserve">
+    <value>кошка</value>
+  </data>
+  <data name="CaptchaAnchor" xml:space="preserve">
+    <value>якорь</value>
+  </data>
+  <data name="CaptchaDolphin" xml:space="preserve">
+    <value>дельфин</value>
+  </data>
+  <data name="CaptchaApple" xml:space="preserve">
+    <value>яблоко</value>
+  </data>
+  <data name="CaptchaBall" xml:space="preserve">
+    <value>мяч</value>
+  </data>
+  <data name="CaptchaHorse" xml:space="preserve">
+    <value>лошадь</value>
+  </data>
+  <data name="CaptchaDuck" xml:space="preserve">
+    <value>утка</value>
+  </data>
+  <data name="CaptchaRaccoon" xml:space="preserve">
+    <value>енот</value>
+  </data>
+  <data name="CaptchaOwl" xml:space="preserve">
+    <value>сова</value>
+  </data>
+  <data name="CaptchaTurtle" xml:space="preserve">
+    <value>черепаха</value>
+  </data>
+  <data name="CaptchaCrab" xml:space="preserve">
+    <value>краб</value>
+  </data>
+  <data name="CaptchaBanana" xml:space="preserve">
+    <value>банан</value>
+  </data>
+  <data name="CaptchaWatermelon" xml:space="preserve">
+    <value>арбуз</value>
+  </data>
+  <data name="CaptchaClock" xml:space="preserve">
+    <value>часы</value>
+  </data>
+  <data name="CaptchaAirplane" xml:space="preserve">
+    <value>самолёт</value>
+  </data>
+  <data name="CaptchaKnife" xml:space="preserve">
+    <value>нож</value>
+  </data>
+  <data name="CaptchaTshirt" xml:space="preserve">
+    <value>футболка</value>
+  </data>
+  <data name="CaptchaScissors" xml:space="preserve">
+    <value>ножницы</value>
+  </data>
+  <data name="CaptchaWhale" xml:space="preserve">
+    <value>кит</value>
+  </data>
+  <data name="CaptchaElephant" xml:space="preserve">
+    <value>слон</value>
+  </data>
+  <data name="CaptchaFlamingo" xml:space="preserve">
+    <value>фламинго</value>
+  </data>
+  <data name="CaptchaPopcorn" xml:space="preserve">
+    <value>попкорн</value>
+  </data>
+  <data name="CaptchaButterfly" xml:space="preserve">
+    <value>бабочка</value>
+  </data>
+  <data name="CaptchaCrown" xml:space="preserve">
+    <value>корона</value>
+  </data>
+  <data name="CaptchaSkull" xml:space="preserve">
+    <value>череп</value>
+  </data>
+  <data name="CaptchaBoomerang" xml:space="preserve">
+    <value>бумеранг</value>
+  </data>
+  <data name="CaptchaEar" xml:space="preserve">
+    <value>ухо</value>
   </data>
 </root> 

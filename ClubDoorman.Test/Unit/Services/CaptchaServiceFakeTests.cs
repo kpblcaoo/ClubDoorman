@@ -9,6 +9,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using System.Reflection;
 using Moq;
 using ClubDoorman.Models;
+using ClubDoorman.Services;
 
 namespace ClubDoorman.Test.Unit.Services;
 
@@ -20,12 +21,25 @@ public class CaptchaServiceFakeTests
 {
     private CaptchaServiceTestFactory _factory = null!;
     private Mock<IMessageService> _messageServiceMock = null!;
+    private Mock<ICaptchaLocalizer> _captchaLocalizerMock;
 
     [SetUp]
     public void Setup()
     {
         _messageServiceMock = new Mock<IMessageService>();
+        _captchaLocalizerMock = new Mock<ICaptchaLocalizer>();
         _factory = new CaptchaServiceTestFactory();
+        
+        // Setup default localization responses
+        _captchaLocalizerMock.Setup(x => x.GetNewParticipantName(It.IsAny<long>()))
+            .Returns("новый участник чата");
+        _captchaLocalizerMock.Setup(x => x.GetEmojiDescription(It.IsAny<int>(), It.IsAny<long>()))
+            .Returns("единорог");
+        _captchaLocalizerMock.Setup(x => x.GetCaptchaMessage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>()))
+            .Returns((string userMention, string emojiDesc, long chatId) => 
+                $"Привет, {userMention}! Антиспам: на какой кнопке {emojiDesc}?");
+        _captchaLocalizerMock.Setup(x => x.GetAdPlaceholder(It.IsAny<long>()))
+            .Returns("\n\n 📍 Место для рекламы\n<i>...</i>");
     }
 
     [Test]
@@ -43,7 +57,8 @@ public class CaptchaServiceFakeTests
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
             new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object
+            _messageServiceMock.Object,
+            _captchaLocalizerMock.Object
         );
         
         var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
@@ -79,7 +94,8 @@ public class CaptchaServiceFakeTests
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
             new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object
+            _messageServiceMock.Object,
+            _captchaLocalizerMock.Object
         );
         
         var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
@@ -112,7 +128,8 @@ public class CaptchaServiceFakeTests
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
             new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object
+            _messageServiceMock.Object,
+            _captchaLocalizerMock.Object
         );
         
         var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
@@ -143,7 +160,8 @@ public class CaptchaServiceFakeTests
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
             new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object
+            _messageServiceMock.Object,
+            _captchaLocalizerMock.Object
         );
         
         var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
@@ -174,7 +192,8 @@ public class CaptchaServiceFakeTests
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
             new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object
+            _messageServiceMock.Object,
+            _captchaLocalizerMock.Object
         );
         
         var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
@@ -219,7 +238,8 @@ public class CaptchaServiceFakeTests
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
             new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object
+            _messageServiceMock.Object,
+            _captchaLocalizerMock.Object
         );
         
         var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
@@ -252,7 +272,8 @@ public class CaptchaServiceFakeTests
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
             new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object
+            _messageServiceMock.Object,
+            _captchaLocalizerMock.Object
         );
         
         var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
@@ -297,7 +318,8 @@ public class CaptchaServiceFakeTests
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
             new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object
+            _messageServiceMock.Object,
+            _captchaLocalizerMock.Object
         );
         
         var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
@@ -328,7 +350,8 @@ public class CaptchaServiceFakeTests
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
             new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object
+            _messageServiceMock.Object,
+            _captchaLocalizerMock.Object
         );
         
         var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
