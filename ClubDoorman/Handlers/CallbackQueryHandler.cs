@@ -148,7 +148,7 @@ public class CallbackQueryHandler : IUpdateHandler
 
         _statisticsService.IncrementCaptcha(captchaInfo.ChatId);
 
-        try
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             // Банируем на 20 минут
             await _bot.BanChatMember(
@@ -178,11 +178,7 @@ public class CallbackQueryHandler : IUpdateHandler
                     cancellationToken
                 );
             }, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Не удалось забанить пользователя за неправильную капчу");
-        }
+        }, "HandleFailedCaptcha", captchaInfo.User, new Chat { Id = captchaInfo.ChatId, Title = captchaInfo.ChatTitle }, cancellationToken);
     }
 
     private async Task HandleSuccessfulCaptcha(User user, Chat chat, Models.CaptchaInfo captchaInfo, CancellationToken cancellationToken)
@@ -243,7 +239,7 @@ public class CallbackQueryHandler : IUpdateHandler
 
         _logger.LogDebug("🎛️ Админский callback: {Data}, split: [{Parts}]", cbData, string.Join(", ", split));
 
-        try
+        await _errorMiddleware.ExecuteWithErrorHandlingAsync(async () =>
         {
             if (split.Count > 1 && split[0] == "approve" && long.TryParse(split[1], out var approveUserId))
             {
@@ -282,12 +278,7 @@ public class CallbackQueryHandler : IUpdateHandler
             }
 
             await _bot.AnswerCallbackQuery(callbackQuery.Id, cancellationToken: cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при обработке админского callback {Data}", cbData);
-            await _bot.AnswerCallbackQuery(callbackQuery.Id, "Ошибка при выполнении действия", cancellationToken: cancellationToken);
-        }
+        }, new ErrorContext("HandleAdminCallback", $"Обработка админского callback: {cbData}"), cancellationToken);
     }
 
     private async Task HandleApproveUser(CallbackQuery callbackQuery, long userId, CancellationToken cancellationToken)
@@ -318,7 +309,7 @@ public class CallbackQueryHandler : IUpdateHandler
             await _badMessageManager.MarkAsBad(text);
         }
 
-        try
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             // Банируем пользователя и полностью очищаем из всех списков
             await _bot.BanChatMember(new ChatId(chatId), userId, cancellationToken: cancellationToken);
@@ -344,27 +335,14 @@ public class CallbackQueryHandler : IUpdateHandler
                 new SimpleNotificationData(callbackQuery.From, callbackQuery.Message!.Chat, $"{adminName} забанил пользователя\n🧹 Пользователь очищен из всех списков\n📝 Сообщение добавлено в список авто-бана"),
                 cancellationToken
             );
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось забанить пользователя через админский callback");
-            await _messageService.SendAdminNotificationAsync(
-                AdminNotificationType.ChannelError,
-                new SimpleNotificationData(callbackQuery.From, callbackQuery.Message!.Chat, "Не могу забанить. Не хватает могущества? Сходите забаньте руками"),
-                cancellationToken
-            );
-        }
+        }, "HandleBanUser", callbackQuery.From, callbackQuery.Message?.Chat, cancellationToken);
 
         // Удаляем оригинальное сообщение пользователя
-        try
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             if (userMessage != null)
                 await _bot.DeleteMessage(userMessage.Chat, userMessage.MessageId, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Не удалось удалить оригинальное сообщение пользователя");
-        }
+        }, "HandleBanUser", callbackQuery.From, callbackQuery.Message?.Chat, cancellationToken);
 
         // Убираем кнопки
         await _bot.EditMessageReplyMarkup(callbackQuery.Message!.Chat.Id, callbackQuery.Message.MessageId, cancellationToken: cancellationToken);
@@ -378,7 +356,7 @@ public class CallbackQueryHandler : IUpdateHandler
         // При бане по профилю НЕ добавляем сообщение в автобан - проблема в профиле, а не в сообщении
         _logger.LogInformation("🚫👤 Бан по профилю - сообщение НЕ добавляется в автобан для пользователя {UserId}", userId);
 
-        try
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             // Банируем пользователя и полностью очищаем из всех списков
             await _bot.BanChatMember(new ChatId(chatId), userId, cancellationToken: cancellationToken);
@@ -404,27 +382,14 @@ public class CallbackQueryHandler : IUpdateHandler
                 new SimpleNotificationData(callbackQuery.From, callbackQuery.Message!.Chat, $"{adminName} забанил пользователя за спам-профиль\n🧹 Пользователь очищен из всех списков\n⚠️ Сообщение НЕ добавлено в автобан (проблема в профиле)"),
                 cancellationToken
             );
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось забанить пользователя через админский callback (бан по профилю)");
-            await _messageService.SendAdminNotificationAsync(
-                AdminNotificationType.ChannelError,
-                new SimpleNotificationData(callbackQuery.From, callbackQuery.Message!.Chat, "Не могу забанить. Не хватает могущества? Сходите забаньте руками"),
-                cancellationToken
-            );
-        }
+        }, "HandleBanUserByProfile", callbackQuery.From, callbackQuery.Message?.Chat, cancellationToken);
 
         // Удаляем оригинальное сообщение пользователя
-        try
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             if (userMessage != null)
                 await _bot.DeleteMessage(userMessage.Chat, userMessage.MessageId, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Не удалось удалить оригинальное сообщение пользователя");
-        }
+        }, "HandleBanUserByProfile", callbackQuery.From, callbackQuery.Message?.Chat, cancellationToken);
 
         // Убираем кнопки
         await _bot.EditMessageReplyMarkup(callbackQuery.Message!.Chat.Id, callbackQuery.Message.MessageId, cancellationToken: cancellationToken);
