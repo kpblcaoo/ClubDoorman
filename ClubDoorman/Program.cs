@@ -37,7 +37,8 @@ public class Program
         Console.CancelKeyPress += (sender, e) =>
         {
             Console.WriteLine("\n🛑 Получен сигнал завершения (Ctrl+C). Завершаем работу...");
-            e.Cancel = false; // Позволяем приложению завершиться
+            e.Cancel = true; // Предотвращаем стандартное завершение
+            Environment.Exit(0); // Принудительно завершаем приложение
         };
         
         var host = Host.CreateDefaultBuilder(args)

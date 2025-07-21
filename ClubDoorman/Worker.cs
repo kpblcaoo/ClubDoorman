@@ -85,46 +85,69 @@ internal sealed class Worker(
 
     private async Task CaptchaLoop(CancellationToken token)
     {
-        while (!token.IsCancellationRequested)
+        try
         {
-            await Task.Delay(TimeSpan.FromSeconds(15), token);
-            await _captchaService.BanExpiredCaptchaUsersAsync();
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(15), token);
+                await _captchaService.BanExpiredCaptchaUsersAsync();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("🛑 CaptchaLoop отменён");
         }
     }
 
     private async Task RefreshBanlistLoop(CancellationToken token)
     {
-        // Обновляем банлист сразу после запуска бота
-        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
+        try
         {
-            _logger.LogInformation("Начальное обновление банлиста из lols.bot при старте бота");
-            await _userManager.RefreshBanlist();
-        }, "InitialBanlistRefresh", null, null, token);
-
-        while (await _banlistRefreshTimer.WaitForNextTickAsync(token))
-        {
+            // Обновляем банлист сразу после запуска бота
             await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
             {
-                _logger.LogInformation("Обновляем банлист из lols.bot");
+                _logger.LogInformation("Начальное обновление банлиста из lols.bot при старте бота");
                 await _userManager.RefreshBanlist();
-            }, "BanlistRefresh", null, null, token);
+            }, "InitialBanlistRefresh", null, null, token);
+
+            while (await _banlistRefreshTimer.WaitForNextTickAsync(token))
+            {
+                await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
+                {
+                    _logger.LogInformation("Обновляем банлист из lols.bot");
+                    await _userManager.RefreshBanlist();
+                }, "BanlistRefresh", null, null, token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("🛑 RefreshBanlistLoop отменён");
         }
     }
 
     private async Task UpdateMembersCountLoop(CancellationToken stoppingToken)
     {
-        while (await _membersCountUpdateTimer.WaitForNextTickAsync(stoppingToken))
+        try
         {
-            await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
+            while (await _membersCountUpdateTimer.WaitForNextTickAsync(stoppingToken))
             {
-                await _globalStatsManager.UpdateAllMembersAsync(_bot);
-                _logger.LogInformation("Обновлено количество участников во всех чатах для статистики");
-            }, "UpdateMembersCount", null, null, stoppingToken);
+                await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
+                {
+                    await _globalStatsManager.UpdateAllMembersAsync(_bot);
+                    _logger.LogInformation("Обновлено количество участников во всех чатах для статистики");
+                }, "UpdateMembersCount", null, null, stoppingToken);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("🛑 UpdateMembersCountLoop отменён");
         }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("🚀 Worker запущен");
+        
         ChatSettingsManager.InitConfigFileIfMissing();
         _ = CaptchaLoop(stoppingToken);
         _ = ReportStatisticsLoop(stoppingToken);
@@ -151,6 +174,8 @@ internal sealed class Worker(
             }, "InitialMembersCountUpdate", null, null, stoppingToken);
         });
 
+        _logger.LogInformation("🔄 Основной цикл обработки запущен");
+        
         while (!stoppingToken.IsCancellationRequested)
         {
             try
@@ -159,12 +184,19 @@ internal sealed class Worker(
                 if (offset % 100 == 0)
                     await System.IO.File.WriteAllTextAsync(offsetPath, offset.ToString(), stoppingToken);
             }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("🛑 Получен сигнал отмены в основном цикле");
+                break;
+            }
             catch (Exception e) when (e is not OperationCanceledException)
             {
                 await _errorMiddleware.HandleExceptionAsync(e, "ExecuteAsync", "Ошибка в основном цикле обработки", ErrorSeverity.High, stoppingToken);
                 await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
             }
         }
+        
+        _logger.LogInformation("🛑 Основной цикл обработки завершён");
     }
 
     private async Task<int> UpdateLoop(int offset, CancellationToken stoppingToken)
@@ -343,26 +375,33 @@ internal sealed class Worker(
 
     private async Task ReportStatisticsLoop(CancellationToken ct)
     {
-        while (await _timer.WaitForNextTickAsync(ct))
+        try
         {
-            if (DateTimeOffset.UtcNow.Hour != 12)
-                continue;
+            while (await _timer.WaitForNextTickAsync(ct))
+            {
+                if (DateTimeOffset.UtcNow.Hour != 12)
+                    continue;
 
-            await _errorMiddleware.ExecuteWithErrorHandlingAsync(
-                async () =>
-                {
-                    var report = await _statisticsService.GenerateReportAsync();
-                    _statisticsService.ClearStats();
-                    
-                    await _messageService.SendAdminNotificationAsync(
-                        AdminNotificationType.SystemInfo,
-                        new SimpleNotificationData(new User { Id = 0, FirstName = "System" }, new Chat { Id = Config.AdminChatId, Title = "Admin" }, report),
-                        ct
-                    );
-                },
-                new ErrorContext("ReportStatisticsLoop", "Отправка отчета статистики"),
-                ct
-            );
+                await _errorMiddleware.ExecuteWithErrorHandlingAsync(
+                    async () =>
+                    {
+                        var report = await _statisticsService.GenerateReportAsync();
+                        _statisticsService.ClearStats();
+                        
+                        await _messageService.SendAdminNotificationAsync(
+                            AdminNotificationType.SystemInfo,
+                            new SimpleNotificationData(new User { Id = 0, FirstName = "System" }, new Chat { Id = Config.AdminChatId, Title = "Admin" }, report),
+                            ct
+                        );
+                    },
+                    new ErrorContext("ReportStatisticsLoop", "Отправка отчета статистики"),
+                    ct
+                );
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("🛑 ReportStatisticsLoop отменён");
         }
     }
 
