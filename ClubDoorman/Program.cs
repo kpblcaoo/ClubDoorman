@@ -1,6 +1,8 @@
 using Serilog;
 using Serilog.Events;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Infrastructure.ErrorHandling;
+using ClubDoorman.Infrastructure.ErrorHandling.ErrorHandlingStrategies;
 using ClubDoorman.Services;
 using ClubDoorman.Handlers;
 using ClubDoorman.Handlers.Commands;
@@ -144,7 +146,20 @@ public class Program
                 services.AddSingleton<MessageTemplates>();
                 services.Configure<LoggingConfiguration>(options => {});
                 services.AddSingleton<ILoggingConfigurationService, LoggingConfigurationService>();
-                services.AddSingleton<IMessageService, MessageService>();
+                services.AddSingleton<IMessageService>(provider => new MessageService(
+                    provider.GetRequiredService<ITelegramBotClientWrapper>(),
+                    provider.GetRequiredService<ILogger<MessageService>>(),
+                    provider.GetRequiredService<MessageTemplates>(),
+                    provider.GetRequiredService<ILoggingConfigurationService>(),
+                    provider.GetRequiredService<ErrorHandlingMiddleware>()
+                ));
+                
+                // Централизованная система обработки ошибок
+                services.AddSingleton<RetryStrategy>();
+                services.AddSingleton<LoggingStrategy>();
+                services.AddSingleton<NotificationStrategy>();
+                services.AddSingleton<IErrorHandler, ErrorHandler>();
+                services.AddSingleton<ErrorHandlingMiddleware>();
                 
                 // Обработчики обновлений
                 services.AddSingleton<IUpdateHandler>(provider => new MessageHandler(

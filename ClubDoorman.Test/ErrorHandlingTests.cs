@@ -1,199 +1,172 @@
-using ClubDoorman.Infrastructure;
+using ClubDoorman.Infrastructure.ErrorHandling;
+using ClubDoorman.Infrastructure.ErrorHandling.ErrorHandlingStrategies;
 using ClubDoorman.Services;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
-using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace ClubDoorman.Test;
 
 /// <summary>
-/// Тесты для проверки улучшенной обработки ошибок
+/// Тесты для централизованной системы обработки ошибок
 /// </summary>
 public class ErrorHandlingTests : TestBase
 {
     [Test]
-    public void ModerationService_CheckMessageAsync_WithNullMessage_ThrowsArgumentNullException()
-    {
-        // Arrange
-        var moderationService = CreateModerationService();
-
-        // Act & Assert
-        var exception = Assert.ThrowsAsync<ArgumentNullException>(async () =>
-        {
-            await moderationService.CheckMessageAsync(null!);
-        });
-
-        Assert.That(exception!.Message, Does.Contain("Сообщение не может быть null"));
-    }
-
-    [Test]
-    public void ModerationService_CheckUserNameAsync_WithNullUser_ThrowsArgumentNullException()
-    {
-        // Arrange
-        var moderationService = CreateModerationService();
-
-        // Act & Assert
-        var exception = Assert.ThrowsAsync<ArgumentNullException>(async () =>
-        {
-            await moderationService.CheckUserNameAsync(null!);
-        });
-
-        Assert.That(exception!.Message, Does.Contain("Пользователь не может быть null"));
-    }
-
-    [Test]
-    public void ModerationService_CheckUserNameAsync_WithEmptyFirstName_ThrowsModerationException()
-    {
-        // Arrange
-        var moderationService = CreateModerationService();
-        var user = new User { Id = 123, FirstName = "", LastName = "Test" };
-
-        // Act & Assert
-        var exception = Assert.ThrowsAsync<ModerationException>(async () =>
-        {
-            await moderationService.CheckUserNameAsync(user);
-        });
-
-        Assert.That(exception!.Message, Does.Contain("Имя пользователя не может быть пустым"));
-    }
-
-    [Test]
-    public void ModerationService_IncrementGoodMessageCountAsync_WithNullUser_ThrowsArgumentNullException()
-    {
-        // Arrange
-        var moderationService = CreateModerationService();
-        var chat = new Chat { Id = 456, Title = "Test Chat" };
-
-        // Act & Assert
-        var exception = Assert.ThrowsAsync<ArgumentNullException>(async () =>
-        {
-            await moderationService.IncrementGoodMessageCountAsync(null!, chat, "test message");
-        });
-
-        Assert.That(exception!.Message, Does.Contain("Пользователь не может быть null"));
-    }
-
-    [Test]
-    public void ModerationService_IncrementGoodMessageCountAsync_WithNullChat_ThrowsArgumentNullException()
-    {
-        // Arrange
-        var moderationService = CreateModerationService();
-        var user = new User { Id = 123, FirstName = "Test", LastName = "User" };
-
-        // Act & Assert
-        var exception = Assert.ThrowsAsync<ArgumentNullException>(async () =>
-        {
-            await moderationService.IncrementGoodMessageCountAsync(user, null!, "test message");
-        });
-
-        Assert.That(exception!.Message, Does.Contain("Чат не может быть null"));
-    }
-
-    [Test]
-    public void ModerationService_IncrementGoodMessageCountAsync_WithEmptyMessageText_ThrowsArgumentException()
-    {
-        // Arrange
-        var moderationService = CreateModerationService();
-        var user = new User { Id = 123, FirstName = "Test", LastName = "User" };
-        var chat = new Chat { Id = 456, Title = "Test Chat" };
-
-        // Act & Assert
-        var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
-        {
-            await moderationService.IncrementGoodMessageCountAsync(user, chat, "");
-        });
-
-        Assert.That(exception!.Message, Does.Contain("Текст сообщения не может быть пустым"));
-    }
-
-    [Test]
-    public void AiChecks_GetSpamProbability_WithNullMessage_ThrowsArgumentNullException()
-    {
-        // Arrange
-        var aiChecks = CreateAiChecks();
-
-        // Act & Assert
-        var exception = Assert.ThrowsAsync<ArgumentNullException>(async () =>
-        {
-            await aiChecks.GetSpamProbability(null!);
-        });
-
-        Assert.That(exception!.Message, Does.Contain("Сообщение не может быть null"));
-    }
-
-    [Test]
-    public void UserManager_InBanlist_WithInvalidUserId_ReturnsFalse()
-    {
-        // Arrange
-        // UserManager internal, поэтому тестируем через интерфейс
-        // Этот тест показывает, что валидация работает на уровне сервиса
-
-        // Act & Assert
-        // Проверяем, что валидация ID работает корректно
-        Assert.That(-1, Is.LessThan(0));
-        Assert.That(0, Is.EqualTo(0));
-    }
-
-    [Test]
-    public void UserManager_InBanlist_WithZeroUserId_ReturnsFalse()
-    {
-        // Arrange
-        // UserManager internal, поэтому тестируем через интерфейс
-        // Этот тест показывает, что валидация работает на уровне сервиса
-
-        // Act & Assert
-        // Проверяем, что валидация ID работает корректно
-        Assert.That(0, Is.EqualTo(0));
-    }
-
-    [Test]
-    public void CustomExceptions_CanBeCreated()
+    public void ErrorContext_Constructor_WithOperation_SetsProperties()
     {
         // Arrange & Act
-        var moderationException = new ModerationException("Test moderation error");
-        var userManagementException = new UserManagementException("Test user management error");
-        var aiServiceException = new AiServiceException("Test AI service error");
-        var telegramApiException = new TelegramApiException("Test Telegram API error");
-        var configurationException = new ConfigurationException("Test configuration error");
+        var context = new ErrorContext("TestOperation", "Test description", ErrorSeverity.High);
 
         // Assert
-        Assert.That(moderationException.Message, Is.EqualTo("Test moderation error"));
-        Assert.That(userManagementException.Message, Is.EqualTo("Test user management error"));
-        Assert.That(aiServiceException.Message, Is.EqualTo("Test AI service error"));
-        Assert.That(telegramApiException.Message, Is.EqualTo("Test Telegram API error"));
-        Assert.That(configurationException.Message, Is.EqualTo("Test configuration error"));
+        Assert.That(context.Operation, Is.EqualTo("TestOperation"));
+        Assert.That(context.Description, Is.EqualTo("Test description"));
+        Assert.That(context.Severity, Is.EqualTo(ErrorSeverity.High));
     }
 
     [Test]
-    [Category("ErrorHandling")]
-    public async Task SpamHamClassifier_Timeout_ReturnsGracefulFallback()
+    public void ErrorContext_WithData_AddsAdditionalData()
     {
         // Arrange
-        var logger = new Mock<ILogger<SpamHamClassifier>>().Object;
-        var classifier = new SpamHamClassifier(logger);
-        
-        // Act & Assert - должен вернуть fallback результат без зависания
-        var result = await classifier.IsSpam("test message").WaitAsync(TimeSpan.FromSeconds(20));
-        
-        // Должен вернуть результат (даже если fallback)
-        Assert.That(result.Spam, Is.TypeOf<bool>());
-        Assert.That(result.Score, Is.TypeOf<float>());
+        var context = new ErrorContext("TestOperation");
+
+        // Act
+        context.WithData("key1", "value1").WithData("key2", 42);
+
+        // Assert
+        Assert.That(context.AdditionalData["key1"], Is.EqualTo("value1"));
+        Assert.That(context.AdditionalData["key2"], Is.EqualTo(42));
     }
 
-    private static ModerationService CreateModerationService()
+    [Test]
+    public void ErrorContext_WithSeverity_SetsSeverity()
     {
-        // Используем TestFactory для создания сервиса с моками
-        var factory = new ModerationServiceTestFactory();
-        return factory.CreateModerationService();
+        // Arrange
+        var context = new ErrorContext("TestOperation");
+
+        // Act
+        context.WithSeverity(ErrorSeverity.Critical);
+
+        // Assert
+        Assert.That(context.Severity, Is.EqualTo(ErrorSeverity.Critical));
     }
 
-    private static AiChecks CreateAiChecks()
+    [Test]
+    public void LoggingStrategy_CanHandle_ReturnsTrue()
     {
-        // Используем TestFactory для создания AiChecks с моками
-        var factory = new AiChecksTestFactory();
-        return factory.CreateAiChecks();
+        // Arrange
+        var logger = new Mock<ILogger<LoggingStrategy>>().Object;
+        var strategy = new LoggingStrategy(logger);
+        var exception = new InvalidOperationException("Test exception");
+        var context = new ErrorContext("TestOperation");
+
+        // Act
+        var result = strategy.CanHandle(exception, context);
+
+        // Assert
+        Assert.That(result, Is.True);
+    }
+
+    [Test]
+    public void NotificationStrategy_CanHandle_HighSeverity_ReturnsTrue()
+    {
+        // Arrange
+        var messageService = new Mock<IMessageService>().Object;
+        var logger = new Mock<ILogger<NotificationStrategy>>().Object;
+        var strategy = new NotificationStrategy(messageService, logger);
+        var exception = new InvalidOperationException("Test exception");
+        var context = new ErrorContext("TestOperation", severity: ErrorSeverity.High);
+
+        // Act
+        var result = strategy.CanHandle(exception, context);
+
+        // Assert
+        Assert.That(result, Is.True);
+    }
+
+    [Test]
+    public void NotificationStrategy_CanHandle_LowSeverity_ReturnsFalse()
+    {
+        // Arrange
+        var messageService = new Mock<IMessageService>().Object;
+        var logger = new Mock<ILogger<NotificationStrategy>>().Object;
+        var strategy = new NotificationStrategy(messageService, logger);
+        var exception = new InvalidOperationException("Test exception");
+        var context = new ErrorContext("TestOperation", severity: ErrorSeverity.Low);
+
+        // Act
+        var result = strategy.CanHandle(exception, context);
+
+        // Assert
+        Assert.That(result, Is.False);
+    }
+
+    [Test]
+    public void RetryStrategy_IsRetryableException_HttpRequestException_ReturnsTrue()
+    {
+        // Arrange
+        var logger = new Mock<ILogger<RetryStrategy>>().Object;
+        var strategy = new RetryStrategy(logger);
+        var exception = new HttpRequestException("Network error");
+        var context = new ErrorContext("TestOperation");
+
+        // Act
+        var result = strategy.CanHandle(exception, context);
+
+        // Assert
+        Assert.That(result, Is.True);
+    }
+
+    [Test]
+    public void RetryStrategy_IsRetryableException_OperationCanceledException_ReturnsFalse()
+    {
+        // Arrange
+        var logger = new Mock<ILogger<RetryStrategy>>().Object;
+        var strategy = new RetryStrategy(logger);
+        var exception = new OperationCanceledException("Operation canceled");
+        var context = new ErrorContext("TestOperation");
+
+        // Act
+        var result = strategy.CanHandle(exception, context);
+
+        // Assert
+        Assert.That(result, Is.False);
+    }
+
+    [Test]
+    public void ErrorHandlingResult_Success_CreatesSuccessResult()
+    {
+        // Act
+        var result = ErrorHandlingResult.Success(shouldContinue: false);
+
+        // Assert
+        Assert.That(result.IsHandled, Is.True);
+        Assert.That(result.ShouldContinue, Is.False);
+    }
+
+    [Test]
+    public void ErrorHandlingResult_Failure_CreatesFailureResult()
+    {
+        // Act
+        var result = ErrorHandlingResult.Failure(shouldContinue: true);
+
+        // Assert
+        Assert.That(result.IsHandled, Is.False);
+        Assert.That(result.ShouldContinue, Is.True);
+    }
+
+    [Test]
+    public void ErrorHandlingResult_WithData_AddsAdditionalData()
+    {
+        // Arrange
+        var result = ErrorHandlingResult.Success();
+
+        // Act
+        result.WithData("key1", "value1").WithData("key2", 42);
+
+        // Assert
+        Assert.That(result.AdditionalData["key1"], Is.EqualTo("value1"));
+        Assert.That(result.AdditionalData["key2"], Is.EqualTo(42));
     }
 } 

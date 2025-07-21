@@ -1,4 +1,5 @@
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Infrastructure.ErrorHandling;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Logging;
 using Telegram.Bot.Types;
@@ -17,47 +18,43 @@ public class MessageService : IMessageService
     private readonly ILogger<MessageService> _logger;
     private readonly MessageTemplates _templates;
     private readonly ILoggingConfigurationService _configService;
+    private readonly ErrorHandlingMiddleware _errorMiddleware;
     
     public MessageService(
         ITelegramBotClientWrapper bot,
         ILogger<MessageService> logger,
         MessageTemplates templates,
-        ILoggingConfigurationService configService)
+        ILoggingConfigurationService configService,
+        ErrorHandlingMiddleware errorMiddleware)
     {
         _bot = bot;
         _logger = logger;
         _templates = templates;
         _configService = configService;
+        _errorMiddleware = errorMiddleware;
     }
     
     public async Task SendAdminNotificationAsync(AdminNotificationType type, NotificationData data, CancellationToken cancellationToken = default)
     {
-        try
+        var destinations = _configService.GetAdminNotificationDestinations(type);
+        
+        // Проверяем, нужно ли отправлять в админский чат
+        if (destinations.HasFlag(NotificationDestination.AdminChat) && _configService.ShouldSendNotification(type.ToString(), NotificationDestination.AdminChat))
         {
-            var destinations = _configService.GetAdminNotificationDestinations(type);
-            
-            // Проверяем, нужно ли отправлять в админский чат
-            if (destinations.HasFlag(NotificationDestination.AdminChat) && _configService.ShouldSendNotification(type.ToString(), NotificationDestination.AdminChat))
+            // Проверяем, что админский чат настроен корректно
+            var adminChatEnv = Environment.GetEnvironmentVariable("DOORMAN_ADMIN_CHAT");
+            if (string.IsNullOrEmpty(adminChatEnv))
             {
-                // Проверяем, что админский чат настроен корректно
-                var adminChatEnv = Environment.GetEnvironmentVariable("DOORMAN_ADMIN_CHAT");
-                if (string.IsNullOrEmpty(adminChatEnv))
-                {
-                    _logger.LogWarning("Админский чат не настроен (переменная DOORMAN_ADMIN_CHAT не установлена)");
-                    return;
-                }
-                
+                _logger.LogWarning("Админский чат не настроен (переменная DOORMAN_ADMIN_CHAT не установлена)");
+                return;
+            }
+            
+            // Используем централизованную обработку ошибок для Telegram API операций
+            await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
+            {
                 // Диагностика: проверяем доступность чата
-                try
-                {
-                    var chatInfo = await _bot.GetChat(Config.AdminChatId, cancellationToken);
-                    _logger.LogDebug("Админский чат доступен: {ChatTitle} (ID: {ChatId})", chatInfo.Title, chatInfo.Id);
-                }
-                catch (Exception chatEx)
-                {
-                    _logger.LogError(chatEx, "Не удается получить информацию об админском чате {ChatId}", Config.AdminChatId);
-                    return;
-                }
+                var chatInfo = await _bot.GetChat(Config.AdminChatId, cancellationToken);
+                _logger.LogDebug("Админский чат доступен: {ChatTitle} (ID: {ChatId})", chatInfo.Title, chatInfo.Id);
                 
                 var template = _templates.GetAdminTemplate(type);
                 var message = _templates.FormatNotificationTemplate(template, data);
@@ -71,15 +68,11 @@ public class MessageService : IMessageService
                 
                 _logger.LogDebug("Отправлено админское уведомление типа {Type} для пользователя {User}", 
                     type, Utils.FullName(data.User));
-            }
-            else
-            {
-                _logger.LogDebug("Админское уведомление типа {Type} пропущено согласно конфигурации", type);
-            }
+            }, "SendAdminNotification", data.User, data.Chat, cancellationToken);
         }
-        catch (Exception ex)
+        else
         {
-            _logger.LogError(ex, "Ошибка при отправке админского уведомления типа {Type} в чат {ChatId}", type, Config.AdminChatId);
+            _logger.LogDebug("Админское уведомление типа {Type} пропущено согласно конфигурации", type);
         }
     }
     
