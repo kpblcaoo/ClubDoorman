@@ -2,10 +2,10 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Infrastructure.ErrorHandling;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Logging;
+using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using System.Runtime.Caching;
 
 namespace ClubDoorman.Services;
 
@@ -19,19 +19,22 @@ public class MessageService : IMessageService
     private readonly MessageTemplates _templates;
     private readonly ILoggingConfigurationService _configService;
     private readonly IErrorHandlingMiddleware _errorMiddleware;
+    private readonly IMemoryCache _memoryCache;
     
     public MessageService(
         ITelegramBotClientWrapper bot,
         ILogger<MessageService> logger,
         MessageTemplates templates,
         ILoggingConfigurationService configService,
-        IErrorHandlingMiddleware errorMiddleware)
+        IErrorHandlingMiddleware errorMiddleware,
+        IMemoryCache memoryCache)
     {
         _bot = bot;
         _logger = logger;
         _templates = templates;
         _configService = configService;
         _errorMiddleware = errorMiddleware;
+        _memoryCache = memoryCache;
     }
     
     public async Task SendAdminNotificationAsync(AdminNotificationType type, NotificationData data, CancellationToken cancellationToken = default)
@@ -282,7 +285,7 @@ public class MessageService : IMessageService
             var callbackDataBan = $"banprofile_{data.Chat.Id}_{data.User.Id}";
             var callbackDataOk = $"aiOk_{data.Chat.Id}_{data.User.Id}";
             
-            MemoryCache.Default.Add(callbackDataBan, data, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(12) });
+            _memoryCache.Set(callbackDataBan, data, TimeSpan.FromHours(12));
 
             var buttons = new InlineKeyboardMarkup(new[]
             {

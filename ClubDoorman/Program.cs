@@ -7,6 +7,7 @@ using ClubDoorman.Services;
 using ClubDoorman.Handlers;
 using ClubDoorman.Handlers.Commands;
 using ClubDoorman.Models.Logging;
+using Microsoft.Extensions.Caching.Memory;
 using Telegram.Bot;
 using DotNetEnv;
 
@@ -161,12 +162,14 @@ public class Program
                 services.AddSingleton<MessageTemplates>();
                 services.Configure<LoggingConfiguration>(context.Configuration.GetSection("LoggingConfiguration"));
                 services.AddSingleton<ILoggingConfigurationService, LoggingConfigurationService>();
+                services.AddMemoryCache();
                 services.AddSingleton<IMessageService>(provider => new MessageService(
                     provider.GetRequiredService<ITelegramBotClientWrapper>(),
                     provider.GetRequiredService<ILogger<MessageService>>(),
                     provider.GetRequiredService<MessageTemplates>(),
                     provider.GetRequiredService<ILoggingConfigurationService>(),
-                    provider.GetRequiredService<IErrorHandlingMiddleware>()
+                    provider.GetRequiredService<IErrorHandlingMiddleware>(),
+                    provider.GetRequiredService<IMemoryCache>()
                 ));
                 
                 // Централизованная система обработки ошибок
