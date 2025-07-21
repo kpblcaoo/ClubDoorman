@@ -81,12 +81,24 @@ internal sealed class UserManager : IUserManager
         _approvedUsersStorage.ApproveUser(userId);
     }
 
-    public bool RemoveApproval(long userId, long? groupId = null, bool removeAll = false)
+    public async Task<bool> RemoveApprovalAsync(long userId, long? groupId = null, bool removeAll = false)
     {
-        return _errorMiddleware.ExecuteWithErrorHandlingAsync(async () =>
+        return await _errorMiddleware.ExecuteWithErrorHandlingAsync(async () =>
         {
             return _approvedUsersStorage.RemoveApproval(userId);
-        }, new ErrorContext("RemoveApproval", $"Удаление одобрения пользователя {userId}", ErrorSeverity.Medium)).Result;
+        }, new ErrorContext("RemoveApproval", $"Удаление одобрения пользователя {userId}", ErrorSeverity.Medium));
+    }
+
+    /// <summary>
+    /// Удаляет одобрение пользователя (синхронная обертка для обратной совместимости)
+    /// </summary>
+    /// <param name="userId">ID пользователя</param>
+    /// <param name="groupId">ID группы (для удаления группового одобрения)</param>
+    /// <param name="removeAll">Удалить все одобрения пользователя</param>
+    /// <returns>true, если одобрение было удалено</returns>
+    public bool RemoveApproval(long userId, long? groupId = null, bool removeAll = false)
+    {
+        return RemoveApprovalAsync(userId, groupId, removeAll).GetAwaiter().GetResult();
     }
 
     /// <summary>

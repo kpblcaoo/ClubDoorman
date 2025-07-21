@@ -113,9 +113,9 @@ internal sealed class UserManagerV2 : IUserManager
     /// <param name="groupId">ID группы (для удаления группового одобрения)</param>
     /// <param name="removeAll">Удалить все одобрения пользователя</param>
     /// <returns>true, если одобрение было удалено</returns>
-    public bool RemoveApproval(long userId, long? groupId = null, bool removeAll = false)
+    public async Task<bool> RemoveApprovalAsync(long userId, long? groupId = null, bool removeAll = false)
     {
-        return _errorMiddleware.ExecuteWithErrorHandlingAsync(async () =>
+        return await _errorMiddleware.ExecuteWithErrorHandlingAsync(async () =>
         {
             if (removeAll)
             {
@@ -132,7 +132,19 @@ internal sealed class UserManagerV2 : IUserManager
                 // Удаляем глобальное одобрение
                 return _approvedUsersStorage.RemoveGlobalApproval(userId);
             }
-        }, new ErrorContext("RemoveApproval", $"Удаление одобрения пользователя {userId}", ErrorSeverity.Medium)).Result;
+        }, new ErrorContext("RemoveApproval", $"Удаление одобрения пользователя {userId}", ErrorSeverity.Medium));
+    }
+
+    /// <summary>
+    /// Удаляет одобрение пользователя (синхронная обертка для обратной совместимости)
+    /// </summary>
+    /// <param name="userId">ID пользователя</param>
+    /// <param name="groupId">ID группы (для удаления группового одобрения)</param>
+    /// <param name="removeAll">Удалить все одобрения пользователя</param>
+    /// <returns>true, если одобрение было удалено</returns>
+    public bool RemoveApproval(long userId, long? groupId = null, bool removeAll = false)
+    {
+        return RemoveApprovalAsync(userId, groupId, removeAll).GetAwaiter().GetResult();
     }
 
     /// <summary>
