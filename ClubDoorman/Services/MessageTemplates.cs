@@ -9,6 +9,13 @@ namespace ClubDoorman.Services;
 /// </summary>
 public class MessageTemplates
 {
+    private readonly IMessageLocalizer? _localizer;
+    
+    public MessageTemplates(IMessageLocalizer? localizer = null)
+    {
+        _localizer = localizer;
+    }
+    
     private readonly Dictionary<AdminNotificationType, string> _adminTemplates = new()
     {
         [AdminNotificationType.AutoBanBlacklist] = 
@@ -197,14 +204,68 @@ public class MessageTemplates
     public string GetAdminTemplate(AdminNotificationType type) => _adminTemplates[type];
     
     /// <summary>
+    /// Получить локализованный шаблон для админского уведомления
+    /// </summary>
+    public string GetLocalizedAdminTemplate(AdminNotificationType type, long chatId)
+    {
+        if (_localizer != null)
+        {
+            var key = GetAdminNotificationKey(type);
+            return _localizer.Admin(key, chatId);
+        }
+        return _adminTemplates[type];
+    }
+    
+    /// <summary>
     /// Получить шаблон для лог-уведомления
     /// </summary>
     public string GetLogTemplate(LogNotificationType type) => _logTemplates[type];
     
     /// <summary>
+    /// Получить локализованный шаблон для лог-уведомления
+    /// </summary>
+    public string GetLocalizedLogTemplate(LogNotificationType type, long chatId)
+    {
+        if (_localizer != null)
+        {
+            var key = GetLogNotificationKey(type);
+            return _localizer.Admin(key, chatId); // Логи тоже идут через админские ресурсы
+        }
+        return _logTemplates[type];
+    }
+    
+    /// <summary>
     /// Получить шаблон для пользовательского уведомления
     /// </summary>
     public string GetUserTemplate(UserNotificationType type) => _userTemplates[type];
+    
+    /// <summary>
+    /// Получить локализованный шаблон для пользовательского уведомления
+    /// </summary>
+    public string GetLocalizedUserTemplate(UserNotificationType type, long chatId)
+    {
+        if (_localizer != null)
+        {
+            var key = GetUserNotificationKey(type);
+            return _localizer.User(key, chatId);
+        }
+        return _userTemplates[type];
+    }
+    
+    /// <summary>
+    /// Получить ключ для админского уведомления
+    /// </summary>
+    private string GetAdminNotificationKey(AdminNotificationType type) => type.ToString();
+    
+    /// <summary>
+    /// Получить ключ для лог-уведомления
+    /// </summary>
+    private string GetLogNotificationKey(LogNotificationType type) => type.ToString();
+    
+    /// <summary>
+    /// Получить ключ для пользовательского уведомления
+    /// </summary>
+    private string GetUserNotificationKey(UserNotificationType type) => type.ToString();
     
     /// <summary>
     /// Форматировать шаблон с данными

@@ -159,7 +159,8 @@ public class Program
                 services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
                 
                 // Централизованная система сообщений
-                services.AddSingleton<MessageTemplates>();
+                services.AddSingleton<IMessageLocalizer, MessageLocalizer>();
+                services.AddSingleton<MessageTemplates>(provider => new MessageTemplates(provider.GetRequiredService<IMessageLocalizer>()));
                 services.Configure<LoggingConfiguration>(context.Configuration.GetSection("LoggingConfiguration"));
                 services.AddSingleton<ILoggingConfigurationService, LoggingConfigurationService>();
                 services.AddMemoryCache();

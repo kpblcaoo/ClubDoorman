@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="BotStarted" xml:space="preserve">
+    <value>Бот успешно запущен</value>
+  </data>
+  <data name="BotStopped" xml:space="preserve">
+    <value>Бот остановлен</value>
+  </data>
+  <data name="UpdateReceived" xml:space="preserve">
+    <value>Получено обновление: Сообщение={0}, Callback={1}, ChatMember={2}</value>
+  </data>
+  <data name="HandlerAccepted" xml:space="preserve">
+    <value>Обработчик {0} принял обновление</value>
+  </data>
+  <data name="HandlerRejected" xml:space="preserve">
+    <value>Обработчик {0} отклонил обновление</value>
+  </data>
+  <data name="NewUserJoined" xml:space="preserve">
+    <value>Новый пользователь {0} (id={1}, username={2}) зашел в группу '{3}' (id={4})</value>
+  </data>
+  <data name="UserBanned" xml:space="preserve">
+    <value>Пользователь {0} забанен в чате {1}: {2}</value>
+  </data>
+  <data name="UserRestricted" xml:space="preserve">
+    <value>Пользователь {0} ограничен в чате {1}: {2}</value>
+  </data>
+  <data name="MessageDeleted" xml:space="preserve">
+    <value>Сообщение {0} удалено в чате {1}: {2}</value>
+  </data>
+  <data name="CaptchaShown" xml:space="preserve">
+    <value>Капча показана пользователю {0} в чате {1}</value>
+  </data>
+  <data name="CaptchaSolved" xml:space="preserve">
+    <value>Капча решена пользователем {0} в чате {1}</value>
+  </data>
+  <data name="CaptchaFailed" xml:space="preserve">
+    <value>Капча провалена пользователем {0} в чате {1}</value>
+  </data>
+  <data name="CaptchaExpired" xml:space="preserve">
+    <value>Капча истекла для пользователя {0} в чате {1}</value>
+  </data>
+  <data name="SpamDetected" xml:space="preserve">
+    <value>Спам обнаружен от пользователя {0} в чате {1}: {2}</value>
+  </data>
+  <data name="MimicryDetected" xml:space="preserve">
+    <value>Мимикрия обнаружена у пользователя {0} в чате {1}, скор: {2:F2}</value>
+  </data>
+  <data name="AiAnalysisCompleted" xml:space="preserve">
+    <value>AI анализ завершен для пользователя {0} в чате {1}, вероятность: {2:F2}</value>
+  </data>
+  <data name="ConfigurationLoaded" xml:space="preserve">
+    <value>Конфигурация успешно загружена</value>
+  </data>
+  <data name="ConfigurationError" xml:space="preserve">
+    <value>Ошибка конфигурации: {0}</value>
+  </data>
+  <data name="DatabaseError" xml:space="preserve">
+    <value>Ошибка базы данных: {0}</value>
+  </data>
+  <data name="NetworkError" xml:space="preserve">
+    <value>Ошибка сети: {0}</value>
+  </data>
+  <data name="TelegramApiError" xml:space="preserve">
+    <value>Ошибка Telegram API: {0}</value>
+  </data>
+  <data name="UnknownError" xml:space="preserve">
+    <value>Произошла неизвестная ошибка: {0}</value>
+  </data>
+  <data name="ServiceStarted" xml:space="preserve">
+    <value>Сервис {0} запущен</value>
+  </data>
+  <data name="ServiceStopped" xml:space="preserve">
+    <value>Сервис {0} остановлен</value>
+  </data>
+  <data name="ServiceError" xml:space="preserve">
+    <value>Ошибка сервиса {0}: {1}</value>
+  </data>
+  <data name="MemoryUsage" xml:space="preserve">
+    <value>Использование памяти: {0} МБ</value>
+  </data>
+  <data name="PerformanceWarning" xml:space="preserve">
+    <value>Предупреждение производительности: {0}</value>
+  </data>
+  <data name="HealthCheck" xml:space="preserve">
+    <value>Проверка здоровья: {0}</value>
+  </data>
+  <data name="MaintenanceMode" xml:space="preserve">
+    <value>Режим обслуживания: {0}</value>
+  </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Резервное копирование завершено: {0}</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Резервное копирование не удалось: {0}</value>
+  </data>
+  <data name="UpdateAvailable" xml:space="preserve">
+    <value>Доступно обновление: {0}</value>
+  </data>
+  <data name="UpdateInstalled" xml:space="preserve">
+    <value>Обновление установлено: {0}</value>
+  </data>
+  <data name="UpdateFailed" xml:space="preserve">
+    <value>Обновление не удалось: {0}</value>
+  </data>
+</root> 

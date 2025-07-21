@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="CaptchaPrompt" xml:space="preserve">
+    <value>Пожалуйста, решите капчу: {0}</value>
+  </data>
+  <data name="CaptchaSuccess" xml:space="preserve">
+    <value>✅ Капча решена успешно! Добро пожаловать в чат.</value>
+  </data>
+  <data name="CaptchaFailed" xml:space="preserve">
+    <value>❌ Неверная капча. Попробуйте еще раз.</value>
+  </data>
+  <data name="CaptchaExpired" xml:space="preserve">
+    <value>⏰ Капча истекла. Запросите новую.</value>
+  </data>
+  <data name="WelcomeMessage" xml:space="preserve">
+    <value><b>👋 Привет! Я современный антиспам-бот для Telegram</b>
+
+Защищаю <b>группы</b> и <b>каналы с обсуждениями</b> от спама, флуда и нежелательных участников.</value>
+  </data>
+  <data name="ModerationWarning" xml:space="preserve">
+    <value>👋 {0}, вы пока <b>новичок</b> в этом чате.
+
+<b>Первые 3 сообщения</b> проходят антиспам-проверку:
+• нельзя эмодзи, рекламу и <b>стоп-слова</b>
+• работает ML-анализ</value>
+  </data>
+  <data name="MessageDeleted" xml:space="preserve">
+    <value>❌ Ваше сообщение удалено: {0}</value>
+  </data>
+  <data name="UserBanned" xml:space="preserve">
+    <value>🚫 Вы забанены в этом чате: {0}</value>
+  </data>
+  <data name="UserRestricted" xml:space="preserve">
+    <value>⚠️ Вы ограничены в этом чате: {0}</value>
+  </data>
+  <data name="CaptchaWelcome" xml:space="preserve">
+    <value>👋 {0}
+
+<b>Внимание!</b> первые три сообщения проходят антиспам-проверку, эмодзи{1} и реклама запрещены — они могут удаляться автоматически. Не просите писать в ЛС!{2}</value>
+  </data>
+  <data name="GenericError" xml:space="preserve">
+    <value>❌ Что-то пошло не так. Попробуйте позже. (ID ошибки: {0})</value>
+  </data>
+  <data name="TooManyEmojis" xml:space="preserve">
+    <value>В этом сообщении многовато эмоджи</value>
+  </data>
+  <data name="StopWordsDetected" xml:space="preserve">
+    <value>Сообщение содержит запрещенные слова</value>
+  </data>
+  <data name="SpamDetected" xml:space="preserve">
+    <value>Сообщение классифицировано как спам</value>
+  </data>
+  <data name="MediaNotAllowed" xml:space="preserve">
+    <value>Медиа не разрешены в первых 3 сообщениях</value>
+  </data>
+  <data name="ButtonsNotAllowed" xml:space="preserve">
+    <value>Кнопки не разрешены</value>
+  </data>
+  <data name="ChannelMessageNotAllowed" xml:space="preserve">
+    <value>Сообщения от каналов не разрешены</value>
+  </data>
+  <data name="LongNameNotAllowed" xml:space="preserve">
+    <value>Имя слишком длинное</value>
+  </data>
+  <data name="BlacklistedUser" xml:space="preserve">
+    <value>Пользователь в черном списке</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>✅ {0}</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>⚠️ {0}</value>
+  </data>
+  <data name="SystemInfo" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+</root> 

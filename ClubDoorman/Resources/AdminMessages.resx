@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="AutoBanBlacklist" xml:space="preserve">
+    <value>🚫 Auto-ban from blacklist lols.bot (first message)
+User {0} from chat {1}
+{2}</value>
+  </data>
+  <data name="AutoBanFromBlacklist" xml:space="preserve">
+    <value>🚫 Auto-ban from blacklist: {0}
+User {1} from chat {2}
+{3}</value>
+  </data>
+  <data name="PrivateChatBanAttempt" xml:space="preserve">
+    <value>⚠️ Ban attempt in private chat: {0}
+User {1} from chat {2}
+Operation is not possible in private chats</value>
+  </data>
+  <data name="BanForLongName" xml:space="preserve">
+    <value>{0} in chat *{1}*: {2}</value>
+  </data>
+  <data name="BanChannel" xml:space="preserve">
+    <value>Message deleted, channel {0} banned in chat {1}</value>
+  </data>
+  <data name="RemovedFromApproved" xml:space="preserve">
+    <value>⚠️ User {0} removed from approved list after auto-ban from blacklist</value>
+  </data>
+  <data name="ChannelMessage" xml:space="preserve">
+    <value>Message from channel {0} in chat {1} - report to admin chat</value>
+  </data>
+  <data name="SuspiciousUser" xml:space="preserve">
+    <value>🔍 *Suspicious user detected*
+
+👤 User: [{0}](tg://user?id={1})
+🏠 Chat: *{2}*
+📊 Mimicry score: *{3:F2}*
+🕐 Marked as suspicious: {4:yyyy-MM-dd HH:mm}
+
+📝 First messages:
+{5}
+
+✅ {6} more good messages needed for approval</value>
+  </data>
+  <data name="AiProfileAnalysis" xml:space="preserve">
+    <value>🤖 *AI profile analysis*
+
+👤 User: [{0}](tg://user?id={1})
+🏠 Chat: *{2}*
+📊 Spam probability: *{3:F2}*
+🔍 Reason: {4}
+
+📝 Name and bio:
+`{5}`</value>
+  </data>
+  <data name="ModerationError" xml:space="preserve">
+    <value>❌ Moderation error: {0}
+User: {1}
+Chat: {2}
+Error: {3}</value>
+  </data>
+  <data name="SystemError" xml:space="preserve">
+    <value>💥 System error: {0}
+Error: {1}</value>
+  </data>
+  <data name="AutoBan" xml:space="preserve">
+    <value>Message deleted: {0}
+User {1} from chat {2}
+{3}</value>
+  </data>
+  <data name="SuspiciousMessage" xml:space="preserve">
+    <value>⚠️ *Suspicious message* - requires manual review. Message *NOT deleted*.
+User [{0}](tg://user?id={1}) in chat *{2}*
+Message: `{3}`</value>
+  </data>
+  <data name="ChannelError" xml:space="preserve">
+    <value>⚠️ Cannot ban channel in chat {0}. Not enough permissions?</value>
+  </data>
+  <data name="UserCleanup" xml:space="preserve">
+    <value>🧹 User {0} cleaned from all lists after auto-ban</value>
+  </data>
+  <data name="UserApproved" xml:space="preserve">
+    <value>✅ {0}</value>
+  </data>
+  <data name="SystemInfo" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>✅ {0}</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>⚠️ {0}</value>
+  </data>
+  <data name="AiDetectAutoDelete" xml:space="preserve">
+    <value>🔍🤖🚫 *Special AI detect: auto-delete spam*
+
+👤 User: [{0}](tg://user?id={1})
+🏠 Chat: *{2}*
+📨 Message: `{3}`
+🎭 Mimicry score: *{4:F2}*
+🤖 AI analysis: *{5:F2}* - {6}
+🔬 ML score: *{7:F2}*
+⚡ Action: **Automatically deleted + 2 hour restriction**</value>
+  </data>
+  <data name="AiDetectSuspicious" xml:space="preserve">
+    <value>🔍🤖❓ *Special AI detect: suspicious message*
+
+👤 User: [{0}](tg://user?id={1})
+🏠 Chat: *{2}*
+📨 Message: `{3}`
+🎭 Mimicry score: *{4:F2}*
+🤖 AI analysis: *{5:F2}* - {6}
+🔬 ML score: *{7:F2}*
+🔒 User restricted for 2 hours. Decision required.</value>
+  </data>
+  <data name="UserRemovedFromApproved" xml:space="preserve">
+    <value>⚠️ User [{0}](tg://user?id={1}) removed from approved list after receiving restrictions in chat *{2}*</value>
+  </data>
+  <data name="UserRestricted" xml:space="preserve">
+    <value>🔔 In chat *{0}* user [{1}](tg://user?id={2}) was given read-only or banned, check Recent actions, ML might have missed spam. If so - send here.{3}</value>
+  </data>
+</root> 

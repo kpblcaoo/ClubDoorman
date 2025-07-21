@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="AutoBanBlacklist" xml:space="preserve">
+    <value>🚫 Автобан по блэклисту lols.bot (первое сообщение)
+Юзер {0} из чата {1}
+{2}</value>
+  </data>
+  <data name="AutoBanFromBlacklist" xml:space="preserve">
+    <value>🚫 Автобан из блэклиста: {0}
+Юзер {1} из чата {2}
+{3}</value>
+  </data>
+  <data name="PrivateChatBanAttempt" xml:space="preserve">
+    <value>⚠️ Попытка бана в приватном чате: {0}
+Юзер {1} из чата {2}
+Операция невозможна в приватных чатах</value>
+  </data>
+  <data name="BanForLongName" xml:space="preserve">
+    <value>{0} в чате *{1}*: {2}</value>
+  </data>
+  <data name="BanChannel" xml:space="preserve">
+    <value>Сообщение удалено, в чате {0} забанен канал {1}</value>
+  </data>
+  <data name="RemovedFromApproved" xml:space="preserve">
+    <value>⚠️ Пользователь {0} удален из списка одобренных после автобана по блэклисту</value>
+  </data>
+  <data name="ChannelMessage" xml:space="preserve">
+    <value>Сообщение от канала {0} в чате {1} - репорт в админ-чат</value>
+  </data>
+  <data name="SuspiciousUser" xml:space="preserve">
+    <value>🔍 *Подозрительный пользователь обнаружен*
+
+👤 Пользователь: [{0}](tg://user?id={1})
+🏠 Чат: *{2}*
+📊 Оценка мимикрии: *{3:F2}*
+🕐 Помечен как подозрительный: {4:yyyy-MM-dd HH:mm}
+
+📝 Первые сообщения:
+{5}
+
+✅ Для одобрения нужно ещё {6} хороших сообщений</value>
+  </data>
+  <data name="AiProfileAnalysis" xml:space="preserve">
+    <value>🤖 *AI анализ профиля*
+
+👤 Пользователь: [{0}](tg://user?id={1})
+🏠 Чат: *{2}*
+📊 Вероятность спама: *{3:F2}*
+🔍 Причина: {4}
+
+📝 Имя и био:
+`{5}`</value>
+  </data>
+  <data name="ModerationError" xml:space="preserve">
+    <value>❌ Ошибка модерации: {0}
+Пользователь: {1}
+Чат: {2}
+Ошибка: {3}</value>
+  </data>
+  <data name="SystemError" xml:space="preserve">
+    <value>💥 Системная ошибка: {0}
+Ошибка: {1}</value>
+  </data>
+  <data name="AutoBan" xml:space="preserve">
+    <value>Сообщение удалено: {0}
+Юзер {1} из чата {2}
+{3}</value>
+  </data>
+  <data name="SuspiciousMessage" xml:space="preserve">
+    <value>⚠️ *Подозрительное сообщение* - требует ручной проверки. Сообщение *НЕ удалено*.
+Пользователь [{0}](tg://user?id={1}) в чате *{2}*
+Сообщение: `{3}`</value>
+  </data>
+  <data name="ChannelError" xml:space="preserve">
+    <value>⚠️ Не могу забанить канал в чате {0}. Не хватает могущества?</value>
+  </data>
+  <data name="UserCleanup" xml:space="preserve">
+    <value>🧹 Пользователь {0} очищен из всех списков после автобана</value>
+  </data>
+  <data name="UserApproved" xml:space="preserve">
+    <value>✅ {0}</value>
+  </data>
+  <data name="SystemInfo" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>✅ {0}</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>⚠️ {0}</value>
+  </data>
+  <data name="AiDetectAutoDelete" xml:space="preserve">
+    <value>🔍🤖🚫 *Специальный AI детект: автоудаление спама*
+
+👤 Пользователь: [{0}](tg://user?id={1})
+🏠 Чат: *{2}*
+📨 Сообщение: `{3}`
+🎭 Скор мимикрии: *{4:F2}*
+🤖 AI анализ: *{5:F2}* - {6}
+🔬 ML скор: *{7:F2}*
+⚡ Действие: **Автоматически удалено + ограничение на 2 часа**</value>
+  </data>
+  <data name="AiDetectSuspicious" xml:space="preserve">
+    <value>🔍🤖❓ *Специальный AI детект: подозрительное сообщение*
+
+👤 Пользователь: [{0}](tg://user?id={1})
+🏠 Чат: *{2}*
+📨 Сообщение: `{3}`
+🎭 Скор мимикрии: *{4:F2}*
+🤖 AI анализ: *{5:F2}* - {6}
+🔬 ML скор: *{7:F2}*
+🔒 Пользователь ограничен на 2 часа. Требуется решение.</value>
+  </data>
+  <data name="UserRemovedFromApproved" xml:space="preserve">
+    <value>⚠️ Пользователь [{0}](tg://user?id={1}) удален из списка одобренных после получения ограничений в чате *{2}*</value>
+  </data>
+  <data name="UserRestricted" xml:space="preserve">
+    <value>🔔 В чате *{0}* пользователю [{1}](tg://user?id={2}) дали ридонли или забанили, посмотрите в Recent actions, возможно ML пропустил спам. Если это так - кидайте его сюда.{3}</value>
+  </data>
+</root> 

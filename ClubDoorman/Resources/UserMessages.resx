@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="CaptchaPrompt" xml:space="preserve">
+    <value>Please solve the captcha: {0}</value>
+  </data>
+  <data name="CaptchaSuccess" xml:space="preserve">
+    <value>✅ Captcha solved successfully! Welcome to the chat.</value>
+  </data>
+  <data name="CaptchaFailed" xml:space="preserve">
+    <value>❌ Incorrect captcha. Please try again.</value>
+  </data>
+  <data name="CaptchaExpired" xml:space="preserve">
+    <value>⏰ Captcha expired. Please request a new one.</value>
+  </data>
+  <data name="WelcomeMessage" xml:space="preserve">
+    <value><b>👋 Hello! I'm a modern anti-spam bot for Telegram</b>
+
+I protect <b>groups</b> and <b>channels with discussions</b> from spam, flood and unwanted participants.</value>
+  </data>
+  <data name="ModerationWarning" xml:space="preserve">
+    <value>👋 {0}, you are still a <b>newcomer</b> in this chat.
+
+<b>First 3 messages</b> go through anti-spam check:
+• no emojis, ads and <b>stop-words</b>
+• ML analysis works</value>
+  </data>
+  <data name="MessageDeleted" xml:space="preserve">
+    <value>❌ Your message was deleted: {0}</value>
+  </data>
+  <data name="UserBanned" xml:space="preserve">
+    <value>🚫 You are banned in this chat: {0}</value>
+  </data>
+  <data name="UserRestricted" xml:space="preserve">
+    <value>⚠️ You are restricted in this chat: {0}</value>
+  </data>
+  <data name="CaptchaWelcome" xml:space="preserve">
+    <value>👋 {0}
+
+<b>Attention!</b> First three messages go through anti-spam check, emojis{1} and ads are prohibited — they may be deleted automatically. Don't ask to write in PM!{2}</value>
+  </data>
+  <data name="GenericError" xml:space="preserve">
+    <value>❌ Something went wrong. Please try again later. (Error ID: {0})</value>
+  </data>
+  <data name="TooManyEmojis" xml:space="preserve">
+    <value>Too many emojis in this message</value>
+  </data>
+  <data name="StopWordsDetected" xml:space="preserve">
+    <value>Message contains prohibited words</value>
+  </data>
+  <data name="SpamDetected" xml:space="preserve">
+    <value>Message classified as spam</value>
+  </data>
+  <data name="MediaNotAllowed" xml:space="preserve">
+    <value>Media is not allowed in first 3 messages</value>
+  </data>
+  <data name="ButtonsNotAllowed" xml:space="preserve">
+    <value>Buttons are not allowed</value>
+  </data>
+  <data name="ChannelMessageNotAllowed" xml:space="preserve">
+    <value>Channel messages are not allowed</value>
+  </data>
+  <data name="LongNameNotAllowed" xml:space="preserve">
+    <value>Name is too long</value>
+  </data>
+  <data name="BlacklistedUser" xml:space="preserve">
+    <value>User is blacklisted</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>✅ {0}</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>⚠️ {0}</value>
+  </data>
+  <data name="SystemInfo" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+</root> 

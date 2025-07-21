@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="BotStarted" xml:space="preserve">
+    <value>Bot started successfully</value>
+  </data>
+  <data name="BotStopped" xml:space="preserve">
+    <value>Bot stopped</value>
+  </data>
+  <data name="UpdateReceived" xml:space="preserve">
+    <value>Update received: Message={0}, Callback={1}, ChatMember={2}</value>
+  </data>
+  <data name="HandlerAccepted" xml:space="preserve">
+    <value>Handler {0} accepted update</value>
+  </data>
+  <data name="HandlerRejected" xml:space="preserve">
+    <value>Handler {0} rejected update</value>
+  </data>
+  <data name="NewUserJoined" xml:space="preserve">
+    <value>New user {0} (id={1}, username={2}) joined group '{3}' (id={4})</value>
+  </data>
+  <data name="UserBanned" xml:space="preserve">
+    <value>User {0} banned in chat {1}: {2}</value>
+  </data>
+  <data name="UserRestricted" xml:space="preserve">
+    <value>User {0} restricted in chat {1}: {2}</value>
+  </data>
+  <data name="MessageDeleted" xml:space="preserve">
+    <value>Message {0} deleted in chat {1}: {2}</value>
+  </data>
+  <data name="CaptchaShown" xml:space="preserve">
+    <value>Captcha shown to user {0} in chat {1}</value>
+  </data>
+  <data name="CaptchaSolved" xml:space="preserve">
+    <value>Captcha solved by user {0} in chat {1}</value>
+  </data>
+  <data name="CaptchaFailed" xml:space="preserve">
+    <value>Captcha failed by user {0} in chat {1}</value>
+  </data>
+  <data name="CaptchaExpired" xml:space="preserve">
+    <value>Captcha expired for user {0} in chat {1}</value>
+  </data>
+  <data name="SpamDetected" xml:space="preserve">
+    <value>Spam detected from user {0} in chat {1}: {2}</value>
+  </data>
+  <data name="MimicryDetected" xml:space="preserve">
+    <value>Mimicry detected from user {0} in chat {1}, score: {2:F2}</value>
+  </data>
+  <data name="AiAnalysisCompleted" xml:space="preserve">
+    <value>AI analysis completed for user {0} in chat {1}, probability: {2:F2}</value>
+  </data>
+  <data name="ConfigurationLoaded" xml:space="preserve">
+    <value>Configuration loaded successfully</value>
+  </data>
+  <data name="ConfigurationError" xml:space="preserve">
+    <value>Configuration error: {0}</value>
+  </data>
+  <data name="DatabaseError" xml:space="preserve">
+    <value>Database error: {0}</value>
+  </data>
+  <data name="NetworkError" xml:space="preserve">
+    <value>Network error: {0}</value>
+  </data>
+  <data name="TelegramApiError" xml:space="preserve">
+    <value>Telegram API error: {0}</value>
+  </data>
+  <data name="UnknownError" xml:space="preserve">
+    <value>Unknown error occurred: {0}</value>
+  </data>
+  <data name="ServiceStarted" xml:space="preserve">
+    <value>Service {0} started</value>
+  </data>
+  <data name="ServiceStopped" xml:space="preserve">
+    <value>Service {0} stopped</value>
+  </data>
+  <data name="ServiceError" xml:space="preserve">
+    <value>Service {0} error: {1}</value>
+  </data>
+  <data name="MemoryUsage" xml:space="preserve">
+    <value>Memory usage: {0} MB</value>
+  </data>
+  <data name="PerformanceWarning" xml:space="preserve">
+    <value>Performance warning: {0}</value>
+  </data>
+  <data name="HealthCheck" xml:space="preserve">
+    <value>Health check: {0}</value>
+  </data>
+  <data name="MaintenanceMode" xml:space="preserve">
+    <value>Maintenance mode: {0}</value>
+  </data>
+  <data name="BackupCompleted" xml:space="preserve">
+    <value>Backup completed: {0}</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Backup failed: {0}</value>
+  </data>
+  <data name="UpdateAvailable" xml:space="preserve">
+    <value>Update available: {0}</value>
+  </data>
+  <data name="UpdateInstalled" xml:space="preserve">
+    <value>Update installed: {0}</value>
+  </data>
+  <data name="UpdateFailed" xml:space="preserve">
+    <value>Update failed: {0}</value>
+  </data>
+</root> 
