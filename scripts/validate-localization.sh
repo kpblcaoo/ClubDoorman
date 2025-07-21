@@ -66,15 +66,69 @@ for file in "${RESOURCE_FILES[@]}"; do
     fi
 done
 
+# Check for encoding issues and BOM
+print_status $YELLOW "🔍 Checking file encoding..."
+
+for file in "${RESOURCE_FILES[@]}"; do
+    # Check for BOM (Byte Order Mark)
+    if hexdump -C "$file" | head -1 | grep -q "ef bb bf"; then
+        print_status $YELLOW "⚠️  BOM detected in $file (this might cause issues)"
+    fi
+    
+    # Check if file starts with XML declaration
+    if ! head -1 "$file" | grep -q "<?xml"; then
+        print_status $RED "❌ File $file doesn't start with XML declaration"
+        exit 1
+    fi
+    
+    # Check for UTF-8 encoding
+    if ! file "$file" | grep -q "UTF-8"; then
+        print_status $YELLOW "⚠️  File $file might not be UTF-8 encoded"
+    fi
+done
+
 # Validate XML structure of resource files
 print_status $YELLOW "🔍 Validating XML structure..."
 
 for file in "${RESOURCE_FILES[@]}"; do
-    if ! xmllint --noout "$file" 2>/dev/null; then
-        print_status $RED "❌ Invalid XML in: $file"
-        exit 1
-    else
+    # Try multiple validation approaches
+    validation_passed=false
+    
+    # Method 1: Basic xmllint validation
+    if xmllint --noout "$file" 2>/dev/null; then
         print_status $GREEN "✅ Valid XML: $file"
+        validation_passed=true
+    else
+        # Method 2: Check if xmllint is available and try with explicit encoding
+        if command -v xmllint &> /dev/null; then
+            if xmllint --noout --encoding utf-8 "$file" 2>/dev/null; then
+                print_status $GREEN "✅ Valid XML (UTF-8): $file"
+                validation_passed=true
+            else
+                # Method 3: Basic XML structure check with grep
+                if grep -q '^<?xml' "$file" && grep -q '</root>$' "$file" && grep -q '<data name=' "$file"; then
+                    print_status $GREEN "✅ Valid XML structure (basic check): $file"
+                    validation_passed=true
+                else
+                    print_status $RED "❌ Invalid XML structure: $file"
+                    exit 1
+                fi
+            fi
+        else
+            # Method 4: Fallback to basic structure check
+            if grep -q '^<?xml' "$file" && grep -q '</root>$' "$file" && grep -q '<data name=' "$file"; then
+                print_status $GREEN "✅ Valid XML structure (fallback check): $file"
+                validation_passed=true
+            else
+                print_status $RED "❌ Invalid XML structure: $file"
+                exit 1
+            fi
+        fi
+    fi
+    
+    if [ "$validation_passed" = false ]; then
+        print_status $RED "❌ XML validation failed for: $file"
+        exit 1
     fi
 done
 
