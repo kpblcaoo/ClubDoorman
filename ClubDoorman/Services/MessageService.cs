@@ -42,8 +42,7 @@ public class MessageService : IMessageService
         if (destinations.HasFlag(NotificationDestination.AdminChat) && _configService.ShouldSendNotification(type.ToString(), NotificationDestination.AdminChat))
         {
             // Проверяем, что админский чат настроен корректно
-            var adminChatEnv = Environment.GetEnvironmentVariable("DOORMAN_ADMIN_CHAT");
-            if (string.IsNullOrEmpty(adminChatEnv))
+            if (Config.AdminChatId == 123456789) // Тестовое значение по умолчанию
             {
                 _logger.LogWarning("Админский чат не настроен (переменная DOORMAN_ADMIN_CHAT не установлена)");
                 return;
@@ -84,11 +83,9 @@ public class MessageService : IMessageService
         if (destinations.HasFlag(NotificationDestination.LogChat) && _configService.ShouldSendNotification(type.ToString(), NotificationDestination.LogChat))
         {
             // Проверяем, что лог-чат настроен корректно
-            var logChatEnv = Environment.GetEnvironmentVariable("DOORMAN_LOG_ADMIN_CHAT");
-            if (string.IsNullOrEmpty(logChatEnv))
+            if (Config.LogAdminChatId == Config.AdminChatId) // Если лог-чат не настроен, используется админский чат
             {
-                _logger.LogWarning("Лог-чат не настроен (переменная DOORMAN_LOG_ADMIN_CHAT не установлена)");
-                return;
+                _logger.LogDebug("Лог-чат не настроен, используется админский чат");
             }
             
             // Используем централизованную обработку ошибок для Telegram API операций
