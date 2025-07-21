@@ -112,8 +112,9 @@ public class MessageTemplatesLocalizationTests : TestBase
         // Assert
         Assert.That(result, Is.Not.Empty);
         // Локализованный шаблон содержит индексированные плейсхолдеры, поэтому проверяем наличие шаблона
-        Assert.That(result, Contains.Substring("Message deleted:"));
-        Assert.That(result, Contains.Substring("User"));
-        Assert.That(result, Contains.Substring("from chat"));
+        // Проверяем русский шаблон, так как ChatCultureProvider настроен на русский
+        Assert.That(result, Contains.Substring("Сообщение удалено:"));
+        Assert.That(result, Contains.Substring("Юзер"));
+        Assert.That(result, Contains.Substring("из чата"));
     }
 } 

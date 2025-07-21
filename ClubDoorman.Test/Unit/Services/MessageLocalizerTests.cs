@@ -55,7 +55,8 @@ public class MessageLocalizerTests : TestBase
 
         // Assert
         Assert.That(result, Is.Not.Null);
-        Assert.That(result, Does.Contain("Something went wrong"));
+        // Проверяем русский fallback, так как ChatCultureProvider настроен на русский
+        Assert.That(result, Does.Contain("Что-то пошло не так"));
     }
 
     [Test]

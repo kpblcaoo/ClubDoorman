@@ -57,6 +57,7 @@ public class Program
                         .MinimumLevel.Verbose()
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                         .MinimumLevel.Override("System", LogEventLevel.Information)
+                        .MinimumLevel.Override("ClubDoorman.SystemLogMarker", LogEventLevel.Information)
                         .Enrich.FromLogContext()
                         .Enrich.WithProperty("Application", "ClubDoorman")
                         .WriteTo.Async(a => a.Console())
