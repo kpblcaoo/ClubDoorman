@@ -32,6 +32,14 @@ public class Program
         }
         
         InitData();
+        
+        // Настройка обработки сигналов завершения
+        Console.CancelKeyPress += (sender, e) =>
+        {
+            Console.WriteLine("\n🛑 Получен сигнал завершения (Ctrl+C). Завершаем работу...");
+            e.Cancel = false; // Позволяем приложению завершиться
+        };
+        
         var host = Host.CreateDefaultBuilder(args)
             .UseSerilog(
                 (_, _, config) =>

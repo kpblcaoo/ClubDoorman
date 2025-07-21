@@ -506,4 +506,17 @@ internal sealed class Worker(
             ? user.Username
             : FullName(user.FirstName, user.LastName);
     }
+
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("🛑 Остановка Worker...");
+        
+        // Отменяем все таймеры
+        _timer.Dispose();
+        _banlistRefreshTimer.Dispose();
+        _membersCountUpdateTimer.Dispose();
+        
+        await base.StopAsync(cancellationToken);
+        _logger.LogInformation("✅ Worker остановлен");
+    }
 }
