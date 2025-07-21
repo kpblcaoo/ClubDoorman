@@ -250,7 +250,7 @@ public class MessageTemplates
         }
         else if (data is SuspiciousUserNotificationData suspiciousData)
         {
-            result = result.Replace("{MimicryScore}", suspiciousData.MimicryScore.ToString("F2"));
+            result = result.Replace("{MimicryScore:F2}", suspiciousData.MimicryScore.ToString("F2"));
             result = result.Replace("{SuspiciousAt}", suspiciousData.SuspiciousAt.ToString("yyyy-MM-dd HH:mm"));
             result = result.Replace("{FirstMessages}", FormatFirstMessages(suspiciousData.FirstMessages));
             result = result.Replace("{RequiredMessages}", Config.SuspiciousToApprovedMessageCount.ToString());
@@ -291,9 +291,9 @@ public class MessageTemplates
                 result = result.Replace("{UserName}", Utils.FullName(aiDetectData.User));
                 result = result.Replace("{UserId}", aiDetectData.User.Id.ToString());
                 result = result.Replace("{ChatTitle}", aiDetectData.Chat.Title ?? "");
-                result = result.Replace("{MimicryScore}", aiDetectData.MimicryScore.ToString("F2"));
-                result = result.Replace("{AiScore}", aiDetectData.AiScore.ToString("F2"));
-                result = result.Replace("{MlScore}", aiDetectData.MlScore.ToString("F2"));
+                result = result.Replace("{MimicryScore:F2}", aiDetectData.MimicryScore.ToString("F2"));
+                result = result.Replace("{AiScore:F2}", aiDetectData.AiScore.ToString("F2"));
+                result = result.Replace("{MlScore:F2}", aiDetectData.MlScore.ToString("F2"));
                 result = result.Replace("{AiReason}", aiDetectData.AiReason);
                 result = result.Replace("{MessageText}", aiDetectData.MessageText.Substring(0, Math.Min(aiDetectData.MessageText.Length, 200)));
             }
