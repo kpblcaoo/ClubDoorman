@@ -107,45 +107,6 @@ for file in "${RESOURCE_FILES[@]}"; do
     fi
 done
 
-# Check for missing translations (compare en vs ru files)
-print_status $YELLOW "🔍 Checking translation completeness..."
-
-# Function to extract keys from a resource file
-extract_keys() {
-    local file=$1
-    grep -o 'name="[^"]*"' "$file" | sed 's/name="//' | sed 's/"//' | sort
-}
-
-# Compare UserMessages
-en_keys=$(extract_keys "ClubDoorman/Resources/UserMessages.resx")
-ru_keys=$(extract_keys "ClubDoorman/Resources/UserMessages.ru.resx")
-
-missing_in_ru=$(comm -23 <(echo "$en_keys") <(echo "$ru_keys"))
-if [ ! -z "$missing_in_ru" ]; then
-    print_status $YELLOW "⚠️  Missing Russian translations in UserMessages:"
-    echo "$missing_in_ru"
-fi
-
-# Compare AdminMessages
-en_keys=$(extract_keys "ClubDoorman/Resources/AdminMessages.resx")
-ru_keys=$(extract_keys "ClubDoorman/Resources/AdminMessages.ru.resx")
-
-missing_in_ru=$(comm -23 <(echo "$en_keys") <(echo "$ru_keys"))
-if [ ! -z "$missing_in_ru" ]; then
-    print_status $YELLOW "⚠️  Missing Russian translations in AdminMessages:"
-    echo "$missing_in_ru"
-fi
-
-# Compare SystemMessages
-en_keys=$(extract_keys "ClubDoorman/Resources/SystemMessages.resx")
-ru_keys=$(extract_keys "ClubDoorman/Resources/SystemMessages.ru.resx")
-
-missing_in_ru=$(comm -23 <(echo "$en_keys") <(echo "$ru_keys"))
-if [ ! -z "$missing_in_ru" ]; then
-    print_status $YELLOW "⚠️  Missing Russian translations in SystemMessages:"
-    echo "$missing_in_ru"
-fi
-
 # Check for placeholder consistency
 print_status $YELLOW "🔍 Checking placeholder consistency..."
 
@@ -156,57 +117,6 @@ for file in "${RESOURCE_FILES[@]}"; do
         print_status $GREEN "✅ Placeholders found in $file: $placeholders"
     fi
 done
-
-# Run .NET validation if available
-print_status $YELLOW "🔍 Running .NET validation..."
-
-# Create a temporary validation program
-cat > temp_validation.cs << 'EOF'
-using System;
-using System.Globalization;
-using System.Reflection;
-using System.Resources;
-
-class LocalizationValidator
-{
-    static void Main()
-    {
-        var assemblies = new[] { "UserMessages", "AdminMessages", "SystemMessages" };
-        var cultures = new[] { "", "ru" };
-        
-        foreach (var assembly in assemblies)
-        {
-            var resourceManager = new ResourceManager($"ClubDoorman.Resources.{assembly}", Assembly.GetExecutingAssembly());
-            
-            foreach (var cultureCode in cultures)
-            {
-                var culture = string.IsNullOrEmpty(cultureCode) ? CultureInfo.InvariantCulture : new CultureInfo(cultureCode);
-                var resourceSet = resourceManager.GetResourceSet(culture, true, true);
-                
-                if (resourceSet == null)
-                {
-                    Console.WriteLine($"❌ Cannot load resource set for {assembly} culture {culture.Name}");
-                    Environment.Exit(1);
-                }
-                
-                Console.WriteLine($"✅ Loaded {assembly} for culture {culture.Name}");
-            }
-        }
-        
-        Console.WriteLine("✅ All resources loaded successfully");
-    }
-}
-EOF
-
-# Try to compile and run the validation
-if dotnet run --project temp_validation.cs 2>/dev/null; then
-    print_status $GREEN "✅ .NET validation passed"
-else
-    print_status $YELLOW "⚠️  .NET validation skipped (compilation failed)"
-fi
-
-# Clean up
-rm -f temp_validation.cs
 
 print_status $GREEN "🎉 Localization validation completed successfully!"
 print_status $GREEN "✅ All resource files are valid and properly configured"

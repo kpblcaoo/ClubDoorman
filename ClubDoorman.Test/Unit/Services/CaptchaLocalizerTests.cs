@@ -6,6 +6,9 @@ using NUnit.Framework;
 namespace ClubDoorman.Test.Unit.Services;
 
 [TestFixture]
+[Category("unit")]
+[Category("services")]
+[Category("localization")]
 public class CaptchaLocalizerTests : TestBase
 {
     private ICaptchaLocalizer _captchaLocalizer = null!;

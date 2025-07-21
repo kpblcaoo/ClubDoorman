@@ -10,6 +10,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 namespace ClubDoorman.Test.Unit.Services;
 
 [TestFixture]
+[Category("unit")]
+[Category("services")]
+[Category("localization")]
 public class CaptchaServiceLocalizationTests : TestBase
 {
     private CaptchaService _captchaService = null!;
