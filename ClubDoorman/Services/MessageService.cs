@@ -18,14 +18,14 @@ public class MessageService : IMessageService
     private readonly ILogger<MessageService> _logger;
     private readonly MessageTemplates _templates;
     private readonly ILoggingConfigurationService _configService;
-    private readonly ErrorHandlingMiddleware _errorMiddleware;
+    private readonly IErrorHandlingMiddleware _errorMiddleware;
     
     public MessageService(
         ITelegramBotClientWrapper bot,
         ILogger<MessageService> logger,
         MessageTemplates templates,
         ILoggingConfigurationService configService,
-        ErrorHandlingMiddleware errorMiddleware)
+        IErrorHandlingMiddleware errorMiddleware)
     {
         _bot = bot;
         _logger = logger;

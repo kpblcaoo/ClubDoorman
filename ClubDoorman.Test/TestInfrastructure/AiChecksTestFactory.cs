@@ -1,4 +1,5 @@
 using ClubDoorman.Services;
+using ClubDoorman.Infrastructure.ErrorHandling;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -17,12 +18,14 @@ public class AiChecksTestFactory
 {
     public Mock<ITelegramBotClientWrapper> BotMock { get; } = new();
     public Mock<ILogger<AiChecks>> LoggerMock { get; } = new();
+    public Mock<IErrorHandlingMiddleware> ErrorMiddlewareMock { get; } = new();
 
     public AiChecks CreateAiChecks()
     {
         return new AiChecks(
             BotMock.Object,
-            LoggerMock.Object
+            LoggerMock.Object,
+            ErrorMiddlewareMock.Object
         );
     }
 
@@ -37,6 +40,12 @@ public class AiChecksTestFactory
     public AiChecksTestFactory WithLoggerSetup(Action<Mock<ILogger<AiChecks>>> setup)
     {
         setup(LoggerMock);
+        return this;
+    }
+
+    public AiChecksTestFactory WithErrorMiddlewareSetup(Action<Mock<IErrorHandlingMiddleware>> setup)
+    {
+        setup(ErrorMiddlewareMock);
         return this;
     }
 

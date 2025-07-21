@@ -3,6 +3,7 @@ using System.Runtime.Caching;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Infrastructure.ErrorHandling;
 using Telegram.Bot.Types;
 using Telegram.Bot;
 
@@ -22,6 +23,7 @@ public class ModerationService : IModerationService
     private readonly ITelegramBotClient _botClient;
     private readonly IMessageService _messageService;
     private readonly ILogger<ModerationService> _logger;
+    private readonly IErrorHandlingMiddleware _errorMiddleware;
 
     // Счетчики хороших сообщений для новой системы
     private readonly ConcurrentDictionary<long, int> _goodUserMessages = new();
@@ -45,7 +47,8 @@ public class ModerationService : IModerationService
         ISuspiciousUsersStorage suspiciousUsersStorage,
         ITelegramBotClient botClient,
         IMessageService messageService,
-        ILogger<ModerationService> logger)
+        ILogger<ModerationService> logger,
+        IErrorHandlingMiddleware errorMiddleware)
     {
         _classifier = classifier;
         _mimicryClassifier = mimicryClassifier;
@@ -56,6 +59,7 @@ public class ModerationService : IModerationService
         _botClient = botClient;
         _messageService = messageService;
         _logger = logger;
+        _errorMiddleware = errorMiddleware;
         
         // Логируем статус системы мимикрии
         if (Config.SuspiciousDetectionEnabled)
@@ -387,20 +391,13 @@ public class ModerationService : IModerationService
     /// </summary>
     public async Task<bool> BanAndCleanupUserAsync(long userId, long chatId, int? messageIdToDelete = null)
     {
-        try
+        return await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             // Удаляем сообщение если указано
             if (messageIdToDelete.HasValue)
             {
-                try
-                {
-                    await _botClient.DeleteMessage(chatId, messageIdToDelete.Value);
-                    _logger.LogInformation("Удалено сообщение {MessageId} из чата {ChatId}", messageIdToDelete.Value, chatId);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Не удалось удалить сообщение {MessageId} из чата {ChatId}", messageIdToDelete.Value, chatId);
-                }
+                await _botClient.DeleteMessage(chatId, messageIdToDelete.Value);
+                _logger.LogInformation("Удалено сообщение {MessageId} из чата {ChatId}", messageIdToDelete.Value, chatId);
             }
             
             // Баним пользователя
@@ -411,12 +408,7 @@ public class ModerationService : IModerationService
             
             _logger.LogInformation("🚫 Пользователь {UserId} забанен и очищен из всех списков для чата {ChatId}", userId, chatId);
             return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при бане пользователя {UserId} в чате {ChatId}", userId, chatId);
-            return false;
-        }
+        }, "BanAndCleanupUser", null, null, CancellationToken.None);
     }
 
     /// <summary>
@@ -424,7 +416,7 @@ public class ModerationService : IModerationService
     /// </summary>
     public async Task<bool> UnrestrictAndApproveUserAsync(long userId, long chatId)
     {
-        try
+        return await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             // Снимаем все ограничения
             await _botClient.RestrictChatMember(
@@ -458,12 +450,7 @@ public class ModerationService : IModerationService
 
             _logger.LogInformation("🔓 Пользователь {UserId} разблокирован и одобрен в чате {ChatId}", userId, chatId);
             return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при разблокировке пользователя {UserId} в чате {ChatId}", userId, chatId);
-            return false;
-        }
+        }, "UnrestrictAndApproveUser", null, null, CancellationToken.None);
     }
 
     private async Task<bool> AnalyzeMimicryAndMarkSuspicious(User user, Chat chat, string userKey)
@@ -711,7 +698,7 @@ public class ModerationService : IModerationService
     /// </summary>
     private async Task<bool> RestrictUserToReadOnly(User user, Chat chat, TimeSpan duration)
     {
-        try
+        return await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             var until = DateTime.UtcNow.Add(duration);
             await _botClient.RestrictChatMember(
@@ -741,12 +728,7 @@ public class ModerationService : IModerationService
             _logger.LogInformation("🔒 Пользователь {User} ограничен на readonly до {Until}", 
                 Utils.FullName(user), until);
             return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при ограничении пользователя {User}", Utils.FullName(user));
-            return false;
-        }
+        }, "RestrictUserToReadOnly", user, chat, CancellationToken.None);
     }
 
     public async Task<bool> CheckAiDetectAndNotifyAdminsAsync(User user, Chat chat, Message message)

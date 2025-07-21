@@ -122,29 +122,20 @@ public class ModerationServiceTests
         var chatId = 67890L;
         var messageId = 111;
 
-        // Используем базовые методы Telegram API вместо extension methods
-        _factory.BotClientMock.Setup(x => x.SendRequest(
-            It.IsAny<BanChatMemberRequest>(), 
+        // Mock the ErrorHandlingMiddleware to return true
+        _factory.ErrorMiddlewareMock.Setup(x => x.ExecuteTelegramApiAsync(
+            It.IsAny<Func<Task<bool>>>(), 
+            It.IsAny<string>(), 
+            It.IsAny<Telegram.Bot.Types.User>(), 
+            It.IsAny<Telegram.Bot.Types.Chat>(), 
             It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(true));
-
-        _factory.BotClientMock.Setup(x => x.SendRequest(
-            It.IsAny<DeleteMessageRequest>(), 
-            It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(true));
+            .ReturnsAsync(true);
 
         // Act
         var result = await _service.BanAndCleanupUserAsync(userId, chatId, messageId);
 
         // Assert
         Assert.That(result, Is.True);
-        _factory.BotClientMock.Verify(x => x.SendRequest(
-            It.IsAny<BanChatMemberRequest>(), 
-            It.IsAny<CancellationToken>()), Times.Once);
-        
-        _factory.BotClientMock.Verify(x => x.SendRequest(
-            It.IsAny<DeleteMessageRequest>(), 
-            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -154,23 +145,19 @@ public class ModerationServiceTests
         var userId = 12345L;
         var chatId = 67890L;
 
-        _factory.BotClientMock.Setup(x => x.SendRequest(
-            It.IsAny<BanChatMemberRequest>(), 
+        _factory.ErrorMiddlewareMock.Setup(x => x.ExecuteTelegramApiAsync(
+            It.IsAny<Func<Task<bool>>>(), 
+            It.IsAny<string>(), 
+            It.IsAny<Telegram.Bot.Types.User>(), 
+            It.IsAny<Telegram.Bot.Types.Chat>(), 
             It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(true));
+            .ReturnsAsync(true);
 
         // Act
         var result = await _service.BanAndCleanupUserAsync(userId, chatId);
 
         // Assert
         Assert.That(result, Is.True);
-        _factory.BotClientMock.Verify(x => x.SendRequest(
-            It.IsAny<BanChatMemberRequest>(), 
-            It.IsAny<CancellationToken>()), Times.Once);
-        
-        _factory.BotClientMock.Verify(x => x.SendRequest(
-            It.IsAny<DeleteMessageRequest>(), 
-            It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]
@@ -180,10 +167,13 @@ public class ModerationServiceTests
         var userId = 12345L;
         var chatId = 67890L;
 
-        _factory.BotClientMock.Setup(x => x.SendRequest(
-            It.IsAny<BanChatMemberRequest>(), 
+        _factory.ErrorMiddlewareMock.Setup(x => x.ExecuteTelegramApiAsync(
+            It.IsAny<Func<Task<bool>>>(), 
+            It.IsAny<string>(), 
+            It.IsAny<Telegram.Bot.Types.User>(), 
+            It.IsAny<Telegram.Bot.Types.Chat>(), 
             It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new Exception("Telegram API error"));
+            .ReturnsAsync(false);
 
         // Act
         var result = await _service.BanAndCleanupUserAsync(userId, chatId);

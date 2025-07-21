@@ -117,7 +117,11 @@ public class Program
                 services.AddSingleton<ISpamHamClassifier, SpamHamClassifier>();
                 services.AddSingleton<IMimicryClassifier, MimicryClassifier>();
                 services.AddSingleton<IBadMessageManager, BadMessageManager>();
-                services.AddSingleton<IAiChecks>(provider => new AiChecks(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<AiChecks>>()));
+                services.AddSingleton<IAiChecks>(provider => new AiChecks(
+                    provider.GetRequiredService<ITelegramBotClientWrapper>(), 
+                    provider.GetRequiredService<ILogger<AiChecks>>(),
+                    provider.GetRequiredService<ErrorHandlingMiddleware>()
+                ));
                 services.AddSingleton<GlobalStatsManager>();
                 services.AddSingleton<ISuspiciousUsersStorage, SuspiciousUsersStorage>();
                 
@@ -137,7 +141,8 @@ public class Program
                     provider.GetRequiredService<ISuspiciousUsersStorage>(),
                     provider.GetRequiredService<ITelegramBotClient>(),
                     provider.GetRequiredService<IMessageService>(),
-                    provider.GetRequiredService<ILogger<ModerationService>>()));
+                    provider.GetRequiredService<ILogger<ModerationService>>(),
+                    provider.GetRequiredService<ErrorHandlingMiddleware>()));
                 services.AddSingleton<IntroFlowService>(provider => new IntroFlowService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<IntroFlowService>>(), provider.GetRequiredService<ICaptchaService>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<IAiChecks>(), provider.GetRequiredService<IStatisticsService>(), provider.GetRequiredService<GlobalStatsManager>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>()));
                 services.AddSingleton<IChatLinkFormatter, ChatLinkFormatter>();
                 services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
@@ -159,7 +164,7 @@ public class Program
                 services.AddSingleton<LoggingStrategy>();
                 services.AddSingleton<NotificationStrategy>();
                 services.AddSingleton<IErrorHandler, ErrorHandler>();
-                services.AddSingleton<ErrorHandlingMiddleware>();
+                services.AddSingleton<IErrorHandlingMiddleware, ErrorHandlingMiddleware>();
                 
                 // Обработчики обновлений
                 services.AddSingleton<IUpdateHandler>(provider => new MessageHandler(

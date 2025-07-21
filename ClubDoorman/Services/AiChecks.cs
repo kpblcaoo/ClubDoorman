@@ -9,6 +9,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using tryAGI.OpenAI;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Infrastructure.ErrorHandling;
 
 namespace ClubDoorman.Services;
 
@@ -17,6 +18,7 @@ public class AiChecks : IAiChecks
     private readonly ITelegramBotClientWrapper _bot;
     private readonly ILogger<AiChecks> _logger;
     private readonly OpenAiClient? _api;
+    private readonly IErrorHandlingMiddleware _errorMiddleware;
     private readonly JsonSerializerOptions _jsonOptions = new() { Converters = { new JsonStringEnumConverter() } };
     
     // Retry policy для обработки временных ошибок API
@@ -27,10 +29,11 @@ public class AiChecks : IAiChecks
     
     const string Model = "google/gemini-2.5-flash";
     
-    public AiChecks(ITelegramBotClientWrapper bot, ILogger<AiChecks> logger)
+    public AiChecks(ITelegramBotClientWrapper bot, ILogger<AiChecks> logger, IErrorHandlingMiddleware errorMiddleware)
     {
         _bot = bot;
         _logger = logger;
+        _errorMiddleware = errorMiddleware;
         _api = Config.OpenRouterApi == null ? null : CustomProviders.OpenRouter(Config.OpenRouterApi);
         
         if (_api == null)
@@ -78,7 +81,7 @@ public class AiChecks : IAiChecks
         var pic = Array.Empty<byte>();
         var nameBioUser = string.Empty;
 
-        try
+        return await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             var userChat = await _bot.GetChatFullInfo(user.Id);
             
@@ -183,15 +186,17 @@ public class AiChecks : IAiChecks
                 _logger.LogInformation("AI анализ профиля пользователя {UserId}: {Probability} - {Reason}", 
                     user.Id, probability.Probability, probability.Reason);
             }
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Ошибка при AI анализе профиля пользователя {UserId}", user.Id);
-        }
 
-        var finalResult = new SpamPhotoBio(probability, pic, nameBioUser);
-        CacheResult(user.Id, finalResult);
-        return finalResult;
+            var finalResult = new SpamPhotoBio(probability, pic, nameBioUser);
+            CacheResult(user.Id, finalResult);
+            
+            if (ifChanged != null && probability.Probability > 0.5)
+            {
+                await ifChanged($"AI анализ: {probability.Reason}");
+            }
+            
+            return finalResult;
+        }, "GetAttentionBaitProbability", user, null, CancellationToken.None);
     }
 
     /// <summary>

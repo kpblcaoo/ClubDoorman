@@ -191,8 +191,8 @@ public class ModerationServiceBusinessLogicTests
         var userId = 123456L;
         var chatId = 789L;
         
-        _factory.WithBotClientSetup(mock => 
-            mock.Setup(x => x.SendRequest(It.IsAny<Telegram.Bot.Requests.BanChatMemberRequest>(), It.IsAny<CancellationToken>()))
+        _factory.WithErrorMiddlewareSetup(mock => 
+            mock.Setup(x => x.ExecuteTelegramApiAsync(It.IsAny<Func<Task<bool>>>(), It.IsAny<string>(), It.IsAny<Telegram.Bot.Types.User>(), It.IsAny<Telegram.Bot.Types.Chat>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true));
 
         // Act
@@ -209,8 +209,8 @@ public class ModerationServiceBusinessLogicTests
         var userId = 123456L;
         var chatId = 789L;
         
-        _factory.WithBotClientSetup(mock => 
-            mock.Setup(x => x.SendRequest(It.IsAny<Telegram.Bot.Requests.RestrictChatMemberRequest>(), It.IsAny<CancellationToken>()))
+        _factory.WithErrorMiddlewareSetup(mock => 
+            mock.Setup(x => x.ExecuteTelegramApiAsync(It.IsAny<Func<Task<bool>>>(), It.IsAny<string>(), It.IsAny<Telegram.Bot.Types.User>(), It.IsAny<Telegram.Bot.Types.Chat>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true));
 
         // Act

@@ -1,4 +1,5 @@
 using ClubDoorman.Services;
+using ClubDoorman.Infrastructure.ErrorHandling;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -24,6 +25,7 @@ public class ModerationServiceTestFactory
     public Mock<ITelegramBotClient> BotClientMock { get; } = new();
     public Mock<IMessageService> MessageServiceMock { get; } = new();
     public Mock<ILogger<ModerationService>> LoggerMock { get; } = new();
+    public Mock<IErrorHandlingMiddleware> ErrorMiddlewareMock { get; } = new();
 
     public ModerationService CreateModerationService()
     {
@@ -36,7 +38,8 @@ public class ModerationServiceTestFactory
             SuspiciousUsersStorageMock.Object,
             BotClientMock.Object,
             MessageServiceMock.Object,
-            LoggerMock.Object
+            LoggerMock.Object,
+            ErrorMiddlewareMock.Object
         );
     }
 
@@ -93,6 +96,12 @@ public class ModerationServiceTestFactory
     public ModerationServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<ModerationService>>> setup)
     {
         setup(LoggerMock);
+        return this;
+    }
+
+    public ModerationServiceTestFactory WithErrorMiddlewareSetup(Action<Mock<IErrorHandlingMiddleware>> setup)
+    {
+        setup(ErrorMiddlewareMock);
         return this;
     }
 

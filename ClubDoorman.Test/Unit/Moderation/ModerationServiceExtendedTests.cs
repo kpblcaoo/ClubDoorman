@@ -158,9 +158,9 @@ public class ModerationServiceExtendedTests
     public async Task BanAndCleanupUserAsync_ValidParameters_ReturnsTrue()
     {
         // Arrange
-        _factory.WithBotClientSetup(mock => 
-            mock.Setup(x => x.SendRequest(It.IsAny<Telegram.Bot.Requests.BanChatMemberRequest>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(true)));
+        _factory.WithErrorMiddlewareSetup(mock => 
+            mock.Setup(x => x.ExecuteTelegramApiAsync(It.IsAny<Func<Task<bool>>>(), It.IsAny<string>(), It.IsAny<Telegram.Bot.Types.User>(), It.IsAny<Telegram.Bot.Types.Chat>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true));
         
         var service = _factory.CreateModerationService();
         var userId = 12345L;
@@ -178,9 +178,9 @@ public class ModerationServiceExtendedTests
     public async Task BanAndCleanupUserAsync_WithoutMessageId_OnlyBansUser()
     {
         // Arrange
-        _factory.WithBotClientSetup(mock => 
-            mock.Setup(x => x.SendRequest(It.IsAny<Telegram.Bot.Requests.BanChatMemberRequest>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(true)));
+        _factory.WithErrorMiddlewareSetup(mock => 
+            mock.Setup(x => x.ExecuteTelegramApiAsync(It.IsAny<Func<Task<bool>>>(), It.IsAny<string>(), It.IsAny<Telegram.Bot.Types.User>(), It.IsAny<Telegram.Bot.Types.Chat>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true));
         
         var service = _factory.CreateModerationService();
         var userId = 12345L;
@@ -197,9 +197,9 @@ public class ModerationServiceExtendedTests
     public async Task BanAndCleanupUserAsync_TelegramApiError_ReturnsFalse()
     {
         // Arrange
-        _factory.WithBotClientSetup(mock => 
-            mock.Setup(x => x.SendRequest(It.IsAny<Telegram.Bot.Requests.BanChatMemberRequest>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new Exception("Telegram API error")));
+        _factory.WithErrorMiddlewareSetup(mock => 
+            mock.Setup(x => x.ExecuteTelegramApiAsync(It.IsAny<Func<Task<bool>>>(), It.IsAny<string>(), It.IsAny<Telegram.Bot.Types.User>(), It.IsAny<Telegram.Bot.Types.Chat>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false));
         
         var service = _factory.CreateModerationService();
         var userId = 12345L;

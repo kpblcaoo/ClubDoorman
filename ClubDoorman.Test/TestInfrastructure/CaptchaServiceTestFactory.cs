@@ -1,4 +1,5 @@
 using ClubDoorman.Services;
+using ClubDoorman.Infrastructure.ErrorHandling;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -67,7 +68,8 @@ public class CaptchaServiceTestFactory
             new Mock<ISuspiciousUsersStorage>().Object,
             new Mock<ITelegramBotClient>().Object,
             new Mock<IMessageService>().Object,
-            new Mock<ILogger<ModerationService>>().Object
+            new Mock<ILogger<ModerationService>>().Object,
+            new Mock<IErrorHandlingMiddleware>().Object
         );
     }
 
