@@ -30,6 +30,7 @@ public class MessageHandlerTestFactory
     public Mock<IMessageService> MessageServiceMock { get; } = new();
     public Mock<IChatLinkFormatter> ChatLinkFormatterMock { get; } = new();
     public Mock<ILogger<MessageHandler>> LoggerMock { get; } = new();
+    public Mock<IErrorHandlingMiddleware> ErrorMiddlewareMock { get; } = new();
 
     public MessageHandler CreateMessageHandler()
     {
@@ -132,6 +133,12 @@ public class MessageHandlerTestFactory
         return this;
     }
 
+    public MessageHandlerTestFactory WithErrorMiddlewareSetup(Action<Mock<IErrorHandlingMiddleware>> setup)
+    {
+        setup(ErrorMiddlewareMock);
+        return this;
+    }
+
     #endregion
 
     #region Smart Methods Based on Business Logic
@@ -152,7 +159,7 @@ public class MessageHandlerTestFactory
             new Mock<ITelegramBotClient>().Object,
             new Mock<IMessageService>().Object,
             new Mock<ILogger<ModerationService>>().Object,
-            new Mock<IErrorHandlingMiddleware>().Object
+            ErrorMiddlewareMock.Object
         );
     }
 
@@ -203,7 +210,7 @@ public class MessageHandlerTestFactory
             UserFlowLoggerMock.Object,
             MessageServiceMock.Object,
             ChatLinkFormatterMock.Object,
-            new Mock<IErrorHandlingMiddleware>().Object,
+            ErrorMiddlewareMock.Object,
             LoggerMock.Object
         );
     }

@@ -842,7 +842,7 @@ public class MessageHandler : IUpdateHandler
         var user = message.From;
         var deletionMessagePart = $"{reason}";
 
-        try
+        await _errorMiddleware.ExecuteWithMessageAsync(async () =>
         {
             // Создаем кнопки реакции для админ-чата
             var callbackDataBan = $"ban_{message.Chat.Id}_{user.Id}";
@@ -889,41 +889,16 @@ public class MessageHandler : IUpdateHandler
             );
             
             _logger.LogDebug("Уведомление с кнопками успешно отправлено в админ-чат");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Не удалось отправить уведомление в админ-чат");
-            // Fallback: отправляем простое уведомление без пересылки и кнопок
-            try
-            {
-                var deletionData = new AutoBanNotificationData(
-                    user, 
-                    message.Chat, 
-                    deletionMessagePart, 
-                    reason, 
-                    message.MessageId, 
-                    LinkToMessage(message.Chat, message.MessageId)
-                );
-                await _messageService.SendAdminNotificationAsync(AdminNotificationType.AutoBan, deletionData, cancellationToken);
-            }
-            catch (Exception fallbackEx)
-            {
-                _logger.LogError(fallbackEx, "Не удалось отправить fallback уведомление в админ-чат");
-            }
-        }
+        }, "DeleteAndReportMessage", message, cancellationToken);
         
-        try
+        // Удаляем сообщение
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             _logger.LogDebug("Пытаемся удалить сообщение {MessageId} из чата {ChatId}", message.MessageId, message.Chat.Id);
             await _bot.DeleteMessage(message.Chat.Id, message.MessageId, cancellationToken: cancellationToken);
             deletionMessagePart += ", сообщение удалено.";
             _logger.LogDebug("Сообщение успешно удалено");
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Unable to delete message {MessageId} from chat {ChatId}", message.MessageId, message.Chat.Id);
-            deletionMessagePart += ", сообщение НЕ удалено (не хватило могущества?).";
-        }
+        }, "DeleteAndReportMessage", user, message.Chat, cancellationToken);
 
         // Отправляем предупреждение пользователю (только если не было отправлено недавно)
         var warningKey = $"warning_{message.Chat.Id}_{user.Id}";
@@ -931,7 +906,7 @@ public class MessageHandler : IUpdateHandler
         
         if (existingWarning == null)
         {
-            try
+            await _errorMiddleware.ExecuteWithMessageAsync(async () =>
             {
                 var warningData = new SimpleNotificationData(user, message.Chat, "новичок в этом чате");
                 var sentWarn = await _messageService.SendUserNotificationWithReplyAsync(
@@ -947,11 +922,7 @@ public class MessageHandler : IUpdateHandler
                 
                 DeleteMessageLater(sentWarn, TimeSpan.FromSeconds(40), cancellationToken);
                 _logger.LogDebug("Предупреждение отправлено пользователю и будет удалено через 40 секунд");
-            }
-            catch (Exception e)
-            {
-                _logger.LogWarning(e, "Не удалось отправить предупреждение пользователю");
-            }
+            }, "DeleteAndReportMessage", message, cancellationToken);
         }
         else
         {
@@ -995,7 +966,7 @@ public class MessageHandler : IUpdateHandler
     
     private async Task SendSuspiciousMessageWithButtons(Message message, User user, SuspiciousMessageNotificationData data, CancellationToken cancellationToken)
     {
-        try
+        await _errorMiddleware.ExecuteWithMessageAsync(async () =>
         {
             var template = _messageService.GetTemplates().GetAdminTemplate(AdminNotificationType.SuspiciousMessage);
             var messageText = _messageService.GetTemplates().FormatNotificationTemplate(template, data);
@@ -1028,13 +999,7 @@ public class MessageHandler : IUpdateHandler
             
             _logger.LogDebug("Отправлено подозрительное сообщение с кнопками для пользователя {User} в чате {Chat}", 
                 Utils.FullName(user), message.Chat.Title);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при отправке подозрительного сообщения с кнопками");
-            // Fallback: отправляем без кнопок
-            await _messageService.SendAdminNotificationAsync(AdminNotificationType.SuspiciousMessage, data, cancellationToken);
-        }
+        }, "SendSuspiciousMessageWithButtons", message, cancellationToken);
     }
 
     /// <summary>
@@ -1050,7 +1015,7 @@ public class MessageHandler : IUpdateHandler
         _userFlowLogger.LogUserBanned(user, chat, "Пользователь в блэклисте lols.bot");
         
         // Пересылаем сообщение в лог-чат перед удалением
-        try
+        await _errorMiddleware.ExecuteWithMessageAsync(async () =>
         {
             var forward = await _bot.ForwardMessage(
                 new ChatId(Config.LogAdminChatId),
@@ -1068,32 +1033,20 @@ public class MessageHandler : IUpdateHandler
                 LinkToMessage(message.Chat, message.MessageId)
             );
             await _messageService.SendLogNotificationAsync(LogNotificationType.AutoBanBlacklist, blacklistData, cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось переслать сообщение в лог-чат");
-        }
+        }, "HandleBlacklistBan", message, cancellationToken);
         
         // Удаляем сообщение
-        try
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             await _bot.DeleteMessage(message.Chat, message.MessageId, cancellationToken: cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось удалить сообщение пользователя из блэклиста");
-        }
+        }, "HandleBlacklistBan", user, message.Chat, cancellationToken);
         
         // Баним пользователя на 4 часа (как в IntroFlowService)
-        try
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             var banUntil = DateTime.UtcNow + TimeSpan.FromMinutes(240);
             await _bot.BanChatMember(chat.Id, user.Id, untilDate: banUntil, revokeMessages: true, cancellationToken: cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось забанить пользователя из блэклиста");
-        }
+        }, "HandleBlacklistBan", user, message.Chat, cancellationToken);
         
         // Обновляем статистику
         _statisticsService.IncrementBlacklistBan(message.Chat.Id);
@@ -1102,15 +1055,11 @@ public class MessageHandler : IUpdateHandler
         // Удаляем из списка одобренных
         if (_userManager.RemoveApproval(user.Id))
         {
-            try
+            await _errorMiddleware.ExecuteWithMessageAsync(async () =>
             {
                 var removedData = new SimpleNotificationData(user, message.Chat, "удален из списка одобренных после автобана по блэклисту");
                 await _messageService.SendAdminNotificationAsync(AdminNotificationType.RemovedFromApproved, removedData, cancellationToken);
-            }
-            catch (Exception e)
-            {
-                _logger.LogWarning(e, "Не удалось отправить уведомление об удалении из одобренных");
-            }
+            }, "HandleBlacklistBan", message, cancellationToken);
         }
         
         _logger.LogInformation("✅ АВТОБАН ЗАВЕРШЕН: пользователь {User} (id={UserId}) забанен на 4 часа в чате '{ChatTitle}' (id={ChatId}) по блэклисту lols.bot", 
@@ -1172,17 +1121,13 @@ public class MessageHandler : IUpdateHandler
                     user.Id, result.SpamProbability.Probability);
 
                 // Удаляем сообщение пользователя
-                try
+                await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
                 {
                     await _bot.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Не удалось удалить сообщение при AI анализе");
-                }
+                }, "PerformAiProfileAnalysis", user, chat, cancellationToken);
 
                 // Даем ридонли на 10 минут
-                try
+                await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
                 {
                     var untilDate = DateTime.UtcNow.AddMinutes(10);
                     await _bot.RestrictChatMember(
@@ -1208,11 +1153,7 @@ public class MessageHandler : IUpdateHandler
                         untilDate: (DateTime?)untilDate,
                         cancellationToken: cancellationToken
                     );
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Не удалось дать ридонли пользователю");
-                }
+                }, "PerformAiProfileAnalysis", user, chat, cancellationToken);
 
                 // Отправляем красивое уведомление в админ-чат
                 var aiProfileData = new AiProfileAnalysisData(

@@ -121,7 +121,7 @@ public class Program
                 services.AddSingleton<IAiChecks>(provider => new AiChecks(
                     provider.GetRequiredService<ITelegramBotClientWrapper>(), 
                     provider.GetRequiredService<ILogger<AiChecks>>(),
-                    provider.GetRequiredService<ErrorHandlingMiddleware>()
+                    provider.GetRequiredService<IErrorHandlingMiddleware>()
                 ));
                 services.AddSingleton<GlobalStatsManager>();
                 services.AddSingleton<ISuspiciousUsersStorage, SuspiciousUsersStorage>();
@@ -143,7 +143,7 @@ public class Program
                     provider.GetRequiredService<ITelegramBotClient>(),
                     provider.GetRequiredService<IMessageService>(),
                     provider.GetRequiredService<ILogger<ModerationService>>(),
-                    provider.GetRequiredService<ErrorHandlingMiddleware>()));
+                    provider.GetRequiredService<IErrorHandlingMiddleware>()));
                 services.AddSingleton<IntroFlowService>(provider => new IntroFlowService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<IntroFlowService>>(), provider.GetRequiredService<ICaptchaService>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<IAiChecks>(), provider.GetRequiredService<IStatisticsService>(), provider.GetRequiredService<GlobalStatsManager>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<IErrorHandlingMiddleware>()));
                 services.AddSingleton<IChatLinkFormatter, ChatLinkFormatter>();
                 services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
@@ -157,7 +157,7 @@ public class Program
                     provider.GetRequiredService<ILogger<MessageService>>(),
                     provider.GetRequiredService<MessageTemplates>(),
                     provider.GetRequiredService<ILoggingConfigurationService>(),
-                    provider.GetRequiredService<ErrorHandlingMiddleware>()
+                    provider.GetRequiredService<IErrorHandlingMiddleware>()
                 ));
                 
                 // Централизованная система обработки ошибок
