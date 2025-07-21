@@ -160,15 +160,11 @@ public class MessageHandler : IUpdateHandler
         // Удаление сообщений о бане ботом
         if (message.LeftChatMember != null && message.From?.Id == _bot.BotId)
         {
-            try
+            await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
             {
                 await _bot.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
                 _logger.LogDebug("Удалено сообщение о бане/исключении пользователя");
-            }
-            catch (Exception e)
-            {
-                _logger.LogWarning(e, "Не удалось удалить сообщение о бане/исключении");
-            }
+            }, "DeleteBanMessage", message.From, chat, cancellationToken);
             return;
         }
 
@@ -584,14 +580,10 @@ public class MessageHandler : IUpdateHandler
         if (_captchaService.GetCaptchaInfo(captchaKey) != null)
         {
             // Удаляем сообщение от пользователя, который должен пройти капчу
-            try
+            await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
             {
                 await _bot.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Не удалось удалить сообщение от пользователя проходящего капчу");
-            }
+            }, "DeleteCaptchaUserMessage", user, chat, cancellationToken);
             return;
         }
 
@@ -695,7 +687,7 @@ public class MessageHandler : IUpdateHandler
 
     private async Task<bool> IsChannelDiscussion(Chat chat, Message message)
     {
-        try
+        return await _errorMiddleware.ExecuteWithErrorHandlingAsync(async () =>
         {
             if (chat.Type != ChatType.Supergroup)
                 return false;
@@ -710,17 +702,12 @@ public class MessageHandler : IUpdateHandler
             }
             
             return isAutoForward;
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось определить тип чата {ChatId}", chat.Id);
-            return false;
-        }
+        }, new ErrorContext("IsChannelDiscussion", "Определение типа чата"), cancellationToken: CancellationToken.None);
     }
 
     private async Task BanUserForLongName(Message? userJoinMessage, User user, string reason, TimeSpan? banDuration, CancellationToken cancellationToken)
     {
-        try
+        await _errorMiddleware.ExecuteWithMessageAsync(async () =>
         {
             var chat = userJoinMessage?.Chat!;
             
@@ -755,16 +742,12 @@ public class MessageHandler : IUpdateHandler
             await _messageService.SendAdminNotificationAsync(AdminNotificationType.BanForLongName, banData, cancellationToken);
             
             _userFlowLogger.LogUserBanned(user, chat, reason);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось забанить пользователя за длинное имя");
-        }
+        }, "BanUserForLongName", userJoinMessage, cancellationToken);
     }
 
     private async Task BanBlacklistedUser(Message userJoinMessage, User user, CancellationToken cancellationToken)
     {
-        try
+        await _errorMiddleware.ExecuteWithMessageAsync(async () =>
         {
             var chat = userJoinMessage.Chat;
             
@@ -788,16 +771,12 @@ public class MessageHandler : IUpdateHandler
             await _bot.DeleteMessage(chat.Id, userJoinMessage.MessageId, cancellationToken);
             
             _userFlowLogger.LogUserBanned(user, chat, "Пользователь в блэклисте");
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось забанить пользователя из блэклиста");
-        }
+        }, "BanBlacklistedUser", userJoinMessage, cancellationToken);
     }
 
     private async Task AutoBanChannel(Message message, CancellationToken cancellationToken)
     {
-        try
+        await _errorMiddleware.ExecuteWithMessageAsync(async () =>
         {
             var chat = message.Chat;
             var senderChat = message.SenderChat!;
@@ -807,18 +786,7 @@ public class MessageHandler : IUpdateHandler
             
             var channelData = new ChannelMessageNotificationData(senderChat, chat, message.Text ?? "[медиа]");
             await _messageService.ForwardToAdminWithNotificationAsync(message, AdminNotificationType.ChannelMessage, channelData, cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось забанить канал");
-            var errorData = new ErrorNotificationData(
-                new InvalidOperationException("Не удалось забанить канал"),
-                "Не хватает могущества",
-                null,
-                message.Chat
-            );
-            await _messageService.SendAdminNotificationAsync(AdminNotificationType.ChannelError, errorData, cancellationToken);
-        }
+        }, "AutoBanChannel", message, cancellationToken);
     }
 
     private async Task AutoBan(Message message, string reason, CancellationToken cancellationToken)
