@@ -78,32 +78,25 @@ public class MessageService : IMessageService
     
     public async Task SendLogNotificationAsync(LogNotificationType type, NotificationData data, CancellationToken cancellationToken = default)
     {
-        try
+        var destinations = _configService.GetLogNotificationDestinations(type);
+        
+        // Проверяем, нужно ли отправлять в лог-чат
+        if (destinations.HasFlag(NotificationDestination.LogChat) && _configService.ShouldSendNotification(type.ToString(), NotificationDestination.LogChat))
         {
-            var destinations = _configService.GetLogNotificationDestinations(type);
-            
-            // Проверяем, нужно ли отправлять в лог-чат
-            if (destinations.HasFlag(NotificationDestination.LogChat) && _configService.ShouldSendNotification(type.ToString(), NotificationDestination.LogChat))
+            // Проверяем, что лог-чат настроен корректно
+            var logChatEnv = Environment.GetEnvironmentVariable("DOORMAN_LOG_ADMIN_CHAT");
+            if (string.IsNullOrEmpty(logChatEnv))
             {
-                // Проверяем, что лог-чат настроен корректно
-                var logChatEnv = Environment.GetEnvironmentVariable("DOORMAN_LOG_ADMIN_CHAT");
-                if (string.IsNullOrEmpty(logChatEnv))
-                {
-                    _logger.LogWarning("Лог-чат не настроен (переменная DOORMAN_LOG_ADMIN_CHAT не установлена)");
-                    return;
-                }
-                
+                _logger.LogWarning("Лог-чат не настроен (переменная DOORMAN_LOG_ADMIN_CHAT не установлена)");
+                return;
+            }
+            
+            // Используем централизованную обработку ошибок для Telegram API операций
+            await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
+            {
                 // Диагностика: проверяем доступность чата
-                try
-                {
-                    var chatInfo = await _bot.GetChat(Config.LogAdminChatId, cancellationToken);
-                    _logger.LogDebug("Лог-чат доступен: {ChatTitle} (ID: {ChatId})", chatInfo.Title, chatInfo.Id);
-                }
-                catch (Exception chatEx)
-                {
-                    _logger.LogError(chatEx, "Не удается получить информацию о лог-чате {ChatId}", Config.LogAdminChatId);
-                    return;
-                }
+                var chatInfo = await _bot.GetChat(Config.LogAdminChatId, cancellationToken);
+                _logger.LogDebug("Лог-чат доступен: {ChatTitle} (ID: {ChatId})", chatInfo.Title, chatInfo.Id);
                 
                 var template = _templates.GetLogTemplate(type);
                 var message = _templates.FormatNotificationTemplate(template, data);
@@ -117,21 +110,17 @@ public class MessageService : IMessageService
                 
                 _logger.LogDebug("Отправлено лог-уведомление типа {Type} для пользователя {User}", 
                     type, Utils.FullName(data.User));
-            }
-            else
-            {
-                _logger.LogDebug("Лог-уведомление типа {Type} пропущено согласно конфигурации", type);
-            }
+            }, "SendLogNotification", data.User, data.Chat, cancellationToken);
         }
-        catch (Exception ex)
+        else
         {
-            _logger.LogError(ex, "Ошибка при отправке лог-уведомления типа {Type} в чат {ChatId}", type, Config.LogAdminChatId);
+            _logger.LogDebug("Лог-уведомление типа {Type} пропущено согласно конфигурации", type);
         }
     }
     
     public async Task SendUserNotificationAsync(User user, Chat chat, UserNotificationType type, object data, CancellationToken cancellationToken = default)
     {
-        try
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             var template = _templates.GetUserTemplate(type);
             var message = _templates.FormatTemplate(template, data);
@@ -154,17 +143,12 @@ public class MessageService : IMessageService
             
             _logger.LogDebug("Отправлено пользовательское уведомление типа {Type} пользователю {User} в чате {Chat}", 
                 type, Utils.FullName(user), chat.Title);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при отправке пользовательского уведомления типа {Type} пользователю {User}", 
-                type, Utils.FullName(user));
-        }
+        }, "SendUserNotification", user, chat, cancellationToken);
     }
     
     public async Task<Message> SendUserNotificationWithReplyAsync(User user, Chat chat, UserNotificationType type, object data, CancellationToken cancellationToken = default)
     {
-        try
+        return await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             var template = _templates.GetUserTemplate(type);
             string message;
@@ -199,18 +183,12 @@ public class MessageService : IMessageService
                 type, Utils.FullName(user), chat.Title);
             
             return sentMessage;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при отправке пользовательского уведомления типа {Type} пользователю {User}", 
-                type, Utils.FullName(user));
-            throw;
-        }
+        }, "SendUserNotificationWithReply", user, chat, cancellationToken);
     }
     
     public async Task<Message?> ForwardToAdminWithNotificationAsync(Message originalMessage, AdminNotificationType type, NotificationData data, CancellationToken cancellationToken = default)
     {
-        try
+        return await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             // Пересылаем оригинальное сообщение
             var forward = await _bot.ForwardMessage(
@@ -234,17 +212,12 @@ public class MessageService : IMessageService
             
             _logger.LogDebug("Переслано сообщение в админский чат с уведомлением типа {Type}", type);
             return notification;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при пересылке сообщения в админский чат с уведомлением типа {Type}", type);
-            return null;
-        }
+        }, "ForwardToAdminWithNotification", data.User, data.Chat, cancellationToken);
     }
     
     public async Task<Message?> ForwardToLogWithNotificationAsync(Message originalMessage, LogNotificationType type, NotificationData data, CancellationToken cancellationToken = default)
     {
-        try
+        return await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             // Пересылаем оригинальное сообщение
             var forward = await _bot.ForwardMessage(
@@ -268,12 +241,7 @@ public class MessageService : IMessageService
             
             _logger.LogDebug("Переслано сообщение в лог-чат с уведомлением типа {Type}", type);
             return notification;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при пересылке сообщения в лог-чат с уведомлением типа {Type}", type);
-            return null;
-        }
+        }, "ForwardToLogWithNotification", data.User, data.Chat, cancellationToken);
     }
     
     public async Task SendErrorNotificationAsync(Exception ex, string context, User? user = null, Chat? chat = null, CancellationToken cancellationToken = default)
@@ -298,7 +266,7 @@ public class MessageService : IMessageService
     
     public async Task SendAiProfileAnalysisAsync(AiProfileAnalysisData data, CancellationToken cancellationToken = default)
     {
-        try
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             var displayName = !string.IsNullOrEmpty(data.User.FirstName)
                 ? Utils.FullName(data.User.FirstName, data.User.LastName)
@@ -362,16 +330,12 @@ public class MessageService : IMessageService
             );
             
             _logger.LogDebug("Отправлено AI уведомление о профиле для пользователя {User}", Utils.FullName(data.User));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при отправке AI уведомления о профиле для пользователя {User}", Utils.FullName(data.User));
-        }
+        }, "SendAiProfileAnalysis", data.User, data.Chat, cancellationToken);
     }
     
     public async Task<Message> SendCaptchaMessageAsync(Chat chat, string message, ReplyParameters? replyParameters, InlineKeyboardMarkup replyMarkup, CancellationToken cancellationToken = default)
     {
-        try
+        return await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             var sentMessage = await _bot.SendMessage(
                 chat.Id,
@@ -385,12 +349,7 @@ public class MessageService : IMessageService
             _logger.LogDebug("Отправлено сообщение капчи в чат {Chat}", chat.Title);
             
             return sentMessage;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при отправке сообщения капчи в чат {Chat}", chat.Title);
-            throw;
-        }
+        }, "SendCaptchaMessage", null, chat, cancellationToken);
     }
     
     public MessageTemplates GetTemplates()
