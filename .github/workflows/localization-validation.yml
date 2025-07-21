@@ -1,0 +1,38 @@
+name: Localization Validation
+
+on:
+  push:
+    paths:
+      - 'ClubDoorman/Resources/**'
+      - 'scripts/validate-localization.sh'
+      - '.github/workflows/localization-validation.yml'
+  pull_request:
+    paths:
+      - 'ClubDoorman/Resources/**'
+      - 'scripts/validate-localization.sh'
+      - '.github/workflows/localization-validation.yml'
+
+jobs:
+  validate-localization:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        
+    - name: Install dependencies
+      run: dotnet restore
+      
+    - name: Validate localization resources
+      run: ./scripts/validate-localization.sh
+      
+    - name: Build project
+      run: dotnet build ClubDoorman.sln --configuration Release --no-restore
+      
+    - name: Run localization tests
+      run: dotnet test ClubDoorman.Test/ClubDoorman.Test.csproj --filter "Category=Localization" --verbosity normal 

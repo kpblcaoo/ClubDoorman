@@ -18,7 +18,13 @@ public class MessageTemplatesLocalizationTests : TestBase
     public void Setup()
     {
         _mockLogger = new Mock<ILogger<MessageLocalizer>>();
-        _localizer = new MessageLocalizer(_mockLogger.Object);
+        var mockCultureProvider = new Mock<IChatCultureProvider>();
+        mockCultureProvider.Setup(x => x.GetCultureForChat(It.IsAny<long>()))
+            .Returns(new System.Globalization.CultureInfo("ru"));
+        mockCultureProvider.Setup(x => x.GetDefaultCulture())
+            .Returns(new System.Globalization.CultureInfo("ru"));
+        
+        _localizer = new MessageLocalizer(_mockLogger.Object, mockCultureProvider.Object);
         _templates = new MessageTemplates(_localizer);
     }
     

@@ -159,7 +159,9 @@ public class Program
                 services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
                 
                 // Централизованная система сообщений
+                services.AddSingleton<IChatCultureProvider, ChatCultureProvider>();
                 services.AddSingleton<IMessageLocalizer, MessageLocalizer>();
+                services.AddSingleton<ILocalizationValidator, LocalizationValidator>();
                 services.AddSingleton<MessageTemplates>(provider => new MessageTemplates(provider.GetRequiredService<IMessageLocalizer>()));
                 services.Configure<LoggingConfiguration>(context.Configuration.GetSection("LoggingConfiguration"));
                 services.AddSingleton<ILoggingConfigurationService, LoggingConfigurationService>();
@@ -205,6 +207,8 @@ public class Program
                 services.AddSingleton<StartCommandHandler>(provider => new StartCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<StartCommandHandler>>(), provider.GetRequiredService<IMessageService>()));
                 services.AddSingleton<ICommandHandler>(provider => new SuspiciousCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<ILogger<SuspiciousCommandHandler>>()));
                 services.AddSingleton<SuspiciousCommandHandler>(provider => new SuspiciousCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<ILogger<SuspiciousCommandHandler>>()));
+                services.AddSingleton<ICommandHandler>(provider => new LocalizationCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<LocalizationCommandHandler>>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<ILocalizationValidator>()));
+                services.AddSingleton<LocalizationCommandHandler>(provider => new LocalizationCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<LocalizationCommandHandler>>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<ILocalizationValidator>()));
                 
                 // Условная регистрация системы одобрения
                 if (Config.UseNewApprovalSystem)
@@ -263,6 +267,8 @@ public class Program
                 Console.WriteLine($"   • AI-включенные чаты: {Config.AiEnabledChats.Count}");
                 Console.WriteLine($"   • Группы без VPN-рекламы: {Config.NoVpnAdGroups.Count}");
                 Console.WriteLine($"   • Чаты с отключенной фильтрацией медиа: {Config.MediaFilteringDisabledChats.Count}");
+                Console.WriteLine($"   • Культура по умолчанию: {Config.DefaultCulture}");
+                Console.WriteLine($"   • Валидация локализации: {Config.EnableLocalizationValidation}");
             })
             .Build();
 

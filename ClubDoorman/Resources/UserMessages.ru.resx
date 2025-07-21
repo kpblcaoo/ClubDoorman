@@ -74,4 +74,7 @@
   <data name="SystemInfo" xml:space="preserve">
     <value>{0}</value>
   </data>
+  <data name="CaptchaShown" xml:space="preserve">
+    <value>🧩 Пожалуйста, пройдите капчу для входа в чат</value>
+  </data>
 </root> 

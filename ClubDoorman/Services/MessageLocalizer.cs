@@ -11,10 +11,12 @@ public class MessageLocalizer : IMessageLocalizer
 {
     private readonly ILogger<MessageLocalizer> _logger;
     private readonly Dictionary<string, System.Resources.ResourceManager> _resourceManagers;
+    private readonly IChatCultureProvider _cultureProvider;
     
-    public MessageLocalizer(ILogger<MessageLocalizer> logger)
+    public MessageLocalizer(ILogger<MessageLocalizer> logger, IChatCultureProvider cultureProvider)
     {
         _logger = logger;
+        _cultureProvider = cultureProvider;
         _resourceManagers = new Dictionary<string, System.Resources.ResourceManager>
         {
             ["UserMessages"] = new System.Resources.ResourceManager("ClubDoorman.Resources.UserMessages", Assembly.GetExecutingAssembly()),
@@ -30,16 +32,7 @@ public class MessageLocalizer : IMessageLocalizer
     /// <returns>Культура</returns>
     private CultureInfo GetCultureForChat(long chatId)
     {
-        // Простая логика: пока все чаты на русском, кроме специальных
-        // В будущем можно добавить настройку языка по чату
-        if (chatId == Config.AdminChatId || chatId == Config.LogAdminChatId)
-        {
-            // Админские чаты могут быть на английском
-            return new CultureInfo("en");
-        }
-        
-        // По умолчанию русский
-        return new CultureInfo("ru");
+        return _cultureProvider.GetCultureForChat(chatId);
     }
     
     /// <summary>
@@ -50,7 +43,8 @@ public class MessageLocalizer : IMessageLocalizer
     private CultureInfo GetCultureForAdmin(long chatId)
     {
         // Админы могут получать сообщения на английском для универсальности
-        return new CultureInfo("en");
+        // Но можно переопределить через настройки чата
+        return _cultureProvider.GetCultureForChat(chatId);
     }
     
     /// <summary>

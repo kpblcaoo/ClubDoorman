@@ -117,4 +117,7 @@ Message: `{3}`</value>
   <data name="UserRestricted" xml:space="preserve">
     <value>🔔 In chat *{0}* user [{1}](tg://user?id={2}) was given read-only or banned, check Recent actions, ML might have missed spam. If so - send here.{3}</value>
   </data>
+  <data name="GenericError" xml:space="preserve">
+    <value>❌ Something went wrong. Please try again later. (Error ID: {0})</value>
+  </data>
 </root> 

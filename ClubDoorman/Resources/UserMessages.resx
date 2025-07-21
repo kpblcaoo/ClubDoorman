@@ -74,4 +74,7 @@ I protect <b>groups</b> and <b>channels with discussions</b> from spam, flood an
   <data name="SystemInfo" xml:space="preserve">
     <value>{0}</value>
   </data>
+  <data name="CaptchaShown" xml:space="preserve">
+    <value>🧩 Please solve the captcha to enter the chat</value>
+  </data>
 </root> 

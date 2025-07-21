@@ -117,4 +117,7 @@
   <data name="UserRestricted" xml:space="preserve">
     <value>🔔 В чате *{0}* пользователю [{1}](tg://user?id={2}) дали ридонли или забанили, посмотрите в Recent actions, возможно ML пропустил спам. Если это так - кидайте его сюда.{3}</value>
   </data>
+  <data name="GenericError" xml:space="preserve">
+    <value>❌ Что-то пошло не так. Попробуйте позже. (ID ошибки: {0})</value>
+  </data>
 </root> 

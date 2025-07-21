@@ -271,6 +271,32 @@ namespace ClubDoorman.Infrastructure
             return MediaFilteringDisabledChats.Contains(chatId);
         }
 
+        // ==== НАСТРОЙКИ ЛОКАЛИЗАЦИИ ====
+
+        /// <summary>
+        /// Культура по умолчанию для локализации
+        /// </summary>
+        public static string DefaultCulture { get; } = GetDefaultCulture();
+
+        /// <summary>
+        /// Включить валидацию ресурсов локализации
+        /// </summary>
+        public static bool EnableLocalizationValidation { get; } = GetEnvironmentBool("DOORMAN_LOCALIZATION_VALIDATION_ENABLE");
+
+        /// <summary>
+        /// Получить культуру по умолчанию из переменных окружения
+        /// </summary>
+        private static string GetDefaultCulture()
+        {
+            var culture = Environment.GetEnvironmentVariable("DOORMAN_DEFAULT_CULTURE");
+            return culture?.ToLowerInvariant() switch
+            {
+                "en" or "en-us" or "en-gb" => "en",
+                "ru" or "ru-ru" => "ru",
+                _ => "ru" // По умолчанию русский
+            };
+        }
+
         private static bool GetEnvironmentBool(string envName)
         {
             var env = Environment.GetEnvironmentVariable(envName);

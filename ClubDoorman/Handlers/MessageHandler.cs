@@ -192,6 +192,15 @@ public class MessageHandler : IUpdateHandler
             await startHandler.HandleAsync(message, cancellationToken);
             return;
         }
+        
+        // Обработка команды /localization
+        if (command == "localization")
+        {
+            // Получаем LocalizationCommandHandler из DI и делегируем обработку
+            var localizationHandler = _serviceProvider.GetRequiredService<LocalizationCommandHandler>();
+            await localizationHandler.HandleAsync(message, cancellationToken);
+            return;
+        }
 
         // Обработка команды /suspicious
         if (command == "suspicious")
