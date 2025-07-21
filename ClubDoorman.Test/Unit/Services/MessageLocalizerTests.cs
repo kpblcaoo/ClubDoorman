@@ -49,7 +49,7 @@ public class MessageLocalizerTests : TestBase
 
         // Assert
         Assert.That(result, Is.Not.Null);
-        Assert.That(result, Does.Contain("Missing key"));
+        Assert.That(result, Does.Contain("Something went wrong"));
     }
 
     [Test]
@@ -82,7 +82,7 @@ public class MessageLocalizerTests : TestBase
         // Assert
         Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.Not.Empty);
-        Assert.That(result, Does.Contain("started"));
+        Assert.That(result, Does.Contain("Бот"));
     }
 
     [Test]
@@ -133,5 +133,72 @@ public class MessageLocalizerTests : TestBase
         Assert.That(result, Is.Not.Null);
         Assert.That(result, Does.Contain("TestUser"));
         Assert.That(result, Does.Contain("TestGroup"));
+    }
+    
+    [Test]
+    public void User_WithCulture_ReturnsLocalizedMessage()
+    {
+        // Arrange
+        var key = "CaptchaPrompt";
+        var culture = new System.Globalization.CultureInfo("ru");
+        var args = new object[] { "ABC123" };
+
+        // Act
+        var result = _localizer.User(key, culture, args);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.Not.Empty);
+        Assert.That(result, Does.Contain("ABC123"));
+    }
+    
+    [Test]
+    public void Admin_WithCulture_ReturnsLocalizedMessage()
+    {
+        // Arrange
+        var key = "AutoBanBlacklist";
+        var culture = new System.Globalization.CultureInfo("en");
+        var args = new object[] { "TestUser", "TestChat", "TestLink" };
+
+        // Act
+        var result = _localizer.Admin(key, culture, args);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.Not.Empty);
+        Assert.That(result, Does.Contain("TestUser"));
+        Assert.That(result, Does.Contain("TestChat"));
+    }
+    
+    [Test]
+    public void System_WithCulture_ReturnsLocalizedMessage()
+    {
+        // Arrange
+        var key = "BotStarted";
+        var culture = new System.Globalization.CultureInfo("en");
+
+        // Act
+        var result = _localizer.System(key, culture);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.Not.Empty);
+        Assert.That(result, Does.Contain("started"));
+    }
+    
+    [Test]
+    public void User_MissingKey_ReturnsGenericError()
+    {
+        // Arrange
+        var key = "NonExistentKey";
+        var culture = new System.Globalization.CultureInfo("en");
+
+        // Act
+        var result = _localizer.User(key, culture);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.Not.Empty);
+        Assert.That(result, Does.Contain("Something went wrong"));
     }
 } 

@@ -15,6 +15,15 @@ public interface IMessageLocalizer
     string User(string key, long chatId, params object[] args);
     
     /// <summary>
+    /// Получить локализованное сообщение для пользователя с указанной культурой
+    /// </summary>
+    /// <param name="key">Ключ сообщения</param>
+    /// <param name="culture">Культура для локализации</param>
+    /// <param name="args">Аргументы для форматирования</param>
+    /// <returns>Локализованное сообщение</returns>
+    string User(string key, System.Globalization.CultureInfo culture, params object[] args);
+    
+    /// <summary>
     /// Получить локализованное сообщение для админа
     /// </summary>
     /// <param name="key">Ключ сообщения</param>
@@ -24,10 +33,28 @@ public interface IMessageLocalizer
     string Admin(string key, long chatId, params object[] args);
     
     /// <summary>
+    /// Получить локализованное сообщение для админа с указанной культурой
+    /// </summary>
+    /// <param name="key">Ключ сообщения</param>
+    /// <param name="culture">Культура для локализации</param>
+    /// <param name="args">Аргументы для форматирования</param>
+    /// <returns>Локализованное сообщение</returns>
+    string Admin(string key, System.Globalization.CultureInfo culture, params object[] args);
+    
+    /// <summary>
     /// Получить локализованное системное сообщение
     /// </summary>
     /// <param name="key">Ключ сообщения</param>
     /// <param name="args">Аргументы для форматирования</param>
     /// <returns>Локализованное сообщение</returns>
     string System(string key, params object[] args);
+    
+    /// <summary>
+    /// Получить локализованное системное сообщение с указанной культурой
+    /// </summary>
+    /// <param name="key">Ключ сообщения</param>
+    /// <param name="culture">Культура для локализации</param>
+    /// <param name="args">Аргументы для форматирования</param>
+    /// <returns>Локализованное сообщение</returns>
+    string System(string key, System.Globalization.CultureInfo culture, params object[] args);
 } 

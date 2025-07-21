@@ -58,25 +58,34 @@ public class MessageLocalizer : IMessageLocalizer
     /// </summary>
     public string User(string key, long chatId, params object[] args)
     {
+        var culture = GetCultureForChat(chatId);
+        return User(key, culture, args);
+    }
+    
+    /// <summary>
+    /// Получить локализованное сообщение для пользователя с указанной культурой
+    /// </summary>
+    public string User(string key, CultureInfo culture, params object[] args)
+    {
         try
         {
-            var culture = GetCultureForChat(chatId);
             var resourceManager = _resourceManagers["UserMessages"];
             var message = resourceManager.GetString(key, culture);
             
             if (string.IsNullOrEmpty(message))
             {
                 _logger.LogWarning("User message key '{Key}' not found for culture '{Culture}'", key, culture.Name);
-                // Fallback на английский
-                message = resourceManager.GetString(key, new CultureInfo("en")) ?? $"Missing key: {key}";
+                // Fallback к GenericError
+                var fallbackMessage = resourceManager.GetString("GenericError", culture) ?? "Something went wrong. Please try again later.";
+                return fallbackMessage;
             }
             
-            return args.Length > 0 ? string.Format(message, args) : message;
+            return args.Length > 0 ? string.Format(culture, message, args) : message;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting user message for key '{Key}'", key);
-            return $"Error: {key}";
+            return "Something went wrong. Please try again later.";
         }
     }
     
@@ -85,20 +94,27 @@ public class MessageLocalizer : IMessageLocalizer
     /// </summary>
     public string Admin(string key, long chatId, params object[] args)
     {
+        var culture = GetCultureForAdmin(chatId);
+        return Admin(key, culture, args);
+    }
+    
+    /// <summary>
+    /// Получить локализованное сообщение для админа с указанной культурой
+    /// </summary>
+    public string Admin(string key, CultureInfo culture, params object[] args)
+    {
         try
         {
-            var culture = GetCultureForAdmin(chatId);
             var resourceManager = _resourceManagers["AdminMessages"];
             var message = resourceManager.GetString(key, culture);
             
             if (string.IsNullOrEmpty(message))
             {
                 _logger.LogWarning("Admin message key '{Key}' not found for culture '{Culture}'", key, culture.Name);
-                // Fallback на английский
-                message = resourceManager.GetString(key, new CultureInfo("en")) ?? $"Missing key: {key}";
+                return $"Missing key: {key}";
             }
             
-            return args.Length > 0 ? string.Format(message, args) : message;
+            return args.Length > 0 ? string.Format(culture, message, args) : message;
         }
         catch (Exception ex)
         {
@@ -112,10 +128,16 @@ public class MessageLocalizer : IMessageLocalizer
     /// </summary>
     public string System(string key, params object[] args)
     {
+        return System(key, CultureInfo.CurrentUICulture, args);
+    }
+    
+    /// <summary>
+    /// Получить локализованное системное сообщение с указанной культурой
+    /// </summary>
+    public string System(string key, CultureInfo culture, params object[] args)
+    {
         try
         {
-            // Системные сообщения по умолчанию на английском
-            var culture = new CultureInfo("en");
             var resourceManager = _resourceManagers["SystemMessages"];
             var message = resourceManager.GetString(key, culture);
             
@@ -125,7 +147,7 @@ public class MessageLocalizer : IMessageLocalizer
                 return $"Missing key: {key}";
             }
             
-            return args.Length > 0 ? string.Format(message, args) : message;
+            return args.Length > 0 ? string.Format(culture, message, args) : message;
         }
         catch (Exception ex)
         {

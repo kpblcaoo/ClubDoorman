@@ -210,7 +210,7 @@ public class MessageTemplates
     {
         if (_localizer != null)
         {
-            var key = GetAdminNotificationKey(type);
+            var key = type.ToString();
             return _localizer.Admin(key, chatId);
         }
         return _adminTemplates[type];
@@ -228,7 +228,7 @@ public class MessageTemplates
     {
         if (_localizer != null)
         {
-            var key = GetLogNotificationKey(type);
+            var key = type.ToString();
             return _localizer.Admin(key, chatId); // Логи тоже идут через админские ресурсы
         }
         return _logTemplates[type];
@@ -246,26 +246,11 @@ public class MessageTemplates
     {
         if (_localizer != null)
         {
-            var key = GetUserNotificationKey(type);
+            var key = type.ToString();
             return _localizer.User(key, chatId);
         }
         return _userTemplates[type];
     }
-    
-    /// <summary>
-    /// Получить ключ для админского уведомления
-    /// </summary>
-    private string GetAdminNotificationKey(AdminNotificationType type) => type.ToString();
-    
-    /// <summary>
-    /// Получить ключ для лог-уведомления
-    /// </summary>
-    private string GetLogNotificationKey(LogNotificationType type) => type.ToString();
-    
-    /// <summary>
-    /// Получить ключ для пользовательского уведомления
-    /// </summary>
-    private string GetUserNotificationKey(UserNotificationType type) => type.ToString();
     
     /// <summary>
     /// Форматировать шаблон с данными
