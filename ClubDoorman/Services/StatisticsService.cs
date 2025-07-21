@@ -3,6 +3,9 @@ using System.Text;
 using ClubDoorman.Models;
 using ClubDoorman.Infrastructure;
 using Telegram.Bot;
+using ClubDoorman.Infrastructure.ErrorHandling;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace ClubDoorman.Services;
 
@@ -15,12 +18,14 @@ public class StatisticsService : IStatisticsService
     private readonly ITelegramBotClientWrapper _bot;
     private readonly ILogger<StatisticsService> _logger;
     private readonly IChatLinkFormatter _chatLinkFormatter;
+    private readonly IErrorHandlingMiddleware _errorMiddleware;
 
-    public StatisticsService(ITelegramBotClientWrapper bot, ILogger<StatisticsService> logger, IChatLinkFormatter chatLinkFormatter)
+    public StatisticsService(ITelegramBotClientWrapper bot, ILogger<StatisticsService> logger, IChatLinkFormatter chatLinkFormatter, IErrorHandlingMiddleware errorMiddleware)
     {
         _bot = bot;
         _logger = logger;
         _chatLinkFormatter = chatLinkFormatter;
+        _errorMiddleware = errorMiddleware;
     }
 
     public void IncrementCaptcha(long chatId)
@@ -63,17 +68,17 @@ public class StatisticsService : IStatisticsService
 
     public async Task<string> GenerateReportAsync()
     {
-        var report = _stats.ToArray();
-        var sb = new StringBuilder();
-        sb.AppendLine("📊 *Статистика за последние 24 часа:*");
-        
-        foreach (var (chatId, stats) in report.OrderBy(x => x.Value.ChatTitle))
+        return await _errorMiddleware.ExecuteWithErrorHandlingAsync(async () =>
         {
-            var sum = stats.KnownBadMessage + stats.BlacklistBanned + stats.StoppedCaptcha + stats.LongNameBanned;
-            if (sum == 0) continue;
+            var report = _stats.ToArray();
+            var sb = new StringBuilder();
+            sb.AppendLine("📊 *Статистика за последние 24 часа:*");
             
-            try
+            foreach (var (chatId, stats) in report.OrderBy(x => x.Value.ChatTitle))
             {
+                var sum = stats.KnownBadMessage + stats.BlacklistBanned + stats.StoppedCaptcha + stats.LongNameBanned;
+                if (sum == 0) continue;
+                
                 var chat = await _bot.GetChat(chatId);
                 var chatLink = _chatLinkFormatter.GetChatLink(chat);
                 var chatType = ChatSettingsManager.GetChatType(chat.Id);
@@ -90,20 +95,13 @@ public class StatisticsService : IStatisticsService
                 if (stats.LongNameBanned > 0)
                     sb.AppendLine($"▫️ За длинные имена: *{stats.LongNameBanned}*");
             }
-            catch (Exception ex)
+
+            if (sb.Length <= 35) // Если нет данных, кроме заголовка
             {
-                _logger.LogWarning(ex, "Не удалось получить информацию о чате {ChatId}", chatId);
-                sb.AppendLine($"Чат {chatId}: {sum} блокировок");
+                sb.AppendLine("\nНичего интересного не произошло 🎉");
             }
-        }
 
-        if (sb.Length <= 35) // Если нет данных, кроме заголовка
-        {
-            sb.AppendLine("\nНичего интересного не произошло 🎉");
-        }
-
-        return sb.ToString();
+            return sb.ToString();
+        }, new ErrorContext("GenerateReport", "Генерация отчета статистики", ErrorSeverity.Medium));
     }
-
-
 } 

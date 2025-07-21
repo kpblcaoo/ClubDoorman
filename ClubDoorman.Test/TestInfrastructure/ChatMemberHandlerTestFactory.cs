@@ -29,8 +29,9 @@ public class ChatMemberHandlerTestFactory
             BotMock.Object,
             UserManagerMock.Object,
             LoggerMock.Object,
-            new IntroFlowService(BotMock.Object, new Mock<ILogger<IntroFlowService>>().Object, new Mock<ICaptchaService>().Object, UserManagerMock.Object, new AiChecks(BotMock.Object, new Mock<ILogger<AiChecks>>().Object, new Mock<IErrorHandlingMiddleware>().Object), new Mock<IStatisticsService>().Object, new Mock<GlobalStatsManager>().Object, new Mock<IModerationService>().Object, new Mock<IMessageService>().Object),
-            MessageServiceMock.Object
+            new IntroFlowService(BotMock.Object, new Mock<ILogger<IntroFlowService>>().Object, new Mock<ICaptchaService>().Object, UserManagerMock.Object, new AiChecks(BotMock.Object, new Mock<ILogger<AiChecks>>().Object, new Mock<IErrorHandlingMiddleware>().Object), new Mock<IStatisticsService>().Object, new Mock<GlobalStatsManager>().Object, new Mock<IModerationService>().Object, new Mock<IMessageService>().Object, new Mock<IErrorHandlingMiddleware>().Object),
+            MessageServiceMock.Object,
+            new Mock<IErrorHandlingMiddleware>().Object
         );
     }
 

@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Infrastructure.ErrorHandling;
+using Microsoft.Extensions.Logging;
 
 namespace ClubDoorman.Services;
 
@@ -11,31 +13,29 @@ internal sealed class UserManager : IUserManager
 {
     private readonly ILogger<UserManager> _logger;
     private readonly ApprovedUsersStorage _approvedUsersStorage;
+    private readonly IErrorHandlingMiddleware _errorMiddleware;
 
     public async Task RefreshBanlist()
     {
-        try
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             await _semaphore.WaitAsync();
             try
             {
-                var httpClient = new HttpClient();
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15)); // Таймаут 15 сек
-                var banlist = await httpClient.GetFromJsonAsync<long[]>("https://lols.bot/spam/banlist.json", cts.Token);
-                
-                if (banlist != null && banlist.Length > 0)
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                var response = await _httpClient.GetFromJsonAsync<LolsBotApiResponse>(
+                    "https://api.lols.bot/banlist", 
+                    cts.Token
+                );
+
+                if (response?.banned_users != null && response.banned_users.Length > 0)
                 {
-                    var oldCount = _banlist.Count;
-                    
-                    // Очищаем текущий список
-                    foreach (var key in _banlist.Keys.ToArray())
-                        _banlist.TryRemove(key, out _);
-                    
-                    // Заполняем его новыми значениями
-                    foreach (var id in banlist)
-                        _banlist.TryAdd(id, 0);
-                    
-                    _logger.LogInformation("Обновлен банлист из lols.bot: было {OldCount}, стало {NewCount} записей", oldCount, _banlist.Count);
+                    _banlist.Clear();
+                    foreach (var userId in response.banned_users)
+                    {
+                        _banlist.TryAdd(userId, 0);
+                    }
+                    _logger.LogInformation("Обновлен банлист из lols.bot: {Count} пользователей", response.banned_users.Length);
                 }
                 else
                 {
@@ -46,17 +46,14 @@ internal sealed class UserManager : IUserManager
             {
                 _semaphore.Release();
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Не удалось обновить банлист из lols.bot");
-        }
+        }, "RefreshBanlist", null, null, CancellationToken.None);
     }
 
-    public UserManager(ILogger<UserManager> logger, ApprovedUsersStorage approvedUsersStorage)
+    public UserManager(ILogger<UserManager> logger, ApprovedUsersStorage approvedUsersStorage, IErrorHandlingMiddleware errorMiddleware)
     {
         _logger = logger;
         _approvedUsersStorage = approvedUsersStorage;
+        _errorMiddleware = errorMiddleware;
         
         // Логируем состояние тестового блэклиста при создании UserManager
         Console.WriteLine($"[DEBUG] UserManager создан: тестовый блэклист содержит {_testBlacklist.Count} ID(s): [{string.Join(", ", _testBlacklist)}]");
@@ -86,15 +83,10 @@ internal sealed class UserManager : IUserManager
 
     public bool RemoveApproval(long userId, long? groupId = null, bool removeAll = false)
     {
-        try
+        return _errorMiddleware.ExecuteWithErrorHandlingAsync(async () =>
         {
             return _approvedUsersStorage.RemoveApproval(userId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Не удалось удалить пользователя {UserId} из списка одобренных", userId);
-            return false;
-        }
+        }, new ErrorContext("RemoveApproval", $"Удаление одобрения пользователя {userId}", ErrorSeverity.Medium)).Result;
     }
 
     /// <summary>
@@ -145,7 +137,8 @@ internal sealed class UserManager : IUserManager
                 return false;
             }
 
-            if (result.banned)
+            // Проверяем, есть ли пользователь в списке забаненных
+            if (result.banned_users != null && result.banned_users.Contains(userId))
             {
                 _logger.LogInformation("Пользователь {UserId} найден в банлисте LolsBot", userId);
                 _banlist.TryAdd(userId, 0);
@@ -203,7 +196,7 @@ internal sealed class UserManager : IUserManager
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 #pragma warning disable IDE1006 // Naming Styles
 
-    private record LolsBotApiResponse(long user_id, int? offenses, bool banned, bool ok, string? when, float? spam_factor, bool? scammer);
+    private record LolsBotApiResponse(long[] banned_users);
 
     internal class ClubByTgIdResponse
     {

@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Net.Http.Json;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Infrastructure.ErrorHandling;
 
 namespace ClubDoorman.Services;
 
@@ -9,6 +10,7 @@ internal sealed class UserManagerV2 : IUserManager
 {
     private readonly ILogger<UserManagerV2> _logger;
     private readonly ApprovedUsersStorageV2 _approvedUsersStorage;
+    private readonly IErrorHandlingMiddleware _errorMiddleware;
     private readonly ConcurrentDictionary<long, byte> _banlist = [];
     private readonly SemaphoreSlim _semaphore = new(1);
     private readonly HttpClient _clubHttpClient = new();
@@ -17,10 +19,11 @@ internal sealed class UserManagerV2 : IUserManager
     // Тестовый блэклист из переменной окружения DOORMAN_TEST_BLACKLIST_IDS
     private static readonly HashSet<long> _testBlacklist = LoadTestBlacklist();
 
-    public UserManagerV2(ILogger<UserManagerV2> logger, ApprovedUsersStorageV2 approvedUsersStorage)
+    public UserManagerV2(ILogger<UserManagerV2> logger, ApprovedUsersStorageV2 approvedUsersStorage, IErrorHandlingMiddleware errorMiddleware)
     {
         _logger = logger;
         _approvedUsersStorage = approvedUsersStorage;
+        _errorMiddleware = errorMiddleware;
         
         // Логируем состояние тестового блэклиста при создании UserManagerV2
         Console.WriteLine($"[DEBUG] UserManagerV2 создан: тестовый блэклист содержит {_testBlacklist.Count} ID(s): [{string.Join(", ", _testBlacklist)}]");
@@ -33,28 +36,25 @@ internal sealed class UserManagerV2 : IUserManager
 
     public async Task RefreshBanlist()
     {
-        try
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             await _semaphore.WaitAsync();
             try
             {
-                var httpClient = new HttpClient();
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-                var banlist = await httpClient.GetFromJsonAsync<long[]>("https://lols.bot/spam/banlist.json", cts.Token);
-                
-                if (banlist != null && banlist.Length > 0)
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                var response = await _httpClient.GetFromJsonAsync<LolsBotApiResponse>(
+                    "https://api.lols.bot/banlist", 
+                    cts.Token
+                );
+
+                if (response?.banned_users != null && response.banned_users.Length > 0)
                 {
-                    var oldCount = _banlist.Count;
-                    
-                    // Очищаем текущий список
-                    foreach (var key in _banlist.Keys.ToArray())
-                        _banlist.TryRemove(key, out _);
-                    
-                    // Заполняем его новыми значениями: 1 = banned
-                    foreach (var id in banlist)
-                        _banlist.TryAdd(id, 1);
-                    
-                    _logger.LogInformation("Обновлен банлист из lols.bot: было {OldCount}, стало {NewCount} записей", oldCount, _banlist.Count);
+                    _banlist.Clear();
+                    foreach (var userId in response.banned_users)
+                    {
+                        _banlist.TryAdd(userId, 1);
+                    }
+                    _logger.LogInformation("Обновлен банлист из lols.bot: {Count} пользователей", response.banned_users.Length);
                 }
                 else
                 {
@@ -65,11 +65,7 @@ internal sealed class UserManagerV2 : IUserManager
             {
                 _semaphore.Release();
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Не удалось обновить банлист из lols.bot");
-        }
+        }, "RefreshBanlist", null, null, CancellationToken.None);
     }
 
     /// <summary>
@@ -119,7 +115,7 @@ internal sealed class UserManagerV2 : IUserManager
     /// <returns>true, если одобрение было удалено</returns>
     public bool RemoveApproval(long userId, long? groupId = null, bool removeAll = false)
     {
-        try
+        return _errorMiddleware.ExecuteWithErrorHandlingAsync(async () =>
         {
             if (removeAll)
             {
@@ -136,12 +132,7 @@ internal sealed class UserManagerV2 : IUserManager
                 // Удаляем глобальное одобрение
                 return _approvedUsersStorage.RemoveGlobalApproval(userId);
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Не удалось удалить одобрение пользователя {UserId}", userId);
-            return false;
-        }
+        }, new ErrorContext("RemoveApproval", $"Удаление одобрения пользователя {userId}", ErrorSeverity.Medium)).Result;
     }
 
     /// <summary>
@@ -221,7 +212,7 @@ internal sealed class UserManagerV2 : IUserManager
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 #pragma warning disable IDE1006 // Naming Styles
 
-    private record LolsBotApiResponse(long user_id, int? offenses, bool banned, bool ok, string? when, float? spam_factor, bool? scammer);
+    private record LolsBotApiResponse(long[] banned_users);
 
     internal class ClubByTgIdResponse
     {

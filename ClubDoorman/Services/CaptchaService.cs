@@ -124,34 +124,20 @@ public class CaptchaService : ICaptchaService
                     _logger.LogInformation("Пользователь {User} (id={UserId}) не прошёл капчу (таймаут) в группе '{ChatTitle}' (id={ChatId})", 
                         Utils.FullName(expiredCaptcha.User), expiredCaptcha.User.Id, expiredCaptcha.ChatTitle ?? "-", expiredCaptcha.ChatId);
                     
-                    try
-                    {
-                        // Баним пользователя на 20 минут
-                        await _bot.BanChatMemberAsync(expiredCaptcha.ChatId, expiredCaptcha.User.Id, 
-                            untilDate: DateTime.UtcNow + TimeSpan.FromMinutes(20), revokeMessages: false);
-                        
-                        // Удаляем сообщения
-                        await _bot.DeleteMessageAsync(chat.Id, captchaMessage.MessageId);
-                        if (userJoinMessage != null)
-                            await _bot.DeleteMessageAsync(chat.Id, userJoinMessage.MessageId);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Ошибка при бане пользователя {UserId} за просроченную капчу", expiredCaptcha.User.Id);
-                    }
+                    // Баним пользователя на 20 минут
+                    await _bot.BanChatMemberAsync(expiredCaptcha.ChatId, expiredCaptcha.User.Id, 
+                        untilDate: DateTime.UtcNow + TimeSpan.FromMinutes(20), revokeMessages: false);
+                    
+                    // Удаляем сообщения
+                    await _bot.DeleteMessageAsync(chat.Id, captchaMessage.MessageId);
+                    if (userJoinMessage != null)
+                        await _bot.DeleteMessageAsync(chat.Id, userJoinMessage.MessageId);
                     
                     // Разбан через 20 минут
                     _ = Task.Run(async () =>
                     {
-                        try
-                        {
-                            await Task.Delay(TimeSpan.FromMinutes(20));
-                            await _bot.UnbanChatMemberAsync(expiredCaptcha.ChatId, expiredCaptcha.User.Id);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning(ex, "Ошибка при разбане пользователя {UserId}", expiredCaptcha.User.Id);
-                        }
+                        await Task.Delay(TimeSpan.FromMinutes(20));
+                        await _bot.UnbanChatMemberAsync(expiredCaptcha.ChatId, expiredCaptcha.User.Id);
                     });
                 }
             }

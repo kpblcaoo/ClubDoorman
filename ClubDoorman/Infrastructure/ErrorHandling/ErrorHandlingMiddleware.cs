@@ -105,6 +105,36 @@ public class ErrorHandlingMiddleware : IErrorHandlingMiddleware
     }
 
     /// <summary>
+    /// Выполняет операцию с автоматической обработкой ошибок через IErrorHandler
+    /// </summary>
+    /// <typeparam name="T">Тип возвращаемого значения</typeparam>
+    /// <param name="operation">Операция для выполнения</param>
+    /// <param name="context">Контекст ошибки</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Результат операции или значение по умолчанию</returns>
+    public async Task<T> ExecuteWithErrorHandlingAsync<T>(
+        Func<Task<T>> operation,
+        ErrorContext context,
+        CancellationToken cancellationToken = default)
+    {
+        return await _errorHandler.ExecuteWithErrorHandlingAsync(operation, context, cancellationToken);
+    }
+
+    /// <summary>
+    /// Выполняет операцию с автоматической обработкой ошибок через IErrorHandler (без возвращаемого значения)
+    /// </summary>
+    /// <param name="operation">Операция для выполнения</param>
+    /// <param name="context">Контекст ошибки</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    public async Task ExecuteWithErrorHandlingAsync(
+        Func<Task> operation,
+        ErrorContext context,
+        CancellationToken cancellationToken = default)
+    {
+        await _errorHandler.ExecuteWithErrorHandlingAsync(operation, context, cancellationToken);
+    }
+
+    /// <summary>
     /// Обрабатывает исключение с дополнительным контекстом
     /// </summary>
     /// <param name="exception">Исключение для обработки</param>

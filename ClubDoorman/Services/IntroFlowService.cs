@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using ClubDoorman.Infrastructure;
-using ClubDoorman.Services;
+using ClubDoorman.Infrastructure.ErrorHandling;
+using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using Telegram.Bot;
 using Telegram.Bot.Extensions;
@@ -23,6 +24,7 @@ public class IntroFlowService
     private readonly GlobalStatsManager _globalStatsManager;
     private readonly IModerationService _moderationService;
     private readonly IMessageService _messageService;
+    private readonly IErrorHandlingMiddleware _errorMiddleware;
 
     public IntroFlowService(
         ITelegramBotClientWrapper bot,
@@ -33,7 +35,8 @@ public class IntroFlowService
         IStatisticsService statisticsService,
         GlobalStatsManager globalStatsManager,
         IModerationService moderationService,
-        IMessageService messageService)
+        IMessageService messageService,
+        IErrorHandlingMiddleware errorMiddleware)
     {
         _bot = bot;
         _logger = logger;
@@ -44,6 +47,7 @@ public class IntroFlowService
         _globalStatsManager = globalStatsManager;
         _moderationService = moderationService;
         _messageService = messageService;
+        _errorMiddleware = errorMiddleware;
     }
 
     public async Task ProcessNewUserAsync(Message? userJoinMessage, User user, Chat? chat = default)
@@ -115,7 +119,7 @@ public class IntroFlowService
         string nameDescription,
         Chat? chat = default)
     {
-        try
+        await _errorMiddleware.ExecuteWithMessageAsync(async () =>
         {
             chat = userJoinMessage?.Chat ?? chat;
             Debug.Assert(chat != null);
@@ -150,11 +154,7 @@ public class IntroFlowService
                 new AutoBanNotificationData(user, chat, banType, $"{nameDescription} длинное имя пользователя ({fullName.Length} символов): {fullName}")
             );
             _globalStatsManager.IncBan(chat.Id, chat.Title ?? "");
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Unable to ban user with long username");
-        }
+        }, "BanUserForLongName", userJoinMessage ?? new Message { From = user, Chat = chat! }, CancellationToken.None);
     }
 
     private async Task<bool> BanIfBlacklisted(User user, Chat chat, Message? userJoinMessage = null)
@@ -162,7 +162,7 @@ public class IntroFlowService
         if (!await _userManager.InBanlist(user.Id))
             return false;
 
-        try
+        return await _errorMiddleware.ExecuteWithMessageAsync(async () =>
         {
             _statisticsService.IncrementBlacklistBan(chat.Id);
             
@@ -173,15 +173,8 @@ public class IntroFlowService
             // Явно удаляем сообщение о входе в чат, если оно есть
             if (userJoinMessage != null)
             {
-                try
-                {
-                    await _bot.DeleteMessage(chat.Id, userJoinMessage.MessageId);
-                    _logger.LogDebug("Удалено сообщение о входе пользователя из блэклиста");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Не удалось удалить сообщение о входе пользователя из блэклиста");
-                }
+                await _bot.DeleteMessage(chat.Id, userJoinMessage.MessageId);
+                _logger.LogDebug("Удалено сообщение о входе пользователя из блэклиста");
             }
             
             // Удаляем из списка одобренных
@@ -196,17 +189,7 @@ public class IntroFlowService
             _logger.LogInformation("Пользователь {User} (id={UserId}) из блэклиста забанен на 4 часа в чате {ChatTitle} (id={ChatId})", FullName(user.FirstName, user.LastName), user.Id, chat.Title, chat.Id);
             _globalStatsManager.IncBan(chat.Id, chat.Title ?? "");
             return true;
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Unable to ban");
-            await _messageService.SendAdminNotificationAsync(
-                AdminNotificationType.Warning,
-                new SimpleNotificationData(new User { Id = 0, FirstName = "System" }, chat, $"Не могу забанить юзера из блеклиста в чате {chat.Title}. Не хватает могущества? Сходите забаньте руками.")
-            );
-        }
-
-        return false;
+        }, "BanIfBlacklisted", userJoinMessage ?? new Message { From = user, Chat = chat }, CancellationToken.None);
     }
 
     private static string FullName(string firstName, string? lastName) =>

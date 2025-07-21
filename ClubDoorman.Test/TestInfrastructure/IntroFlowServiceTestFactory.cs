@@ -36,7 +36,8 @@ public class IntroFlowServiceTestFactory
             StatisticsServiceMock.Object,
             new GlobalStatsManager(),
             ModerationServiceMock.Object,
-            MessageServiceMock.Object
+            MessageServiceMock.Object,
+            new Mock<IErrorHandlingMiddleware>().Object
         );
     }
 

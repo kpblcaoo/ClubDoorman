@@ -68,6 +68,30 @@ public interface IErrorHandlingMiddleware
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Выполняет операцию с автоматической обработкой ошибок через IErrorHandler
+    /// </summary>
+    /// <typeparam name="T">Тип возвращаемого значения</typeparam>
+    /// <param name="operation">Операция для выполнения</param>
+    /// <param name="context">Контекст ошибки</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Результат операции или значение по умолчанию</returns>
+    Task<T> ExecuteWithErrorHandlingAsync<T>(
+        Func<Task<T>> operation,
+        ErrorContext context,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Выполняет операцию с автоматической обработкой ошибок через IErrorHandler (без возвращаемого значения)
+    /// </summary>
+    /// <param name="operation">Операция для выполнения</param>
+    /// <param name="context">Контекст ошибки</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    Task ExecuteWithErrorHandlingAsync(
+        Func<Task> operation,
+        ErrorContext context,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Обрабатывает исключение напрямую
     /// </summary>
     /// <param name="exception">Исключение для обработки</param>

@@ -3,6 +3,7 @@ using System.Runtime.Caching;
 using System.Text;
 using ClubDoorman.Handlers.Commands;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Infrastructure.ErrorHandling;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
@@ -34,6 +35,7 @@ public class MessageHandler : IUpdateHandler
     private readonly IUserFlowLogger _userFlowLogger;
     private readonly IMessageService _messageService;
     private readonly IChatLinkFormatter _chatLinkFormatter;
+    private readonly IErrorHandlingMiddleware _errorMiddleware;
 
     // Флаги присоединившихся пользователей (временные)
     private static readonly ConcurrentDictionary<string, byte> _joinedUserFlags = new();
@@ -69,6 +71,7 @@ public class MessageHandler : IUpdateHandler
         IUserFlowLogger userFlowLogger,
         IMessageService messageService,
         IChatLinkFormatter chatLinkFormatter,
+        IErrorHandlingMiddleware errorMiddleware,
         ILogger<MessageHandler> logger)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
@@ -84,6 +87,7 @@ public class MessageHandler : IUpdateHandler
         _userFlowLogger = userFlowLogger ?? throw new ArgumentNullException(nameof(userFlowLogger));
         _messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
         _chatLinkFormatter = chatLinkFormatter ?? throw new ArgumentNullException(nameof(chatLinkFormatter));
+        _errorMiddleware = errorMiddleware ?? throw new ArgumentNullException(nameof(errorMiddleware));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -314,7 +318,7 @@ public class MessageHandler : IUpdateHandler
             var sum = stats.KnownBadMessage + stats.BlacklistBanned + stats.StoppedCaptcha + stats.LongNameBanned;
             if (sum == 0) continue;
             Chat? chat = null;
-            try { chat = await _bot.GetChat(chatId); } catch { }
+            try { chat = await _errorMiddleware.ExecuteTelegramApiAsync(async () => await _bot.GetChat(chatId), "HandleStatsCommandAsync", null, null, cancellationToken); } catch { }
             sb.AppendLine();
             if (chat != null)
                 sb.AppendLine($"{_chatLinkFormatter.GetChatLink(chat)} (`{chat.Id}`) [{ChatSettingsManager.GetChatType(chat.Id)}]:");
@@ -383,27 +387,22 @@ public class MessageHandler : IUpdateHandler
             return;
         }
 
-        try
-        {
-            await _bot.SendMessage(userId.Value, textToSend, parseMode: ParseMode.Markdown);
-            await _messageService.SendUserNotificationAsync(
-                message.From!,
-                message.Chat,
-                UserNotificationType.Success,
-                new SimpleNotificationData(message.From!, message.Chat, $"Сообщение отправлено пользователю {target}"),
-                cancellationToken
-            );
-        }
-        catch (Exception ex)
-        {
-            await _messageService.SendUserNotificationAsync(
-                message.From!,
-                message.Chat,
-                UserNotificationType.Warning,
-                new SimpleNotificationData(message.From!, message.Chat, $"Не удалось доставить сообщение пользователю {target}: {ex.Message}"),
-                cancellationToken
-            );
-        }
+        await _errorMiddleware.ExecuteWithMessageAsync(
+            async () =>
+            {
+                await _bot.SendMessage(userId.Value, textToSend, parseMode: ParseMode.Markdown);
+                await _messageService.SendUserNotificationAsync(
+                    message.From!,
+                    message.Chat,
+                    UserNotificationType.Success,
+                    new SimpleNotificationData(message.From!, message.Chat, $"Сообщение отправлено пользователю {target}"),
+                    cancellationToken
+                );
+            },
+            "HandleSayCommandAsync",
+            message,
+            cancellationToken
+        );
     }
 
     // Вспомогательная функция для поиска userId по username среди недавних пользователей (по кэшу)

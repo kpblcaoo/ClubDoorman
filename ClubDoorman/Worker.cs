@@ -9,9 +9,13 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Text.Json;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Infrastructure.ErrorHandling;
 using ClubDoorman.Services;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using ClubDoorman.Handlers;
 
 namespace ClubDoorman;
 
@@ -26,7 +30,8 @@ internal sealed class Worker(
     IAiChecks aiChecks,
     IChatLinkFormatter chatLinkFormatter,
     ITelegramBotClientWrapper bot,
-    IMessageService messageService
+    IMessageService messageService,
+    IErrorHandlingMiddleware errorMiddleware
 ) : BackgroundService
 {
     // Классы CaptchaInfo и Stats перенесены в Models
@@ -45,6 +50,7 @@ internal sealed class Worker(
     private readonly IAiChecks _aiChecks = aiChecks;
     private readonly IChatLinkFormatter _chatLinkFormatter = chatLinkFormatter;
     private readonly IMessageService _messageService = messageService;
+    private readonly IErrorHandlingMiddleware _errorMiddleware = errorMiddleware;
     private readonly GlobalStatsManager _globalStatsManager = new();
     private User _me = default!;
     
@@ -89,27 +95,19 @@ internal sealed class Worker(
     private async Task RefreshBanlistLoop(CancellationToken token)
     {
         // Обновляем банлист сразу после запуска бота
-        try 
+        await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
         {
             _logger.LogInformation("Начальное обновление банлиста из lols.bot при старте бота");
             await _userManager.RefreshBanlist();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при начальном обновлении банлиста");
-        }
+        }, "InitialBanlistRefresh", null, null, token);
 
         while (await _banlistRefreshTimer.WaitForNextTickAsync(token))
         {
-            try
+            await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
             {
                 _logger.LogInformation("Обновляем банлист из lols.bot");
                 await _userManager.RefreshBanlist();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при обновлении банлиста");
-            }
+            }, "BanlistRefresh", null, null, token);
         }
     }
 
@@ -117,15 +115,11 @@ internal sealed class Worker(
     {
         while (await _membersCountUpdateTimer.WaitForNextTickAsync(stoppingToken))
         {
-            try
+            await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
             {
                 await _globalStatsManager.UpdateAllMembersAsync(_bot);
                 _logger.LogInformation("Обновлено количество участников во всех чатах для статистики");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Ошибка при обновлении количества участников чатов");
-            }
+            }, "UpdateMembersCount", null, null, stoppingToken);
         }
     }
 
@@ -149,13 +143,12 @@ internal sealed class Worker(
         _me = await _bot.GetMe(cancellationToken: stoppingToken);
         
         _ = Task.Run(async () => {
-            try {
+            await _errorMiddleware.ExecuteTelegramApiAsync(async () =>
+            {
                 await _globalStatsManager.UpdateAllMembersAsync(_bot);
                 await _globalStatsManager.UpdateZeroMemberChatsAsync(_bot);
                 _logger.LogInformation("Первичное обновление количества участников во всех чатах для статистики");
-            } catch (Exception ex) {
-                _logger.LogWarning(ex, "Ошибка при первичном обновлении количества участников");
-            }
+            }, "InitialMembersCountUpdate", null, null, stoppingToken);
         });
 
         while (!stoppingToken.IsCancellationRequested)
@@ -168,7 +161,7 @@ internal sealed class Worker(
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                _logger.LogError(e, "ExecuteAsync");
+                await _errorMiddleware.HandleExceptionAsync(e, "ExecuteAsync", "Ошибка в основном цикле обработки", ErrorSeverity.High, stoppingToken);
                 await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
             }
         }
@@ -242,45 +235,48 @@ internal sealed class Worker(
         var user = message.From;
         
         // Пересылаем сообщение в лог-чат перед удалением
-        try
-        {
-            var forward = await _bot.ForwardMessage(
+        await _errorMiddleware.ExecuteTelegramApiAsync(
+            async () => await _bot.ForwardMessage(
                 new ChatId(Config.LogAdminChatId),
                 message.Chat.Id,
                 message.MessageId,
                 cancellationToken: stoppingToken
-            );
-            
-            await _messageService.SendAdminNotificationAsync(
+            ),
+            "AutoBanWithLogging",
+            user,
+            message.Chat,
+            stoppingToken
+        );
+        
+        await _errorMiddleware.ExecuteTelegramApiAsync(
+            async () => await _messageService.SendAdminNotificationAsync(
                 AdminNotificationType.AutoBan,
                 new AutoBanNotificationData(user, message.Chat, "Автобан из блэклиста", reason, message.MessageId, LinkToMessage(message.Chat, message.MessageId)),
                 stoppingToken
-            );
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось переслать сообщение в лог-чат");
-        }
+            ),
+            "AutoBanWithLogging",
+            user,
+            message.Chat,
+            stoppingToken
+        );
         
         // Удаляем сообщение
-        try
-        {
-            await _bot.DeleteMessage(message.Chat, message.MessageId, cancellationToken: stoppingToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось удалить сообщение пользователя из блэклиста");
-        }
+        await _errorMiddleware.ExecuteTelegramApiAsync(
+            async () => await _bot.DeleteMessage(message.Chat, message.MessageId, cancellationToken: stoppingToken),
+            "AutoBanWithLogging",
+            user,
+            message.Chat,
+            stoppingToken
+        );
         
         // Баним пользователя
-        try
-        {
-            await _bot.BanChatMember(message.Chat, user.Id, revokeMessages: false, cancellationToken: stoppingToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось забанить пользователя из блэклиста");
-        }
+        await _errorMiddleware.ExecuteTelegramApiAsync(
+            async () => await _bot.BanChatMember(message.Chat, user.Id, revokeMessages: false, cancellationToken: stoppingToken),
+            "AutoBanWithLogging",
+            user,
+            message.Chat,
+            stoppingToken
+        );
         
         // Обновляем статистику
         _statisticsService.IncrementBlacklistBan(message.Chat.Id);
@@ -302,26 +298,27 @@ internal sealed class Worker(
 
     private async Task HandleBadMessage(Message message, User user, CancellationToken stoppingToken)
     {
-        try
-        {
-            var chat = message.Chat;
-            _statisticsService.IncrementKnownBadMessage(chat.Id);
-            await _bot.DeleteMessage(chat, message.MessageId, stoppingToken);
-            await _bot.BanChatMember(chat, user.Id, cancellationToken: stoppingToken);
-            _globalStatsManager.IncBan(chat.Id, chat.Title ?? "");
-            if (_userManager.RemoveApproval(user.Id, message.Chat.Id, removeAll: true))
+        await _errorMiddleware.ExecuteWithMessageAsync(
+            async () =>
             {
-                await _messageService.SendAdminNotificationAsync(
-                    AdminNotificationType.UserCleanup,
-                    new UserCleanupNotificationData(user, message.Chat, $"Пользователь {FullName(user.FirstName, user.LastName)} удален из списка одобренных после бана за спам"),
-                    stoppingToken
-                );
-            }
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Unable to ban");
-        }
+                var chat = message.Chat;
+                _statisticsService.IncrementKnownBadMessage(chat.Id);
+                await _bot.DeleteMessage(chat, message.MessageId, stoppingToken);
+                await _bot.BanChatMember(chat, user.Id, cancellationToken: stoppingToken);
+                _globalStatsManager.IncBan(chat.Id, chat.Title ?? "");
+                if (_userManager.RemoveApproval(user.Id, message.Chat.Id, removeAll: true))
+                {
+                    await _messageService.SendAdminNotificationAsync(
+                        AdminNotificationType.UserCleanup,
+                        new UserCleanupNotificationData(user, message.Chat, $"Пользователь {FullName(user.FirstName, user.LastName)} удален из списка одобренных после бана за спам"),
+                        stoppingToken
+                    );
+                }
+            },
+            "HandleBadMessage",
+            message,
+            stoppingToken
+        );
     }
 
     // Метод HandleCallback удален - логика перенесена в CallbackQueryHandler
@@ -346,21 +343,21 @@ internal sealed class Worker(
             if (DateTimeOffset.UtcNow.Hour != 12)
                 continue;
 
-            try
-            {
-                var report = await _statisticsService.GenerateReportAsync();
-                _statisticsService.ClearStats();
-                
-                await _messageService.SendAdminNotificationAsync(
-                    AdminNotificationType.SystemInfo,
-                    new SimpleNotificationData(new User { Id = 0, FirstName = "System" }, new Chat { Id = Config.AdminChatId, Title = "Admin" }, report),
-                    ct
-                );
-            }
-            catch (Exception e)
-            {
-                _logger.LogWarning(e, "Unable to sent report to admin chat");
-            }
+            await _errorMiddleware.ExecuteWithErrorHandlingAsync(
+                async () =>
+                {
+                    var report = await _statisticsService.GenerateReportAsync();
+                    _statisticsService.ClearStats();
+                    
+                    await _messageService.SendAdminNotificationAsync(
+                        AdminNotificationType.SystemInfo,
+                        new SimpleNotificationData(new User { Id = 0, FirstName = "System" }, new Chat { Id = Config.AdminChatId, Title = "Admin" }, report),
+                        ct
+                    );
+                },
+                new ErrorContext("ReportStatisticsLoop", "Отправка отчета статистики"),
+                ct
+            );
         }
     }
 
@@ -430,44 +427,44 @@ internal sealed class Worker(
     /// </summary>
     private async Task<bool> IsChannelDiscussion(Chat chat, Message message)
     {
-        try
-        {
-            // Если это не супергруппа, то это точно не обсуждение
-            if (chat.Type != ChatType.Supergroup)
-                return false;
+        return await _errorMiddleware.ExecuteWithMessageAsync(
+            async () =>
+            {
+                // Если это не супергруппа, то это точно не обсуждение
+                if (chat.Type != ChatType.Supergroup)
+                    return false;
 
-            // Проверяем, есть ли у группы связанный канал
-            // Для получения LinkedChatId нужно использовать GetChatFullInfo
-            var hasLinkedChannel = false;
-            try
-            {
-                var chatFull = await _bot.GetChatFullInfo(chat.Id);
-                hasLinkedChannel = chatFull.LinkedChatId != null;
-            }
-            catch
-            {
-                // Если не удалось получить полную информацию, считаем что связанного канала нет
-                hasLinkedChannel = false;
-            }
-            
-            // Обсуждение канала если:
-            // 1. Есть связанный канал И сообщение автоматически переслано
-            // 2. ИЛИ просто есть связанный канал (пользователи пишут в обсуждении)
-            var isDiscussion = hasLinkedChannel && (message.IsAutomaticForward || true);
-            
-            if (isDiscussion)
-            {
-                _logger.LogDebug("Обнаружено обсуждение канала: chat={ChatId}, hasLinkedChannel={HasLinked}, autoForward={AutoForward}", 
-                    chat.Id, hasLinkedChannel, message.IsAutomaticForward);
-            }
-            
-            return isDiscussion;
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось определить тип чата {ChatId}", chat.Id);
-            return false;
-        }
+                // Проверяем, есть ли у группы связанный канал
+                // Для получения LinkedChatId нужно использовать GetChatFullInfo
+                var hasLinkedChannel = false;
+                try
+                {
+                    var chatFull = await _bot.GetChatFullInfo(chat.Id);
+                    hasLinkedChannel = chatFull.LinkedChatId != null;
+                }
+                catch
+                {
+                    // Если не удалось получить полную информацию, считаем что связанного канала нет
+                    hasLinkedChannel = false;
+                }
+                
+                // Обсуждение канала если:
+                // 1. Есть связанный канал И сообщение автоматически переслано
+                // 2. ИЛИ просто есть связанный канал (пользователи пишут в обсуждении)
+                var isDiscussion = hasLinkedChannel && (message.IsAutomaticForward || true);
+                
+                if (isDiscussion)
+                {
+                    _logger.LogDebug("Обнаружено обсуждение канала: chat={ChatId}, hasLinkedChannel={HasLinked}, autoForward={AutoForward}", 
+                        chat.Id, hasLinkedChannel, message.IsAutomaticForward);
+                }
+                
+                return isDiscussion;
+            },
+            "IsChannelDiscussion",
+            message,
+            CancellationToken.None
+        );
     }
 
     // Методы BanNoCaptchaUsers, CaptchaAttempts и UnbanUserLater удалены - логика перенесена в CaptchaService
@@ -482,7 +479,12 @@ internal sealed class Worker(
                 try
                 {
                     await Task.Delay(after, cancellationToken);
-                    await _bot.DeleteMessage(message.Chat, message.MessageId, cancellationToken: cancellationToken);
+                    await _errorMiddleware.ExecuteWithMessageAsync(
+                        async () => await _bot.DeleteMessage(message.Chat, message.MessageId, cancellationToken: cancellationToken),
+                        "DeleteMessageLater",
+                        message,
+                        cancellationToken
+                    );
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {

@@ -105,7 +105,8 @@ public class Program
                     provider.GetRequiredService<IAiChecks>(),
                     provider.GetRequiredService<IChatLinkFormatter>(),
                     provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                    provider.GetRequiredService<IMessageService>()
+                    provider.GetRequiredService<IMessageService>(),
+                    provider.GetRequiredService<IErrorHandlingMiddleware>()
                 ));
                 
                 // Telegram Bot Client
@@ -126,8 +127,8 @@ public class Program
                 services.AddSingleton<ISuspiciousUsersStorage, SuspiciousUsersStorage>();
                 
                 // Новые сервисы
-                services.AddSingleton<IUpdateDispatcher, UpdateDispatcher>();
-                services.AddSingleton<IStatisticsService>(provider => new StatisticsService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<StatisticsService>>(), provider.GetRequiredService<IChatLinkFormatter>()));
+                services.AddSingleton<IUpdateDispatcher>(provider => new UpdateDispatcher(provider.GetRequiredService<IEnumerable<IUpdateHandler>>(), provider.GetRequiredService<ILogger<UpdateDispatcher>>(), provider.GetRequiredService<IErrorHandlingMiddleware>()));
+                services.AddSingleton<IStatisticsService>(provider => new StatisticsService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<StatisticsService>>(), provider.GetRequiredService<IChatLinkFormatter>(), provider.GetRequiredService<IErrorHandlingMiddleware>()));
                 services.AddSingleton<ICaptchaService>(provider => new CaptchaService(
                     provider.GetRequiredService<ITelegramBotClientWrapper>(),
                     provider.GetRequiredService<ILogger<CaptchaService>>(),
@@ -143,7 +144,7 @@ public class Program
                     provider.GetRequiredService<IMessageService>(),
                     provider.GetRequiredService<ILogger<ModerationService>>(),
                     provider.GetRequiredService<ErrorHandlingMiddleware>()));
-                services.AddSingleton<IntroFlowService>(provider => new IntroFlowService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<IntroFlowService>>(), provider.GetRequiredService<ICaptchaService>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<IAiChecks>(), provider.GetRequiredService<IStatisticsService>(), provider.GetRequiredService<GlobalStatsManager>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>()));
+                services.AddSingleton<IntroFlowService>(provider => new IntroFlowService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<IntroFlowService>>(), provider.GetRequiredService<ICaptchaService>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<IAiChecks>(), provider.GetRequiredService<IStatisticsService>(), provider.GetRequiredService<GlobalStatsManager>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<IErrorHandlingMiddleware>()));
                 services.AddSingleton<IChatLinkFormatter, ChatLinkFormatter>();
                 services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
                 
@@ -181,9 +182,10 @@ public class Program
                     provider.GetRequiredService<IUserFlowLogger>(),
                     provider.GetRequiredService<IMessageService>(),
                     provider.GetRequiredService<IChatLinkFormatter>(),
+                    provider.GetRequiredService<IErrorHandlingMiddleware>(),
                     provider.GetRequiredService<ILogger<MessageHandler>>()));
-                services.AddSingleton<IUpdateHandler>(provider => new CallbackQueryHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ICaptchaService>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<IBadMessageManager>(), provider.GetRequiredService<IStatisticsService>(), provider.GetRequiredService<IAiChecks>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<ILogger<CallbackQueryHandler>>()));
-                services.AddSingleton<IUpdateHandler>(provider => new ChatMemberHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<ILogger<ChatMemberHandler>>(), provider.GetRequiredService<IntroFlowService>(), provider.GetRequiredService<IMessageService>()));
+                services.AddSingleton<IUpdateHandler>(provider => new CallbackQueryHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ICaptchaService>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<IBadMessageManager>(), provider.GetRequiredService<IStatisticsService>(), provider.GetRequiredService<IAiChecks>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<IErrorHandlingMiddleware>(), provider.GetRequiredService<ILogger<CallbackQueryHandler>>()));
+                services.AddSingleton<IUpdateHandler>(provider => new ChatMemberHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<ILogger<ChatMemberHandler>>(), provider.GetRequiredService<IntroFlowService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<IErrorHandlingMiddleware>()));
                 
                 // Обработчики команд
                 services.AddSingleton<ICommandHandler>(provider => new StartCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<StartCommandHandler>>(), provider.GetRequiredService<IMessageService>()));
@@ -195,13 +197,13 @@ public class Program
                 if (Config.UseNewApprovalSystem)
                 {
                     services.AddSingleton<ApprovedUsersStorageV2>();
-                    services.AddSingleton<UserManagerV2>();
+                    services.AddSingleton<UserManagerV2>(provider => new UserManagerV2(provider.GetRequiredService<ILogger<UserManagerV2>>(), provider.GetRequiredService<ApprovedUsersStorageV2>(), provider.GetRequiredService<IErrorHandlingMiddleware>()));
                     services.AddSingleton<IUserManager>(provider => provider.GetRequiredService<UserManagerV2>());
                 }
                 else
                 {
                     services.AddSingleton<ApprovedUsersStorage>();
-                    services.AddSingleton<UserManager>();
+                    services.AddSingleton<UserManager>(provider => new UserManager(provider.GetRequiredService<ILogger<UserManager>>(), provider.GetRequiredService<ApprovedUsersStorage>(), provider.GetRequiredService<IErrorHandlingMiddleware>()));
                     services.AddSingleton<IUserManager>(provider => provider.GetRequiredService<UserManager>());
                 }
                 

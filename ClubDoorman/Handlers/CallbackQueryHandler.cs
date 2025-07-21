@@ -1,6 +1,8 @@
 using System.Runtime.Caching;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Infrastructure.ErrorHandling;
 using ClubDoorman.Services;
+using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -23,6 +25,7 @@ public class CallbackQueryHandler : IUpdateHandler
     private readonly IModerationService _moderationService;
     private readonly IMessageService _messageService;
     private readonly ILogger<CallbackQueryHandler> _logger;
+    private readonly IErrorHandlingMiddleware _errorMiddleware;
 
     public CallbackQueryHandler(
         ITelegramBotClientWrapper bot,
@@ -33,6 +36,7 @@ public class CallbackQueryHandler : IUpdateHandler
         IAiChecks aiChecks,
         IModerationService moderationService,
         IMessageService messageService,
+        IErrorHandlingMiddleware errorMiddleware,
         ILogger<CallbackQueryHandler> logger)
     {
         _bot = bot;
@@ -43,6 +47,7 @@ public class CallbackQueryHandler : IUpdateHandler
         _aiChecks = aiChecks;
         _moderationService = moderationService;
         _messageService = messageService;
+        _errorMiddleware = errorMiddleware;
         _logger = logger;
     }
 
@@ -54,7 +59,7 @@ public class CallbackQueryHandler : IUpdateHandler
     public async Task HandleAsync(Update update, CancellationToken cancellationToken = default)
     {
         var callbackQuery = update.CallbackQuery!;
-        var cbData = callbackQuery.Data;
+        var cbData = callbackQuery.Data!;
         
         _logger.LogDebug("📞 Получен callback: {Data} от пользователя {User} в чате {Chat}", 
             cbData, callbackQuery.From.Username ?? callbackQuery.From.FirstName, callbackQuery.Message?.Chat.Id);
@@ -72,11 +77,11 @@ public class CallbackQueryHandler : IUpdateHandler
             return;
         }
 
-        try
+        await _errorMiddleware.ExecuteWithMessageAsync(async () =>
         {
-            if (message.Chat.Id == Config.AdminChatId || message.Chat.Id == Config.LogAdminChatId)
+            if (cbData.StartsWith("admin_"))
             {
-                _logger.LogDebug("🔧 Обрабатываем админский callback: {Data}", cbData);
+                _logger.LogDebug("🎯 Обрабатываем админский callback: {Data}", cbData);
                 await HandleAdminCallback(callbackQuery, cancellationToken);
             }
             else
@@ -84,12 +89,7 @@ public class CallbackQueryHandler : IUpdateHandler
                 _logger.LogDebug("🎯 Обрабатываем капча callback: {Data}", cbData);
                 await HandleCaptchaCallback(callbackQuery, cancellationToken);
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при обработке callback {Data}", cbData);
-            await _bot.AnswerCallbackQuery(callbackQuery.Id, "Произошла ошибка", cancellationToken: cancellationToken);
-        }
+        }, "HandleCallbackQuery", callbackQuery.Message!, cancellationToken);
     }
 
     private async Task HandleCaptchaCallback(CallbackQuery callbackQuery, CancellationToken cancellationToken)
@@ -168,15 +168,15 @@ public class CallbackQueryHandler : IUpdateHandler
             // Планируем разбан через 20 минут
             _ = Task.Run(async () =>
             {
-                try
-                {
-                    await Task.Delay(TimeSpan.FromMinutes(20), cancellationToken);
-                    await _bot.UnbanChatMember(captchaInfo.ChatId, captchaInfo.User.Id, cancellationToken: cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Ошибка при разбане пользователя {UserId}", captchaInfo.User.Id);
-                }
+                await _errorMiddleware.ExecuteWithErrorHandlingAsync(
+                    async () =>
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(20), cancellationToken);
+                        await _bot.UnbanChatMember(captchaInfo.ChatId, captchaInfo.User.Id, cancellationToken: cancellationToken);
+                    },
+                    new ErrorContext("HandleFailedCaptcha", "Разбан пользователя после неправильной капчи"),
+                    cancellationToken
+                );
             }, cancellationToken);
         }
         catch (Exception ex)
@@ -224,15 +224,15 @@ public class CallbackQueryHandler : IUpdateHandler
         // Удаляем приветствие через 20 секунд
         _ = Task.Run(async () =>
         {
-            try
-            {
-                await Task.Delay(TimeSpan.FromSeconds(20), cancellationToken);
-                await _bot.DeleteMessage(chat.Id, sent.MessageId, cancellationToken: cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Не удалось удалить приветственное сообщение");
-            }
+            await _errorMiddleware.ExecuteWithErrorHandlingAsync(
+                async () =>
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(20), cancellationToken);
+                    await _bot.DeleteMessage(chat.Id, sent.MessageId, cancellationToken: cancellationToken);
+                },
+                new ErrorContext("HandleSuccessfulCaptcha", "Удаление приветственного сообщения"),
+                cancellationToken
+            );
         }, cancellationToken);
     }
 

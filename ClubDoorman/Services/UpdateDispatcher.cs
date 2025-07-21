@@ -1,4 +1,5 @@
 using ClubDoorman.Handlers;
+using ClubDoorman.Infrastructure.ErrorHandling;
 using Telegram.Bot.Types;
 
 namespace ClubDoorman.Services;
@@ -10,19 +11,23 @@ public class UpdateDispatcher : IUpdateDispatcher
 {
     private readonly IEnumerable<IUpdateHandler> _updateHandlers;
     private readonly ILogger<UpdateDispatcher> _logger;
+    private readonly IErrorHandlingMiddleware _errorMiddleware;
 
     /// <summary>
     /// Создает экземпляр диспетчера обновлений.
     /// </summary>
     /// <param name="updateHandlers">Коллекция обработчиков обновлений</param>
     /// <param name="logger">Логгер для записи событий</param>
+    /// <param name="errorMiddleware">Middleware для обработки ошибок</param>
     /// <exception cref="ArgumentNullException">Если updateHandlers или logger равны null</exception>
     public UpdateDispatcher(
         IEnumerable<IUpdateHandler> updateHandlers,
-        ILogger<UpdateDispatcher> logger)
+        ILogger<UpdateDispatcher> logger,
+        IErrorHandlingMiddleware errorMiddleware)
     {
         _updateHandlers = updateHandlers ?? throw new ArgumentNullException(nameof(updateHandlers));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _errorMiddleware = errorMiddleware ?? throw new ArgumentNullException(nameof(errorMiddleware));
     }
 
     /// <summary>
@@ -35,7 +40,7 @@ public class UpdateDispatcher : IUpdateDispatcher
     {
         if (update == null) throw new ArgumentNullException(nameof(update));
 
-        try
+        await _errorMiddleware.ExecuteWithErrorHandlingAsync(async () =>
         {
             _logger.LogDebug("🚀 Dispatcher получил update: Message={Msg}, Callback={CB}, ChatMember={CM}", 
                 update.Message != null, update.CallbackQuery != null, update.ChatMember != null);
@@ -53,16 +58,6 @@ public class UpdateDispatcher : IUpdateDispatcher
                     _logger.LogDebug("❌ Handler {Type} отклонил update", handler.GetType().Name);
                 }
             }
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Обработка обновления была отменена");
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при обработке обновления {UpdateType}", update.Type);
-            throw;
-        }
+        }, new ErrorContext("DispatchUpdate", $"Обработка обновления типа {update.Type}", ErrorSeverity.High), cancellationToken);
     }
 } 

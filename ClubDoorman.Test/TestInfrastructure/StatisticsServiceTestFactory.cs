@@ -25,7 +25,8 @@ public class StatisticsServiceTestFactory
         return new StatisticsService(
             BotMock.Object,
             LoggerMock.Object,
-            ChatLinkFormatterMock.Object
+            ChatLinkFormatterMock.Object,
+            new Mock<IErrorHandlingMiddleware>().Object
         );
     }
 

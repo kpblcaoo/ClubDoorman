@@ -38,6 +38,7 @@ public class CallbackQueryHandlerTestFactory
             AiChecksMock.Object,
             ModerationServiceMock.Object,
             MessageServiceMock.Object,
+            new Mock<IErrorHandlingMiddleware>().Object,
             LoggerMock.Object
         );
     }

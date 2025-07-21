@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 using ClubDoorman.Handlers;
+using ClubDoorman.Infrastructure.ErrorHandling;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -22,7 +23,8 @@ public class UpdateDispatcherTestFactory
     {
         return new UpdateDispatcher(
             UpdateHandlersMock.Object,
-            LoggerMock.Object
+            LoggerMock.Object,
+            new Mock<IErrorHandlingMiddleware>().Object
         );
     }
 

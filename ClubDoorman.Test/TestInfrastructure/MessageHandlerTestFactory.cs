@@ -47,6 +47,7 @@ public class MessageHandlerTestFactory
             UserFlowLoggerMock.Object,
             MessageServiceMock.Object,
             ChatLinkFormatterMock.Object,
+            new Mock<IErrorHandlingMiddleware>().Object,
             LoggerMock.Object
         );
     }
@@ -202,6 +203,7 @@ public class MessageHandlerTestFactory
             UserFlowLoggerMock.Object,
             MessageServiceMock.Object,
             ChatLinkFormatterMock.Object,
+            new Mock<IErrorHandlingMiddleware>().Object,
             LoggerMock.Object
         );
     }
