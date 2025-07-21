@@ -90,7 +90,7 @@ public class Program
                         );
                 }
             )
-            .ConfigureServices(services =>
+            .ConfigureServices((context, services) =>
             {
                 // Проверяем конфигурацию бота
                 if (string.IsNullOrEmpty(Config.BotApi))
@@ -159,7 +159,7 @@ public class Program
                 
                 // Централизованная система сообщений
                 services.AddSingleton<MessageTemplates>();
-                services.Configure<LoggingConfiguration>(options => {});
+                services.Configure<LoggingConfiguration>(context.Configuration.GetSection("LoggingConfiguration"));
                 services.AddSingleton<ILoggingConfigurationService, LoggingConfigurationService>();
                 services.AddSingleton<IMessageService>(provider => new MessageService(
                     provider.GetRequiredService<ITelegramBotClientWrapper>(),

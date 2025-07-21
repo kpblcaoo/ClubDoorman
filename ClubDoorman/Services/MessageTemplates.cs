@@ -175,20 +175,17 @@ public class MessageTemplates
         [UserNotificationType.CaptchaShown] = 
             "🧩 Пожалуйста, пройдите капчу для входа в чат",
             
-        [UserNotificationType.Welcome] = 
-            "👋 Добро пожаловать в чат!",
-            
         [UserNotificationType.Warning] = 
             "⚠️ {Reason}",
             
-                    [UserNotificationType.Success] = 
-                "✅ {Reason}",
+        [UserNotificationType.Success] = 
+            "✅ {Reason}",
 
-                        [UserNotificationType.SystemInfo] =
-                "{Reason}",
+        [UserNotificationType.SystemInfo] =
+            "{Reason}",
 
-            [UserNotificationType.Welcome] = 
-                "{Reason}",
+        [UserNotificationType.Welcome] = 
+            "{Reason}",
 
             [UserNotificationType.CaptchaWelcome] =
                 "👋 {UserName}\\n\\n<b>Внимание!</b> первые три сообщения проходят антиспам-проверку, эмодзи{MediaWarning} и реклама запрещены — они могут удаляться автоматически. Не просите писать в ЛС!{VpnAd}"
@@ -284,7 +281,7 @@ public class MessageTemplates
             }
             else if (data is AiProfileAnalysisData aiProfileData)
             {
-                result = result.Replace("{SpamProbability:F2}", (aiProfileData.SpamProbability * 100).ToString("F2"));
+                result = result.Replace("{SpamProbability}", (aiProfileData.SpamProbability * 100).ToString("F2"));
                 result = result.Replace("{AiReason}", aiProfileData.Reason);
                 result = result.Replace("{NameBio}", aiProfileData.NameBio);
                 result = result.Replace("{MessageText}", aiProfileData.MessageText);
