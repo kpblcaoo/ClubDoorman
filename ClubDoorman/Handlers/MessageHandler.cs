@@ -314,7 +314,16 @@ public class MessageHandler : IUpdateHandler
             var sum = stats.KnownBadMessage + stats.BlacklistBanned + stats.StoppedCaptcha + stats.LongNameBanned;
             if (sum == 0) continue;
             Chat? chat = null;
-            try { chat = await _errorMiddleware.ExecuteTelegramApiAsync(async () => await _bot.GetChat(chatId), "HandleStatsCommandAsync", null, null, cancellationToken); } catch { }
+            
+            // Пытаемся получить информацию о чате, но не прерываем выполнение при ошибке
+            chat = await _errorMiddleware.ExecuteTelegramApiAsync(
+                async () => await _bot.GetChat(chatId), 
+                "HandleStatsCommandAsync", 
+                null, 
+                null, 
+                cancellationToken
+            );
+            
             sb.AppendLine();
             if (chat != null)
                 sb.AppendLine($"{_chatLinkFormatter.GetChatLink(chat)} (`{chat.Id}`) [{ChatSettingsManager.GetChatType(chat.Id)}]:");
@@ -662,15 +671,12 @@ public class MessageHandler : IUpdateHandler
             
             case ModerationAction.Delete:
                 _logger.LogInformation("Удаление сообщения: {Reason}", moderationResult.Reason);
-                try
-                {
-                    await DeleteAndReportMessage(message, moderationResult.Reason, cancellationToken);
-                    _logger.LogInformation("Сообщение успешно обработано для удаления");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Ошибка при удалении сообщения: {Reason}", moderationResult.Reason);
-                }
+                await _errorMiddleware.ExecuteWithMessageAsync(
+                    async () => await DeleteAndReportMessage(message, moderationResult.Reason, cancellationToken),
+                    "HandleUserMessageAsync",
+                    message,
+                    cancellationToken
+                );
                 break;
             
             case ModerationAction.Report:

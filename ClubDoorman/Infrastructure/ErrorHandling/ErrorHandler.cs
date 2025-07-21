@@ -84,6 +84,11 @@ public class ErrorHandler : IErrorHandler
             // Выполняем операцию без retry
             return await operation();
         }
+        catch (OperationCanceledException)
+        {
+            // Пробрасываем OperationCanceledException дальше для корректного завершения приложения
+            throw;
+        }
         catch (Exception exception)
         {
             await HandleAsync(exception, context, cancellationToken);
@@ -106,6 +111,11 @@ public class ErrorHandler : IErrorHandler
 
             // Выполняем операцию без retry
             await operation();
+        }
+        catch (OperationCanceledException)
+        {
+            // Пробрасываем OperationCanceledException дальше для корректного завершения приложения
+            throw;
         }
         catch (Exception exception)
         {

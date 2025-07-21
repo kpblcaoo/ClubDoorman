@@ -193,6 +193,11 @@ internal sealed class Worker(
                 }
                 await _updateDispatcher.DispatchAsync(update, stoppingToken);
             }
+            catch (OperationCanceledException)
+            {
+                // Пробрасываем OperationCanceledException дальше для корректного завершения приложения
+                throw;
+            }
             catch (Exception e)
             {
                 _logger.LogWarning(e, "UpdateLoop");
