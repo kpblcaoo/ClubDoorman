@@ -7,21 +7,14 @@ set -e
 
 echo "🐳 Building Docker image for CI validation..."
 
-# Build Docker image
-docker build -t clubdoorman-localization-test ./ClubDoorman
-
-if [ $? -ne 0 ]; then
-    echo "❌ Docker build failed"
-    exit 1
-fi
-
-echo "✅ Docker build successful"
-
-# Run validation inside Docker container
-echo "🔍 Running localization validation inside Docker container..."
-docker run --rm -v "$(pwd):/workspace" -w /workspace clubdoorman-localization-test bash -c "
-    # Install required tools in container
+# Build Docker image and run validation in build stage
+echo "🔍 Running localization validation in Docker build stage..."
+docker run --rm -v "$(pwd):/src" -w /src mcr.microsoft.com/dotnet/sdk:9.0 bash -c "
+    # Install required tools
     apt-get update -qq && apt-get install -y -qq xmllint hexdump file
+    
+    # Build project first
+    dotnet build ClubDoorman.sln --configuration Release --no-restore
     
     # Run validation script
     ./scripts/validate-localization.sh
