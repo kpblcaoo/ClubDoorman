@@ -75,7 +75,7 @@ print_status $YELLOW "🔍 Checking file encoding..."
 
 for file in "${RESOURCE_FILES[@]}"; do
     # Check for BOM (Byte Order Mark)
-    if hexdump -C "$file" | head -1 | grep -q "ef bb bf"; then
+    if od -An -tx1 -N3 "$file" | grep -q "ef bb bf"; then
         print_status $YELLOW "⚠️  BOM detected in $file (this might cause issues)"
     fi
     

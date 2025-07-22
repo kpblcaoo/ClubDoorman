@@ -35,14 +35,20 @@ public class Program
         InitData();
         
         // Настройка обработки сигналов завершения
+        var cts = new CancellationTokenSource();
         Console.CancelKeyPress += (sender, e) =>
         {
             Console.WriteLine("\n🛑 Получен сигнал завершения (Ctrl+C). Завершаем работу...");
             e.Cancel = true; // Предотвращаем стандартное завершение
-            Environment.Exit(0); // Принудительно завершаем приложение
+            cts.Cancel(); // Сигнализируем о завершении
         };
         
         var host = Host.CreateDefaultBuilder(args)
+            .ConfigureHostConfiguration(config =>
+            {
+                // Передаем CancellationToken для graceful shutdown
+                config.AddCommandLine(args);
+            })
             .UseSerilog(
                 (_, _, config) =>
                 {
@@ -275,7 +281,7 @@ public class Program
             })
             .Build();
 
-        await host.RunAsync();
+        await host.RunAsync(cts.Token);
     }
 
     private static void InitData()

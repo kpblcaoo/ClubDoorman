@@ -107,6 +107,9 @@ public class LocalizationValidator : ILocalizationValidator
         
         result.Statistics["TotalKeys"] = keys.Count;
         
+        // Для отслеживания дубликатов
+        var seenKeys = new HashSet<string>();
+        
         // Проверяем каждый ключ во всех культурах
         foreach (var key in keys)
         {
@@ -128,10 +131,13 @@ public class LocalizationValidator : ILocalizationValidator
                     }
                     
                     // Проверяем на дубликаты
-                    var duplicateCount = keys.Count(k => k == key);
-                    if (duplicateCount > 1)
+                    if (seenKeys.Contains(key))
                     {
-                        result.AddWarning($"Duplicate key '{key}' found {duplicateCount} times in resource '{resourceName}'");
+                        result.AddWarning($"Duplicate key '{key}' found in resource '{resourceName}'");
+                    }
+                    else
+                    {
+                        seenKeys.Add(key);
                     }
                 }
             }

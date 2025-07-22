@@ -296,7 +296,7 @@ public class MessageTemplates
         }
         else if (data is SuspiciousUserNotificationData suspiciousData)
         {
-            result = result.Replace("{MimicryScore:F2}", suspiciousData.MimicryScore.ToString("F2"));
+            result = result.Replace("{MimicryScore}", suspiciousData.MimicryScore.ToString("F2"));
             result = result.Replace("{SuspiciousAt}", suspiciousData.SuspiciousAt.ToString("yyyy-MM-dd HH:mm"));
             result = result.Replace("{FirstMessages}", FormatFirstMessages(suspiciousData.FirstMessages));
             result = result.Replace("{RequiredMessages}", Config.SuspiciousToApprovedMessageCount.ToString());

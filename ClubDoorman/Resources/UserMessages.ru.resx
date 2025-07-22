@@ -28,9 +28,7 @@
     <value>Привет, {0}! Антиспам: на какой кнопке {1}?</value>
   </data>
   <data name="CaptchaAdPlaceholder" xml:space="preserve">
-    <value>
-
- 📍 Место для рекламы
+    <value>📍 Место для рекламы
 <i>...</i></value>
   </data>
   <data name="CaptchaNewParticipant" xml:space="preserve">
