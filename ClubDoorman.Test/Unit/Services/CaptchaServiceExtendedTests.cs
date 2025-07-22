@@ -142,6 +142,10 @@ public class CaptchaServiceExtendedTests
 
         // Act
         var result1 = await service.CreateCaptchaAsync(chat, user1);
+        
+        // Небольшая задержка для обеспечения разных случайных чисел
+        await Task.Delay(10);
+        
         var result2 = await service.CreateCaptchaAsync(chat, user2);
 
         // Assert
