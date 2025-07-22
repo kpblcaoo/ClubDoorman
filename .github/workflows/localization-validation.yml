@@ -5,11 +5,13 @@ on:
     paths:
       - 'ClubDoorman/Resources/**'
       - 'scripts/validate-localization.sh'
+      - 'scripts/validate-localization-ci.sh'
       - '.github/workflows/localization-validation.yml'
   pull_request:
     paths:
       - 'ClubDoorman/Resources/**'
       - 'scripts/validate-localization.sh'
+      - 'scripts/validate-localization-ci.sh'
       - '.github/workflows/localization-validation.yml'
 
 jobs:
@@ -28,8 +30,8 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
       
-    - name: Validate localization resources
-      run: ./scripts/validate-localization.sh
+    - name: Validate localization resources (with Docker build)
+      run: ./scripts/validate-localization-ci.sh
       
     - name: Build project
       run: dotnet build ClubDoorman.sln --configuration Release --no-restore
