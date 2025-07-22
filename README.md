@@ -76,6 +76,23 @@
 - https://lols.bot/ за борьбу со спамерами и API для бан-листов
 - https://github.com/umputun/tg-spam/ за некоторые идеи и три четверти датасета
 
+## Development
+
+### Git Hooks
+
+Для автоматической проверки качества кода установите Git hooks:
+
+```bash
+./scripts/setup-hooks.sh
+```
+
+Этот скрипт установит pre-commit hook, который:
+- Запускает автотесты перед каждым коммитом
+- Валидирует ресурсы локализации при изменении файлов ресурсов
+- Предотвращает коммит при ошибках
+
+Чтобы пропустить проверки временно: `git commit --no-verify`
+
 ### Translation
 If you're willing to do the heavy lifting of translating all the text of this bot to other languages, please let me know first before running headfirst and creating a PR.
 
