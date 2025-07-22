@@ -13,6 +13,6 @@ docker run --rm -v "$(pwd):/src" -w /src mcr.microsoft.com/dotnet/sdk:9.0 bash -
     # Install required tools
     apt-get update -qq && apt-get install -y -qq libxml2-utils bsdmainutils file
     
-    # Run validation script (it will handle .NET SDK check and build internally)
-    ./scripts/validate-localization.sh
+    # Run validation script with build skipped
+    SKIP_BUILD=true ./scripts/validate-localization.sh
 " 

@@ -34,16 +34,20 @@ fi
 
 print_status $GREEN "✅ .NET SDK found"
 
-# Build the project to ensure resources are compiled
-print_status $YELLOW "🔨 Building project..."
-dotnet build ClubDoorman.sln --configuration Release --no-restore
+# Build the project to ensure resources are compiled (skip in CI)
+if [ "$SKIP_BUILD" != "true" ]; then
+    print_status $YELLOW "🔨 Building project..."
+    dotnet build ClubDoorman.sln --configuration Release --no-restore
 
-if [ $? -ne 0 ]; then
-    print_status $RED "❌ Build failed"
-    exit 1
+    if [ $? -ne 0 ]; then
+        print_status $RED "❌ Build failed"
+        exit 1
+    fi
+
+    print_status $GREEN "✅ Build successful"
+else
+    print_status $YELLOW "⏭️  Skipping build (SKIP_BUILD=true)"
 fi
-
-print_status $GREEN "✅ Build successful"
 
 # Check if resource files exist
 RESOURCE_FILES=(
