@@ -213,18 +213,41 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
 
     private string FormatAiProfileAnalysis(AiProfileAnalysisData notification)
     {
-        var reasonText = notification.Reason.Length > 500 ? 
-            notification.Reason.Substring(0, 497) + "..." : 
+        var reasonText = notification.Reason.Length > 350 ? 
+            notification.Reason.Substring(0, 347) + "..." : 
             notification.Reason;
             
-        return $"🤖 <b>AI анализ профиля</b>\n\n" +
-               $"👤 Пользователь: {FormatUser(notification.User)}\n" +
-               $"💬 Чат: {FormatChat(notification.Chat)}\n" +
-               $"📊 Вероятность спама: {notification.SpamProbability * 100:F1}%\n" +
-               $"📝 Причина: {reasonText}\n" +
-               $"📋 Профиль: {notification.NameBio}\n" +
-               $"💬 Сообщение: {notification.MessageText}\n" +
-               $"🔗 Ссылка: {FormatMessageLink(notification.Chat, notification.MessageId)}";
+        var messageText = notification.MessageText.Length > 120 ? 
+            notification.MessageText.Substring(0, 117) + "..." : 
+            notification.MessageText;
+            
+        // Экранируем HTML символы
+        var escapedUser = System.Net.WebUtility.HtmlEncode(FormatUser(notification.User));
+        var escapedChat = System.Net.WebUtility.HtmlEncode(FormatChat(notification.Chat));
+        var escapedReason = System.Net.WebUtility.HtmlEncode(reasonText);
+        var escapedNameBio = System.Net.WebUtility.HtmlEncode(notification.NameBio);
+        var escapedMessageText = System.Net.WebUtility.HtmlEncode(messageText);
+            
+        var result = $"🤖 <b>AI анализ профиля</b>\n\n" +
+                     $"👤 <b>Пользователь</b>: {escapedUser}\n" +
+                     $"💬 <b>Чат</b>: {escapedChat}\n\n" +
+                     $"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+                     $"📊 <b>Вероятность спама</b>: {notification.SpamProbability * 100:F1}%\n\n" +
+                     $"🔍 <b>Причина</b>:\n<i>{escapedReason}</i>\n\n" +
+                     $"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+                     $"📋 <b>Профиль</b>:\n<code>{escapedNameBio}</code>\n\n" +
+                     $"💬 <b>Сообщение</b>:\n<code>{escapedMessageText}</code>\n\n";
+                     
+        if (!string.IsNullOrEmpty(notification.AutomaticAction))
+        {
+            // Автоматическое действие не экранируем - мы его формируем сами и знаем что там безопасно
+            result += $"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+                      $"⚡ <b>Автоматическое действие</b>:\n<b>{notification.AutomaticAction}</b>\n\n";
+        }
+        
+        result += $"🔗 <b>Ссылка</b>: {FormatMessageLink(notification.Chat, notification.MessageId)}";
+        
+        return result;
     }
 
     private async Task SendAiProfileAnalysisWithPhoto(AiProfileAnalysisData data, CancellationToken cancellationToken)
