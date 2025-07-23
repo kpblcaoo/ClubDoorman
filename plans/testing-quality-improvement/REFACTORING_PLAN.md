@@ -126,21 +126,62 @@ var service = factory.CreateModerationService();
 
 ### Phase 4: Декомпозиция больших классов (7-10 дней)
 
-#### 🔴 4.1 Разбить MessageHandler
+#### 🔴 4.1 Анализ и вынос сложных методов из MessageHandler
 ```csharp
-// Вынести из MessageHandler.cs:
-- HandleCommandAsync → ICommandProcessor
-- HandleNewMembersAsync → INewMemberProcessor  
-- HandleUserMessageAsync → IUserMessageProcessor
-- HandleChannelMessageAsync → IChannelMessageProcessor
+// Критерии выноса (из анализа):
+// ✅ Метод > 20 строк и обрабатывает логику
+// ✅ Метод вызывает сторонние сервисы  
+// ✅ Метод зависит от многих параметров
+// ✅ Метод вызывает async/await/AI
+// ❌ Метод просто проверяет флаг/пересылает
+
+// Кандидаты для анализа:
+- HandleCommandAsync → ICommandProcessor (если >20 строк + AI)
+- HandleNewMembersAsync → INewMemberProcessor (если сложная логика)
+- HandleUserMessageAsync → IUserMessageProcessor (если >20 строк)
+- HandleChannelMessageAsync → IChannelMessageProcessor (если >20 строк)
+
+// Промежуточный вариант для простых методов:
+private async Task HandleSimpleCommandAsync(Message message)
+{
+    var decision = _commandEvaluator.Evaluate(message.Text);
+    await _telegramClient.SendText(message.Chat.Id, decision.Reply);
+}
 ```
 
-#### 🔴 4.2 Разбить CallbackQueryHandler
+#### 🔴 4.2 Анализ и вынос сложных методов из CallbackQueryHandler
 ```csharp
-// Вынести из CallbackQueryHandler.cs:
-- HandleCaptchaCallback → ICaptchaCallbackProcessor
-- HandleAdminCallback → IAdminCallbackProcessor
-- HandleSuspiciousUserCallback → ISuspiciousUserCallbackProcessor
+// Кандидаты для анализа:
+- HandleCaptchaCallback → ICaptchaCallbackProcessor (если >20 строк)
+- HandleAdminCallback → IAdminCallbackProcessor (если >20 строк)  
+- HandleSuspiciousUserCallback → ISuspiciousUserCallbackProcessor (если >20 строк)
+
+// Промежуточный вариант:
+private async Task HandleSimpleCallbackAsync(CallbackQuery callback)
+{
+    var action = _callbackEvaluator.Evaluate(callback.Data);
+    await _telegramClient.AnswerCallbackQuery(callback.Id, action.Response);
+}
+```
+
+#### 🟡 4.3 Вынос чистой бизнес-логики (альтернатива полному выносу)
+```csharp
+// Вместо полного выноса сервиса - вынести только логику:
+public class CommandEvaluator
+{
+    public CommandDecision Evaluate(string commandText, User user, Chat chat)
+    {
+        // Чистая бизнес-логика без Telegram зависимостей
+        return new CommandDecision { Reply = "...", Action = CommandAction.Allow };
+    }
+}
+
+// В MessageHandler:
+private async Task HandleCommandAsync(Message message)
+{
+    var decision = _commandEvaluator.Evaluate(message.Text, message.From, message.Chat);
+    await _telegramClient.SendText(message.Chat.Id, decision.Reply);
+}
 ```
 
 ---
@@ -163,8 +204,10 @@ var service = factory.CreateModerationService();
 - [ ] Убрать прямые `new Mock<T>()` из тестов
 
 ### Phase 4: Декомпозиция
-- [ ] Разбить MessageHandler на 4-5 сервисов
-- [ ] Разбить CallbackQueryHandler на 3-4 сервиса
+- [ ] Проанализировать методы по критериям сложности
+- [ ] Вынести сложные методы (>20 строк + внешние сервисы) в отдельные сервисы
+- [ ] Для средних методов использовать промежуточные варианты (вынос логики)
+- [ ] Оставить простые методы без изменений
 - [ ] Создать тесты для каждого нового сервиса
 
 ---
@@ -187,8 +230,11 @@ var service = factory.CreateModerationService();
 - [x] Создан детальный план рефакторинга
 - [x] Определены приоритеты и этапы
 - [x] Подготовлена структура для отслеживания прогресса
+- [x] Создана ветка `refactor/testing-quality-improvement`
+- [x] Добавлены критерии анализа методов для выноса
+- [x] Скорректирован подход к декомпозиции с учетом сложности
 
 ### Следующие шаги:
-- [ ] Создать ветку `refactor/testing-quality-improvement`
 - [ ] Начать Phase 1: Аудит интерфейсов
-- [ ] Составить детальный анализ каждого интерфейса 
+- [ ] Проанализировать каждый интерфейс по критериям необходимости
+- [ ] Начать Phase 2: Критические исправления (IAppConfig) 
