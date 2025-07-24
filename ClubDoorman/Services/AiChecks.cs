@@ -57,9 +57,6 @@ public class AiChecks : IAiChecks
             
         var text = messageText.Trim().ToLowerInvariant();
         
-        // Убираем знаки препинания для более точного сравнения
-        text = text.TrimEnd('.', '!', '?', ',');
-        
         var boringGreetings = new[]
         {
             "привет", "hi", "hello", "здравствуйте", "добрый день", "добрый вечер",
@@ -71,8 +68,13 @@ public class AiChecks : IAiChecks
             "всех приветствую", "всем хай", "всем здравствуйте"
         };
         
-        // Точное совпадение с одним из банальных приветствий
-        return boringGreetings.Contains(text);
+        // Сначала проверяем точное совпадение (включая пунктуацию)
+        if (boringGreetings.Contains(text))
+            return true;
+        
+        // Потом убираем знаки препинания и проверяем снова
+        var textWithoutPunctuation = text.TrimEnd('.', '!', '?', ',');
+        return boringGreetings.Contains(textWithoutPunctuation);
     }
 
     /// <summary>
