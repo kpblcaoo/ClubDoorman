@@ -7,7 +7,7 @@ namespace ClubDoorman.Services;
 /// <summary>
 /// Реализация форматирования ссылок на Telegram чаты в Markdown
 /// </summary>
-public class ChatLinkFormatter : IChatLinkFormatter
+public class ChatLinkFormatter
 {
     private const string SupergroupPrefix = "-100";
     private const string GroupPrefix = "-";

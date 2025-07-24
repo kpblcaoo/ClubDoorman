@@ -8,7 +8,7 @@ namespace ClubDoorman.Services;
 /// Менеджер для хранения и проверки известных плохих сообщений (спам/оскорбления и т.д.).
 /// Хранит хэши сообщений, поддерживает потокобезопасность и асинхронную запись.
 /// </summary>
-public sealed class BadMessageManager : IBadMessageManager
+public sealed class BadMessageManager
 {
     private const string Path = "data/bad-messages.txt";
     private readonly SemaphoreSlim _fileLock = new(1);

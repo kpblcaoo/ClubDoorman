@@ -17,7 +17,7 @@ public class StatisticsServiceTestFactory
 {
     public Mock<ITelegramBotClientWrapper> BotMock { get; } = new();
     public Mock<ILogger<StatisticsService>> LoggerMock { get; } = new();
-    public Mock<IChatLinkFormatter> ChatLinkFormatterMock { get; } = new();
+    public Mock<ChatLinkFormatter> ChatLinkFormatterMock { get; } = new();
 
     public StatisticsService CreateStatisticsService()
     {
@@ -42,7 +42,7 @@ public class StatisticsServiceTestFactory
         return this;
     }
 
-    public StatisticsServiceTestFactory WithChatLinkFormatterSetup(Action<Mock<IChatLinkFormatter>> setup)
+    public StatisticsServiceTestFactory WithChatLinkFormatterSetup(Action<Mock<ChatLinkFormatter>> setup)
     {
         setup(ChatLinkFormatterMock);
         return this;
@@ -61,7 +61,7 @@ public class StatisticsServiceTestFactory
         return new ModerationService(
             new Mock<ISpamHamClassifier>().Object,
             new Mock<IMimicryClassifier>().Object,
-            new Mock<IBadMessageManager>().Object,
+            new Mock<BadMessageManager>().Object,
             new Mock<IUserManager>().Object,
             new Mock<IAiChecks>().Object,
             new Mock<ISuspiciousUsersStorage>().Object,

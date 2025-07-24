@@ -9,7 +9,7 @@ namespace ClubDoorman.Test.Unit.Infrastructure;
 [Category("infrastructure")]
 public class StatisticsServiceGetChatLinkTests
 {
-    private IChatLinkFormatter _chatLinkFormatter;
+    private ChatLinkFormatter _chatLinkFormatter;
 
     [OneTimeSetUp]
     public void SetUp()

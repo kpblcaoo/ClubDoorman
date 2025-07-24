@@ -19,7 +19,7 @@ public class CallbackQueryHandlerTestFactory
     public Mock<ITelegramBotClientWrapper> BotMock { get; } = new();
     public Mock<ICaptchaService> CaptchaServiceMock { get; } = new();
     public Mock<IUserManager> UserManagerMock { get; } = new();
-    public Mock<IBadMessageManager> BadMessageManagerMock { get; } = new();
+    public Mock<BadMessageManager> BadMessageManagerMock { get; } = new();
     public Mock<IStatisticsService> StatisticsServiceMock { get; } = new();
     public Mock<IAiChecks> AiChecksMock { get; } = new();
     public Mock<IModerationService> ModerationServiceMock { get; } = new();
@@ -61,7 +61,7 @@ public class CallbackQueryHandlerTestFactory
         return this;
     }
 
-    public CallbackQueryHandlerTestFactory WithBadMessageManagerSetup(Action<Mock<IBadMessageManager>> setup)
+    public CallbackQueryHandlerTestFactory WithBadMessageManagerSetup(Action<Mock<BadMessageManager>> setup)
     {
         setup(BadMessageManagerMock);
         return this;
@@ -110,7 +110,7 @@ public class CallbackQueryHandlerTestFactory
         return new ModerationService(
             new Mock<ISpamHamClassifier>().Object,
             new Mock<IMimicryClassifier>().Object,
-            new Mock<IBadMessageManager>().Object,
+            new Mock<BadMessageManager>().Object,
             new Mock<IUserManager>().Object,
             new Mock<IAiChecks>().Object,
             new Mock<ISuspiciousUsersStorage>().Object,

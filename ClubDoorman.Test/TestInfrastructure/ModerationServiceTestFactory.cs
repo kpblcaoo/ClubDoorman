@@ -17,7 +17,7 @@ public class ModerationServiceTestFactory
 {
     public Mock<ISpamHamClassifier> ClassifierMock { get; } = new();
     public Mock<IMimicryClassifier> MimicryClassifierMock { get; } = new();
-    public Mock<IBadMessageManager> BadMessageManagerMock { get; } = new();
+    public Mock<BadMessageManager> BadMessageManagerMock { get; } = new();
     public Mock<IUserManager> UserManagerMock { get; } = new();
     public Mock<IAiChecks> AiChecksMock { get; } = new();
     public Mock<ISuspiciousUsersStorage> SuspiciousUsersStorageMock { get; } = new();
@@ -54,7 +54,7 @@ public class ModerationServiceTestFactory
         return this;
     }
 
-    public ModerationServiceTestFactory WithBadMessageManagerSetup(Action<Mock<IBadMessageManager>> setup)
+    public ModerationServiceTestFactory WithBadMessageManagerSetup(Action<Mock<BadMessageManager>> setup)
     {
         setup(BadMessageManagerMock);
         return this;

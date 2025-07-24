@@ -25,7 +25,7 @@ public class MessageHandler : IUpdateHandler
     private readonly ICaptchaService _captchaService;
     private readonly IUserManager _userManager;
     private readonly ISpamHamClassifier _classifier;
-    private readonly IBadMessageManager _badMessageManager;
+    private readonly BadMessageManager _badMessageManager;
     private readonly IAiChecks _aiChecks;
     private readonly GlobalStatsManager _globalStatsManager;
     private readonly IStatisticsService _statisticsService;
@@ -33,7 +33,7 @@ public class MessageHandler : IUpdateHandler
     private readonly IServiceProvider _serviceProvider;
     private readonly IUserFlowLogger _userFlowLogger;
     private readonly IMessageService _messageService;
-    private readonly IChatLinkFormatter _chatLinkFormatter;
+    private readonly ChatLinkFormatter _chatLinkFormatter;
     private readonly IBotPermissionsService _botPermissionsService;
 
     // Флаги присоединившихся пользователей (временные)
@@ -64,14 +64,14 @@ public class MessageHandler : IUpdateHandler
         ICaptchaService captchaService,
         IUserManager userManager,
         ISpamHamClassifier classifier,
-        IBadMessageManager badMessageManager,
+        BadMessageManager badMessageManager,
         IAiChecks aiChecks,
         GlobalStatsManager globalStatsManager,
         IStatisticsService statisticsService,
         IServiceProvider serviceProvider,
         IUserFlowLogger userFlowLogger,
         IMessageService messageService,
-        IChatLinkFormatter chatLinkFormatter,
+        ChatLinkFormatter chatLinkFormatter,
         IBotPermissionsService botPermissionsService,
         ILogger<MessageHandler> logger)
     {

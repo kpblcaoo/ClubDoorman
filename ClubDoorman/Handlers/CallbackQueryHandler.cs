@@ -17,7 +17,7 @@ public class CallbackQueryHandler : IUpdateHandler
     private readonly ITelegramBotClientWrapper _bot;
     private readonly ICaptchaService _captchaService;
     private readonly IUserManager _userManager;
-    private readonly IBadMessageManager _badMessageManager;
+    private readonly BadMessageManager _badMessageManager;
     private readonly IStatisticsService _statisticsService;
     private readonly IAiChecks _aiChecks;
     private readonly IModerationService _moderationService;
@@ -28,7 +28,7 @@ public class CallbackQueryHandler : IUpdateHandler
         ITelegramBotClientWrapper bot,
         ICaptchaService captchaService,
         IUserManager userManager,
-        IBadMessageManager badMessageManager,
+        BadMessageManager badMessageManager,
         IStatisticsService statisticsService,
         IAiChecks aiChecks,
         IModerationService moderationService,

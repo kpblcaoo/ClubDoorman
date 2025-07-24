@@ -61,7 +61,7 @@ public class CaptchaServiceTestFactory
         return new ModerationService(
             new Mock<ISpamHamClassifier>().Object,
             new Mock<IMimicryClassifier>().Object,
-            new Mock<IBadMessageManager>().Object,
+            new Mock<BadMessageManager>().Object,
             new Mock<IUserManager>().Object,
             new Mock<IAiChecks>().Object,
             new Mock<ISuspiciousUsersStorage>().Object,

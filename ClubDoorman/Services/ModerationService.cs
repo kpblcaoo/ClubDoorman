@@ -15,7 +15,7 @@ public class ModerationService : IModerationService
 {
     private readonly ISpamHamClassifier _classifier;
     private readonly IMimicryClassifier _mimicryClassifier;
-    private readonly IBadMessageManager _badMessageManager;
+    private readonly BadMessageManager _badMessageManager;
     private readonly IUserManager _userManager;
     private readonly IAiChecks _aiChecks;
     private readonly ISuspiciousUsersStorage _suspiciousUsersStorage;
@@ -39,7 +39,7 @@ public class ModerationService : IModerationService
     public ModerationService(
         ISpamHamClassifier classifier,
         IMimicryClassifier mimicryClassifier,
-        IBadMessageManager badMessageManager,
+        BadMessageManager badMessageManager,
         IUserManager userManager,
         IAiChecks aiChecks,
         ISuspiciousUsersStorage suspiciousUsersStorage,

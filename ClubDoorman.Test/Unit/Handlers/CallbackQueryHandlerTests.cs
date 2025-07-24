@@ -20,7 +20,7 @@ public class CallbackQueryHandlerTests
     private Mock<ITelegramBotClientWrapper> _mockBot = null!;
     private Mock<ICaptchaService> _mockCaptchaService = null!;
     private Mock<IUserManager> _mockUserManager = null!;
-    private Mock<IBadMessageManager> _mockBadMessageManager = null!;
+    private Mock<BadMessageManager> _mockBadMessageManager = null!;
     private Mock<IStatisticsService> _mockStatisticsService = null!;
     private Mock<IAiChecks> _mockAiChecks = null!;
     private Mock<IModerationService> _mockModerationService = null!;
@@ -33,7 +33,7 @@ public class CallbackQueryHandlerTests
         _mockBot = new Mock<ITelegramBotClientWrapper>();
         _mockCaptchaService = new Mock<ICaptchaService>();
         _mockUserManager = new Mock<IUserManager>();
-        _mockBadMessageManager = new Mock<IBadMessageManager>();
+        _mockBadMessageManager = new Mock<BadMessageManager>();
         _mockStatisticsService = new Mock<IStatisticsService>();
         _mockAiChecks = new Mock<IAiChecks>();
         _mockModerationService = new Mock<IModerationService>();

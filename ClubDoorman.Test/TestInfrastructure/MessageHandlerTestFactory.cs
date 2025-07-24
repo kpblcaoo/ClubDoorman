@@ -21,13 +21,13 @@ public class MessageHandlerTestFactory
     public Mock<ICaptchaService> CaptchaServiceMock { get; } = new();
     public Mock<IUserManager> UserManagerMock { get; } = new();
     public Mock<ISpamHamClassifier> ClassifierMock { get; } = new();
-    public Mock<IBadMessageManager> BadMessageManagerMock { get; } = new();
+    public Mock<BadMessageManager> BadMessageManagerMock { get; } = new();
     public Mock<IAiChecks> AiChecksMock { get; } = new();
     public Mock<IStatisticsService> StatisticsServiceMock { get; } = new();
     public Mock<IServiceProvider> ServiceProviderMock { get; } = new();
     public Mock<IUserFlowLogger> UserFlowLoggerMock { get; } = new();
     public Mock<IMessageService> MessageServiceMock { get; } = new();
-    public Mock<IChatLinkFormatter> ChatLinkFormatterMock { get; } = new();
+    public Mock<ChatLinkFormatter> ChatLinkFormatterMock { get; } = new();
     public Mock<IBotPermissionsService> BotPermissionsServiceMock { get; } = new();
     public Mock<ILogger<MessageHandler>> LoggerMock { get; } = new();
 
@@ -84,7 +84,7 @@ public class MessageHandlerTestFactory
         return this;
     }
 
-    public MessageHandlerTestFactory WithBadMessageManagerSetup(Action<Mock<IBadMessageManager>> setup)
+    public MessageHandlerTestFactory WithBadMessageManagerSetup(Action<Mock<BadMessageManager>> setup)
     {
         setup(BadMessageManagerMock);
         return this;
@@ -120,7 +120,7 @@ public class MessageHandlerTestFactory
         return this;
     }
 
-    public MessageHandlerTestFactory WithChatLinkFormatterSetup(Action<Mock<IChatLinkFormatter>> setup)
+    public MessageHandlerTestFactory WithChatLinkFormatterSetup(Action<Mock<ChatLinkFormatter>> setup)
     {
         setup(ChatLinkFormatterMock);
         return this;
@@ -145,7 +145,7 @@ public class MessageHandlerTestFactory
         return new ModerationService(
             new Mock<ISpamHamClassifier>().Object,
             new Mock<IMimicryClassifier>().Object,
-            new Mock<IBadMessageManager>().Object,
+            new Mock<BadMessageManager>().Object,
             new Mock<IUserManager>().Object,
             new Mock<IAiChecks>().Object,
             new Mock<ISuspiciousUsersStorage>().Object,

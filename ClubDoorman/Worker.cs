@@ -22,9 +22,9 @@ internal sealed class Worker(
     IStatisticsService statisticsService,
     ISpamHamClassifier classifier,
     IUserManager userManager,
-    IBadMessageManager badMessageManager,
+            BadMessageManager badMessageManager,
     IAiChecks aiChecks,
-    IChatLinkFormatter chatLinkFormatter,
+            ChatLinkFormatter chatLinkFormatter,
     ITelegramBotClientWrapper bot,
     IMessageService messageService
 ) : BackgroundService
@@ -41,9 +41,9 @@ internal sealed class Worker(
     private readonly IStatisticsService _statisticsService = statisticsService;
     private readonly ISpamHamClassifier _classifier = classifier;
     private readonly IUserManager _userManager = userManager;
-    private readonly IBadMessageManager _badMessageManager = badMessageManager;
+    private readonly BadMessageManager _badMessageManager = badMessageManager;
     private readonly IAiChecks _aiChecks = aiChecks;
-    private readonly IChatLinkFormatter _chatLinkFormatter = chatLinkFormatter;
+    private readonly ChatLinkFormatter _chatLinkFormatter = chatLinkFormatter;
     private readonly IMessageService _messageService = messageService;
     private readonly GlobalStatsManager _globalStatsManager = new();
     private User _me = default!;
