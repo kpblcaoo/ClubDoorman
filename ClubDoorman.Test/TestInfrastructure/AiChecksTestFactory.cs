@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 using Telegram.Bot;
+using ClubDoorman.Test.TestInfrastructure;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -17,12 +18,14 @@ public class AiChecksTestFactory
 {
     public Mock<ITelegramBotClientWrapper> BotMock { get; } = new();
     public Mock<ILogger<AiChecks>> LoggerMock { get; } = new();
+    public Mock<IAppConfig> ConfigMock { get; } = AppConfigTestFactory.CreateMock();
 
     public AiChecks CreateAiChecks()
     {
         return new AiChecks(
             BotMock.Object,
-            LoggerMock.Object
+            LoggerMock.Object,
+            ConfigMock.Object
         );
     }
 
@@ -37,6 +40,12 @@ public class AiChecksTestFactory
     public AiChecksTestFactory WithLoggerSetup(Action<Mock<ILogger<AiChecks>>> setup)
     {
         setup(LoggerMock);
+        return this;
+    }
+
+    public AiChecksTestFactory WithConfigSetup(Action<Mock<IAppConfig>> setup)
+    {
+        setup(ConfigMock);
         return this;
     }
 

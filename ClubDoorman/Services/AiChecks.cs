@@ -16,6 +16,7 @@ public class AiChecks : IAiChecks
 {
     private readonly ITelegramBotClientWrapper _bot;
     private readonly ILogger<AiChecks> _logger;
+    private readonly IAppConfig _config;
     private readonly OpenAiClient? _api;
     private readonly JsonSerializerOptions _jsonOptions = new() { Converters = { new JsonStringEnumConverter() } };
     
@@ -27,11 +28,12 @@ public class AiChecks : IAiChecks
     
     const string Model = "google/gemini-2.5-flash";
     
-    public AiChecks(ITelegramBotClientWrapper bot, ILogger<AiChecks> logger)
+    public AiChecks(ITelegramBotClientWrapper bot, ILogger<AiChecks> logger, IAppConfig config)
     {
         _bot = bot;
         _logger = logger;
-        _api = Config.OpenRouterApi == null ? null : CustomProviders.OpenRouter(Config.OpenRouterApi);
+        _config = config;
+        _api = _config.OpenRouterApi == null ? null : CustomProviders.OpenRouter(_config.OpenRouterApi);
         
         if (_api == null)
         {
@@ -57,10 +59,17 @@ public class AiChecks : IAiChecks
     }
 
     /// <summary>
-    /// Получает вероятность того, что профиль создан для привлечения внимания/спама
+    /// Получает вероятность того, что профиль создан для привлечения внимания/спама.
+    /// Требует, чтобы <paramref name="user"/> не был null — это проверяется выше по стеку.
     /// </summary>
+    /// <param name="user">Пользователь для анализа. Не может быть null.</param>
+    /// <param name="ifChanged">Опциональный callback для уведомления об изменениях.</param>
+    /// <returns>Результат анализа профиля пользователя.</returns>
+    /// <exception cref="ArgumentNullException">Выбрасывается, если <paramref name="user"/> равен null.</exception>
     public async ValueTask<SpamPhotoBio> GetAttentionBaitProbability(Telegram.Bot.Types.User user, Func<string, Task>? ifChanged = default)
     {
+        if (user == null)
+            throw new ArgumentNullException(nameof(user), "user должен быть проверен ранее");
         if (_api == null)
         {
             _logger.LogDebug("OpenAI API не настроен, пропускаем AI проверку профиля");
@@ -133,7 +142,7 @@ public class AiChecks : IAiChecks
                     _logger.LogDebug("🔍 PHOTO MESSAGE: Content создан, тип={Type}", photoMessage.Content.GetType().Name);
                     sb.Append($"\nФото: прикреплено");
                     
-                    _logger.LogDebug("🤖 AI анализ профиля: фото загружено для пользователя {UserId}, размер: {Size} байт", 
+                    _logger.LogDebug("�� AI анализ профиля: фото загружено для пользователя {UserId}, размер: {Size} байт", 
                         user.Id, photoBytes.Length);
                     _logger.LogDebug("🔍 ФОТО: {Size} байт, fileId={FileId}", photoBytes.Length, userChat.Photo.BigFileId);
                 }

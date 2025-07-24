@@ -106,6 +106,9 @@ public class Program
                     provider.GetRequiredService<IMessageService>()
                 ));
                 
+                // Инжектируемая конфигурация
+                services.AddSingleton<IAppConfig, AppConfig>();
+                
                 // Telegram Bot Client
                 services.AddSingleton<TelegramBotClient>(provider => new TelegramBotClient(Config.BotApi));
                 services.AddSingleton<ITelegramBotClient>(provider => provider.GetRequiredService<TelegramBotClient>());
@@ -115,7 +118,7 @@ public class Program
                 services.AddSingleton<ISpamHamClassifier, SpamHamClassifier>();
                 services.AddSingleton<IMimicryClassifier, MimicryClassifier>();
                 services.AddSingleton<IBadMessageManager, BadMessageManager>();
-                services.AddSingleton<IAiChecks>(provider => new AiChecks(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<AiChecks>>()));
+                services.AddSingleton<IAiChecks>(provider => new AiChecks(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<AiChecks>>(), provider.GetRequiredService<IAppConfig>()));
                 services.AddSingleton<GlobalStatsManager>();
                 services.AddSingleton<ISuspiciousUsersStorage, SuspiciousUsersStorage>();
                 
@@ -171,8 +174,8 @@ public class Program
                 // Обработчики команд
                 services.AddSingleton<ICommandHandler>(provider => new StartCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<StartCommandHandler>>(), provider.GetRequiredService<IMessageService>()));
                 services.AddSingleton<StartCommandHandler>(provider => new StartCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<StartCommandHandler>>(), provider.GetRequiredService<IMessageService>()));
-                services.AddSingleton<ICommandHandler>(provider => new SuspiciousCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<ILogger<SuspiciousCommandHandler>>()));
-                services.AddSingleton<SuspiciousCommandHandler>(provider => new SuspiciousCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<ILogger<SuspiciousCommandHandler>>()));
+                services.AddSingleton<ICommandHandler>(provider => new SuspiciousCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<ILogger<SuspiciousCommandHandler>>(), provider.GetRequiredService<IAppConfig>()));
+                services.AddSingleton<SuspiciousCommandHandler>(provider => new SuspiciousCommandHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<ILogger<SuspiciousCommandHandler>>(), provider.GetRequiredService<IAppConfig>()));
                 
                 // Регистрация системы одобрения
                 services.AddSingleton<ApprovedUsersStorage>();

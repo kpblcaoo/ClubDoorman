@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using ClubDoorman.Test.TestInfrastructure;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
@@ -64,7 +65,8 @@ public class MessageHandlerExtendedTests
                 new TelegramBotClientWrapper(new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz")),
                 _factory.ModerationServiceMock.Object,
                 new Mock<IMessageService>().Object,
-                NullLogger<SuspiciousCommandHandler>.Instance
+                NullLogger<SuspiciousCommandHandler>.Instance,
+                AppConfigTestFactory.CreateMock().Object
             );
             
             // Возвращаем реальные экземпляры для командных обработчиков через GetService

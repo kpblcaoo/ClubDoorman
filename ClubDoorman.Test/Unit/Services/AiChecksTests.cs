@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using ClubDoorman.Services;
 using ClubDoorman.TestInfrastructure;
+using ClubDoorman.Test.TestInfrastructure;
 using Telegram.Bot.Types;
 using Moq;
 using Microsoft.Extensions.Logging;
@@ -24,7 +25,7 @@ public class AiChecksTests
         _mockLogger = new Mock<ILogger<AiChecks>>();
         
         // Создаем реальный AiChecks с моками
-        _aiChecks = new AiChecks(_mockBot.Object, _mockLogger.Object);
+        _aiChecks = new AiChecks(_mockBot.Object, _mockLogger.Object, AppConfigTestFactory.CreateMock().Object);
     }
 
     [Test]
@@ -119,19 +120,11 @@ public class AiChecksTests
     }
 
     [Test]
-    public async Task GetAttentionBaitProbability_WithNullUser_ReturnsDefaultResult()
+    public async Task GetAttentionBaitProbability_WithNullUser_ThrowsArgumentNullException()
     {
-        // Arrange
-        User? user = null;
-
-        // Act
-        var result = await _aiChecks.GetAttentionBaitProbability(user!);
-
-        // Assert
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.SpamProbability.Probability, Is.EqualTo(0.0));
-        Assert.That(result.Photo, Is.Empty);
-        Assert.That(result.NameBio, Is.Empty);
+        // Act & Assert
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await _aiChecks.GetAttentionBaitProbability(null!));
     }
 
     [Test]

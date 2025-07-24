@@ -74,19 +74,11 @@ public class AiChecksExtendedTests
     #region GetAttentionBaitProbability Tests
 
     [Test]
-    public async Task GetAttentionBaitProbability_NullUser_ReturnsDefaultResult()
+    public void GetAttentionBaitProbability_NullUser_ThrowsArgumentNullException()
     {
-        // Arrange
-        var service = _factory.CreateAiChecks();
-
-        // Act
-        var result = await service.GetAttentionBaitProbability(null!);
-
-        // Assert
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.SpamProbability, Is.Not.Null);
-        Assert.That(result.Photo, Is.Not.Null);
-        Assert.That(result.NameBio, Is.Not.Null);
+        // Act & Assert
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await _factory.CreateAiChecks().GetAttentionBaitProbability(null!));
     }
 
     [Test]
