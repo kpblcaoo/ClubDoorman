@@ -138,8 +138,8 @@ public class Program
                     provider.GetRequiredService<ILogger<ModerationService>>()));
                 services.AddSingleton<IntroFlowService>(provider => new IntroFlowService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<IntroFlowService>>(), provider.GetRequiredService<ICaptchaService>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<IAiChecks>(), provider.GetRequiredService<IStatisticsService>(), provider.GetRequiredService<GlobalStatsManager>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>()));
                 services.AddSingleton<ChatLinkFormatter>();
-                services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
-                services.AddSingleton<IBotPermissionsService, BotPermissionsService>();
+                services.AddSingleton<UserFlowLogger>();
+                services.AddSingleton<BotPermissionsService>();
                 
                 // Централизованная система сообщений
                 services.AddSingleton<MessageTemplates>();
@@ -160,10 +160,10 @@ public class Program
                     provider.GetRequiredService<GlobalStatsManager>(),
                     provider.GetRequiredService<IStatisticsService>(),
                     provider.GetRequiredService<IServiceProvider>(),
-                    provider.GetRequiredService<IUserFlowLogger>(),
+                    provider.GetRequiredService<UserFlowLogger>(),
                     provider.GetRequiredService<IMessageService>(),
                     provider.GetRequiredService<ChatLinkFormatter>(),
-                    provider.GetRequiredService<IBotPermissionsService>(),
+                    provider.GetRequiredService<BotPermissionsService>(),
                     provider.GetRequiredService<ILogger<MessageHandler>>()));
                 services.AddSingleton<IUpdateHandler>(provider => new CallbackQueryHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ICaptchaService>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<BadMessageManager>(), provider.GetRequiredService<IStatisticsService>(), provider.GetRequiredService<IAiChecks>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<ILogger<CallbackQueryHandler>>()));
                 services.AddSingleton<IUpdateHandler>(provider => new ChatMemberHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<ILogger<ChatMemberHandler>>(), provider.GetRequiredService<IntroFlowService>(), provider.GetRequiredService<IMessageService>()));

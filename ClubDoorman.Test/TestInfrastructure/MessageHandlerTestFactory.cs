@@ -25,10 +25,10 @@ public class MessageHandlerTestFactory
     public Mock<IAiChecks> AiChecksMock { get; } = new();
     public Mock<IStatisticsService> StatisticsServiceMock { get; } = new();
     public Mock<IServiceProvider> ServiceProviderMock { get; } = new();
-    public Mock<IUserFlowLogger> UserFlowLoggerMock { get; } = new();
+    public Mock<UserFlowLogger> UserFlowLoggerMock { get; } = new();
     public Mock<IMessageService> MessageServiceMock { get; } = new();
     public Mock<ChatLinkFormatter> ChatLinkFormatterMock { get; } = new();
-    public Mock<IBotPermissionsService> BotPermissionsServiceMock { get; } = new();
+    public Mock<BotPermissionsService> BotPermissionsServiceMock { get; } = new();
     public Mock<ILogger<MessageHandler>> LoggerMock { get; } = new();
 
     public MessageHandler CreateMessageHandler()
@@ -108,7 +108,7 @@ public class MessageHandlerTestFactory
         return this;
     }
 
-    public MessageHandlerTestFactory WithUserFlowLoggerSetup(Action<Mock<IUserFlowLogger>> setup)
+    public MessageHandlerTestFactory WithUserFlowLoggerSetup(Action<Mock<UserFlowLogger>> setup)
     {
         setup(UserFlowLoggerMock);
         return this;

@@ -9,7 +9,7 @@ namespace ClubDoorman.Services;
 /// <summary>
 /// Реализация сервиса для проверки прав бота в чатах
 /// </summary>
-public class BotPermissionsService : IBotPermissionsService
+public class BotPermissionsService
 {
     private readonly ITelegramBotClientWrapper _bot;
     private readonly ILogger<BotPermissionsService> _logger;

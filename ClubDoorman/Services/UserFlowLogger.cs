@@ -6,7 +6,7 @@ namespace ClubDoorman.Services;
 /// <summary>
 /// Централизованный логгер для отслеживания пользовательского флоу
 /// </summary>
-public class UserFlowLogger : IUserFlowLogger
+public class UserFlowLogger
 {
     private readonly ILogger<UserFlowLogger> _logger;
 

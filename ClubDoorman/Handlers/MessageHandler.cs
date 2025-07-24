@@ -31,10 +31,10 @@ public class MessageHandler : IUpdateHandler
     private readonly IStatisticsService _statisticsService;
     private readonly ILogger<MessageHandler> _logger;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IUserFlowLogger _userFlowLogger;
+    private readonly UserFlowLogger _userFlowLogger;
     private readonly IMessageService _messageService;
     private readonly ChatLinkFormatter _chatLinkFormatter;
-    private readonly IBotPermissionsService _botPermissionsService;
+    private readonly BotPermissionsService _botPermissionsService;
 
     // Флаги присоединившихся пользователей (временные)
     private static readonly ConcurrentDictionary<string, byte> _joinedUserFlags = new();
@@ -69,10 +69,10 @@ public class MessageHandler : IUpdateHandler
         GlobalStatsManager globalStatsManager,
         IStatisticsService statisticsService,
         IServiceProvider serviceProvider,
-        IUserFlowLogger userFlowLogger,
+        UserFlowLogger userFlowLogger,
         IMessageService messageService,
         ChatLinkFormatter chatLinkFormatter,
-        IBotPermissionsService botPermissionsService,
+        BotPermissionsService botPermissionsService,
         ILogger<MessageHandler> logger)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
