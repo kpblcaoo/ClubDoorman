@@ -224,7 +224,25 @@
   - [x] Обновлены все тестовые фабрики и тесты
   - [x] Проверена компиляция проекта
 
+- [x] Удален `ILoggingConfigurationService` → используется `LoggingConfigurationService` напрямую
+  - [x] Удален файл `ILoggingConfigurationService.cs`
+  - [x] Обновлен `LoggingConfigurationService.cs` (убрана реализация интерфейса)
+  - [x] Обновлены все зависимости в `Program.cs`
+  - [x] Обновлен сервис: `MessageService`
+  - [x] Проверена компиляция проекта
+
+- [x] Удален `IServiceChatDispatcher` → используется `ServiceChatDispatcher` напрямую
+  - [x] Удален файл `IServiceChatDispatcher.cs`
+  - [x] Обновлен `ServiceChatDispatcher.cs` (убрана реализация интерфейса)
+  - [x] Обновлены все зависимости в `Program.cs`
+  - [x] Обновлен сервис: `MessageService`
+  - [x] Проверена компиляция проекта
+
+### ✅ Phase 1 завершена! Удалено 4 избыточных интерфейса
+- **Количество интерфейсов:** 20 → 16 (-20%)
+- **Упрощена DI конфигурация**
+- **Убраны ненужные абстракции**
+
 ### Следующие шаги:
-- [ ] Удалить `ILoggingConfigurationService` → использовать `LoggingConfigurationService` напрямую
-- [ ] Удалить `IServiceChatDispatcher` → использовать `ServiceChatDispatcher` напрямую
-- [ ] Проанализировать спорные интерфейсы 
+- [ ] Проанализировать спорные интерфейсы: `ISpamHamClassifier`, `IMimicryClassifier`, `IUserFlowLogger`, `IBotPermissionsService`
+- [ ] Начать Phase 2: Критические исправления (IAppConfig) 

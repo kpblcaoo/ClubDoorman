@@ -144,8 +144,8 @@ public class Program
                 // Централизованная система сообщений
                 services.AddSingleton<MessageTemplates>();
                 services.Configure<LoggingConfiguration>(options => {});
-                services.AddSingleton<ILoggingConfigurationService, LoggingConfigurationService>();
-                services.AddSingleton<IServiceChatDispatcher, ServiceChatDispatcher>();
+                services.AddSingleton<LoggingConfigurationService>();
+                services.AddSingleton<ServiceChatDispatcher>();
                 services.AddSingleton<IMessageService, MessageService>();
                 
                 // Обработчики обновлений

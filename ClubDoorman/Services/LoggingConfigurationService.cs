@@ -7,7 +7,7 @@ namespace ClubDoorman.Services;
 /// <summary>
 /// Сервис для работы с конфигурацией логирования
 /// </summary>
-public class LoggingConfigurationService : ILoggingConfigurationService
+public class LoggingConfigurationService
 {
     private readonly LoggingConfiguration _configuration;
     private readonly ILogger<LoggingConfigurationService> _logger;

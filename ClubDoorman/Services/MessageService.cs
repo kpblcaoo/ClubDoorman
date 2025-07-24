@@ -16,15 +16,15 @@ public class MessageService : IMessageService
     private readonly ITelegramBotClientWrapper _bot;
     private readonly ILogger<MessageService> _logger;
     private readonly MessageTemplates _templates;
-    private readonly ILoggingConfigurationService _configService;
-    private readonly IServiceChatDispatcher _serviceChatDispatcher;
+    private readonly LoggingConfigurationService _configService;
+    private readonly ServiceChatDispatcher _serviceChatDispatcher;
     
     public MessageService(
         ITelegramBotClientWrapper bot,
         ILogger<MessageService> logger,
         MessageTemplates templates,
-        ILoggingConfigurationService configService,
-        IServiceChatDispatcher serviceChatDispatcher)
+        LoggingConfigurationService configService,
+        ServiceChatDispatcher serviceChatDispatcher)
     {
         _bot = bot;
         _logger = logger;

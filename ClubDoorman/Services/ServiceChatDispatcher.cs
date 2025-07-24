@@ -9,7 +9,7 @@ namespace ClubDoorman.Services;
 /// <summary>
 /// Реализация диспетчера сервис-чатов для разделения сообщений по админ-чату и лог-чату
 /// </summary>
-public class ServiceChatDispatcher : IServiceChatDispatcher
+public class ServiceChatDispatcher
 {
     private readonly ITelegramBotClientWrapper _bot;
     private readonly ILogger<ServiceChatDispatcher> _logger;
