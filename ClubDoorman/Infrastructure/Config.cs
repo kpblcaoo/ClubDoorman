@@ -176,6 +176,11 @@ namespace ClubDoorman.Infrastructure
         public static bool HighConfidenceAutoBan { get; } = !GetEnvironmentBool("DOORMAN_HIGH_CONFIDENCE_AUTOBAN_DISABLE");
         
         /// <summary>
+        /// Отключить приветственные сообщения
+        /// </summary>
+        public static bool DisableWelcome { get; } = GetEnvironmentBool("DOORMAN_DISABLE_WELCOME");
+        
+        /// <summary>
         /// Чаты для которых включены AI проверки профилей (если не указано - для всех)
         /// </summary>
         public static HashSet<long> AiEnabledChats { get; } = GetAiEnabledChats();
@@ -219,7 +224,12 @@ namespace ClubDoorman.Infrastructure
         /// </summary>
         public static bool GlobalApprovalMode { get; } = !GetEnvironmentBool("DOORMAN_GROUP_APPROVAL_MODE");
 
-
+        /// <summary>
+        /// Использовать новую систему одобрения (ApprovedUsersStorageV2)
+        /// - true: использовать новую систему с поддержкой глобальных и групповых одобрений
+        /// - false: использовать старую систему (ApprovedUsersStorage)
+        /// </summary>
+        public static bool UseNewApprovalSystem { get; } = GetEnvironmentBool("DOORMAN_USE_NEW_APPROVAL_SYSTEM");
 
         // ==== НАСТРОЙКИ СИСТЕМЫ ПОДОЗРИТЕЛЬНЫХ ПОЛЬЗОВАТЕЛЕЙ ====
 
