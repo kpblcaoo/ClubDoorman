@@ -216,6 +216,18 @@ public class MessageService : IMessageService
     /// </summary>
     public async Task<Message> SendWelcomeMessageAsync(User user, Chat chat, string reason = "приветствие", CancellationToken cancellationToken = default)
     {
+        // Проверяем, отключены ли приветствия
+        if (Config.DisableWelcome)
+        {
+            _logger.LogDebug("Приветственные сообщения отключены (DOORMAN_DISABLE_WELCOME=true)");
+            // Возвращаем простое сообщение без реальной отправки
+            return new Message
+            {
+                Date = DateTime.UtcNow,
+                Chat = chat,
+                From = new User { Id = 0, FirstName = "System", IsBot = true }
+            };
+        }
         // Создаем приветственное сообщение (логика перенесена из CallbackQueryHandler)
         var displayName = !string.IsNullOrEmpty(user.FirstName)
             ? System.Net.WebUtility.HtmlEncode(Utils.FullName(user))
