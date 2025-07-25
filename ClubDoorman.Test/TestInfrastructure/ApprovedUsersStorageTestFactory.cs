@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace ClubDoorman.TestInfrastructure;
 
 /// <summary>
-/// TestFactory для ApprovedUsersStorage
+/// TestFactory для ApprovedUsersStorageV2
 /// Автоматически сгенерировано
 /// </summary>
 [TestFixture]
@@ -21,19 +21,6 @@ public class ApprovedUsersStorageTestFactory
         return new ApprovedUsersStorage(
             LoggerMock.Object
         );
-    }
-
-    /// <summary>
-    /// Создает экземпляр с кастомным путем к файлу для тестирования
-    /// </summary>
-    public ApprovedUsersStorage CreateApprovedUsersStorageWithCustomPath(string filePath)
-    {
-        // Используем рефлексию для установки приватного поля _filePath
-        var service = new ApprovedUsersStorage(LoggerMock.Object);
-        var field = typeof(ApprovedUsersStorage).GetField("_filePath", 
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        field?.SetValue(service, filePath);
-        return service;
     }
 
     #region Configuration Methods

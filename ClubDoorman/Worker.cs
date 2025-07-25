@@ -26,7 +26,8 @@ internal sealed class Worker(
     IAiChecks aiChecks,
     IChatLinkFormatter chatLinkFormatter,
     ITelegramBotClientWrapper bot,
-    IMessageService messageService
+    IMessageService messageService,
+    IAppConfig appConfig
 ) : BackgroundService
 {
     // Классы CaptchaInfo и Stats перенесены в Models
@@ -45,6 +46,7 @@ internal sealed class Worker(
     private readonly IAiChecks _aiChecks = aiChecks;
     private readonly IChatLinkFormatter _chatLinkFormatter = chatLinkFormatter;
     private readonly IMessageService _messageService = messageService;
+    private readonly IAppConfig _appConfig = appConfig;
     private readonly GlobalStatsManager _globalStatsManager = new();
     private User _me = default!;
     
@@ -65,13 +67,9 @@ internal sealed class Worker(
         
         var whitelistVar = Environment.GetEnvironmentVariable("DOORMAN_WHITELIST");
         Console.WriteLine($"[DEBUG] DOORMAN_WHITELIST env var: '{whitelistVar}'");
-        Console.WriteLine($"[DEBUG] Loaded {Config.WhitelistChats.Count} whitelist groups: [{string.Join(", ", Config.WhitelistChats)}]");
-        Console.WriteLine($"[DEBUG] Private /start allowed: {Config.IsPrivateStartAllowed()}");
         
         var logChatVar = Environment.GetEnvironmentVariable("DOORMAN_LOG_ADMIN_CHAT");
         Console.WriteLine($"[DEBUG] DOORMAN_LOG_ADMIN_CHAT env var: '{logChatVar}'");
-        Console.WriteLine($"[DEBUG] Log admin chat ID: {Config.LogAdminChatId}");
-        Console.WriteLine($"[DEBUG] Using separate log chat: {Config.LogAdminChatId != Config.AdminChatId}");
         
         var testBlacklistVar = Environment.GetEnvironmentVariable("DOORMAN_TEST_BLACKLIST_IDS");
         Console.WriteLine($"[DEBUG] DOORMAN_TEST_BLACKLIST_IDS env var: '{testBlacklistVar}'");
@@ -388,20 +386,11 @@ internal sealed class Worker(
     private static string UserToKey(long chatId, User user) => $"{chatId}_{user.Id}";
     
     /// <summary>
-    /// Проверяет, одобрен ли пользователь с учетом текущей системы одобрения
+    /// Проверяет, одобрен ли пользователь
     /// </summary>
     private bool IsUserApproved(long userId, long? chatId = null)
     {
-        if (Config.UseNewApprovalSystem)
-        {
-            // Новая система: проверяем с учетом режима (глобального или группового)
-            return _userManager.Approved(userId, chatId);
-        }
-        else
-        {
-            // Старая система: проверяем только глобально
-            return _userManager.Approved(userId);
-        }
+        return _userManager.Approved(userId, chatId);
     }
 
     /// <summary>
