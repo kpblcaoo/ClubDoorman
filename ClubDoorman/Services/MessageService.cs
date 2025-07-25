@@ -157,7 +157,7 @@ public class MessageService : IMessageService
             return new Message
             {
                 Date = DateTime.UtcNow,
-                Chat = chat,
+                Chat = request.Chat,
                 From = new User { Id = 0, FirstName = "System", IsBot = true }
             };
         }
@@ -181,7 +181,7 @@ public class MessageService : IMessageService
         }
         else
         {
-            mediaWarning = Config.IsMediaFilteringDisabledForChat(chat.Id) ? ", стикеры, документы" : ", изображения, стикеры, документы";
+            mediaWarning = Config.IsMediaFilteringDisabledForChat(request.Chat.Id) ? ", стикеры, документы" : ", изображения, стикеры, документы";
             greetMsg = $"👋 {mention}\n\n<b>Внимание!</b> первые три сообщения проходят антиспам-проверку, эмодзи{mediaWarning} и реклама запрещены — они могут удаляться автоматически.\n\n⚠️ <b>Важно:</b> банальные приветствия без цели удаляются автоматически. Пишите конкретные вопросы!\n\nНе просите писать в ЛС!{vpnAd}";
         }
 
