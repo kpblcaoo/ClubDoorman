@@ -711,15 +711,7 @@ public class MessageHandler : IUpdateHandler
             return;
         }
 
-        // AI анализ профиля при первом сообщении
-        var profileAnalysisResult = await PerformAiProfileAnalysis(message, user, chat, cancellationToken);
-        if (profileAnalysisResult)
-        {
-            // Пользователь получил ограничения за подозрительный профиль, не продолжаем модерацию
-            return;
-        }
-
-        // Модерация сообщения
+        // Модерация сообщения (базовые проверки сначала)
         _userFlowLogger.LogModerationStarted(user, chat, messageText);
         var moderationResult = await _moderationService.CheckMessageAsync(message);
         _userFlowLogger.LogModerationResult(user, chat, moderationResult.Action.ToString(), moderationResult.Reason, moderationResult.Confidence);
@@ -729,6 +721,14 @@ public class MessageHandler : IUpdateHandler
             case ModerationAction.Allow:
                 _logger.LogDebug("Сообщение разрешено: {Reason}", moderationResult.Reason);
                 var allowedMessageText = message.Text ?? message.Caption ?? "";
+                
+                // AI анализ профиля при первом сообщении (только если базовые проверки пройдены)
+                var profileAnalysisResult = await PerformAiProfileAnalysis(message, user, chat, cancellationToken);
+                if (profileAnalysisResult)
+                {
+                    // Пользователь получил ограничения за подозрительный профиль, не засчитываем сообщение
+                    return;
+                }
                 
                 // Проверяем AI детект для подозрительных пользователей
                 var aiDetectBlocked = await _moderationService.CheckAiDetectAndNotifyAdminsAsync(user, chat, message);
