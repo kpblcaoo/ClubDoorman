@@ -192,7 +192,7 @@ public class CallbackQueryHandler : IUpdateHandler
             "========================================================", 
             Utils.FullName(user), user.Id, chat.Title ?? "-", chat.Id);
 
-        // Используем новый метод для отправки приветствия
+        // Используем новый метод для отправки приветствия (null если приветствия отключены)
         await _messageService.SendWelcomeMessageAsync(user, chat, "приветствие после капчи", cancellationToken);
     }
 
