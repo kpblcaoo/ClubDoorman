@@ -32,8 +32,9 @@ public interface IMessageService
 
     /// <summary>
     /// Отправляет приветственное сообщение используя Request объект
+    /// Возвращает null если приветствия отключены
     /// </summary>
-    Task<Message> SendWelcomeMessageAsync(SendWelcomeMessageRequest request);
+    Task<Message?> SendWelcomeMessageAsync(SendWelcomeMessageRequest request);
 
     /// <summary>
     /// Отправляет сообщение капчи используя Request объект

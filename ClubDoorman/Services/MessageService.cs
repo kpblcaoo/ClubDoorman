@@ -146,20 +146,15 @@ public class MessageService : IMessageService
 
     /// <summary>
     /// Отправляет приветственное сообщение используя Request объект
+    /// Возвращает null если приветствия отключены
     /// </summary>
-    public async Task<Message> SendWelcomeMessageAsync(SendWelcomeMessageRequest request)
+    public async Task<Message?> SendWelcomeMessageAsync(SendWelcomeMessageRequest request)
     {
         // Проверяем, отключены ли приветствия
         if (Config.DisableWelcome)
         {
             _logger.LogDebug("Приветственные сообщения отключены (DOORMAN_DISABLE_WELCOME=true)");
-            // Возвращаем простое сообщение без реальной отправки
-            return new Message
-            {
-                Date = DateTime.UtcNow,
-                Chat = request.Chat,
-                From = new User { Id = 0, FirstName = "System", IsBot = true }
-            };
+            return null;
         }
         // Создаем приветственное сообщение (логика перенесена из CallbackQueryHandler)
         var displayName = !string.IsNullOrEmpty(request.User.FirstName)

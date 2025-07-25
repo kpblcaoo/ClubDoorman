@@ -189,7 +189,7 @@ public class CallbackQueryHandler : IUpdateHandler
     private async Task HandleSuccessfulCaptcha(User user, Chat chat, Models.CaptchaInfo captchaInfo, CancellationToken cancellationToken)
     {
         _logger.LogInformation("==================== КАПЧА ПРОЙДЕНА ====================\n" +
-            "Пользователь {User} (id={UserId}) успешно прошёл капчу в группе '{ChatTitle}' (id={ChatId}) — показываем приветствие\n" +
+            "Пользователь {User} (id={UserId}) успешно прошёл капчу в группе '{ChatTitle}' (id={ChatId})\n" +
             "========================================================", 
             Utils.FullName(user), user.Id, chat.Title ?? "-", chat.Id);
 
