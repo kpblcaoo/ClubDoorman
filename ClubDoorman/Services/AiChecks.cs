@@ -521,6 +521,113 @@ public class AiChecks : IAiChecks
         }
     }
 
+    /// <summary>
+    /// Анализ ML-подозрительных сообщений с помощью AI (каскадная система)
+    /// </summary>
+    public async ValueTask<SpamProbability> GetMlSuspiciousMessageAnalysis(
+        Message message, 
+        Telegram.Bot.Types.User user, 
+        double mlScore)
+    {
+        if (_api == null)
+            return new SpamProbability();
+
+        try
+        {
+            var text = message.Text ?? message.Caption ?? "";
+            if (string.IsNullOrWhiteSpace(text))
+                return new SpamProbability();
+
+            var userName = Utils.FullName(user);
+            var username = user.Username != null ? $"@{user.Username}" : "нет";
+            
+            // Получаем информацию о пользователе
+            var userChat = await _bot.GetChatFullInfo(user.Id);
+            var bioInfo = !string.IsNullOrEmpty(userChat.Bio) ? $"\n• Биография: {userChat.Bio}" : "";
+            var photoInfo = userChat.Photo != null ? "\n• Есть фото профиля" : "\n• Нет фото профиля";
+
+            var prompt = $"""
+                КРИТИЧЕСКИЙ AI АНАЛИЗ ML-ПОДОЗРИТЕЛЬНОГО СООБЩЕНИЯ
+                ВАЖНО: Объяснение должно быть КРАТКИМ (максимум 2-3 предложения)!
+                
+                КОНТЕКСТ:
+                • ML классификатор заподозрил это сообщение как спам (скор: {mlScore:F2})
+                • ML неуверен в своем решении (серая зона)
+                • Твоя задача — дать ФИНАЛЬНОЕ решение: БАН или РАЗРЕШИТЬ
+                • Если ВИДИШЬ подозрительный контент — БАН БЕЗ РАЗБИРАТЕЛЬСТВ
+                
+                ДАННЫЕ ПОЛЬЗОВАТЕЛЯ:
+                • Имя: {userName}
+                • Username: {username}{bioInfo}{photoInfo}
+                
+                СООБЩЕНИЕ: "{text}"
+                
+                ОСОБОЕ ВНИМАНИЕ К ОБФУСКАЦИИ:
+                • Точки между буквами: "дет.ский", "мал.ыш", "ви.део"
+                • Замены символов: "дeтский" (латинская e)
+                • Пробелы в словах: "дет ский"
+                • Подозрительные темы + детские эмодзи: "дет.ские ви.део 🥺"
+                • Комбинации: подозрительное слово + контекст + эмодзи
+                
+                КРИТИЧЕСКИЕ ПРИЗНАКИ ДЛЯ БАНА:
+                • Любая обфускация подозрительных слов
+                • Детские темы с эмодзи (🥺😍💋)
+                • Сексуализированный контент
+                • Мошеннические схемы
+                
+                Оцени вероятность спама от 0 до 1. Если > 0.7 — БАН.
+                """;
+
+            var messages = new List<ChatCompletionRequestMessage>
+            {
+                "Ты — финальный арбитр для ML-подозрительных сообщений. Твоя задача — принимать решение о БАНЕ или РАЗРЕШЕНИИ. ОБЯЗАТЕЛЬНО отвечай на русском языке! Объяснения должны быть КРАТКИМИ (максимум 2-3 предложения).".ToSystemMessage(),
+                prompt.ToUserMessage()
+            };
+
+            // Добавляем фото профиля если есть
+            if (userChat.Photo != null)
+            {
+                try
+                {
+                    using var ms = new MemoryStream();
+                    await _bot.GetInfoAndDownloadFile(userChat.Photo.BigFileId, ms);
+                    var photoBytes = ms.ToArray();
+                    var photoMessage = photoBytes.ToUserMessage(mimeType: "image/jpg");
+                    messages.Add(photoMessage);
+                    _logger.LogDebug("🔍 Добавлено фото профиля для ML-AI анализа {User}", userName);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug("Не удалось загрузить фото профиля для {User}: {Error}", userName, ex.Message);
+                }
+            }
+
+            var response = await _retry.ExecuteAsync(
+                async token => await _api.Chat.CreateChatCompletionAsAsync<SpamProbability>(
+                    messages: messages,
+                    model: Model,
+                    strict: true,
+                    jsonSerializerOptions: _jsonOptions,
+                    cancellationToken: token
+                )
+            );
+
+            if (response.Value1 != null)
+            {
+                _logger.LogInformation("🔍 ML-AI каскадный анализ: {Probability} - {Reason}", 
+                    response.Value1.Probability, response.Value1.Reason);
+                return response.Value1;
+            }
+
+            return new SpamProbability();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Ошибка при ML-AI каскадном анализе");
+            return new SpamProbability();
+        }
+    }
+
 
 
     private void CacheResult(long userId, SpamPhotoBio result)
