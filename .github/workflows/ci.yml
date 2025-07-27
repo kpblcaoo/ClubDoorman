@@ -22,6 +22,18 @@ jobs:
     - name: Build application
       run: dotnet build --configuration Release --no-restore
 
+    - name: Create .env file for diagnostics
+      run: |
+        # Создаем .env файл с тестовыми значениями для диагностики
+        cat > ClubDoorman/.env << EOF
+        DOORMAN_OPENROUTER_API=test-api-key
+        DOORMAN_BOT_API=test-bot-token
+        DOORMAN_ADMIN_CHAT=123456789
+        EOF
+        
+        echo "=== .env файл создан для диагностики ==="
+        ls -la ClubDoorman/.env
+
     - name: Run CI Diagnostics
       run: |
         echo "=== ЗАПУСК ДИАГНОСТИКИ CI ==="
