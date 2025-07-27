@@ -758,4 +758,257 @@ public class AiAnalysisTests
         }
         result.Photo.Length.Should().BeGreaterThan(0, "Фото должно быть загружено");
     }
+
+    [Test]
+    [Category("debug")]
+    [Category("local-only")]
+    public async Task Debug_AI_Analysis_LocalDiagnostics()
+    {
+        TestContext.WriteLine("=== ЛОКАЛЬНАЯ ДИАГНОСТИКА AI АНАЛИЗА ===");
+        
+        // 1. Проверяем .env файл
+        var envPath = FindEnvFile();
+        TestContext.WriteLine($"1. .env файл: {(envPath != null ? $"найден ({envPath})" : "НЕ НАЙДЕН")}");
+        
+        if (envPath != null)
+        {
+            DotNetEnv.Env.Load(envPath);
+            
+            var apiKey = DotNetEnv.Env.GetString("DOORMAN_OPENROUTER_API");
+            var botToken = DotNetEnv.Env.GetString("DOORMAN_BOT_API");
+            var adminChat = DotNetEnv.Env.GetString("DOORMAN_ADMIN_CHAT");
+            
+            TestContext.WriteLine($"2. Переменные окружения:");
+            TestContext.WriteLine($"   DOORMAN_OPENROUTER_API: {(string.IsNullOrEmpty(apiKey) ? "НЕ НАСТРОЕН" : apiKey == "test-api-key" ? "test-api-key" : $"НАСТРОЕН (длина: {apiKey.Length})")}");
+            TestContext.WriteLine($"   DOORMAN_BOT_API: {(string.IsNullOrEmpty(botToken) ? "НЕ НАСТРОЕН" : botToken == "test-bot-token" ? "test-bot-token" : $"НАСТРОЕН (длина: {botToken.Length})")}");
+            TestContext.WriteLine($"   DOORMAN_ADMIN_CHAT: {(string.IsNullOrEmpty(adminChat) ? "НЕ НАСТРОЕН" : $"НАСТРОЕН (длина: {adminChat.Length})")}");
+            
+            if (string.IsNullOrEmpty(apiKey) || apiKey == "test-api-key")
+            {
+                TestContext.WriteLine("❌ API ключ не настроен или тестовый. Пропускаем тест.");
+                Assert.Ignore("DOORMAN_OPENROUTER_API не настроен или равен 'test-api-key'.");
+            }
+            
+            Environment.SetEnvironmentVariable("DOORMAN_OPENROUTER_API", apiKey);
+            Environment.SetEnvironmentVariable("DOORMAN_BOT_API", botToken);
+            Environment.SetEnvironmentVariable("DOORMAN_ADMIN_CHAT", adminChat);
+        }
+        else
+        {
+            TestContext.WriteLine("❌ .env файл не найден. Пропускаем тест.");
+            Assert.Ignore(".env файл не найден.");
+        }
+        
+        // 3. Проверяем тестовое фото
+        var photoPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "Images", "dnekxpb_profile_photo.jpg");
+        TestContext.WriteLine($"3. Тестовое фото:");
+        TestContext.WriteLine($"   Путь: {photoPath}");
+        TestContext.WriteLine($"   Существует: {File.Exists(photoPath)}");
+        
+        if (File.Exists(photoPath))
+        {
+            var fileInfo = new FileInfo(photoPath);
+            TestContext.WriteLine($"   Размер: {fileInfo.Length} байт");
+            TestContext.WriteLine($"   Дата создания: {fileInfo.CreationTime}");
+        }
+        else
+        {
+            TestContext.WriteLine($"   ❌ Файл не найден!");
+            TestContext.WriteLine($"   Текущая директория: {TestContext.CurrentContext.TestDirectory}");
+            
+            var testDataDir = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData");
+            TestContext.WriteLine($"   TestData директория существует: {Directory.Exists(testDataDir)}");
+            
+            if (Directory.Exists(testDataDir))
+            {
+                var imagesDir = Path.Combine(testDataDir, "Images");
+                TestContext.WriteLine($"   Images директория существует: {Directory.Exists(imagesDir)}");
+                
+                if (Directory.Exists(imagesDir))
+                {
+                    var files = Directory.GetFiles(imagesDir);
+                    TestContext.WriteLine($"   Файлы в Images: {string.Join(", ", files.Select(Path.GetFileName))}");
+                }
+            }
+        }
+        
+        // 4. Создаем AiChecks и тестируем
+        var realAppConfig = new AppConfig();
+        var fakeBot = new FakeTelegramClient();
+        
+        if (File.Exists(photoPath))
+        {
+            fakeBot.SetupGetFile("fake_big_photo_id", photoPath);
+            TestContext.WriteLine($"4. FakeTelegramClient настроен для фото: fake_big_photo_id -> {photoPath}");
+        }
+        else
+        {
+            TestContext.WriteLine($"4. ❌ Не можем настроить FakeTelegramClient - фото не найдено");
+        }
+        
+        var realAiChecks = new AiChecks(fakeBot, _logger, realAppConfig);
+        TestContext.WriteLine($"5. AiChecks создан успешно");
+        
+        // 5. Тестируем простой вызов без фото
+        var testUser = new User
+        {
+            Id = 999999,
+            FirstName = "Test",
+            LastName = "User",
+            Username = "testuser"
+        };
+        
+        TestContext.WriteLine($"6. Тестируем простой AI анализ без фото:");
+        try
+        {
+            var result = await realAiChecks.GetAttentionBaitProbability(testUser, "Тестовое сообщение");
+            TestContext.WriteLine($"   ✅ Успешно! Вероятность: {result.SpamProbability.Probability:P1}");
+            TestContext.WriteLine($"   Причина: {result.SpamProbability.Reason}");
+            TestContext.WriteLine($"   Размер фото: {result.Photo.Length} байт");
+        }
+        catch (Exception ex)
+        {
+            TestContext.WriteLine($"   ❌ Ошибка: {ex.Message}");
+            TestContext.WriteLine($"   Тип ошибки: {ex.GetType().Name}");
+            
+            if (ex.InnerException != null)
+            {
+                TestContext.WriteLine($"   Внутренняя ошибка: {ex.InnerException.Message}");
+                TestContext.WriteLine($"   Тип внутренней ошибки: {ex.InnerException.GetType().Name}");
+            }
+        }
+        
+        // 6. Тестируем с фото (если есть)
+        if (File.Exists(photoPath))
+        {
+            var suspiciousUser = TestData.MessageTestData.SuspiciousUserDnekxpb();
+            TestContext.WriteLine($"7. Тестируем AI анализ с фото:");
+            TestContext.WriteLine($"   Пользователь: {suspiciousUser.FirstName} {suspiciousUser.LastName} (@{suspiciousUser.Username})");
+            
+            try
+            {
+                var result = await realAiChecks.GetAttentionBaitProbability(suspiciousUser, "Продам слона пиши с лс");
+                TestContext.WriteLine($"   ✅ Успешно! Вероятность: {result.SpamProbability.Probability:P1}");
+                TestContext.WriteLine($"   Причина: {result.SpamProbability.Reason}");
+                TestContext.WriteLine($"   Размер фото: {result.Photo.Length} байт");
+                TestContext.WriteLine($"   Профиль: {result.NameBio}");
+            }
+            catch (Exception ex)
+            {
+                TestContext.WriteLine($"   ❌ Ошибка: {ex.Message}");
+                TestContext.WriteLine($"   Тип ошибки: {ex.GetType().Name}");
+                
+                if (ex.InnerException != null)
+                {
+                    TestContext.WriteLine($"   Внутренняя ошибка: {ex.InnerException.Message}");
+                    TestContext.WriteLine($"   Тип внутренней ошибки: {ex.InnerException.GetType().Name}");
+                }
+            }
+        }
+        
+        TestContext.WriteLine("=== ДИАГНОСТИКА ЗАВЕРШЕНА ===");
+        
+        // Тест всегда проходит, так как это диагностика
+        Assert.Pass("Диагностика завершена успешно");
+    }
+
+    [Test]
+    [Category("debug")]
+    [Category("ci-diagnostics")]
+    public async Task Debug_CI_Environment_SafeDiagnostics()
+    {
+        TestContext.WriteLine("=== БЕЗОПАСНАЯ ДИАГНОСТИКА CI ОКРУЖЕНИЯ ===");
+        
+        // 1. Проверяем .env файл
+        var envPath = FindEnvFile();
+        TestContext.WriteLine($"1. .env файл: {(envPath != null ? $"найден ({envPath})" : "НЕ НАЙДЕН")}");
+        
+        if (envPath != null)
+        {
+            DotNetEnv.Env.Load(envPath);
+            
+            var apiKey = DotNetEnv.Env.GetString("DOORMAN_OPENROUTER_API");
+            var botToken = DotNetEnv.Env.GetString("DOORMAN_BOT_API");
+            var adminChat = DotNetEnv.Env.GetString("DOORMAN_ADMIN_CHAT");
+            
+            TestContext.WriteLine($"2. Переменные из .env файла:");
+            TestContext.WriteLine($"   DOORMAN_OPENROUTER_API: {(string.IsNullOrEmpty(apiKey) ? "НЕ НАСТРОЕН" : apiKey == "test-api-key" ? "test-api-key" : $"НАСТРОЕН (длина: {apiKey.Length}, суффикс: ...{apiKey[^4..]})")}");
+            TestContext.WriteLine($"   DOORMAN_BOT_API: {(string.IsNullOrEmpty(botToken) ? "НЕ НАСТРОЕН" : botToken == "test-bot-token" ? "test-bot-token" : $"НАСТРОЕН (длина: {botToken.Length}, суффикс: ...{botToken[^4..]})")}");
+            TestContext.WriteLine($"   DOORMAN_ADMIN_CHAT: {(string.IsNullOrEmpty(adminChat) ? "НЕ НАСТРОЕН" : $"НАСТРОЕН (длина: {adminChat.Length}, суффикс: ...{adminChat[^4..]})")}");
+        }
+        else
+        {
+            TestContext.WriteLine("2. .env файл не найден, проверяем переменные окружения напрямую");
+        }
+        
+        // 3. Проверяем переменные окружения напрямую
+        var envApiKey = Environment.GetEnvironmentVariable("DOORMAN_OPENROUTER_API");
+        var envBotToken = Environment.GetEnvironmentVariable("DOORMAN_BOT_API");
+        var envAdminChat = Environment.GetEnvironmentVariable("DOORMAN_ADMIN_CHAT");
+        
+        TestContext.WriteLine($"3. Переменные окружения:");
+        TestContext.WriteLine($"   DOORMAN_OPENROUTER_API: {(string.IsNullOrEmpty(envApiKey) ? "НЕ НАСТРОЕН" : envApiKey == "test-api-key" ? "test-api-key" : $"НАСТРОЕН (длина: {envApiKey.Length}, суффикс: ...{envApiKey[^4..]})")}");
+        TestContext.WriteLine($"   DOORMAN_BOT_API: {(string.IsNullOrEmpty(envBotToken) ? "НЕ НАСТРОЕН" : envBotToken == "test-bot-token" ? "test-bot-token" : $"НАСТРОЕН (длина: {envBotToken.Length}, суффикс: ...{envBotToken[^4..]})")}");
+        TestContext.WriteLine($"   DOORMAN_ADMIN_CHAT: {(string.IsNullOrEmpty(envAdminChat) ? "НЕ НАСТРОЕН" : $"НАСТРОЕН (длина: {envAdminChat.Length}, суффикс: ...{envAdminChat[^4..]})")}");
+        
+        // 4. Проверяем тестовое фото
+        var photoPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "Images", "dnekxpb_profile_photo.jpg");
+        TestContext.WriteLine($"4. Тестовое фото:");
+        TestContext.WriteLine($"   Путь: {photoPath}");
+        TestContext.WriteLine($"   Существует: {File.Exists(photoPath)}");
+        
+        if (File.Exists(photoPath))
+        {
+            var fileInfo = new FileInfo(photoPath);
+            TestContext.WriteLine($"   Размер: {fileInfo.Length} байт");
+            TestContext.WriteLine($"   Дата создания: {fileInfo.CreationTime}");
+        }
+        else
+        {
+            TestContext.WriteLine($"   ❌ Файл не найден!");
+            TestContext.WriteLine($"   Текущая директория: {TestContext.CurrentContext.TestDirectory}");
+            
+            var testDataDir = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData");
+            TestContext.WriteLine($"   TestData директория существует: {Directory.Exists(testDataDir)}");
+            
+            if (Directory.Exists(testDataDir))
+            {
+                var imagesDir = Path.Combine(testDataDir, "Images");
+                TestContext.WriteLine($"   Images директория существует: {Directory.Exists(imagesDir)}");
+                
+                if (Directory.Exists(imagesDir))
+                {
+                    var files = Directory.GetFiles(imagesDir);
+                    TestContext.WriteLine($"   Файлы в Images: {string.Join(", ", files.Select(Path.GetFileName))}");
+                }
+            }
+        }
+        
+        // 5. Проверяем структуру проекта
+        TestContext.WriteLine($"5. Структура проекта:");
+        TestContext.WriteLine($"   Корневая директория: {Directory.GetCurrentDirectory()}");
+        TestContext.WriteLine($"   TestData существует: {Directory.Exists("ClubDoorman.Test/TestData")}");
+        TestContext.WriteLine($"   Images существует: {Directory.Exists("ClubDoorman.Test/TestData/Images")}");
+        
+        // 6. Проверяем AppConfig
+        var appConfig = new AppConfig();
+        TestContext.WriteLine($"6. AppConfig:");
+        TestContext.WriteLine($"   OpenRouter API настроен: {!string.IsNullOrEmpty(appConfig.OpenRouterApi)}");
+        TestContext.WriteLine($"   Bot API настроен: {!string.IsNullOrEmpty(appConfig.BotApi)}");
+        TestContext.WriteLine($"   Admin Chat настроен: {appConfig.AdminChatId != 0}");
+        
+        if (!string.IsNullOrEmpty(appConfig.OpenRouterApi))
+        {
+            TestContext.WriteLine($"   OpenRouter API длина: {appConfig.OpenRouterApi.Length}, суффикс: ...{appConfig.OpenRouterApi[^4..]}");
+        }
+        if (!string.IsNullOrEmpty(appConfig.BotApi))
+        {
+            TestContext.WriteLine($"   Bot API длина: {appConfig.BotApi.Length}, суффикс: ...{appConfig.BotApi[^4..]}");
+        }
+        
+        TestContext.WriteLine("=== ДИАГНОСТИКА CI ЗАВЕРШЕНА ===");
+        
+        // Тест всегда проходит, так как это диагностика
+        Assert.Pass("Безопасная диагностика CI завершена успешно");
+    }
 } 
