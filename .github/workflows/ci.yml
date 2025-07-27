@@ -22,5 +22,15 @@ jobs:
     - name: Build application
       run: dotnet build --configuration Release --no-restore
 
+    - name: Run CI Diagnostics
+      run: |
+        echo "=== ЗАПУСК ДИАГНОСТИКИ CI ==="
+        dotnet test ClubDoorman.Test/ClubDoorman.Test.csproj \
+          --filter "Category=ci-diagnostics" \
+          --verbosity normal \
+          --logger "console;verbosity=detailed" \
+          --no-restore
+        echo "=== ДИАГНОСТИКА CI ЗАВЕРШЕНА ==="
+
     - name: Run tests
       run: dotnet test --no-restore
