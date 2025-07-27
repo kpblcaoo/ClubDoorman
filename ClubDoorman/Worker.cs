@@ -66,13 +66,13 @@ internal sealed class Worker(
         Console.WriteLine($"[DEBUG] Loaded {NoVpnAdGroups.Count} groups without ads: [{string.Join(", ", NoVpnAdGroups)}]");
         
         var whitelistVar = Environment.GetEnvironmentVariable("DOORMAN_WHITELIST");
-        Console.WriteLine($"[DEBUG] DOORMAN_WHITELIST env var: '{whitelistVar}'");
+        Console.WriteLine($"[DEBUG] DOORMAN_WHITELIST env var: {(string.IsNullOrEmpty(whitelistVar) ? "НЕ НАСТРОЕН" : "НАСТРОЕН")}");
         
         var logChatVar = Environment.GetEnvironmentVariable("DOORMAN_LOG_ADMIN_CHAT");
-        Console.WriteLine($"[DEBUG] DOORMAN_LOG_ADMIN_CHAT env var: '{logChatVar}'");
+        Console.WriteLine($"[DEBUG] DOORMAN_LOG_ADMIN_CHAT env var: {(string.IsNullOrEmpty(logChatVar) ? "НЕ НАСТРОЕН" : "НАСТРОЕН")}");
         
         var testBlacklistVar = Environment.GetEnvironmentVariable("DOORMAN_TEST_BLACKLIST_IDS");
-        Console.WriteLine($"[DEBUG] DOORMAN_TEST_BLACKLIST_IDS env var: '{testBlacklistVar}'");
+        Console.WriteLine($"[DEBUG] DOORMAN_TEST_BLACKLIST_IDS env var: {(string.IsNullOrEmpty(testBlacklistVar) ? "НЕ НАСТРОЕН" : "НАСТРОЕН")}");
     }
 
     private async Task CaptchaLoop(CancellationToken token)

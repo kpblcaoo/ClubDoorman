@@ -131,10 +131,7 @@ namespace ClubDoorman.Infrastructure
     
     private static bool GetTextMentionFilterEnabled()
     {
-        var enabled = GetEnvironmentBool("DOORMAN_TEXT_MENTION_FILTER_ENABLE");
-        Console.WriteLine($"[DEBUG] DOORMAN_TEXT_MENTION_FILTER_ENABLE env var: '{Environment.GetEnvironmentVariable("DOORMAN_TEXT_MENTION_FILTER_ENABLE")}'");
-        Console.WriteLine($"[DEBUG] TextMentionFilterEnabled: {enabled}");
-        return enabled;
+        return GetEnvironmentBool("DOORMAN_TEXT_MENTION_FILTER_ENABLE");
     }
     
     /// <summary>

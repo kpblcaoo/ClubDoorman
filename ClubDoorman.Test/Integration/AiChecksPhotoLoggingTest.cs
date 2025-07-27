@@ -76,9 +76,9 @@ public class AiChecksPhotoLoggingTest
         Environment.SetEnvironmentVariable("DOORMAN_BOT_API", botToken);
         Environment.SetEnvironmentVariable("DOORMAN_ADMIN_CHAT", adminChat);
         
-        // Отладочная информация
-        Console.WriteLine($"DotNetEnv API Key: {apiKey}");
-        Console.WriteLine($"Environment API Key: {Environment.GetEnvironmentVariable("DOORMAN_OPENROUTER_API")}");
+        // Отладочная информация (без показа секретов)
+        Console.WriteLine($"DotNetEnv API Key: {(string.IsNullOrEmpty(apiKey) ? "НЕ НАСТРОЕН" : $"НАСТРОЕН (длина: {apiKey.Length})")}");
+        Console.WriteLine($"Environment API Key: {(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOORMAN_OPENROUTER_API")) ? "НЕ НАСТРОЕН" : "НАСТРОЕН")}");
         
         // Проверяем наличие API ключа
         if (string.IsNullOrEmpty(apiKey))

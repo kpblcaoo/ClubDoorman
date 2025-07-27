@@ -299,7 +299,7 @@ internal sealed class UserManager : IUserManager
             }
             else
             {
-                Console.WriteLine($"[WARNING] Некорректный ID в DOORMAN_TEST_BLACKLIST_IDS: '{idStr}'");
+                Console.WriteLine($"[WARNING] Некорректный ID в DOORMAN_TEST_BLACKLIST_IDS: '{idStr.Trim()}'");
             }
         }
         
