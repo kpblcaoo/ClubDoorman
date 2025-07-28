@@ -69,6 +69,15 @@ jobs:
           --logger "console;verbosity=detailed" \
           --no-restore
 
+    - name: Run BDD tests
+      run: |
+        dotnet test ClubDoorman.Test/ClubDoorman.Test.csproj \
+          --filter "Category=BDD" \
+          --verbosity normal \
+          --logger "console;verbosity=detailed" \
+          --no-restore \
+          --logger "trx;LogFileName=bdd-tests.trx"
+
     - name: Run AI Analysis tests with real API
       run: |
         dotnet test ClubDoorman.Test/ClubDoorman.Test.csproj \
