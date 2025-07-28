@@ -104,6 +104,10 @@ public class ModerationServiceBusinessLogicTests
         // Arrange
         var message = CreateTestMessage(123456L, "Hello");
         
+        _factory.WithClassifierSetup(mock => 
+            mock.Setup(x => x.IsSpam(It.IsAny<string>()))
+                .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
+        
         // Мимикрия проверяется только для подозрительных пользователей
         // и только в AnalyzeMimicryAndMarkSuspicious, не в CheckMessageAsync
         // Поэтому этот тест не корректен - убираем его
@@ -123,7 +127,7 @@ public class ModerationServiceBusinessLogicTests
         
         _factory.WithClassifierSetup(mock => 
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
-                .ReturnsAsync((false, 0.1f)));
+                .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
         
         _factory.WithMimicryClassifierSetup(mock => 
             mock.Setup(x => x.AnalyzeMessages(It.IsAny<List<string>>()))
