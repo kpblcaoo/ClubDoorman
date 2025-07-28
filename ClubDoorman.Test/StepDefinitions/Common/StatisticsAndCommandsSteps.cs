@@ -43,7 +43,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // Simulate system working throughout the day
             // This is a placeholder implementation for BDD testing
-            Assert.Pass("System working throughout the day");
+            // No action needed - just a setup step
         }
 
         [Given(@"a regular user tries to execute /spam command")]
@@ -71,7 +71,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // Simulate command execution
             // This is a placeholder implementation for BDD testing
-            Assert.Pass("Command executed");
+            // Command execution logic would go here
         }
 
         [Then(@"correct statistics are displayed:")]
@@ -79,7 +79,9 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // Verify that correct statistics are displayed
             // This is a placeholder implementation for BDD testing
-            Assert.Pass("Correct statistics displayed");
+            // Statistics verification logic would go here
         }
+
+
     }
 } 
