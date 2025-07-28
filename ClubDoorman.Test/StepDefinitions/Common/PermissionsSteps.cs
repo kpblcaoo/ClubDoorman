@@ -21,8 +21,6 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         private Exception? _thrownException;
         private FakeTelegramClient _fakeBot = null!;
         private ILoggerFactory _loggerFactory = null!;
-        private BotPermissionsService _botPermissionsService = null!;
-        private AppConfig _appConfig = null!;
 
         [BeforeScenario]
         public void BeforeScenario()
@@ -35,8 +33,6 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             });
 
             // Упрощенная инициализация для тестов
-            _appConfig = null!;
-            _botPermissionsService = null!;
         }
 
         [AfterScenario]

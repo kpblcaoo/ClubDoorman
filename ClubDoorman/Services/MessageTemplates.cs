@@ -157,7 +157,17 @@ public class MessageTemplates
             "Ошибка: {ErrorMessage}",
             
         [LogNotificationType.ChannelMessage] = 
-            "📢 Сообщение от канала {ChannelTitle} в чате {ChatTitle}"
+            "📢 Сообщение от канала {ChannelTitle} в чате {ChatTitle}",
+            
+        [LogNotificationType.AutoBanTextMention] = 
+            "🚫 Удаление сообщения за ссылки\n" +
+            "Юзер {UserFullName} из чата {ChatTitle}\n" +
+            "{MessageLink}",
+            
+        [LogNotificationType.AutoBanRepeatedViolations] = 
+            "🚫 Автобан за повторные нарушения: {Reason}\n" +
+            "Юзер {UserFullName} из чата {ChatTitle}\n" +
+            "Если это ошибка - разбаньте вручную"
     };
     
     private readonly Dictionary<UserNotificationType, string> _userTemplates = new()

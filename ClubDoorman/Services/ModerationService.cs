@@ -625,7 +625,35 @@ public class ModerationService : IModerationService
         var chatType = ChatSettingsManager.GetChatType(message.Chat.Id);
         var isAnnouncement = chatType == "announcement";
 
-        // 6. Проверка эмодзи
+        // 6. ПРИОРИТЕТНАЯ проверка ссылок
+        if (Config.TextMentionFilterEnabled)
+        {
+            var hasLinks = SimpleFilters.HasLinks(text);
+            _logger.LogDebug("Проверка ссылок: текст='{Text}', найдены={HasLinks}", 
+                text.Length > 50 ? text.Substring(0, 50) + "..." : text, hasLinks);
+                
+            if (hasLinks)
+            {
+                _logger.LogInformation("Найдены ссылки в тексте: '{Text}'", text);
+                return new ModerationResult(ModerationAction.Delete, "Ссылки запрещены");
+            }
+            
+            // Проверяем наличие ссылок в превью сообщения
+            if (message.Entities != null)
+            {
+                var hasUrlEntities = message.Entities.Any(e => 
+                    e.Type == Telegram.Bot.Types.Enums.MessageEntityType.Url ||
+                    e.Type == Telegram.Bot.Types.Enums.MessageEntityType.TextLink);
+                
+                if (hasUrlEntities)
+                {
+                    _logger.LogInformation("Найдены URL-сущности или TextLink в сообщении");
+                    return new ModerationResult(ModerationAction.Delete, "Ссылки запрещены");
+                }
+            }
+        }
+
+        // 7. Проверка эмодзи
         var tooManyEmojis = SimpleFilters.TooManyEmojis(text);
         _logger.LogDebug("Проверка эмодзи: текст='{Text}', многовато={TooMany}, объявление={IsAnnouncement}", 
             text.Length > 50 ? text.Substring(0, 50) + "..." : text, tooManyEmojis, isAnnouncement);
@@ -669,19 +697,21 @@ public class ModerationService : IModerationService
         
         if (spam)
         {
+            // ML уверен - сразу удаляем
             _logger.LogInformation("ML классификатор определил спам: '{Text}', скор={Score}", normalized, score);
             return new ModerationResult(ModerationAction.Delete, $"ML решил что это спам, скор {score}", score);
         }
 
-        // 10. Проверка низкой уверенности в ham
-        if (score > -0.6 && Config.LowConfidenceHamForward)
+        // НОВАЯ ЛОГИКА: ML неуверен → передаем в AI
+        if (score > -0.3 && score < 0.3) // "серая зона" ML
         {
-            return new ModerationResult(ModerationAction.RequireManualReview, 
-                $"Классификатор думает что это НЕ спам, но конфиденс низкий: скор {score}", score);
+            _logger.LogInformation("ML неуверен (скор {Score}), передаем в AI для финального решения", score);
+            return new ModerationResult(ModerationAction.RequireAiReview, 
+                $"ML неуверен (скор {score}), требуется AI анализ", score);
         }
 
-        // Все проверки пройдены - сообщение можно разрешить
-        return new ModerationResult(ModerationAction.Allow, "Сообщение прошло все проверки", score);
+        // ML уверен что это НЕ спам
+        return new ModerationResult(ModerationAction.Allow, "ML уверен что это не спам", score);
     }
 
     public bool SetAiDetectForSuspiciousUser(long userId, long chatId, bool enabled)

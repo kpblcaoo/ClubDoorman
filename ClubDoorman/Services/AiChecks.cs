@@ -129,56 +129,14 @@ public class AiChecks : IAiChecks
 
         try
         {
-            _logger.LogDebug("🤖 AI анализ профиля: получаем GetChatFullInfo для пользователя {UserId}", user.Id);
+            _logger.LogDebug("🤖 AI анализ профиля: получаем информацию о пользователе {UserId}", user.Id);
+            
+            // Используем ChatFullInfo для получения Bio и Photo
             var userChat = await _bot.GetChatFullInfo(user.Id);
+            _logger.LogDebug("🤖 AI анализ профиля: GetChatFullInfo получен для пользователя {UserId}: Bio={Bio}, Photo={Photo}", 
+                user.Id, userChat.Bio ?? "null", userChat.Photo?.ToString() ?? "null");
             
-            // Попробуем также получить базовую информацию о пользователе
-            try
-            {
-                var basicChat = await _bot.GetChat(user.Id);
-                _logger.LogDebug("🤖 AI анализ профиля: GetChat получен для пользователя {UserId}: Type={Type}, Id={Id}, Title={Title}, Username={Username}", 
-                    user.Id, basicChat.Type, basicChat.Id, basicChat.Title ?? "null", basicChat.Username ?? "null");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "🤖 AI анализ профиля: не удалось получить GetChat для пользователя {UserId}", user.Id);
-            }
-            _logger.LogDebug("🤖 AI анализ профиля: GetChatFullInfo получен для пользователя {UserId}, Bio: {Bio}, LinkedChatId: {LinkedChatId}, Photo: {Photo}", 
-                user.Id, userChat.Bio ?? "null", userChat.LinkedChatId?.ToString() ?? "null", userChat.Photo?.ToString() ?? "null");
-            
-            // Дополнительное логирование для отладки
-            _logger.LogDebug("🤖 AI анализ профиля: полная информация о userChat для пользователя {UserId}: Type={Type}, Id={Id}, Title={Title}, Username={Username}", 
-                user.Id, userChat.Type, userChat.Id, userChat.Title ?? "null", userChat.Username ?? "null");
-            
-            // ФИКС: Если у пользователя нет био и нет связанного канала, но есть первое сообщение - анализируем фото + сообщение
-            if (userChat.Bio == null && userChat.LinkedChatId == null)
-            {
-                _logger.LogDebug("У пользователя {UserId} нет био и связанного канала", user.Id);
-                if (userChat.Photo != null)
-                {
-                    // Если есть первое сообщение - делаем полный анализ фото + сообщение
-                    if (!string.IsNullOrWhiteSpace(messageText))
-                    {
-                        _logger.LogDebug("🤖 AI анализ профиля: есть фото и первое сообщение, делаем полный анализ для пользователя {UserId}", user.Id);
-                        // Продолжаем с полным анализом ниже (не return)
-                    }
-                    else
-                    {
-                        // Только фото, без сообщения - используем старую логику
-                        return await GetEroticPhotoBaitProbability(user, userChat);
-                    }
-                }
-                else
-                {
-                    // Нет ни био, ни фото - считаем безопасным
-                    var result = new SpamPhotoBio(new SpamProbability(), [], "");
-                    CacheResult(user.Id, result);
-                    return result;
-                }
-            }
-
-            _logger.LogDebug("Анализируем профиль пользователя {UserId} с помощью AI", user.Id);
-            
+            // Строим профиль без привязанного канала (временно отключено)
             var sb = new StringBuilder();
             sb.Append($"Имя: {Utils.FullName(user)}");
             if (user.Username != null)
@@ -191,9 +149,6 @@ public class AiChecks : IAiChecks
             ChatCompletionRequestUserMessage? photoMessage = null;
 
             // Загружаем фото профиля если есть
-            _logger.LogDebug("🤖 AI анализ профиля: проверяем userChat.Photo для пользователя {UserId}, Photo: {Photo}", 
-                user.Id, userChat.Photo?.ToString() ?? "null");
-                
             if (userChat.Photo != null)
             {
                 _logger.LogDebug("🤖 AI анализ профиля: загружаем фото для пользователя {UserId}, FileId: {FileId}", 
@@ -206,12 +161,10 @@ public class AiChecks : IAiChecks
                     photoBytes = ms.ToArray();
                     pic = photoBytes;
                     photoMessage = photoBytes.ToUserMessage(mimeType: "image/jpg");
-                    _logger.LogDebug("🔍 PHOTO MESSAGE: Content создан, тип={Type}", photoMessage.Content.GetType().Name);
                     sb.Append($"\nФото: прикреплено");
                     
                     _logger.LogDebug("🤖 AI анализ профиля: фото загружено для пользователя {UserId}, размер: {Size} байт", 
                         user.Id, photoBytes.Length);
-                    _logger.LogDebug("🔍 ФОТО: {Size} байт, fileId={FileId}", photoBytes.Length, userChat.Photo.BigFileId);
                 }
                 catch (Exception ex)
                 {
@@ -223,6 +176,9 @@ public class AiChecks : IAiChecks
                 _logger.LogDebug("🤖 AI анализ профиля: у пользователя {UserId} нет фото профиля", user.Id);
             }
 
+            // Обновляем nameBioUser
+            nameBioUser = sb.ToString();
+
             var prompt = $"""
                 Проанализируй, выглядит ли этот Telegram-профиль как «продажный» и созданный с целью привлечения внимания. 
                 Отвечай вероятностью от 0 до 1. 
@@ -231,12 +187,19 @@ public class AiChecks : IAiChecks
                 ОБЯЗАТЕЛЬНО анализируй фото профиля если оно есть!
                 ОБЯЗАТЕЛЬНО учитывай первое сообщение пользователя если оно предоставлено!
                 
+                КРИТИЧЕСКИ ВАЖНО про банальные приветствия:
+                • Банальные приветствия (привет, hello, hi, etc.) от подозрительных профилей - это КЛАССИЧЕСКИЙ паттерн спамеров
+                • Спамеры специально используют невинные сообщения чтобы обойти фильтры
+                • Комбинация подозрительного профиля + банальное приветствие = ВЫСОКАЯ вероятность спама
+                • Реальные пользователи обычно пишут более осмысленные первые сообщения
+                
                 Особенно внимательно учитывай признаки:
                 • сексуализированные профили (эмодзи с двойным смыслом - 💦, 💋, 👄, 🍑, 🍆, 🍒, 🍓, 🍌 и прочих в имени, любой намёк на эротику и порно, голые фото)
                 • подозрительные фото: слишком привлекательные, профессиональные, эротические
                 • упоминания о курсах, заработке, трейдинге, арбитраже, привлечению трафика
                 • ссылки на OnlyFans, соцсети
                 • род занятий указан прямо в имени (например: HR, SMM, недвижимость, маркетинг)
+                • имена-заглушки (случайные буквы, числа, бессмысленные сочетания)
                 
                 Вот данные профиля:
                 {nameBioUser}
@@ -246,6 +209,14 @@ public class AiChecks : IAiChecks
             if (!string.IsNullOrWhiteSpace(messageText))
             {
                 prompt += $"\n\nПервое сообщение пользователя:\n{messageText}";
+                _logger.LogDebug("🤖 AI анализ профиля: добавлено первое сообщение в анализ для пользователя {UserId}", user.Id);
+            }
+
+            // ОТЛАДКА: Логируем полные данные, отправляемые в AI
+            _logger.LogDebug("🤖 AI анализ профиля: полные данные для пользователя {UserId}:\n{ProfileData}", user.Id, nameBioUser);
+            if (!string.IsNullOrWhiteSpace(messageText))
+            {
+                _logger.LogDebug("🤖 AI анализ профиля: первое сообщение для пользователя {UserId}: '{MessageText}'", user.Id, messageText);
             }
 
             var messages = new List<ChatCompletionRequestMessage>
@@ -256,27 +227,6 @@ public class AiChecks : IAiChecks
             
             if (photoMessage != null)
                 messages.Add(photoMessage);
-
-            // Анализируем связанный канал если есть
-            if (userChat.LinkedChatId != null)
-            {
-                try
-                {
-                    var linkedChat = await _bot.GetChatFullInfo(userChat.LinkedChatId.Value);
-                    var info = new StringBuilder();
-                    info.Append($"Информация о привязанном канале:\nНазвание: {linkedChat.Title}");
-                    if (linkedChat.Username != null)
-                        info.Append($"\nЮзернейм: @{linkedChat.Username}");
-                    if (linkedChat.Description != null)
-                        info.Append($"\nОписание: {linkedChat.Description}");
-                    
-                    messages.Add(info.ToString().ToUserMessage());
-                }
-                catch (Exception e)
-                {
-                    _logger.LogWarning(e, "Не удалось получить информацию о связанном канале {ChannelId}", userChat.LinkedChatId);
-                }
-            }
 
             _logger.LogDebug("🤖 AI анализ профиля: отправляем запрос в API для пользователя {UserId}, количество сообщений: {MessagesCount}", 
                 user.Id, messages.Count);
@@ -567,6 +517,113 @@ public class AiChecks : IAiChecks
         catch (Exception ex)
         {
             _logger.LogError(ex, "Ошибка при специальном AI анализе подозрительного пользователя");
+            return new SpamProbability();
+        }
+    }
+
+    /// <summary>
+    /// Анализ ML-подозрительных сообщений с помощью AI (каскадная система)
+    /// </summary>
+    public async ValueTask<SpamProbability> GetMlSuspiciousMessageAnalysis(
+        Message message, 
+        Telegram.Bot.Types.User user, 
+        double mlScore)
+    {
+        if (_api == null)
+            return new SpamProbability();
+
+        try
+        {
+            var text = message.Text ?? message.Caption ?? "";
+            if (string.IsNullOrWhiteSpace(text))
+                return new SpamProbability();
+
+            var userName = Utils.FullName(user);
+            var username = user.Username != null ? $"@{user.Username}" : "нет";
+            
+            // Получаем информацию о пользователе
+            var userChat = await _bot.GetChatFullInfo(user.Id);
+            var bioInfo = !string.IsNullOrEmpty(userChat.Bio) ? $"\n• Биография: {userChat.Bio}" : "";
+            var photoInfo = userChat.Photo != null ? "\n• Есть фото профиля" : "\n• Нет фото профиля";
+
+            var prompt = $"""
+                КРИТИЧЕСКИЙ AI АНАЛИЗ ML-ПОДОЗРИТЕЛЬНОГО СООБЩЕНИЯ
+                ВАЖНО: Объяснение должно быть КРАТКИМ (максимум 2-3 предложения)!
+                
+                КОНТЕКСТ:
+                • ML классификатор заподозрил это сообщение как спам (скор: {mlScore:F2})
+                • ML неуверен в своем решении (серая зона)
+                • Твоя задача — дать ФИНАЛЬНОЕ решение: БАН или РАЗРЕШИТЬ
+                • Если ВИДИШЬ подозрительный контент — БАН БЕЗ РАЗБИРАТЕЛЬСТВ
+                
+                ДАННЫЕ ПОЛЬЗОВАТЕЛЯ:
+                • Имя: {userName}
+                • Username: {username}{bioInfo}{photoInfo}
+                
+                СООБЩЕНИЕ: "{text}"
+                
+                ОСОБОЕ ВНИМАНИЕ К ОБФУСКАЦИИ:
+                • Точки между буквами: "дет.ский", "мал.ыш", "ви.део"
+                • Замены символов: "дeтский" (латинская e)
+                • Пробелы в словах: "дет ский"
+                • Подозрительные темы + детские эмодзи: "дет.ские ви.део 🥺"
+                • Комбинации: подозрительное слово + контекст + эмодзи
+                
+                КРИТИЧЕСКИЕ ПРИЗНАКИ ДЛЯ БАНА:
+                • Любая обфускация подозрительных слов
+                • Детские темы с эмодзи (🥺😍💋)
+                • Сексуализированный контент
+                • Мошеннические схемы
+                
+                Оцени вероятность спама от 0 до 1. Если > 0.7 — БАН.
+                """;
+
+            var messages = new List<ChatCompletionRequestMessage>
+            {
+                "Ты — финальный арбитр для ML-подозрительных сообщений. Твоя задача — принимать решение о БАНЕ или РАЗРЕШЕНИИ. ОБЯЗАТЕЛЬНО отвечай на русском языке! Объяснения должны быть КРАТКИМИ (максимум 2-3 предложения).".ToSystemMessage(),
+                prompt.ToUserMessage()
+            };
+
+            // Добавляем фото профиля если есть
+            if (userChat.Photo != null)
+            {
+                try
+                {
+                    using var ms = new MemoryStream();
+                    await _bot.GetInfoAndDownloadFile(userChat.Photo.BigFileId, ms);
+                    var photoBytes = ms.ToArray();
+                    var photoMessage = photoBytes.ToUserMessage(mimeType: "image/jpg");
+                    messages.Add(photoMessage);
+                    _logger.LogDebug("🔍 Добавлено фото профиля для ML-AI анализа {User}", userName);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug("Не удалось загрузить фото профиля для {User}: {Error}", userName, ex.Message);
+                }
+            }
+
+            var response = await _retry.ExecuteAsync(
+                async token => await _api.Chat.CreateChatCompletionAsAsync<SpamProbability>(
+                    messages: messages,
+                    model: Model,
+                    strict: true,
+                    jsonSerializerOptions: _jsonOptions,
+                    cancellationToken: token
+                )
+            );
+
+            if (response.Value1 != null)
+            {
+                _logger.LogInformation("🔍 ML-AI каскадный анализ: {Probability} - {Reason}", 
+                    response.Value1.Probability, response.Value1.Reason);
+                return response.Value1;
+            }
+
+            return new SpamProbability();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Ошибка при ML-AI каскадном анализе");
             return new SpamProbability();
         }
     }
