@@ -31,7 +31,7 @@ public class ModerationServiceTests
         
         _factory.WithClassifierSetup(mock => 
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
-                .ReturnsAsync((false, 0.2f)));
+                .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
         
         _factory.WithMimicryClassifierSetup(mock => 
             mock.Setup(x => x.AnalyzeMessages(It.IsAny<List<string>>()))
@@ -75,7 +75,7 @@ public class ModerationServiceTests
         
         _factory.WithClassifierSetup(mock => 
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
-                .ReturnsAsync((false, 0.2f)));
+                .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
         
         _factory.WithMimicryClassifierSetup(mock => 
             mock.Setup(x => x.AnalyzeMessages(It.IsAny<List<string>>()))

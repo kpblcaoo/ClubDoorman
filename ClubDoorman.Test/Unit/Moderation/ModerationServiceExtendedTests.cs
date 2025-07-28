@@ -325,6 +325,10 @@ public class ModerationServiceExtendedTests
     public async Task CheckMessageAsync_UserWithoutFirstName_HandlesGracefully()
     {
         // Arrange
+        _factory.WithClassifierSetup(mock => 
+            mock.Setup(x => x.IsSpam(It.IsAny<string>()))
+                .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
+        
         var service = _factory.CreateModerationService();
         var message = new Message
         {
@@ -344,6 +348,10 @@ public class ModerationServiceExtendedTests
     public async Task CheckMessageAsync_ChatWithoutId_HandlesGracefully()
     {
         // Arrange
+        _factory.WithClassifierSetup(mock => 
+            mock.Setup(x => x.IsSpam(It.IsAny<string>()))
+                .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
+        
         var service = _factory.CreateModerationService();
         var message = new Message
         {
@@ -363,6 +371,10 @@ public class ModerationServiceExtendedTests
     public async Task CheckMessageAsync_ConcurrentCalls_HandlesCorrectly()
     {
         // Arrange
+        _factory.WithClassifierSetup(mock => 
+            mock.Setup(x => x.IsSpam(It.IsAny<string>()))
+                .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
+        
         var service = _factory.CreateModerationService();
         var message = TestDataFactory.CreateValidMessage();
         var tasks = new List<Task<ModerationResult>>();
@@ -388,6 +400,10 @@ public class ModerationServiceExtendedTests
     public async Task CheckMessageAsync_WithMimicryDetection_ReturnsAllow()
     {
         // Arrange
+        _factory.WithClassifierSetup(mock => 
+            mock.Setup(x => x.IsSpam(It.IsAny<string>()))
+                .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
+        
         _factory.WithMimicryClassifierSetup(mock => 
             mock.Setup(x => x.AnalyzeMessages(It.IsAny<List<string>>()))
                 .Returns(0.9));
