@@ -35,4 +35,12 @@ public interface IAiChecks
         User user, 
         List<string> firstMessages, 
         double mimicryScore);
+
+    /// <summary>
+    /// Анализ ML-подозрительных сообщений с помощью AI (каскадная система)
+    /// </summary>
+    ValueTask<SpamProbability> GetMlSuspiciousMessageAnalysis(
+        Message message, 
+        User user, 
+        double mlScore);
 } 

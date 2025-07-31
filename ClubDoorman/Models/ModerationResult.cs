@@ -48,5 +48,10 @@ public enum ModerationAction
     /// <summary>
     /// Требуется ручная проверка
     /// </summary>
-    RequireManualReview
+    RequireManualReview,
+    
+    /// <summary>
+    /// ML неуверен, требуется AI анализ
+    /// </summary>
+    RequireAiReview
 } 

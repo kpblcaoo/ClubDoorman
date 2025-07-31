@@ -791,6 +791,25 @@ public class MessageHandler : IUpdateHandler
                 _logger.LogInformation("Требует ручной проверки: {Reason}", moderationResult.Reason);
                 await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
                 break;
+            
+            case ModerationAction.RequireAiReview:
+                _logger.LogInformation("AI анализ для ML-подозрительного: {Reason}", moderationResult.Reason);
+                var aiResult = await _aiChecks.GetMlSuspiciousMessageAnalysis(message, user, moderationResult.Confidence ?? 0.0);
+                
+                if (aiResult.Probability > 0.7)
+                {
+                    // AI подтвердил подозрение - БАН БЕЗ РАЗБИРАТЕЛЬСТВ
+                    var banReason = $"AI подтвердил ML подозрение ({aiResult.Probability:F2}): {aiResult.Reason}";
+                    _logger.LogInformation("AI подтвердил ML подозрение, бан пользователя: {Reason}", banReason);
+                    await AutoBan(message, banReason, cancellationToken);
+                }
+                else
+                {
+                    // AI опроверг подозрение - разрешаем
+                    _logger.LogInformation("AI опроверг ML подозрение ({Probability:F2}), разрешаем сообщение", aiResult.Probability);
+                    await _moderationService.IncrementGoodMessageCountAsync(user, chat, messageText);
+                }
+                break;
         }
     }
 
