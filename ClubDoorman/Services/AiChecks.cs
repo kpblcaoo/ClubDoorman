@@ -187,12 +187,6 @@ public class AiChecks : IAiChecks
                 ОБЯЗАТЕЛЬНО анализируй фото профиля если оно есть!
                 ОБЯЗАТЕЛЬНО учитывай первое сообщение пользователя если оно предоставлено!
                 
-                КРИТИЧЕСКИ ВАЖНО про банальные приветствия:
-                • Банальные приветствия (привет, hello, hi, etc.) от подозрительных профилей - это КЛАССИЧЕСКИЙ паттерн спамеров
-                • Спамеры специально используют невинные сообщения чтобы обойти фильтры
-                • Комбинация подозрительного профиля + банальное приветствие = ВЫСОКАЯ вероятность спама
-                • Реальные пользователи обычно пишут более осмысленные первые сообщения
-                
                 Особенно внимательно учитывай признаки:
                 • сексуализированные профили (эмодзи с двойным смыслом - 💦, 💋, 👄, 🍑, 🍆, 🍒, 🍓, 🍌 и прочих в имени, любой намёк на эротику и порно, голые фото)
                 • подозрительные фото: слишком привлекательные, профессиональные, эротические
@@ -522,6 +516,144 @@ public class AiChecks : IAiChecks
     }
 
 
+
+    /// <summary>
+    /// Каскадный анализ ML -> AI: комплексная проверка профиля + сообщения + ML результата
+    /// </summary>
+    public async ValueTask<SpamProbability> GetCascadeAnalysisProbability(
+        Message message, 
+        Telegram.Bot.Types.User user, 
+        double mlScore, 
+        bool mlSpamDecision)
+    {
+        if (_api == null)
+        {
+            _logger.LogDebug("AI API недоступен для каскадного анализа");
+            return new SpamProbability();
+        }
+
+        try
+        {
+            var text = message.Text ?? message.Caption ?? "";
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                _logger.LogDebug("Текст сообщения пустой, пропускаем каскадный AI анализ");
+                return new SpamProbability();
+            }
+
+            var userName = Utils.FullName(user);
+            var username = user.Username != null ? $"@{user.Username}" : "нет";
+            
+            // Получаем расширенную информацию о профиле
+            var userChat = await _bot.GetChatFullInfo(user.Id);
+            var bioInfo = !string.IsNullOrEmpty(userChat.Bio) ? $"\n• Биография: {userChat.Bio}" : "\n• Биография: отсутствует";
+            var photoInfo = userChat.Photo != null ? "\n• Есть фото профиля" : "\n• Нет фото профиля";
+
+            // Определяем ML решение текстом
+            var mlDecisionText = mlSpamDecision ? "СПАМ" : "НЕ СПАМ";
+            var mlConfidenceText = GetMlConfidenceDescription(mlScore);
+
+            var prompt = $"""
+                КАСКАДНЫЙ АНАЛИЗ ML → AI
+                ВАЖНО: Объяснение должно быть КРАТКИМ (максимум 2-3 предложения)!
+                
+                КОНТЕКСТ:
+                • ML классификатор не уверен в своем решении
+                • Требуется экспертная AI оценка для финального решения
+                • Это критическая точка модерации - твое решение окончательное
+                
+                ML РЕЗУЛЬТАТ:
+                • Решение ML: {mlDecisionText}
+                • Скор ML: {mlScore:F3} ({mlConfidenceText})
+                • Статус: НЕУВЕРЕННОСТЬ (требуется AI анализ)
+                
+                ДАННЫЕ ПОЛЬЗОВАТЕЛЯ:
+                • Имя: {userName}
+                • Username: {username}{bioInfo}{photoInfo}
+                
+                СООБЩЕНИЕ ДЛЯ АНАЛИЗА: "{text}"
+                
+                КРИТЕРИИ ОЦЕНКИ:
+                • Анализируй профиль: подозрительные имена, биографии, фото
+                • Оценивай текст сообщения: спам-маркеры, коммерческие предложения
+                • Учитывай ML скор: если он близок к 0, ML сильно сомневается
+                • Обращай внимание на несоответствия между профилем и сообщением
+                
+                ОСОБЕННОСТИ:
+                • Новые пользователи с коммерческими предложениями = подозрительно
+                • Привлекательные фото + финансовые услуги = вероятный спам
+                • Банальные приветствия могут маскировать спамеров
+                • Учитывай региональную специфику и культурные особенности
+                
+                ЗАДАЧА: Принять окончательное решение вместо ML классификатора.
+                Оцени вероятность спама от 0 до 1, учитывая ВСЕ доступные данные.
+                """;
+
+            var messages = new List<ChatCompletionRequestMessage>
+            {
+                "Ты — эксперт по антиспам модерации, заменяющий неуверенный ML классификатор. Анализируй КОМПЛЕКСНО: профиль + сообщение + ML данные. Принимай ФИНАЛЬНЫЕ решения. ОБЯЗАТЕЛЬНО отвечай на русском языке! Объяснения должны быть КРАТКИМИ (максимум 2-3 предложения).".ToSystemMessage(),
+                prompt.ToUserMessage()
+            };
+
+            // Добавляем фото профиля если есть
+            ChatCompletionRequestUserMessage? photoMessage = null;
+            if (userChat.Photo != null)
+            {
+                try
+                {
+                    using var ms = new MemoryStream();
+                    await _bot.GetInfoAndDownloadFile(userChat.Photo.BigFileId, ms);
+                    var photoBytes = ms.ToArray();
+                    photoMessage = photoBytes.ToUserMessage(mimeType: "image/jpg");
+                    
+                    _logger.LogDebug("🤖 Каскадный AI анализ: добавлено фото профиля ({Size} байт) для пользователя {UserId}", 
+                        photoBytes.Length, user.Id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Не удалось загрузить фото профиля для каскадного анализа пользователя {UserId}", user.Id);
+                }
+            }
+            
+            // Добавляем фото к сообщениям если загружено
+            if (photoMessage != null)
+            {
+                messages.Add(photoMessage);
+            }
+
+            var response = await _retry.ExecuteAsync(
+                async token => await _api.Chat.CreateChatCompletionAsAsync<SpamProbability>(
+                    messages: messages,
+                    model: Model,
+                    strict: true,
+                    jsonSerializerOptions: _jsonOptions,
+                    cancellationToken: token
+                )
+            );
+
+            _logger.LogInformation("🤖🔗 Каскадный AI анализ завершен: пользователь {UserId}, ML={MlScore}, AI={AiScore}, причина={Reason}", 
+                user.Id, mlScore, response.Value1?.Probability ?? 0, response.Value1?.Reason ?? "не указана");
+            
+            return response.Value1 ?? new SpamProbability();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Ошибка при каскадном AI анализе пользователя {UserId}", user.Id);
+            return new SpamProbability();
+        }
+    }
+
+    private string GetMlConfidenceDescription(double mlScore)
+    {
+        return mlScore switch
+        {
+            > 0.5 => "высокая уверенность в спаме",
+            > 0 => "слабая склонность к спаму", 
+            > -0.3 => "очень низкая уверенность",
+            > -0.6 => "склонность к легитимности",
+            _ => "уверенность в легитимности"
+        };
+    }
 
     private void CacheResult(long userId, SpamPhotoBio result)
     {

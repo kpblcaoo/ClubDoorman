@@ -712,11 +712,11 @@ public class ModerationService : IModerationService
             return new ModerationResult(ModerationAction.Delete, $"ML решил что это спам, скор {score}", score);
         }
 
-        // 10. Проверка низкой уверенности в ham
+        // 10. Проверка низкой уверенности в ham - каскадная проверка ML -> AI
         if (score > -0.6 && Config.LowConfidenceHamForward)
         {
-            return new ModerationResult(ModerationAction.RequireManualReview, 
-                $"Классификатор думает что это НЕ спам, но конфиденс низкий: скор {score}", score);
+            return new ModerationResult(ModerationAction.RequireAiAnalysis, 
+                $"ML не уверен (скор {score}) - требуется AI анализ", score);
         }
 
         // Все проверки пройдены - сообщение можно разрешить

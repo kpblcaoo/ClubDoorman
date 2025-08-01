@@ -840,6 +840,11 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
                 _logger.LogInformation("Требует ручной проверки: {Reason}", moderationResult.Reason);
                 await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
                 break;
+            
+            case ModerationAction.RequireAiAnalysis:
+                _logger.LogInformation("ML не уверен, запускаем AI анализ: {Reason}", moderationResult.Reason);
+                await HandleAiCascadeAnalysis(message, user, moderationResult.Confidence ?? 0, isSilentMode, cancellationToken);
+                break;
         }
     }
 
@@ -1454,6 +1459,66 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         }
 
         return false; // Возвращаем false - профиль безопасен, продолжаем модерацию
+    }
+
+    /// <summary>
+    /// Обработка каскадного анализа ML -> AI для сообщений с низкой уверенностью ML
+    /// </summary>
+    private async Task HandleAiCascadeAnalysis(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken)
+    {
+        var messageText = message.Text ?? message.Caption ?? "";
+        var chat = message.Chat;
+        
+        if (string.IsNullOrWhiteSpace(messageText))
+        {
+            _logger.LogWarning("🤖 AI каскадный анализ: пропускаем медиа без текста от {User}", Utils.FullName(user));
+            // Для медиа без текста отправляем в ручную проверку
+            await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
+            return;
+        }
+
+        try
+        {
+            _logger.LogInformation("🤖🔗 КАСКАДНЫЙ АНАЛИЗ: ML дал скор {MlScore}, запускаем AI для пользователя {User}: '{Text}'", 
+                mlScore, Utils.FullName(user), messageText.Substring(0, Math.Min(messageText.Length, 100)));
+
+            // Запускаем комплексный AI анализ (профиль + сообщение + ML данные)
+            var aiResult = await _aiChecks.GetCascadeAnalysisProbability(message, user, mlScore, false).AsTask().WaitAsync(TimeSpan.FromSeconds(30));
+            var aiProbability = aiResult.Probability;
+            var aiReason = aiResult.Reason ?? "Нет объяснения";
+
+            _logger.LogInformation("🤖✅ AI каскадный анализ завершен: пользователь {User}, ML={MlScore}, AI={AiScore}, причина: {AiReason}", 
+                Utils.FullName(user), mlScore, aiProbability, aiReason);
+
+            // Принимаем решение на основе AI анализа
+            if (aiProbability >= 0.8) // Высокая вероятность спама по AI
+            {
+                _logger.LogWarning("🤖🚫 AI каскадный анализ: определен спам (AI={AiScore}), удаляем сообщение", aiProbability);
+                await DeleteAndReportMessage(message, $"AI каскадный анализ: спам (ML={mlScore:F2}, AI={aiProbability:F2})", isSilentMode, cancellationToken);
+                
+                // Отслеживаем нарушения для повторных банов
+                await _userBanService.TrackViolationAndBanIfNeededAsync(message, user, $"AI каскадный анализ: спам (ML={mlScore:F2}, AI={aiProbability:F2})", cancellationToken);
+            }
+            else if (aiProbability >= 0.4) // Подозрительно - требует внимания админов
+            {
+                _logger.LogInformation("🤖❓ AI каскадный анализ: подозрительное сообщение (AI={AiScore}), отправляем админам", aiProbability);
+                await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
+            }
+            else // AI считает сообщение безопасным
+            {
+                _logger.LogInformation("🤖✅ AI каскадный анализ: сообщение безопасно (AI={AiScore}), разрешаем", aiProbability);
+                
+                // Засчитываем как хорошее сообщение
+                await _moderationService.IncrementGoodMessageCountAsync(user, chat, messageText);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Ошибка при AI каскадном анализе для пользователя {UserId}", user.Id);
+            
+            // При ошибке AI отправляем в ручную проверку
+            await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
+        }
     }
 
     #region IMessageHandler Implementation
