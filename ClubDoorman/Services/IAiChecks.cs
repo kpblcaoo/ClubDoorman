@@ -35,4 +35,13 @@ public interface IAiChecks
         User user, 
         List<string> firstMessages, 
         double mimicryScore);
+
+    /// <summary>
+    /// Каскадный анализ ML -> AI: комплексная проверка профиля + сообщения + ML результата
+    /// </summary>
+    ValueTask<SpamProbability> GetCascadeAnalysisProbability(
+        Message message, 
+        User user, 
+        double mlScore, 
+        bool mlSpamDecision);
 } 

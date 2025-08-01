@@ -133,6 +133,31 @@ public static class SimpleFilters
             }
         }
         
+        // Проверяем банальные фразы с приветствиями (до 5 слов)
+        if (words.Length <= 5 && words.Length >= 2)
+        {
+            var hasGreeting = words.Any(word => boringGreetings.Contains(word));
+            if (hasGreeting)
+            {
+                var boringPhrases = new[]
+                {
+                    "как дела", "как у кого дела", "как жизнь", "как сам", "как сама", 
+                    "что делаешь", "что делаете", "как поживаешь", "как поживаете",
+                    "как настроение", "как дечки", "как делишки", "как животик",
+                    "что нового", "что как", "ну как", "как ты", "как вы",
+                    "все хорошо", "все нормально", "все ок", "все окей",
+                    "доброго времени суток", "хорошего дня", "приятного вечера"
+                };
+                
+                var messageWithoutGreeting = string.Join(" ", words.Where(w => !boringGreetings.Contains(w)));
+                if (boringPhrases.Any(phrase => messageWithoutGreeting.Contains(phrase)) || 
+                    messageWithoutGreeting.Trim().Length <= 15) // Короткая банальная добавка
+                {
+                    return true;
+                }
+            }
+        }
+        
         // Проверяем только эмодзи (включая несколько подряд)
         var emojiOnlyPattern = @"^[\s\p{So}\p{Sk}\u200d\ufe0f\u2600-\u27bf\ud800-\udfff]+$";
         if (Regex.IsMatch(normalizedMessage, emojiOnlyPattern) && normalizedMessage.Trim().Length > 0)
