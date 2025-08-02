@@ -1088,6 +1088,9 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
                     cancellationToken: cancellationToken
                 );
                 
+                _logger.LogDebug("✅ Сообщение успешно переслано, ждем 150мс перед отправкой уведомления");
+                await Task.Delay(150, cancellationToken); // Задержка между пересылкой и уведомлением
+                
                 // Отправляем уведомление с кнопками как реплай на пересланное сообщение
                 await _bot.SendMessage(
                     _appConfig.AdminChatId,
@@ -1119,11 +1122,11 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
             _logger.LogError(e, "Не удалось отправить уведомление в админ-чат");
         }
 
-        // ЭТАП 2: Небольшая задержка для избежания race condition с Telegram API
+        // ЭТАП 2: Увеличенная задержка для избежания race condition с Telegram API
         try
         {
-            await Task.Delay(50, cancellationToken); // 50мс задержка
-            _logger.LogDebug("Выполнена задержка 50мс между пересылкой и предупреждением");
+            await Task.Delay(200, cancellationToken); // 200мс задержка (было 50мс)
+            _logger.LogDebug("Выполнена задержка 200мс между пересылкой и предупреждением");
         }
         catch (OperationCanceledException)
         {
@@ -1169,11 +1172,11 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
             }
         }
 
-        // ЭТАП 4: Еще одна небольшая задержка перед удалением
+        // ЭТАП 4: Увеличенная задержка перед удалением
         try
         {
-            await Task.Delay(100, cancellationToken); // 100мс задержка
-            _logger.LogDebug("Выполнена задержка 100мс между предупреждением и удалением");
+            await Task.Delay(300, cancellationToken); // 300мс задержка (было 100мс)
+            _logger.LogDebug("Выполнена задержка 300мс между предупреждением и удалением");
         }
         catch (OperationCanceledException)
         {
