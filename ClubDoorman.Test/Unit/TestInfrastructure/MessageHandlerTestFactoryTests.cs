@@ -1,6 +1,7 @@
 using ClubDoorman.Handlers;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Requests;
 using NUnit.Framework;

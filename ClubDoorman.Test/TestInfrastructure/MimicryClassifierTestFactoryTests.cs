@@ -1,4 +1,5 @@
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;

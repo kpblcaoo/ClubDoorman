@@ -1,6 +1,7 @@
 using ClubDoorman.Handlers;
 using ClubDoorman.Handlers.Commands;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;

@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using ClubDoorman;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.TestInfrastructure;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;

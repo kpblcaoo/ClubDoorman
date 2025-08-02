@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 
 namespace ClubDoorman.TestInfrastructure;
 

@@ -3,6 +3,7 @@ using TechTalk.SpecFlow;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Handlers;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.TestInfrastructure;

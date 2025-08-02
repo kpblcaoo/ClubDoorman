@@ -7,6 +7,7 @@ using Bogus;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using Moq;

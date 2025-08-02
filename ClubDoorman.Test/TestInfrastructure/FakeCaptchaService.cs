@@ -1,6 +1,7 @@
 using ClubDoorman.Models;
 using ClubDoorman.Models.Requests;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 

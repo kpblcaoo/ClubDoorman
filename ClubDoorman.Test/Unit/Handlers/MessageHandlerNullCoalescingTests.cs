@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Test.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using Moq;

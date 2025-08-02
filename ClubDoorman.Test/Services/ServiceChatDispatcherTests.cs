@@ -1,5 +1,6 @@
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using Telegram.Bot.Types;
 using Moq;
 using NUnit.Framework;

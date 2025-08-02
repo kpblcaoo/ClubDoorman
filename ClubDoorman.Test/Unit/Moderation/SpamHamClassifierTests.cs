@@ -1,4 +1,5 @@
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Test.TestData;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;

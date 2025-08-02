@@ -3,7 +3,7 @@ namespace ClubDoorman.Services.BanSystem;
 /// <summary>
 /// Типы банов пользователей
 /// </summary>
-public enum BanType
+public enum BanTypeEnum
 {
     /// <summary>
     /// Бан за длинное имя пользователя

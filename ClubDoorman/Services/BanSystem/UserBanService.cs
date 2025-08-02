@@ -6,7 +6,7 @@ using ClubDoorman.Models.Notifications;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.BanSystem;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.BanSystem;
 
 /// <summary>
 /// Сервис для управления банами пользователей
@@ -191,7 +191,7 @@ public class UserBanService : IUserBanService
     public async Task BanUserAsync(
         Chat chat, 
         User user, 
-        BanType banType, 
+        BanTypeEnum banType, 
         string? customReason = null,
         Message? messageToDelete = null,
         CancellationToken cancellationToken = default)
@@ -213,7 +213,7 @@ public class UserBanService : IUserBanService
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Не удалось забанить пользователя типа {BanType}", banType);
+            _logger.LogWarning(e, "Не удалось забанить пользователя типа {BanTypeEnum}", banType);
         }
     }
 
@@ -440,51 +440,51 @@ public class UserBanService : IUserBanService
             FullName(user.FirstName, user.LastName), user.Id, chat.Title, chat.Id);
     }
 
-    // Вспомогательные методы для работы с enum BanType
-    private (TimeSpan? duration, string reason) GetBanConfiguration(BanType banType, string? customReason)
+    // Вспомогательные методы для работы с enum BanTypeEnum
+    private (TimeSpan? duration, string reason) GetBanConfiguration(BanTypeEnum banType, string? customReason)
     {
         return banType switch
         {
-            BanType.LongName => (null, customReason ?? "Длинное имя пользователя"),
-            BanType.Blacklist => (TimeSpan.FromMinutes(240), "Пользователь в блэклисте"),
-            BanType.AutoBan => (null, customReason ?? "Автоматический бан"),
-            BanType.ManualBan => (null, customReason ?? "Ручной бан"),
-            BanType.ProfileBan => (null, customReason ?? "Бан по профилю"),
-            BanType.ChannelBan => (null, customReason ?? "Бан канала"),
-            BanType.CaptchaBan => (TimeSpan.FromMinutes(10), customReason ?? "Неудачная капча"),
-            BanType.RepeatedViolation => (TimeSpan.FromMinutes(60), customReason ?? "Повторное нарушение"),
+            BanTypeEnum.LongName => (null, customReason ?? "Длинное имя пользователя"),
+            BanTypeEnum.Blacklist => (TimeSpan.FromMinutes(240), "Пользователь в блэклисте"),
+            BanTypeEnum.AutoBan => (null, customReason ?? "Автоматический бан"),
+            BanTypeEnum.ManualBan => (null, customReason ?? "Ручной бан"),
+            BanTypeEnum.ProfileBan => (null, customReason ?? "Бан по профилю"),
+            BanTypeEnum.ChannelBan => (null, customReason ?? "Бан канала"),
+            BanTypeEnum.CaptchaBan => (TimeSpan.FromMinutes(10), customReason ?? "Неудачная капча"),
+            BanTypeEnum.RepeatedViolation => (TimeSpan.FromMinutes(60), customReason ?? "Повторное нарушение"),
             _ => (null, customReason ?? "Неизвестный тип бана")
         };
     }
 
-    private string GetBanTypeDescription(BanType banType)
+    private string GetBanTypeDescription(BanTypeEnum banType)
     {
         return banType switch
         {
-            BanType.LongName => "🚫 Перманентный бан",
-            BanType.Blacklist => "🚫 Бан из блэклиста",
-            BanType.AutoBan => "🚫 Автоматический бан",
-            BanType.ManualBan => "🚫 Ручной бан",
-            BanType.ProfileBan => "🚫 Бан по профилю",
-            BanType.ChannelBan => "🚫 Бан канала",
-            BanType.CaptchaBan => "Автобан на 10 минут",
-            BanType.RepeatedViolation => "Автобан на 1 час",
+            BanTypeEnum.LongName => "🚫 Перманентный бан",
+            BanTypeEnum.Blacklist => "🚫 Бан из блэклиста",
+            BanTypeEnum.AutoBan => "🚫 Автоматический бан",
+            BanTypeEnum.ManualBan => "🚫 Ручной бан",
+            BanTypeEnum.ProfileBan => "🚫 Бан по профилю",
+            BanTypeEnum.ChannelBan => "🚫 Бан канала",
+            BanTypeEnum.CaptchaBan => "Автобан на 10 минут",
+            BanTypeEnum.RepeatedViolation => "Автобан на 1 час",
             _ => "🚫 Бан"
         };
     }
 
-    private LogNotificationType GetNotificationType(BanType banType)
+    private LogNotificationType GetNotificationType(BanTypeEnum banType)
     {
         return banType switch
         {
-            BanType.LongName => LogNotificationType.BanForLongName,
-            BanType.Blacklist => LogNotificationType.BanBlacklistedUser,
-            BanType.AutoBan => LogNotificationType.AutoBan,
-            BanType.ManualBan => LogNotificationType.ManualBan,
-            BanType.ProfileBan => LogNotificationType.ProfileBan,
-            BanType.ChannelBan => LogNotificationType.ChannelBan,
-            BanType.CaptchaBan => LogNotificationType.CaptchaBan,
-            BanType.RepeatedViolation => LogNotificationType.RepeatedViolation,
+            BanTypeEnum.LongName => LogNotificationType.BanForLongName,
+            BanTypeEnum.Blacklist => LogNotificationType.BanBlacklistedUser,
+            BanTypeEnum.AutoBan => LogNotificationType.AutoBan,
+            BanTypeEnum.ManualBan => LogNotificationType.ManualBan,
+            BanTypeEnum.ProfileBan => LogNotificationType.ProfileBan,
+            BanTypeEnum.ChannelBan => LogNotificationType.ChannelBan,
+            BanTypeEnum.CaptchaBan => LogNotificationType.CaptchaBan,
+            BanTypeEnum.RepeatedViolation => LogNotificationType.RepeatedViolation,
             _ => LogNotificationType.AutoBan
         };
     }
