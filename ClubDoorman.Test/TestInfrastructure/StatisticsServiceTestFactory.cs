@@ -69,6 +69,7 @@ public class StatisticsServiceTestFactory
             new Mock<ISuspiciousUsersStorage>().Object,
             new Mock<ITelegramBotClient>().Object,
             new Mock<IMessageService>().Object,
+            new Mock<IUserBanService>().Object,
             new Mock<ILogger<ModerationService>>().Object
         );
     }

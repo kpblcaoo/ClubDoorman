@@ -170,17 +170,37 @@ public class IntroFlowService
 
         try
         {
-            // Используем UserBanService для централизованного бана из блэклиста
+            _statisticsService.IncrementBlacklistBan(chat.Id);
+            
+            // Баним пользователя на 4 часа с параметром revokeMessages: true чтобы удалить все сообщения
+            var banUntil = DateTime.UtcNow + TimeSpan.FromMinutes(240);
+            await _bot.BanChatMember(chat.Id, user.Id, banUntil, revokeMessages: true);
+            
+            // Явно удаляем сообщение о входе в чат, если оно есть
             if (userJoinMessage != null)
             {
-                await _userBanService.BanBlacklistedUserAsync(userJoinMessage, user, CancellationToken.None);
-            }
-            else
-            {
-                // Если нет сообщения о входе, используем BanUserAsync с BanTypeEnum.Blacklist
-                await _userBanService.BanUserAsync(chat, user, BanTypeEnum.Blacklist, "Пользователь в блэклисте", null, CancellationToken.None);
+                try
+                {
+                    await _bot.DeleteMessage(chat.Id, userJoinMessage.MessageId);
+                    _logger.LogDebug("Удалено сообщение о входе пользователя из блэклиста");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Не удалось удалить сообщение о входе пользователя из блэклиста");
+                }
             }
             
+            // Удаляем из списка одобренных
+            if (_userManager.RemoveApproval(user.Id, chat.Id, removeAll: true))
+            {
+                await _messageService.SendAdminNotificationAsync(
+                    AdminNotificationType.UserCleanup,
+                    new UserCleanupNotificationData(user, chat, $"Пользователь {FullName(user.FirstName, user.LastName)} удален из списка одобренных после бана по блеклисту")
+                );
+            }
+            
+            _logger.LogInformation("Пользователь {User} (id={UserId}) из блэклиста забанен на 4 часа в чате {ChatTitle} (id={ChatId})", FullName(user.FirstName, user.LastName), user.Id, chat.Title, chat.Id);
+            _globalStatsManager.IncBan(chat.Id, chat.Title ?? "");
             return true;
         }
         catch (Exception e)
