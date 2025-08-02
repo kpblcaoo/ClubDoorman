@@ -25,35 +25,35 @@
 
 ```bash
 # Использование модульной версии индексера
-python testkit_sql_indexer_modular.py /path/to/TestKit
+python testkit_sql_indexer.py /path/to/TestKit
 
 # С дополнительными опциями
-python testkit_sql_indexer_modular.py /path/to/TestKit --db-path custom.db --no-reports
+python testkit_sql_indexer.py /path/to/TestKit --db-path custom.db --no-reports
 ```
 
 ### Запросы
 
 ```bash
 # Интерактивный режим
-python testkit_sql_query_modular.py --interactive
+python testkit_sql_query.py --interactive
 
 # Поиск по имени метода
-python testkit_sql_query_modular.py --name CreateUser
+python testkit_sql_query.py --name CreateUser
 
 # Поиск по тегу
-python testkit_sql_query_modular.py --tag builder
+python testkit_sql_query.py --tag builder
 
 # Поиск по типу возвращаемого значения
-python testkit_sql_query_modular.py --type string
+python testkit_sql_query.py --type string
 
 # Поиск по компоненту
-python testkit_sql_query_modular.py --component UserBuilder
+python testkit_sql_query.py --component UserBuilder
 
 # Показать статистику
-python testkit_sql_query_modular.py --stats
+python testkit_sql_query.py --stats
 
 # Показать все теги
-python testkit_sql_query_modular.py --tags
+python testkit_sql_query.py --tags
 ```
 
 ## Программное использование
@@ -112,8 +112,8 @@ tags = query_engine.get_all_tags()
 
 Для перехода с оригинальной версии на модульную:
 
-1. Замените вызовы `testkit_sql_indexer.py` на `testkit_sql_indexer_modular.py`
-2. Замените вызовы `testkit_sql_query.py` на `testkit_sql_query_modular.py`
+1. Замените вызовы `testkit_sql_indexer.py` на `testkit_sql_indexer.py` (уже переименовано)
+2. Замените вызовы `testkit_sql_query.py` на `testkit_sql_query.py` (уже переименовано)
 3. Обновите скрипты, использующие программный API
 
 ## Разработка
