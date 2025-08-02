@@ -106,20 +106,21 @@ public class Program
                     return new TelegramBotClient(appConfig.BotApi);
                 });
                 
-                                                   services.AddHostedService<Worker>(provider => new Worker(
-                                       provider.GetRequiredService<ILogger<Worker>>(),
-                                       provider.GetRequiredService<IUpdateDispatcher>(),
-                                       provider.GetRequiredService<ICaptchaService>(),
-                                       provider.GetRequiredService<IStatisticsService>(),
-                                       provider.GetRequiredService<ISpamHamClassifier>(),
-                                       provider.GetRequiredService<IUserManager>(),
-                                       provider.GetRequiredService<IBadMessageManager>(),
-                                       provider.GetRequiredService<IAiChecks>(),
-                                       provider.GetRequiredService<IChatLinkFormatter>(),
-                                       provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                                       provider.GetRequiredService<IMessageService>(),
-                                       provider.GetRequiredService<IAppConfig>()
-                                   ));
+                                                                   services.AddHostedService<Worker>(provider => new Worker(
+                    provider.GetRequiredService<ILogger<Worker>>(),
+                    provider.GetRequiredService<IUpdateDispatcher>(),
+                    provider.GetRequiredService<ICaptchaService>(),
+                    provider.GetRequiredService<IStatisticsService>(),
+                    provider.GetRequiredService<ISpamHamClassifier>(),
+                    provider.GetRequiredService<IUserManager>(),
+                    provider.GetRequiredService<IBadMessageManager>(),
+                    provider.GetRequiredService<IAiChecks>(),
+                    provider.GetRequiredService<IChatLinkFormatter>(),
+                    provider.GetRequiredService<ITelegramBotClientWrapper>(),
+                    provider.GetRequiredService<IMessageService>(),
+                    provider.GetRequiredService<IAppConfig>(),
+                    provider.GetRequiredService<IUserBanService>()
+                ));
                 
                 // Telegram Bot Client интерфейсы
                 services.AddSingleton<ITelegramBotClient>(provider => provider.GetRequiredService<TelegramBotClient>());
