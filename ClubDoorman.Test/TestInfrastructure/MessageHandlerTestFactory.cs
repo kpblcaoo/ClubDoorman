@@ -380,6 +380,7 @@ public class MessageHandlerTestFactory
             mockSuspiciousUsersStorage.Object,
             FakeBotClient as ITelegramBotClient,
             mockMessageService.Object,
+            UserBanServiceMock.Object,
             mockLogger.Object
         );
     }

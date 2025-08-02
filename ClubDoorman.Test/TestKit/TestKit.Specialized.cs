@@ -617,6 +617,7 @@ namespace ClubDoorman.Test.TestKit
                         suspiciousUsersStorage,
                         botClientMock.Object,
                         messageServiceMock.Object,
+                        CreateMockUserBanService().Object,
                         moderationLoggerMock.Object
                     );
 
@@ -671,6 +672,7 @@ namespace ClubDoorman.Test.TestKit
                         suspiciousUsersStorage,
                         botClientMock.Object,
                         messageServiceMock.Object,
+                        CreateMockUserBanService().Object,
                         moderationLoggerMock.Object
                     );
 
@@ -737,6 +739,7 @@ namespace ClubDoorman.Test.TestKit
                         suspiciousUsersStorage,
                         botClientMock.Object,
                         messageServiceMock.Object,
+                        CreateMockUserBanService().Object,
                         loggerMock.Object
                     );
 

@@ -155,6 +155,7 @@ public class Program
                     provider.GetRequiredService<ISuspiciousUsersStorage>(),
                     provider.GetRequiredService<ITelegramBotClient>(),
                     provider.GetRequiredService<IMessageService>(),
+                    provider.GetRequiredService<IUserBanService>(),
                     provider.GetRequiredService<ILogger<ModerationService>>()));
                 services.AddSingleton<IntroFlowService>(provider => new IntroFlowService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<IntroFlowService>>(), provider.GetRequiredService<ICaptchaService>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<IAiChecks>(), provider.GetRequiredService<IStatisticsService>(), provider.GetRequiredService<GlobalStatsManager>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<IAppConfig>()));
                 services.AddSingleton<IChatLinkFormatter, ChatLinkFormatter>();

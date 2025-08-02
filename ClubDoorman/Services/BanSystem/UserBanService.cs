@@ -538,4 +538,9 @@ public class UserBanService : IUserBanService
             _ => LogNotificationType.AutoBan
         };
     }
+
+    public async Task DeleteMessageByIdAsync(long chatId, int messageId)
+    {
+        await DeleteMessageByIdAsync(chatId, messageId, withErrorHandling: true);
+    }
 } 
