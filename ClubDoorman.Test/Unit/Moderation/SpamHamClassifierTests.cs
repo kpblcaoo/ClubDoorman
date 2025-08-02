@@ -308,7 +308,7 @@ public class SpamHamClassifierTests : TestBase
         var message = TK.CreateValidMessage();
         var tasks = new List<Task>();
 
-        // Act
+        // Act - выполняем несколько операций параллельно
         for (int i = 0; i < 5; i++)
         {
             tasks.Add(_classifierMock.Object.AddHam(message.Text!));
@@ -317,7 +317,6 @@ public class SpamHamClassifierTests : TestBase
         await Task.WhenAll(tasks);
 
         // Assert
-        // Проверяем, что все вызовы выполнились без исключений
         Assert.Pass("Concurrent AddHam calls executed successfully");
     }
 } 

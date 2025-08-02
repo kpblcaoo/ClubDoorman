@@ -332,7 +332,7 @@ public class ModerationServiceExtendedTests
         var service = _factory.CreateModerationService();
         var message = new Message
         {
-            Text = "Hello",
+            Text = "Это нормальное сообщение с полезной информацией",
             From = new User { Id = 123 }, // Без FirstName
             Chat = new Chat { Id = 456, Type = Telegram.Bot.Types.Enums.ChatType.Group }
         };
@@ -355,7 +355,7 @@ public class ModerationServiceExtendedTests
         var service = _factory.CreateModerationService();
         var message = new Message
         {
-            Text = "Hello",
+            Text = "Это нормальное сообщение с полезной информацией",
             From = new User { Id = 123, FirstName = "Test" },
             Chat = new Chat { Type = Telegram.Bot.Types.Enums.ChatType.Group } // Без Id
         };
