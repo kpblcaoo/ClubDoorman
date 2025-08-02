@@ -83,14 +83,35 @@ public class UserBanService : IUserBanService
             if (!await ValidateBanOperationAsync(chat, user, "Бан из блэклиста", cancellationToken))
                 return;
             
-            await BanUserAsync(chat, user, TimeSpan.FromMinutes(240), cancellationToken: cancellationToken);
+            // Баним пользователя на 4 часа с revokeMessages: true
+            await BanUserAsync(chat, user, TimeSpan.FromMinutes(240), revokeMessages: true, cancellationToken: cancellationToken);
+            
+            // Удаляем сообщение о входе в чат
             await DeleteMessageAsync(userJoinMessage, cancellationToken: cancellationToken);
+            
+            // Удаляем из списка одобренных (как в старом коде)
+            if (_userManager.RemoveApproval(user.Id, chat.Id, removeAll: true))
+            {
+                await _messageService.SendAdminNotificationAsync(
+                    AdminNotificationType.UserCleanup,
+                    new UserCleanupNotificationData(user, chat, $"Пользователь {FullName(user.FirstName, user.LastName)} удален из списка одобренных после бана по блеклисту")
+                );
+            }
+            
+            // Логируем успех
+            _logger.LogInformation("Пользователь {User} (id={UserId}) из блэклиста забанен на 4 часа в чате {ChatTitle} (id={ChatId})", 
+                FullName(user.FirstName, user.LastName), user.Id, chat.Title, chat.Id);
+            
+            // Обновляем статистику
+            _statisticsService.IncrementBlacklistBan(chat.Id);
+            _globalStatsManager.IncBan(chat.Id, chat.Title ?? "");
             
             _userFlowLogger.LogUserBanned(user, chat, "Пользователь в блэклисте");
         }
         catch (Exception e)
         {
             _logger.LogWarning(e, "Не удалось забанить пользователя из блэклиста");
+            throw; // Re-throw для сохранения оригинального поведения
         }
     }
 
