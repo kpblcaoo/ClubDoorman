@@ -27,6 +27,7 @@ public class CallbackQueryHandlerTestFactory
     public Mock<IModerationService> ModerationServiceMock { get; } = new();
     public Mock<IMessageService> MessageServiceMock { get; } = new();
     public Mock<IViolationTracker> ViolationTrackerMock { get; } = new();
+    public Mock<IUserBanService> UserBanServiceMock { get; } = new();
     public Mock<ILogger<CallbackQueryHandler>> LoggerMock { get; } = new();
 
     public CallbackQueryHandler CreateCallbackQueryHandler()
@@ -41,6 +42,7 @@ public class CallbackQueryHandlerTestFactory
             ModerationServiceMock.Object,
             MessageServiceMock.Object,
             ViolationTrackerMock.Object,
+            UserBanServiceMock.Object,
             LoggerMock.Object
         );
     }

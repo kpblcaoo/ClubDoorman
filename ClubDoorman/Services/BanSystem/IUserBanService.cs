@@ -41,4 +41,9 @@ public interface IUserBanService
     /// Централизованный метод для бана пользователя с указанием типа бана
     /// </summary>
     Task BanUserAsync(Chat chat, User user, BanTypeEnum banType, string? customReason = null, Message? messageToDelete = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Централизованный метод для бана пользователя с указанием типа бана и удалением сообщения по ID
+    /// </summary>
+    Task BanUserAsync(Chat chat, User user, BanTypeEnum banType, string? customReason = null, long? messageIdToDelete = null, long? chatIdForMessage = null, CancellationToken cancellationToken = default);
 } 

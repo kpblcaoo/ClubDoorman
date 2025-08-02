@@ -220,6 +220,41 @@ public class UserBanService : IUserBanService
         }
     }
 
+    public async Task BanUserAsync(
+        Chat chat, 
+        User user, 
+        BanTypeEnum banType, 
+        string? customReason = null,
+        long? messageIdToDelete = null,
+        long? chatIdForMessage = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var (duration, reason) = GetBanConfiguration(banType, customReason);
+            
+            if (!await ValidateBanOperationAsync(chat, user, reason, cancellationToken))
+                return;
+
+            await BanUserAsync(chat, user, duration, cancellationToken: cancellationToken);
+            
+            // Удаляем сообщение по ID, если указано
+            if (messageIdToDelete.HasValue && chatIdForMessage.HasValue)
+            {
+                await DeleteMessageByIdAsync(chatIdForMessage.Value, (int)messageIdToDelete.Value, withErrorHandling: false, cancellationToken);
+            }
+            
+            var banData = new AutoBanNotificationData(user, chat, GetBanTypeDescription(banType), reason, messageIdToDelete);
+            await SendNotificationAsync(banData, GetNotificationType(banType), null, cancellationToken: cancellationToken);
+            
+            _userFlowLogger.LogUserBanned(user, chat, reason);
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Не удалось забанить пользователя типа {BanTypeEnum}", banType);
+        }
+    }
+
     private static string LinkToMessage(Chat chat, long messageId) =>
         chat.Type switch
         {
@@ -271,6 +306,18 @@ public class UserBanService : IUserBanService
         catch (Exception ex) when (withErrorHandling)
         {
             _logger.LogWarning(ex, "Не удалось удалить сообщение {MessageId} из чата {ChatId} (возможно, уже удалено)", message.MessageId, message.Chat.Id);
+        }
+    }
+
+    private async Task DeleteMessageByIdAsync(long chatId, int messageId, bool withErrorHandling = false, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _bot.DeleteMessage(chatId, messageId, cancellationToken: cancellationToken);
+        }
+        catch (Exception ex) when (withErrorHandling)
+        {
+            _logger.LogWarning(ex, "Не удалось удалить сообщение {MessageId} из чата {ChatId} (возможно, уже удалено)", messageId, chatId);
         }
     }
 
