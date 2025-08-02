@@ -1036,7 +1036,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
 
     public async Task DeleteAndReportMessage(Message message, string reason, bool isSilentMode, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Начинаем DeleteAndReportMessage для сообщения {MessageId} в чате {ChatId}", message.MessageId, message.Chat.Id);
+        _logger.LogWarning("🚀 НОВЫЙ КОД DeleteAndReportMessage v2.0 для сообщения {MessageId} в чате {ChatId}", message.MessageId, message.Chat.Id);
         
         var user = message.From;
         var deletionMessagePart = $"{reason}";
@@ -1080,6 +1080,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
             Message? forwardedMessage = null;
             try
             {
+                _logger.LogDebug("🔍 ПЕРЕСЫЛКА: из чата {FromChatId} сообщение {MessageId} в админ-чат {AdminChatId}", message.Chat.Id, message.MessageId, _appConfig.AdminChatId);
+                
                 // Пересылаем сообщение и сохраняем ссылку на него
                 forwardedMessage = await _bot.ForwardMessage(
                     new ChatId(_appConfig.AdminChatId),
@@ -1103,12 +1105,16 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
             }
             catch (Exception forwardEx) when (forwardEx.Message.Contains("protected content") || forwardEx.Message.Contains("can't be forwarded"))
             {
-                _logger.LogWarning("Сообщение имеет защищенный контент, отправляем уведомление без пересылки: {Error}", forwardEx.Message);
+                _logger.LogWarning("❌ Чат '{ChatTitle}' имеет защищенный контент, отправляем расширенное уведомление: {Error}", message.Chat.Title, forwardEx.Message);
                 
-                // Отправляем уведомление без пересылки (просто как обычное сообщение)
+                // Добавляем контент сообщения в уведомление, раз не можем переслать
+                var extendedMessageText = $"{messageText}\n\n" +
+                    $"📝 <b>Содержимое:</b>\n<code>{System.Net.WebUtility.HtmlEncode(message.Text?.Length > 500 ? message.Text[..500] + "..." : message.Text)}</code>";
+                
+                // Отправляем расширенное уведомление без пересылки
                 await _bot.SendMessage(
                     _appConfig.AdminChatId,
-                    messageText,
+                    extendedMessageText,
                     parseMode: ParseMode.Html,
                     replyMarkup: keyboard,
                     cancellationToken: cancellationToken
