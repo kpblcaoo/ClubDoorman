@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Test.TestKit;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;

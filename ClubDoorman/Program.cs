@@ -2,6 +2,7 @@ using Serilog;
 using Serilog.Events;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Handlers;
 using ClubDoorman.Handlers.Commands;
 using ClubDoorman.Models.Logging;

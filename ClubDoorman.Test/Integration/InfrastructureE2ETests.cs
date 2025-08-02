@@ -1,4 +1,5 @@
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Test.TestInfrastructure;
 using FluentAssertions;
@@ -228,7 +229,7 @@ public class InfrastructureE2ETests : TestBase
     {
         // Arrange - создаем сообщение с мимикрией (используем обычное сообщение)
         var mimicryMessage = TestData.Messages.Valid();
-        mimicryMessage.Text = "hi"; // Короткое сообщение для мимикрии
+        mimicryMessage.Text = "Это нормальное сообщение с полезной информацией"; // Небанальное сообщение
         
         // Act
         var result = await _moderationService.CheckMessageAsync(mimicryMessage);

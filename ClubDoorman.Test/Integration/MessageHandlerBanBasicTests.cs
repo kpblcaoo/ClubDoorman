@@ -8,6 +8,7 @@ using NUnit.Framework;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 
 namespace ClubDoorman.Test.Integration;
 

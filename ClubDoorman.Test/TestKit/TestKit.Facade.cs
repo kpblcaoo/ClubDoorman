@@ -1,5 +1,6 @@
 using ClubDoorman.Models;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Test.TestData;
 using ClubDoorman.Handlers;

@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Test.TestInfrastructure;
 using Telegram.Bot.Types;

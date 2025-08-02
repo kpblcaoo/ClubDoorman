@@ -1,5 +1,6 @@
 using ClubDoorman.Models;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Infrastructure;
 using Microsoft.Extensions.Logging;
@@ -124,7 +125,7 @@ public class ModerationServiceBusinessLogicTests
     public async Task CheckMessageAsync_MimicryDetected_ReturnsBanAction()
     {
         // Arrange
-        var message = CreateTestMessage(123456L, "Hello");
+        var message = CreateTestMessage(123456L, "Это нормальное сообщение с полезной информацией");
         
         _factory.WithClassifierSetup(mock => 
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
@@ -147,7 +148,7 @@ public class ModerationServiceBusinessLogicTests
         // Arrange - используем новые возможности TestKit
         var message = TestKitBuilders.CreateMessage()
             .FromUser(123456L)
-            .WithText("Hello world")
+            .WithText("Это нормальное сообщение с полезной информацией")
             .Build();
         
         _factory.WithClassifierSetup(mock => 

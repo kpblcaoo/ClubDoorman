@@ -2,6 +2,7 @@ using ClubDoorman.Handlers;
 using ClubDoorman.Services.UserJoin;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Requests;

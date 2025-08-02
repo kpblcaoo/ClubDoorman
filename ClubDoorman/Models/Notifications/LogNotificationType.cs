@@ -58,5 +58,40 @@ public enum LogNotificationType
     /// <summary>
     /// Автобан за повторные нарушения
     /// </summary>
-    AutoBanRepeatedViolations
+    AutoBanRepeatedViolations,
+    
+    /// <summary>
+    /// Бан пользователя из блэклиста
+    /// </summary>
+    BanBlacklistedUser,
+    
+    /// <summary>
+    /// Автоматический бан
+    /// </summary>
+    AutoBan,
+    
+    /// <summary>
+    /// Ручной бан
+    /// </summary>
+    ManualBan,
+    
+    /// <summary>
+    /// Бан по профилю
+    /// </summary>
+    ProfileBan,
+    
+    /// <summary>
+    /// Бан канала
+    /// </summary>
+    ChannelBan,
+    
+    /// <summary>
+    /// Бан за неудачную капчу
+    /// </summary>
+    CaptchaBan,
+    
+    /// <summary>
+    /// Бан за повторное нарушение
+    /// </summary>
+    RepeatedViolation
 } 

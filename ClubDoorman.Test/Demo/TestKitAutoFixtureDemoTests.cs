@@ -1,5 +1,6 @@
 using ClubDoorman.Handlers;
 using ClubDoorman.Services;
+using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Models;
 using NUnit.Framework;
 using ClubDoorman.Test.TestKit;
