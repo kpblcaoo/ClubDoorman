@@ -794,7 +794,7 @@ public class MessageHandlerGoldenMasterTests
             "Должно залогироваться ошибка при бане пользователя");
 
         // Проверяем, что очистка пользователя все равно выполняется
-        _factory.ModerationServiceMock.Verify(
+        _factory.UserStateManagerMock.Verify(
             x => x.CleanupUserFromAllLists(
                 user.Id,
                 chat.Id),

@@ -11,7 +11,7 @@ namespace ClubDoorman.Services;
 /// <summary>
 /// Сервис модерации сообщений
 /// </summary>
-public class ModerationService : IModerationService
+public class ModerationService : IModerationService, IUserStateManager
 {
     private readonly ISpamHamClassifier _classifier;
     private readonly IMimicryClassifier _mimicryClassifier;

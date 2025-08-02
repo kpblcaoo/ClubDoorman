@@ -23,6 +23,7 @@ public class UserBanService : IUserBanService
     private readonly IStatisticsService _statisticsService;
     private readonly GlobalStatsManager _globalStatsManager;
     private readonly IUserManager _userManager;
+    private readonly IUserStateManager _userStateManager;
 
     public UserBanService(
         ITelegramBotClientWrapper bot,
@@ -34,7 +35,8 @@ public class UserBanService : IUserBanService
         IAppConfig appConfig,
         IStatisticsService statisticsService,
         GlobalStatsManager globalStatsManager,
-        IUserManager userManager)
+        IUserManager userManager,
+        IUserStateManager userStateManager)
     {
         _bot = bot;
         _messageService = messageService;
@@ -46,6 +48,7 @@ public class UserBanService : IUserBanService
         _statisticsService = statisticsService;
         _globalStatsManager = globalStatsManager;
         _userManager = userManager;
+        _userStateManager = userStateManager;
     }
 
     public async Task BanUserForLongNameAsync(Message? userJoinMessage, User user, string reason, TimeSpan? banDuration, CancellationToken cancellationToken)
@@ -341,7 +344,7 @@ public class UserBanService : IUserBanService
 
     private async Task CleanupUserDataAsync(User user, Chat chat, CancellationToken cancellationToken)
     {
-        _moderationService.CleanupUserFromAllLists(user.Id, chat.Id);
+        _userStateManager.CleanupUserFromAllLists(user.Id, chat.Id);
         _violationTracker.ResetViolations(user.Id, chat.Id, ViolationType.MlSpam);
         _violationTracker.ResetViolations(user.Id, chat.Id, ViolationType.StopWords);
         _violationTracker.ResetViolations(user.Id, chat.Id, ViolationType.TooManyEmojis);

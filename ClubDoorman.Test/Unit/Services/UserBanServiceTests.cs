@@ -36,8 +36,9 @@ public class UserBanServiceTests
     private Mock<IAiChecks> _aiServiceMock = null!;
     private Mock<IServiceProvider> _serviceProviderMock = null!;
     private Mock<IChatLinkFormatter> _chatLinkFormatterMock = null!;
-    private Mock<IBotPermissionsService> _botPermissionsServiceMock = null!;
-    
+        private Mock<IBotPermissionsService> _botPermissionsServiceMock = null!;
+    private Mock<IUserStateManager> _userStateManagerMock = null!;
+
     private IUserBanService _userBanService = null!;
 
     [SetUp]
@@ -61,6 +62,7 @@ public class UserBanServiceTests
         _serviceProviderMock = new Mock<IServiceProvider>();
         _chatLinkFormatterMock = new Mock<IChatLinkFormatter>();
         _botPermissionsServiceMock = new Mock<IBotPermissionsService>();
+        _userStateManagerMock = new Mock<IUserStateManager>();
 
         // MessageHandler больше не нужен в этих тестах - тестируем UserBanService напрямую
         
@@ -75,7 +77,8 @@ public class UserBanServiceTests
             _appConfigMock.Object,
             _statisticsServiceMock.Object,
             _globalStatsManagerMock.Object,
-            _userManagerMock.Object
+            _userManagerMock.Object,
+            _userStateManagerMock.Object  // IUserStateManager
         );
     }
 

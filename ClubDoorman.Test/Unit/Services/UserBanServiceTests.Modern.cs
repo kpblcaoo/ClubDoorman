@@ -55,7 +55,8 @@ public class UserBanServiceTestsModern
             _appConfigMock.Object,
             _statisticsServiceMock.Object,
             _globalStatsManagerMock.Object,
-            _userManagerMock.Object
+            _userManagerMock.Object,
+            new Mock<IUserStateManager>().Object  // IUserStateManager
         );
     }
 

@@ -135,6 +135,9 @@ public class Program
                 services.AddSingleton<IViolationTracker, ViolationTracker>();
                 services.AddSingleton<IUserBanService, UserBanService>();
                 
+                // Регистрируем IUserStateManager, используя существующий ModerationService
+                services.AddSingleton<IUserStateManager>(provider => (IUserStateManager)provider.GetRequiredService<IModerationService>());
+                
                 // Новые сервисы
                 services.AddSingleton<IUpdateDispatcher, UpdateDispatcher>();
                 services.AddSingleton<IStatisticsService>(provider => new StatisticsService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<StatisticsService>>(), provider.GetRequiredService<IChatLinkFormatter>()));
