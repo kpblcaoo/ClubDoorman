@@ -217,6 +217,7 @@ public class UserBanService : IUserBanService
         catch (Exception e)
         {
             _logger.LogWarning(e, "Не удалось забанить пользователя типа {BanTypeEnum}", banType);
+            throw; // Re-throw для сохранения оригинального поведения
         }
     }
 
@@ -252,6 +253,7 @@ public class UserBanService : IUserBanService
         catch (Exception e)
         {
             _logger.LogWarning(e, "Не удалось забанить пользователя типа {BanTypeEnum}", banType);
+            throw; // Re-throw для сохранения оригинального поведения
         }
     }
 
