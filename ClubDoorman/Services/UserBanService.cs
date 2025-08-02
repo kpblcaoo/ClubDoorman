@@ -4,6 +4,7 @@ using Telegram.Bot.Types.Enums;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.BanSystem;
 
 namespace ClubDoorman.Services;
 
@@ -181,6 +182,38 @@ public class UserBanService : IUserBanService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Ошибка при отслеживании нарушений для пользователя {UserId}", user.Id);
+        }
+    }
+
+    /// <summary>
+    /// Основной метод бана пользователя с использованием enum типов
+    /// </summary>
+    public async Task BanUserAsync(
+        Chat chat, 
+        User user, 
+        BanType banType, 
+        string? customReason = null,
+        Message? messageToDelete = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var (duration, reason) = GetBanConfiguration(banType, customReason);
+            
+            if (!await ValidateBanOperationAsync(chat, user, reason, cancellationToken))
+                return;
+
+            await BanUserAsync(chat, user, duration, cancellationToken: cancellationToken);
+            await DeleteMessageAsync(messageToDelete, cancellationToken: cancellationToken);
+            
+            var banData = new AutoBanNotificationData(user, chat, GetBanTypeDescription(banType), reason, messageToDelete?.MessageId);
+            await SendNotificationAsync(banData, GetNotificationType(banType), messageToDelete, cancellationToken: cancellationToken);
+            
+            _userFlowLogger.LogUserBanned(user, chat, reason);
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Не удалось забанить пользователя типа {BanType}", banType);
         }
     }
 
@@ -405,5 +438,54 @@ public class UserBanService : IUserBanService
     {
         _logger.LogInformation("✅ АВТОБАН ЗАВЕРШЕН: пользователь {User} (id={UserId}) забанен на 4 часа в чате '{ChatTitle}' (id={ChatId}) по блэклисту lols.bot", 
             FullName(user.FirstName, user.LastName), user.Id, chat.Title, chat.Id);
+    }
+
+    // Вспомогательные методы для работы с enum BanType
+    private (TimeSpan? duration, string reason) GetBanConfiguration(BanType banType, string? customReason)
+    {
+        return banType switch
+        {
+            BanType.LongName => (null, customReason ?? "Длинное имя пользователя"),
+            BanType.Blacklist => (TimeSpan.FromMinutes(240), "Пользователь в блэклисте"),
+            BanType.AutoBan => (null, customReason ?? "Автоматический бан"),
+            BanType.ManualBan => (null, customReason ?? "Ручной бан"),
+            BanType.ProfileBan => (null, customReason ?? "Бан по профилю"),
+            BanType.ChannelBan => (null, customReason ?? "Бан канала"),
+            BanType.CaptchaBan => (TimeSpan.FromMinutes(10), customReason ?? "Неудачная капча"),
+            BanType.RepeatedViolation => (TimeSpan.FromMinutes(60), customReason ?? "Повторное нарушение"),
+            _ => (null, customReason ?? "Неизвестный тип бана")
+        };
+    }
+
+    private string GetBanTypeDescription(BanType banType)
+    {
+        return banType switch
+        {
+            BanType.LongName => "🚫 Перманентный бан",
+            BanType.Blacklist => "🚫 Бан из блэклиста",
+            BanType.AutoBan => "🚫 Автоматический бан",
+            BanType.ManualBan => "🚫 Ручной бан",
+            BanType.ProfileBan => "🚫 Бан по профилю",
+            BanType.ChannelBan => "🚫 Бан канала",
+            BanType.CaptchaBan => "Автобан на 10 минут",
+            BanType.RepeatedViolation => "Автобан на 1 час",
+            _ => "🚫 Бан"
+        };
+    }
+
+    private LogNotificationType GetNotificationType(BanType banType)
+    {
+        return banType switch
+        {
+            BanType.LongName => LogNotificationType.BanForLongName,
+            BanType.Blacklist => LogNotificationType.BanBlacklistedUser,
+            BanType.AutoBan => LogNotificationType.AutoBan,
+            BanType.ManualBan => LogNotificationType.ManualBan,
+            BanType.ProfileBan => LogNotificationType.ProfileBan,
+            BanType.ChannelBan => LogNotificationType.ChannelBan,
+            BanType.CaptchaBan => LogNotificationType.CaptchaBan,
+            BanType.RepeatedViolation => LogNotificationType.RepeatedViolation,
+            _ => LogNotificationType.AutoBan
+        };
     }
 } 
