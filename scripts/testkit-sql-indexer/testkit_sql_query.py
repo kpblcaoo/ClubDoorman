@@ -43,6 +43,8 @@ def interactive_mode(query_engine: TestKitQueryEngine):
     print("  component <class_name> - Search by component/class name")
     print("  tags                   - Show all tags")
     print("  stats                  - Show database statistics")
+    print("  duplicates             - Show duplicate files")
+    print("  duplicate-stats        - Show duplicate statistics")
     print("  quit                   - Exit")
     print()
     
@@ -67,6 +69,28 @@ def interactive_mode(query_engine: TestKitQueryEngine):
                 print(f"  Methods: {stats['total_methods']}")
                 print(f"  Tags: {stats['total_tags']}")
                 print(f"  Top tags: {[tag[0] for tag in stats['top_tags'][:5]]}")
+                print()
+            elif cmd == "duplicates":
+                duplicates = query_engine.find_duplicates()
+                if duplicates:
+                    print(f"Found {len(duplicates)} duplicate groups:")
+                    for i, (file_hash, paths) in enumerate(duplicates[:10], 1):  # Показываем первые 10
+                        print(f"  {i}. Hash: {file_hash[:16]}...")
+                        for path in paths:
+                            print(f"     - {path}")
+                        print()
+                    if len(duplicates) > 10:
+                        print(f"  ... and {len(duplicates) - 10} more duplicate groups")
+                else:
+                    print("No duplicate files found")
+                print()
+            elif cmd == "duplicate-stats":
+                stats = query_engine.get_duplicate_statistics()
+                print(f"Duplicate Statistics:")
+                print(f"  Total files: {stats['total_files']}")
+                print(f"  Unique hashes: {stats['unique_hashes']}")
+                print(f"  Duplicate groups: {stats['duplicate_groups']}")
+                print(f"  Duplicate files: {stats['duplicate_files']}")
                 print()
             elif cmd == "tags":
                 tags = query_engine.get_all_tags()

@@ -403,4 +403,53 @@ class TestKitQueryEngine:
         cursor = self.conn.cursor()
         cursor.execute(query, (method_name, component_id))
         
-        return [row[0] for row in cursor.fetchall()] 
+        return [row[0] for row in cursor.fetchall()]
+    
+    def find_duplicates(self) -> List[Tuple[str, List[str]]]:
+        """Находит файлы с одинаковым хешем"""
+        if not self.conn:
+            self.connect()
+        
+        query = """
+            SELECT file_hash, GROUP_CONCAT(file_path, '|') as paths
+            FROM components 
+            WHERE file_hash IS NOT NULL AND file_hash != ''
+            GROUP BY file_hash 
+            HAVING COUNT(*) > 1
+            ORDER BY file_hash
+        """
+        
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        
+        return [(row[0], row[1].split('|')) for row in cursor.fetchall()]
+    
+    def get_duplicate_statistics(self) -> dict:
+        """Статистика по дубликатам"""
+        if not self.conn:
+            self.connect()
+        
+        cursor = self.conn.cursor()
+        
+        cursor.execute("SELECT COUNT(*) FROM components")
+        total_files = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(DISTINCT file_hash) FROM components WHERE file_hash IS NOT NULL AND file_hash != ''")
+        unique_hashes = cursor.fetchone()[0]
+        
+        cursor.execute("""
+            SELECT COUNT(*) FROM (
+                SELECT file_hash FROM components 
+                WHERE file_hash IS NOT NULL AND file_hash != ''
+                GROUP BY file_hash 
+                HAVING COUNT(*) > 1
+            )
+        """)
+        duplicate_groups = cursor.fetchone()[0]
+        
+        return {
+            'total_files': total_files,
+            'unique_hashes': unique_hashes,
+            'duplicate_groups': duplicate_groups,
+            'duplicate_files': total_files - unique_hashes
+        } 

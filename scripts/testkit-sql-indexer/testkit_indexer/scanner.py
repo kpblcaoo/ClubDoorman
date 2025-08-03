@@ -4,6 +4,7 @@ File scanner for TestKit SQL Indexer
 """
 
 import os
+import hashlib
 from pathlib import Path
 from typing import List, Set
 from .models import TestKitComponent
@@ -69,18 +70,15 @@ class TestKitScanner:
         # Извлекаем методы
         methods = self.parser.extract_methods(content)
         
-        # Извлекаем полные сигнатуры для каждого метода
-        for method in methods:
-            full_signature = self.parser.extract_method_signature_with_params(content, method.name)
-            if full_signature:
-                method.full_signature = full_signature
-        
         # Определяем категорию
         relative_path = file_path.relative_to(self.testkit_path)
         category = self.parser.determine_category(str(relative_path))
         
         # Подсчитываем строки
         lines_count = len(content.split('\n'))
+        
+        # Вычисляем хеш файла
+        file_hash = self._calculate_file_hash(file_path)
         
         component = TestKitComponent(
             file_path=str(file_path),
@@ -89,10 +87,21 @@ class TestKitScanner:
             class_description=class_description,
             category=category,
             methods=methods,
-            lines_count=lines_count
+            lines_count=lines_count,
+            file_hash=file_hash
         )
         
         return component
+    
+    def _calculate_file_hash(self, file_path: Path) -> str:
+        """Вычисляет SHA256 хеш файла"""
+        try:
+            with open(file_path, 'rb') as f:
+                return hashlib.sha256(f.read()).hexdigest()
+        except Exception as e:
+            print(f"Warning: Could not calculate hash for {file_path}: {e}")
+            # Возвращаем путь как ключ в случае ошибки
+            return f"path:{file_path}"
     
     def get_statistics(self) -> dict:
         """Получает статистику по сканированию"""

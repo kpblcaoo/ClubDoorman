@@ -30,6 +30,7 @@ class DatabaseManager:
                 class_description TEXT,
                 category TEXT,
                 lines_count INTEGER,
+                file_hash TEXT,  -- Хеш файла для дедупликации
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -95,6 +96,7 @@ class DatabaseManager:
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_methods_name ON methods(name)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_methods_return_type ON methods(return_type)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_components_category ON components(category)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_components_file_hash ON components(file_hash)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_usage_examples_method ON usage_examples(method_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_usage_examples_context ON usage_examples(context)")
@@ -111,15 +113,16 @@ class DatabaseManager:
         for component in components:
             # Сохраняем компонент
             cursor.execute("""
-                INSERT INTO components (file_path, file_name, class_name, class_description, category, lines_count)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO components (file_path, file_name, class_name, class_description, category, lines_count, file_hash)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 component.file_path,
                 component.file_name,
                 component.class_name,
                 component.class_description,
                 component.category,
-                component.lines_count
+                component.lines_count,
+                component.file_hash
             ))
             
             component_id = cursor.lastrowid

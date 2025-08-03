@@ -62,8 +62,9 @@ class CSharpParser:
                 # Определяем теги
                 tags = self.determine_tags(method_name, return_type, description)
                 
-                # Создаем сигнатуру
+                # Создаем сигнатуру (уже полная)
                 signature = line.strip()
+                full_signature = signature  # Используем ту же строку
                 
                 method = TestKitMethod(
                     name=method_name,
@@ -74,11 +75,43 @@ class CSharpParser:
                     is_static=is_static,
                     is_generic=is_generic,
                     signature=signature,
-                    line_number=i + 1
+                    line_number=i + 1,
+                    full_signature=full_signature
                 )
                 methods.append(method)
         
         return methods
+    
+    def extract_method_summary(self, lines: List[str], method_line: int) -> str:
+        """Извлекает описание метода из комментариев"""
+        description = ""
+        
+        # Ищем комментарии перед методом
+        for i in range(method_line - 1, max(0, method_line - 10), -1):
+            line = lines[i].strip()
+            if line.startswith("///"):
+                if "<summary>" in line:
+                    # Начало summary
+                    summary_lines = []
+                    for j in range(i, len(lines)):
+                        summary_line = lines[j].strip()
+                        if "</summary>" in summary_line:
+                            break
+                        if summary_line.startswith("///"):
+                            summary_lines.append(summary_line.replace("///", "").strip())
+                    description = " ".join(summary_lines)
+                    break
+            elif line.startswith("//") or line.startswith("/*"):
+                # Обычный комментарий
+                comment = line.replace("//", "").replace("/*", "").replace("*/", "").strip()
+                if comment:
+                    description = comment
+                    break
+            elif line.strip():
+                # Если встретили непустую строку без комментария, останавливаемся
+                break
+        
+        return description
 
     def extract_usage_examples(self, content: str, target_methods: List[str]) -> Dict[str, List[str]]:
         """Извлекает примеры использования методов из кода"""
@@ -123,37 +156,6 @@ class CSharpParser:
                 return line.strip()
         
         return ""
-
-    def extract_method_summary(self, lines: List[str], method_line: int) -> str:
-        """Извлекает описание метода из комментариев"""
-        description = ""
-        
-        # Ищем комментарии перед методом
-        for i in range(method_line - 1, max(0, method_line - 10), -1):
-            line = lines[i].strip()
-            if line.startswith("///"):
-                if "<summary>" in line:
-                    # Начало summary
-                    summary_lines = []
-                    for j in range(i, len(lines)):
-                        summary_line = lines[j].strip()
-                        if "</summary>" in summary_line:
-                            break
-                        if summary_line.startswith("///"):
-                            summary_lines.append(summary_line.replace("///", "").strip())
-                    description = " ".join(summary_lines)
-                    break
-            elif line.startswith("//") or line.startswith("/*"):
-                # Обычный комментарий
-                comment = line.replace("//", "").replace("/*", "").replace("*/", "").strip()
-                if comment:
-                    description = comment
-                    break
-            elif line.strip():
-                # Если встретили непустую строку без комментария, останавливаемся
-                break
-        
-        return description
 
     def determine_tags(self, method_name: str, return_type: str, description: str = "") -> List[str]:
         """Определяет теги на основе имени метода, типа возврата и описания"""
