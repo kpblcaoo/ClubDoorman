@@ -1,11 +1,11 @@
-name: Deploy - Build and Push Docker
+name: Build, Release and Push Docker Image
 
 on:
   push:
-    branches: [ next-dev ]
+    branches: [ develop ]
 
 jobs:
-  deploy:
+  build-and-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -13,30 +13,30 @@ jobs:
 
     - name: Extract version number
       id: vars
-      run: echo "version=2.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
-
+      run: echo "version=1.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
+      
     - name: Set lowercase repo name
       run: echo "repo_name=${{ github.repository }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_ENV
-
+      
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '9.0.x'
+        dotnet-version: '9.0.x' # Specify your .NET version here
 
     - name: Restore dependencies
       run: dotnet restore
 
     - name: Build application
       run: dotnet build --configuration Release --no-restore
+      
+    - name: Run tests
+      run: dotnet test --no-restore
 
     - name: Publish application
       run: dotnet publish ClubDoorman/ClubDoorman.csproj -c Release -o publish
 
     - name: Build Docker image
-      run: |
-        docker build -t ghcr.io/${{ env.repo_name }}:dev \
-                     -t ghcr.io/${{ env.repo_name }}:dev-2.0.${{ github.run_number }} \
-                     ./ClubDoorman
+      run: docker build -t ghcr.io/${{ env.repo_name }}:latest -t ghcr.io/${{ env.repo_name }}:${{ steps.vars.outputs.version }} ./ClubDoorman
 
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v2
@@ -45,51 +45,53 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Push Docker image
+    - name: Push Docker image to GitHub Container Registry
       run: |
-        docker push ghcr.io/${{ env.repo_name }}:dev
-        docker push ghcr.io/${{ env.repo_name }}:dev-2.0.${{ github.run_number }}
+        docker push ghcr.io/${{ env.repo_name }}:latest
+        docker push ghcr.io/${{ env.repo_name }}:${{ steps.vars.outputs.version }}
 
-    - name: SSH and Update Container
+    - name: Get Build Info
+      id: build_info
       run: |
-        mkdir -p ~/.ssh/
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -t rsa $SERVER_IP >> ~/.ssh/known_hosts
-        ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "
-          docker-compose -f /root/Spampyre/docker-compose.yml pull &&
-          docker-compose -f /root/Spampyre/docker-compose.yml down &&
-          docker-compose -f /root/Spampyre/docker-compose.yml up -d
-        "
-      env:
-        SSH_USER: ${{ secrets.SSH_USER }}
-        SERVER_IP: ${{ secrets.SERVER_IP }}
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        echo "date=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+        echo "commit=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        echo "branch=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
+        echo "author=$(git log -1 --pretty=format:'%an')" >> $GITHUB_OUTPUT
 
-    - name: Get Docker logs from server
-      run: |
-        mkdir -p ~/.ssh/
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -t rsa $SERVER_IP >> ~/.ssh/known_hosts
-        ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "docker logs --tail 100 spampyre" > spampyre_logs.txt
-      env:
-        SSH_USER: ${{ secrets.SSH_USER }}
-        SERVER_IP: ${{ secrets.SERVER_IP }}
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Upload logs as artifact
-      uses: actions/upload-artifact@v4
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
       with:
-        name: spampyre-logs
-        path: spampyre_logs.txt
-
-    - name: Add logs to summary
-      run: |
-        echo '### Последние логи контейнера spampyre' >> $GITHUB_STEP_SUMMARY
-        echo '<details><summary>Показать логи</summary>' >> $GITHUB_STEP_SUMMARY
-        echo '' >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
-        cat spampyre_logs.txt >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
-        echo '</details>' >> $GITHUB_STEP_SUMMARY
+        tag_name: v${{ steps.vars.outputs.version }}
+        name: Release v${{ steps.vars.outputs.version }}
+        body: |
+          ## GateTroitsBot v${{ steps.vars.outputs.version }}
+          
+          **Сборка:**
+          - Коммит: ${{ steps.build_info.outputs.commit }}
+          
+          **Docker образ:** 
+          ```
+          ghcr.io/${{ env.repo_name }}:${{ steps.vars.outputs.version }}
+          ```
+          
+          **Запуск через Docker Compose:**
+          ```yaml
+          version: '3'
+          services:
+            doorman:
+              image: ghcr.io/${{ env.repo_name }}:${{ steps.vars.outputs.version }}
+              restart: always
+              volumes:
+                - ./data:/app/data
+              environment:
+                - DOORMAN_BOT_API=1234567890:AAAA-YOUR-TOKEN-HERE
+                - DOORMAN_ADMIN_CHAT=-1001234567890
+          ```
+          
+          **Документация:**
+          🔗 [Инструкция по использованию бота](https://telegra.ph/GateTroitsBot-04-19) - всё о настройке, возможностях и рекомендациях
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
