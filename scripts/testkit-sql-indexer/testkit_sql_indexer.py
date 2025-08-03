@@ -15,6 +15,11 @@ def main():
     parser.add_argument("testkit_path", help="Path to TestKit directory")
     parser.add_argument("--db-path", default="testkit_index.db", help="Database file path")
     parser.add_argument("--no-reports", action="store_true", help="Skip report generation")
+    parser.add_argument("--no-deduplicate", action="store_true", help="Skip duplicate file removal")
+    parser.add_argument("--deduplication-strategy", 
+                       choices=["file_hash", "signature", "content", "none"],
+                       default="file_hash",
+                       help="Deduplication strategy to use")
     
     args = parser.parse_args()
     
@@ -25,10 +30,11 @@ def main():
         sys.exit(1)
     
     # Создаем индексер и запускаем процесс
-    indexer = TestKitIndexer(str(testkit_path), args.db_path)
+    deduplication_strategy = "none" if args.no_deduplicate else args.deduplication_strategy
+    indexer = TestKitIndexer(str(testkit_path), args.db_path, deduplication_strategy)
     
     try:
-        result = indexer.run_indexing(generate_reports=not args.no_reports)
+        result = indexer.run_indexing(generate_reports=not args.no_reports, deduplicate=not args.no_deduplicate)
         
         if result:
             print("\n" + "="*50)

@@ -29,6 +29,7 @@ class TestKitComponent:
     category: str
     methods: List[TestKitMethod]
     lines_count: int
+    file_hash: str = ""  # Хеш файла для дедупликации
 
 @dataclass
 class TestKitIndex:
