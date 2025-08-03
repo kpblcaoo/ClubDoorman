@@ -162,7 +162,7 @@ class TestKitQueryEngine:
         return results
     
     def search_methods_by_component(self, component_name: str) -> List[QueryResult]:
-        """Поиск методов по компоненту"""
+        """Поиск методов по компоненту/классу"""
         if not self.conn:
             self.connect()
         
@@ -174,12 +174,146 @@ class TestKitQueryEngine:
             WHERE c.class_name LIKE ?
             ORDER BY m.name
         """
+        params = (f"%{component_name}%",)
         
         cursor = self.conn.cursor()
-        cursor.execute(query, (f"%{component_name}%",))
+        cursor.execute(query, params)
         
         results = []
         for row in cursor.fetchall():
+            # Получаем теги для метода
+            tags = self._get_method_tags(row['name'], row['component_id'])
+            
+            result = QueryResult(
+                method_name=row['name'],
+                return_type=row['return_type'],
+                component_name=row['class_name'],
+                file_path=row['file_path'],
+                description=row['description'] or "",
+                tags=tags,
+                line_number=row['line_number'],
+                is_static=bool(row['is_static']),
+                is_generic=bool(row['is_generic'])
+            )
+            results.append(result)
+        
+        return results
+
+    def get_usage_examples(self, method_name: str, limit: int = 5) -> List[dict]:
+        """Получает примеры использования метода"""
+        if not self.conn:
+            self.connect()
+        
+        query = """
+            SELECT ue.example_code, ue.file_path, ue.line_number, ue.context, c.class_name
+            FROM usage_examples ue
+            JOIN methods m ON ue.method_id = m.id
+            JOIN components c ON m.component_id = c.id
+            WHERE m.name = ?
+            ORDER BY ue.line_number
+            LIMIT ?
+        """
+        
+        cursor = self.conn.cursor()
+        cursor.execute(query, (method_name, limit))
+        
+        results = []
+        for row in cursor.fetchall():
+            results.append({
+                'example_code': row['example_code'],
+                'file_path': row['file_path'],
+                'line_number': row['line_number'],
+                'context': row['context'],
+                'class_name': row['class_name']
+            })
+        
+        return results
+
+    def get_method_signature(self, method_name: str, component_name: str = None) -> str:
+        """Получает полную сигнатуру метода"""
+        if not self.conn:
+            self.connect()
+        
+        if component_name:
+            query = """
+                SELECT m.full_signature, m.signature
+                FROM methods m
+                JOIN components c ON m.component_id = c.id
+                WHERE m.name = ? AND c.class_name = ?
+            """
+            params = (method_name, component_name)
+        else:
+            query = """
+                SELECT full_signature, signature
+                FROM methods
+                WHERE name = ?
+                LIMIT 1
+            """
+            params = (method_name,)
+        
+        cursor = self.conn.cursor()
+        cursor.execute(query, params)
+        
+        result = cursor.fetchone()
+        if result:
+            return result['full_signature'] or result['signature']
+        
+        return ""
+
+    def search_examples_by_context(self, context: str, limit: int = 10) -> List[dict]:
+        """Поиск примеров по контексту (test, integration, etc.)"""
+        if not self.conn:
+            self.connect()
+        
+        query = """
+            SELECT ue.example_code, ue.file_path, ue.line_number, ue.context, 
+                   c.class_name, m.name as method_name
+            FROM usage_examples ue
+            JOIN methods m ON ue.method_id = m.id
+            JOIN components c ON m.component_id = c.id
+            WHERE ue.context LIKE ?
+            ORDER BY ue.line_number
+            LIMIT ?
+        """
+        
+        cursor = self.conn.cursor()
+        cursor.execute(query, (f"%{context}%", limit))
+        
+        results = []
+        for row in cursor.fetchall():
+            results.append({
+                'example_code': row['example_code'],
+                'file_path': row['file_path'],
+                'line_number': row['line_number'],
+                'context': row['context'],
+                'class_name': row['class_name'],
+                'method_name': row['method_name']
+            })
+        
+        return results
+
+    def search_similar_methods(self, method_name: str, limit: int = 10) -> List[QueryResult]:
+        """Поиск похожих методов по имени и тегам"""
+        if not self.conn:
+            self.connect()
+        
+        # Ищем методы с похожими именами
+        query = """
+            SELECT DISTINCT m.name, m.return_type, c.class_name, c.file_path, 
+                   m.description, m.line_number, m.is_static, m.is_generic, m.component_id
+            FROM methods m
+            JOIN components c ON m.component_id = c.id
+            WHERE m.name LIKE ? AND m.name != ?
+            ORDER BY m.name
+            LIMIT ?
+        """
+        
+        cursor = self.conn.cursor()
+        cursor.execute(query, (f"%{method_name}%", method_name, limit))
+        
+        results = []
+        for row in cursor.fetchall():
+            # Получаем теги для метода
             tags = self._get_method_tags(row['name'], row['component_id'])
             
             result = QueryResult(
