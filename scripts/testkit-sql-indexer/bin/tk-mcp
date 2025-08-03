@@ -2,6 +2,14 @@
 import sys
 import os
 
+# Активируем виртуальное окружение
+venv_path = "/home/kpblc/projects/ClubDoorman/scripts/testkit-sql-indexer/venv"
+if os.path.exists(venv_path):
+    # Добавляем путь к site-packages виртуального окружения
+    site_packages = os.path.join(venv_path, "lib", "python3.11", "site-packages")
+    if os.path.exists(site_packages):
+        sys.path.insert(0, site_packages)
+
 # Добавляем путь к модулям
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_dir = os.path.dirname(script_dir)
