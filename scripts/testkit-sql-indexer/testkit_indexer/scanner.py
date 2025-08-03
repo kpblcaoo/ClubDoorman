@@ -69,6 +69,12 @@ class TestKitScanner:
         # Извлекаем методы
         methods = self.parser.extract_methods(content)
         
+        # Извлекаем полные сигнатуры для каждого метода
+        for method in methods:
+            full_signature = self.parser.extract_method_signature_with_params(content, method.name)
+            if full_signature:
+                method.full_signature = full_signature
+        
         # Определяем категорию
         relative_path = file_path.relative_to(self.testkit_path)
         category = self.parser.determine_category(str(relative_path))

@@ -113,7 +113,7 @@ class TestKitFastMCPServer:
                 return "\n".join(output)
             except Exception as e:
                 return f"Error searching by tags: {e}"
-        
+
         @self.mcp.tool(name="tk_method_details", description="Get detailed information about a method")
         def method_details(name: str) -> str:
             """Детальная информация о методе"""
@@ -141,8 +141,17 @@ class TestKitFastMCPServer:
                 output.append(f"# {result.component_name}.{result.method_name}")
                 output.append("")
                 
-                # Сигнатура
-                output.append("## Signature")
+                # Полная сигнатура
+                full_signature = self.query_engine.get_method_signature(result.method_name, result.component_name)
+                if full_signature:
+                    output.append("## Full Signature")
+                    output.append(f"```csharp")
+                    output.append(full_signature)
+                    output.append(f"```")
+                    output.append("")
+                
+                # Базовая сигнатура
+                output.append("## Basic Signature")
                 static_text = "static " if result.is_static else ""
                 generic_text = "<T>" if result.is_generic else ""
                 output.append(f"```csharp")
@@ -175,6 +184,155 @@ class TestKitFastMCPServer:
                 return "\n".join(output)
             except Exception as e:
                 return f"Error getting method details: {e}"
+
+        @self.mcp.tool(name="tk_method_signature", description="Get full method signature with parameters")
+        def method_signature(name: str, component: str = "") -> str:
+            """Полная сигнатура метода"""
+            try:
+                signature = self.query_engine.get_method_signature(name, component)
+                if signature:
+                    output = [f"# Method Signature: {name}"]
+                    output.append("")
+                    output.append("```csharp")
+                    output.append(signature)
+                    output.append("```")
+                    return "\n".join(output)
+                else:
+                    return f"Method '{name}' not found"
+            except Exception as e:
+                return f"Error getting method signature: {e}"
+
+        @self.mcp.tool(name="tk_search_similar", description="Find similar methods")
+        def search_similar(method_name: str, limit: int = 10) -> str:
+            """Поиск похожих методов"""
+            try:
+                results = self.query_engine.search_similar_methods(method_name, limit)
+                
+                if not results:
+                    return f"No similar methods found for '{method_name}'"
+                
+                output = [f"Found {len(results)} similar methods for '{method_name}':"]
+                output.append("")
+                
+                for i, result in enumerate(results, 1):
+                    output.append(f"{i}. **{result.component_name}.{result.method_name}**")
+                    output.append(f"   - Return type: `{result.return_type}`")
+                    output.append(f"   - File: `{result.file_path}:{result.line_number}`")
+                    if result.description:
+                        output.append(f"   - Description: {result.description}")
+                    if result.tags:
+                        output.append(f"   - Tags: {', '.join(result.tags)}")
+                    output.append("")
+                
+                return "\n".join(output)
+            except Exception as e:
+                return f"Error searching similar methods: {e}"
+
+        @self.mcp.tool(name="tk_get_guidance", description="Get usage guidance for a method")
+        def get_guidance(method_name: str) -> str:
+            """Получение рекомендаций по использованию метода"""
+            try:
+                # Импортируем генератор рекомендаций
+                sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+                from generate_usage_guidance import UsageGuidanceGenerator
+                
+                generator = UsageGuidanceGenerator(self.db_path)
+                guidance = generator.generate_method_guidance(method_name)
+                
+                if 'error' in guidance:
+                    return guidance['error']
+                
+                output = []
+                output.append(f"# Usage Guidance for {guidance['method_name']}")
+                output.append(f"**Component:** {guidance['component_name']}")
+                output.append(f"**Return Type:** {guidance['return_type']}")
+                output.append(f"**Tags:** {', '.join(guidance['tags'])}")
+                output.append("")
+                
+                if guidance['description']:
+                    output.append(f"**Description:** {guidance['description']}")
+                    output.append("")
+                
+                if guidance['usage_patterns']:
+                    output.append("## Usage Patterns")
+                    for pattern in guidance['usage_patterns']:
+                        output.append(f"### {pattern['tag'].title()}")
+                        output.append(f"**Description:** {pattern['description']}")
+                        output.append(f"**Usage:** {pattern['usage']}")
+                        output.append(f"**Example:** `{pattern['example']}`")
+                        output.append(f"**Context:** {pattern['context']}")
+                        output.append("")
+                
+                if guidance['recommendations']:
+                    output.append("## Recommendations")
+                    for rec in guidance['recommendations']:
+                        output.append(f"- {rec}")
+                    output.append("")
+                
+                if guidance['related_methods']:
+                    output.append("## Related Methods")
+                    for method in guidance['related_methods']:
+                        output.append(f"- **{method['component']}.{method['name']}** ({', '.join(method['tags'])})")
+                
+                return "\n".join(output)
+            except Exception as e:
+                return f"Error getting guidance: {e}"
+
+        @self.mcp.tool(name="tk_get_context_methods", description="Get methods suitable for specific context")
+        def get_context_methods(context: str, limit: int = 10) -> str:
+            """Получение методов для конкретного контекста"""
+            try:
+                # Импортируем генератор рекомендаций
+                sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+                from generate_usage_guidance import UsageGuidanceGenerator
+                
+                generator = UsageGuidanceGenerator(self.db_path)
+                guidance = generator.generate_context_guidance(context)
+                
+                output = []
+                output.append(f"# Methods for {context} context")
+                output.append(f"**Context:** {guidance['context']}")
+                output.append("")
+                
+                for method in guidance['methods']:
+                    output.append(f"## {method['component']}.{method['name']}")
+                    output.append(f"**Tags:** {', '.join(method['tags'])}")
+                    if method['description']:
+                        output.append(f"**Description:** {method['description']}")
+                    output.append("")
+                
+                return "\n".join(output)
+            except Exception as e:
+                return f"Error getting context methods: {e}"
+
+        @self.mcp.tool(name="tk_get_tag_guidance", description="Get guidance for methods with specific tag")
+        def get_tag_guidance(tag: str, limit: int = 10) -> str:
+            """Получение рекомендаций для методов с конкретным тегом"""
+            try:
+                # Импортируем генератор рекомендаций
+                sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+                from generate_usage_guidance import UsageGuidanceGenerator
+                
+                generator = UsageGuidanceGenerator(self.db_path)
+                guidance = generator.generate_tag_guidance(tag)
+                
+                output = []
+                output.append(f"# Methods with tag '{tag}'")
+                output.append(f"**Description:** {guidance['description']}")
+                output.append(f"**Usage:** {guidance['usage']}")
+                output.append(f"**Example:** `{guidance['example']}`")
+                output.append(f"**Context:** {guidance['context']}")
+                output.append("")
+                
+                for method in guidance['methods']:
+                    output.append(f"## {method['component']}.{method['name']}")
+                    if method['description']:
+                        output.append(f"**Description:** {method['description']}")
+                    output.append("")
+                
+                return "\n".join(output)
+            except Exception as e:
+                return f"Error getting tag guidance: {e}"
         
         @self.mcp.tool(name="tk_stats", description="High-level insight for the Agent")
         def get_stats() -> str:
