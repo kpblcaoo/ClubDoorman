@@ -6,7 +6,7 @@ Database operations for TestKit SQL Indexer
 import sqlite3
 from datetime import datetime
 from typing import List, Optional
-from .models import TestKitComponent, TestKitMethod
+from .models import TestKitComponent, TestKitMethod, UsageExample
 
 class DatabaseManager:
     """Manages SQLite database operations for TestKit index"""
@@ -30,6 +30,7 @@ class DatabaseManager:
                 class_description TEXT,
                 category TEXT,
                 lines_count INTEGER,
+                file_hash TEXT,  -- Хеш файла для дедупликации
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -43,6 +44,7 @@ class DatabaseManager:
                 name TEXT NOT NULL,
                 return_type TEXT,
                 signature TEXT,
+                full_signature TEXT,  -- Полная сигнатура с параметрами
                 description TEXT,
                 line_number INTEGER,
                 is_static BOOLEAN,
@@ -75,11 +77,29 @@ class DatabaseManager:
             )
         """)
 
+        # Примеры использования
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS usage_examples (
+                id INTEGER PRIMARY KEY,
+                method_id INTEGER,
+                component_name TEXT,
+                example_code TEXT NOT NULL,
+                file_path TEXT,
+                line_number INTEGER,
+                context TEXT,  -- Контекст использования (test, integration, etc.)
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (method_id) REFERENCES methods(id)
+            )
+        """)
+
         # Индексы для быстрого поиска
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_methods_name ON methods(name)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_methods_return_type ON methods(return_type)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_components_category ON components(category)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_components_file_hash ON components(file_hash)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_usage_examples_method ON usage_examples(method_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_usage_examples_context ON usage_examples(context)")
 
         self.conn.commit()
     
@@ -93,15 +113,16 @@ class DatabaseManager:
         for component in components:
             # Сохраняем компонент
             cursor.execute("""
-                INSERT INTO components (file_path, file_name, class_name, class_description, category, lines_count)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO components (file_path, file_name, class_name, class_description, category, lines_count, file_hash)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 component.file_path,
                 component.file_name,
                 component.class_name,
                 component.class_description,
                 component.category,
-                component.lines_count
+                component.lines_count,
+                component.file_hash
             ))
             
             component_id = cursor.lastrowid
@@ -109,13 +130,14 @@ class DatabaseManager:
             # Сохраняем методы компонента
             for method in component.methods:
                 cursor.execute("""
-                    INSERT INTO methods (component_id, name, return_type, signature, description, line_number, is_static, is_generic)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO methods (component_id, name, return_type, signature, full_signature, description, line_number, is_static, is_generic)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     component_id,
                     method.name,
                     method.return_type,
                     method.signature,
+                    method.full_signature or method.signature,  # Используем полную сигнатуру если есть
                     method.description,
                     method.line_number,
                     method.is_static,
@@ -145,6 +167,96 @@ class DatabaseManager:
                     """, (tag_id,))
         
         self.conn.commit()
+
+    def save_usage_examples(self, examples: List[UsageExample]):
+        """Сохраняет примеры использования методов"""
+        if not self.conn:
+            raise RuntimeError("Database not initialized. Call create_database() first.")
+        
+        cursor = self.conn.cursor()
+        
+        for example in examples:
+            # Находим method_id по имени метода
+            cursor.execute("""
+                SELECT m.id FROM methods m
+                JOIN components c ON m.component_id = c.id
+                WHERE m.name = ? AND c.class_name = ?
+            """, (example.method_name, example.component_name))
+            
+            result = cursor.fetchone()
+            if result:
+                method_id = result[0]
+                
+                cursor.execute("""
+                    INSERT INTO usage_examples (method_id, component_name, example_code, file_path, line_number, context)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    method_id,
+                    example.component_name,
+                    example.example_code,
+                    example.file_path,
+                    example.line_number,
+                    example.context
+                ))
+        
+        self.conn.commit()
+
+    def get_usage_examples(self, method_name: str, limit: int = 5) -> List[dict]:
+        """Получает примеры использования метода"""
+        if not self.conn:
+            raise RuntimeError("Database not initialized. Call create_database() first.")
+        
+        cursor = self.conn.cursor()
+        
+        cursor.execute("""
+            SELECT ue.example_code, ue.file_path, ue.line_number, ue.context, c.class_name
+            FROM usage_examples ue
+            JOIN methods m ON ue.method_id = m.id
+            JOIN components c ON m.component_id = c.id
+            WHERE m.name = ?
+            ORDER BY ue.line_number
+            LIMIT ?
+        """, (method_name, limit))
+        
+        results = []
+        for row in cursor.fetchall():
+            results.append({
+                'example_code': row[0],
+                'file_path': row[1],
+                'line_number': row[2],
+                'context': row[3],
+                'class_name': row[4]
+            })
+        
+        return results
+
+    def get_method_signature(self, method_name: str, component_name: str = None) -> str:
+        """Получает полную сигнатуру метода"""
+        if not self.conn:
+            raise RuntimeError("Database not initialized. Call create_database() first.")
+        
+        cursor = self.conn.cursor()
+        
+        if component_name:
+            cursor.execute("""
+                SELECT m.full_signature, m.signature
+                FROM methods m
+                JOIN components c ON m.component_id = c.id
+                WHERE m.name = ? AND c.class_name = ?
+            """, (method_name, component_name))
+        else:
+            cursor.execute("""
+                SELECT full_signature, signature
+                FROM methods
+                WHERE name = ?
+                LIMIT 1
+            """, (method_name,))
+        
+        result = cursor.fetchone()
+        if result:
+            return result[0] or result[1]  # Возвращаем полную сигнатуру или обычную
+        
+        return ""
     
     def get_statistics(self) -> dict:
         """Получает статистику по базе данных"""
