@@ -25,7 +25,6 @@ public class UserBanService : IUserBanService
     private readonly IMessageService _messageService;
     private readonly IUserFlowLogger _userFlowLogger;
     private readonly ILogger<UserBanService> _logger;
-    private readonly IModerationService _moderationService;
     private readonly IViolationTracker _violationTracker;
     private readonly IAppConfig _appConfig;
     private readonly IStatisticsService _statisticsService;
@@ -38,7 +37,6 @@ public class UserBanService : IUserBanService
         IMessageService messageService,
         IUserFlowLogger userFlowLogger,
         ILogger<UserBanService> logger,
-        IModerationService moderationService,
         IViolationTracker violationTracker,
         IAppConfig appConfig,
         IStatisticsService statisticsService,
@@ -50,7 +48,6 @@ public class UserBanService : IUserBanService
         _messageService = messageService;
         _userFlowLogger = userFlowLogger;
         _logger = logger;
-        _moderationService = moderationService;
         _violationTracker = violationTracker;
         _appConfig = appConfig;
         _statisticsService = statisticsService;

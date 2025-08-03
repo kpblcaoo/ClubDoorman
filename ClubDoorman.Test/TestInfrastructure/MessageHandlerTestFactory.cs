@@ -55,13 +55,11 @@ public class MessageHandlerTestFactory
             MessageServiceMock.Object,
             UserFlowLoggerMock.Object,
             UserBanServiceLoggerMock.Object,
-            ModerationServiceMock.Object,
             ViolationTrackerMock.Object,
             AppConfigMock.Object,
             StatisticsServiceMock.Object,
             new GlobalStatsManager(),
             UserManagerMock.Object,
-
             UserCleanupServiceMock.Object
         );
     }

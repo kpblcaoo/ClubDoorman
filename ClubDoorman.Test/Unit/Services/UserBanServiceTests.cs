@@ -72,13 +72,11 @@ public class UserBanServiceTests
             _messageServiceMock.Object,
             _userFlowLoggerMock.Object,
             new Mock<ILogger<UserBanService>>().Object,
-            _moderationServiceMock.Object,
             _violationTrackerMock.Object,
             _appConfigMock.Object,
             _statisticsServiceMock.Object,
             _globalStatsManagerMock.Object,
             _userManagerMock.Object,
-
             new Mock<IUserCleanupService>().Object
         );
     }
