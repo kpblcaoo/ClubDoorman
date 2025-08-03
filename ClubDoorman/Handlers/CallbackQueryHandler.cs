@@ -26,6 +26,7 @@ public class CallbackQueryHandler : IUpdateHandler
     private readonly IMessageService _messageService;
     private readonly IViolationTracker _violationTracker;
     private readonly IUserBanService _userBanService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<CallbackQueryHandler> _logger;
 
     public CallbackQueryHandler(
@@ -39,6 +40,7 @@ public class CallbackQueryHandler : IUpdateHandler
         IMessageService messageService,
         IViolationTracker violationTracker,
         IUserBanService userBanService,
+        IServiceProvider serviceProvider,
         ILogger<CallbackQueryHandler> logger)
     {
         _bot = bot;
@@ -51,6 +53,7 @@ public class CallbackQueryHandler : IUpdateHandler
         _messageService = messageService;
         _violationTracker = violationTracker;
         _userBanService = userBanService;
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
@@ -229,6 +232,10 @@ public class CallbackQueryHandler : IUpdateHandler
             {
                 await HandleBanUser(callbackQuery, chatId, userId, cancellationToken);
             }
+            else if (split.Count > 2 && split[0] == "logban" && long.TryParse(split[1], out var logChatId) && long.TryParse(split[2], out var logUserId))
+            {
+                await HandleLogBanUser(callbackQuery, logChatId, logUserId, cancellationToken);
+            }
             else if (split.Count > 2 && split[0] == "banprofile" && long.TryParse(split[1], out var profileChatId) && long.TryParse(split[2], out var profileUserId))
             {
                 await HandleBanUserByProfile(callbackQuery, profileChatId, profileUserId, cancellationToken);
@@ -324,6 +331,44 @@ public class CallbackQueryHandler : IUpdateHandler
         catch (Exception e)
         {
             _logger.LogWarning(e, "Не удалось забанить пользователя через админский callback");
+            
+            // Обновляем сообщение с ошибкой
+            var errorMessage = $"{callbackQuery.Message.Text}\n\n❌ Ошибка при бане администратором {adminName}\nНе могу забанить. Не хватает могущества? Сходите забаньте руками";
+            
+            await _bot.EditMessageText(
+                callbackQuery.Message!.Chat.Id,
+                callbackQuery.Message.MessageId,
+                errorMessage,
+                cancellationToken: cancellationToken
+            );
+        }
+    }
+
+    private async Task HandleLogBanUser(CallbackQuery callbackQuery, long chatId, long userId, CancellationToken cancellationToken)
+    {
+        var adminName = GetAdminDisplayName(callbackQuery.From);
+        
+        try
+        {
+            // Используем сервис лог-чата для обработки бана
+            var logChatService = _serviceProvider.GetRequiredService<ILogChatService>();
+            await logChatService.HandleLogBanAsync(chatId, userId, adminName, cancellationToken);
+            
+            // Обновляем сообщение с результатом действия (без упоминания автобана)
+            var banMessage = $"{callbackQuery.Message.Text}\n\n🚫 Забанен администратором {adminName}\n🧹 Пользователь очищен из всех списков";
+            
+            await _bot.EditMessageText(
+                callbackQuery.Message!.Chat.Id,
+                callbackQuery.Message.MessageId,
+                banMessage,
+                cancellationToken: cancellationToken
+            );
+            
+            _logger.LogInformation("Пользователь {UserId} забанен из лог-чата администратором {AdminName}", userId, adminName);
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Не удалось забанить пользователя через лог-чат callback");
             
             // Обновляем сообщение с ошибкой
             var errorMessage = $"{callbackQuery.Message.Text}\n\n❌ Ошибка при бане администратором {adminName}\nНе могу забанить. Не хватает могущества? Сходите забаньте руками";

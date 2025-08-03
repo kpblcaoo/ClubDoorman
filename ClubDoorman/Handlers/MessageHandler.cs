@@ -884,86 +884,9 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         
         var user = message.From;
 
-        try
-        {
-            // Создаем кнопки реакции для лог-чата
-            var callbackDataBan = $"ban_{message.Chat.Id}_{user.Id}";
-            MemoryCache.Default.Add(callbackDataBan, message, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(12) });
-            
-            var keyboard = new InlineKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    new InlineKeyboardButton("🤖 бан") { CallbackData = callbackDataBan },
-                    new InlineKeyboardButton("😶 пропуск") { CallbackData = "noop" },
-                    new InlineKeyboardButton("🥰 свой") { CallbackData = $"approve_{user.Id}" }
-                }
-            });
-
-            // Определяем заголовок в зависимости от причины
-            var actionDescription = reason switch
-            {
-                var r when r.Contains("Ссылки запрещены") => "Удаление за ссылки",
-                var r when r.Contains("Банальное приветствие") => "Удаление банального приветствия",
-                _ => $"Удаление: {reason}"
-            };
-            
-            var deletionData = new AutoBanNotificationData(
-                user, 
-                message.Chat, 
-                actionDescription, 
-                reason, 
-                message.MessageId, 
-                LinkToMessage(message.Chat, message.MessageId)
-            );
-            
-            // ФИКС: Пытаемся переслать сообщение, но если не получается - отправляем без пересылки
-            Message? forwardedMessage = null;
-            try
-            {
-                // Пересылаем сообщение и отправляем уведомление с кнопками как реплай
-                forwardedMessage = await _bot.ForwardMessage(
-                    new ChatId(_appConfig.LogAdminChatId),
-                    message.Chat.Id,
-                    message.MessageId,
-                    cancellationToken: cancellationToken
-                );
-                
-                var template = _messageService.GetTemplates().GetLogTemplate(LogNotificationType.AutoBanTextMention);
-                var messageText = _messageService.GetTemplates().FormatNotificationTemplate(template, deletionData);
-                
-                await _bot.SendMessage(
-                    _appConfig.LogAdminChatId,
-                    messageText + "\n\n" + "Действия:",
-                    parseMode: ParseMode.Html,
-                    replyMarkup: keyboard,
-                    replyParameters: forwardedMessage,
-                    cancellationToken: cancellationToken
-                );
-            }
-            catch (Exception forwardEx) when (forwardEx.Message.Contains("protected content") || forwardEx.Message.Contains("can't be forwarded"))
-            {
-                _logger.LogWarning("Сообщение имеет защищенный контент, отправляем уведомление без пересылки: {Error}", forwardEx.Message);
-                
-                var template = _messageService.GetTemplates().GetLogTemplate(LogNotificationType.AutoBanTextMention);
-                var messageText = _messageService.GetTemplates().FormatNotificationTemplate(template, deletionData);
-                
-                // Отправляем уведомление без пересылки (просто как обычное сообщение)
-                await _bot.SendMessage(
-                    _appConfig.LogAdminChatId,
-                    messageText + "\n\n" + "Действия:",
-                    parseMode: ParseMode.Html,
-                    replyMarkup: keyboard,
-                    cancellationToken: cancellationToken
-                );
-            }
-            
-            _logger.LogDebug("Уведомление с кнопками успешно отправлено в лог-чат");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Не удалось отправить уведомление в лог-чат");
-        }
+        // Используем сервис лог-чата для отправки уведомления
+        var logChatService = _serviceProvider.GetRequiredService<ILogChatService>();
+        await logChatService.SendLogNotificationAsync(message, reason, cancellationToken);
         
         // Небольшая задержка перед предупреждением для избежания race condition
         try
