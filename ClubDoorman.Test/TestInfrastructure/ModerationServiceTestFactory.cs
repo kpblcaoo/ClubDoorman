@@ -39,6 +39,7 @@ public class ModerationServiceTestFactory
             BotClientMock.Object,
             MessageServiceMock.Object,
             UserBanServiceMock.Object,
+            new Mock<IUserCleanupService>().Object,
             LoggerMock.Object
         );
     }

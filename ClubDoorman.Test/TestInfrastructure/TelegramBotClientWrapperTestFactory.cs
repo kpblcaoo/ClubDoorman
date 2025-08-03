@@ -46,6 +46,7 @@ public class TelegramBotClientWrapperTestFactory
             new Mock<ITelegramBotClient>().Object,
             new Mock<IMessageService>().Object,
             new Mock<IUserBanService>().Object,
+            new Mock<IUserCleanupService>().Object,
             new Mock<ILogger<ModerationService>>().Object
         );
     }

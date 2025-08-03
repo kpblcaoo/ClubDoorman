@@ -72,6 +72,7 @@ public class InfrastructureE2ETests : TestBase
             mockBotClient.Object,
             mockMessageService.Object,
             CreateMockUserBanService().Object,
+            new Mock<IUserCleanupService>().Object,
             _moderationLogger
         );
     }

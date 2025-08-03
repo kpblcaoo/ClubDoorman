@@ -56,7 +56,8 @@ public class UserBanServiceTestsModern
             _statisticsServiceMock.Object,
             _globalStatsManagerMock.Object,
             _userManagerMock.Object,
-            new Mock<IUserStateManager>().Object  // IUserStateManager
+
+            new Mock<IUserCleanupService>().Object
         );
     }
 

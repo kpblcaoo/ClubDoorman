@@ -518,16 +518,16 @@ public class MessageHandlerGoldenMasterTests
         // Arrange: Используем сценарий с пользователем из одобренных
         var (user, chat, message) = TK.Specialized.BanTests.HandleBlacklistBanApprovedUserScenario();
         
-        // Настраиваем UserManager для возврата true при удалении из одобренных
-        _factory.UserManagerMock.Setup(x => x.RemoveApproval(user.Id, null, false)).Returns(true);
+        // Настраиваем UserCleanupService для возврата true при удалении из одобренных
+        _factory.UserCleanupServiceMock.Setup(x => x.RemoveUserFromGlobalApproval(user.Id, "Автобан по блэклисту")).Returns(true);
 
         // Act: Вызываем метод напрямую
         var cancellationToken = CancellationToken.None;
         await _userBanService.HandleBlacklistBanAsync(message, user, chat, cancellationToken);
 
         // Assert: Проверяем удаление из одобренных
-        _factory.UserManagerMock.Verify(
-            x => x.RemoveApproval(user.Id, null, false),
+        _factory.UserCleanupServiceMock.Verify(
+            x => x.RemoveUserFromGlobalApproval(user.Id, "Автобан по блэклисту"),
             Times.Once,
             "Должен удалиться пользователь из списка одобренных");
 
@@ -794,10 +794,11 @@ public class MessageHandlerGoldenMasterTests
             "Должно залогироваться ошибка при бане пользователя");
 
         // Проверяем, что очистка пользователя все равно выполняется
-        _factory.UserStateManagerMock.Verify(
-            x => x.CleanupUserFromAllLists(
+        _factory.UserCleanupServiceMock.Verify(
+            x => x.RemoveUserFromGroupApproval(
                 user.Id,
-                chat.Id),
+                chat.Id,
+                It.IsAny<string>()),
             Times.Once,
             "Должна выполниться очистка пользователя из всех списков");
 

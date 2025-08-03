@@ -133,10 +133,21 @@ public class Program
                 services.AddSingleton<GlobalStatsManager>();
                 services.AddSingleton<ISuspiciousUsersStorage, SuspiciousUsersStorage>();
                 services.AddSingleton<IViolationTracker, ViolationTracker>();
-                services.AddSingleton<IUserBanService, UserBanService>();
+                services.AddSingleton<IUserBanService>(provider => new UserBanService(
+                    provider.GetRequiredService<ITelegramBotClientWrapper>(),
+                    provider.GetRequiredService<IMessageService>(),
+                    provider.GetRequiredService<IUserFlowLogger>(),
+                    provider.GetRequiredService<ILogger<UserBanService>>(),
+                    provider.GetRequiredService<IModerationService>(),
+                    provider.GetRequiredService<IViolationTracker>(),
+                    provider.GetRequiredService<IAppConfig>(),
+                    provider.GetRequiredService<IStatisticsService>(),
+                    provider.GetRequiredService<GlobalStatsManager>(),
+                    provider.GetRequiredService<IUserManager>(),
+                    provider.GetRequiredService<IUserCleanupService>()
+                ));
                 
-                // Регистрируем IUserStateManager, используя существующий ModerationService
-                services.AddSingleton<IUserStateManager>(provider => (IUserStateManager)provider.GetRequiredService<IModerationService>());
+
                 
                 // Новые сервисы
                 services.AddSingleton<IUpdateDispatcher, UpdateDispatcher>();
@@ -156,6 +167,7 @@ public class Program
                     provider.GetRequiredService<ITelegramBotClient>(),
                     provider.GetRequiredService<IMessageService>(),
                     provider.GetRequiredService<IUserBanService>(),
+                    provider.GetRequiredService<IUserCleanupService>(),
                     provider.GetRequiredService<ILogger<ModerationService>>()));
                 services.AddSingleton<IntroFlowService>(provider => new IntroFlowService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<IntroFlowService>>(), provider.GetRequiredService<ICaptchaService>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<IAiChecks>(), provider.GetRequiredService<IStatisticsService>(), provider.GetRequiredService<GlobalStatsManager>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<IUserBanService>(), provider.GetRequiredService<IAppConfig>()));
                 services.AddSingleton<IChatLinkFormatter, ChatLinkFormatter>();
@@ -197,7 +209,7 @@ public class Program
                     provider.GetRequiredService<ILogger<MessageHandler>>(),
                     provider.GetRequiredService<IUserBanService>()));
                 services.AddSingleton<IUpdateHandler>(provider => new CallbackQueryHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ICaptchaService>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<IBadMessageManager>(), provider.GetRequiredService<IStatisticsService>(), provider.GetRequiredService<IAiChecks>(), provider.GetRequiredService<IModerationService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<IViolationTracker>(), provider.GetRequiredService<IUserBanService>(), provider.GetRequiredService<ILogger<CallbackQueryHandler>>()));
-                services.AddSingleton<IUpdateHandler>(provider => new ChatMemberHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<ILogger<ChatMemberHandler>>(), provider.GetRequiredService<IntroFlowService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<IAppConfig>()));
+                services.AddSingleton<IUpdateHandler>(provider => new ChatMemberHandler(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<IUserManager>(), provider.GetRequiredService<ILogger<ChatMemberHandler>>(), provider.GetRequiredService<IntroFlowService>(), provider.GetRequiredService<IMessageService>(), provider.GetRequiredService<IAppConfig>(), provider.GetRequiredService<IUserCleanupService>()));
                 
                 // Новые прокси-сервисы для рефакторинга
                 services.AddSingleton<IMessageHandler>(provider => provider.GetRequiredService<MessageHandler>());
@@ -239,6 +251,9 @@ public class Program
                     provider.GetRequiredService<IAppConfig>()
                 ));
                 services.AddSingleton<IUserManager>(provider => provider.GetRequiredService<UserManager>());
+                
+                // Регистрация сервиса очистки пользователей
+                services.AddSingleton<IUserCleanupService, UserCleanupService>();
                 
                 // Логируем статус AI и Mimicry систем после полной инициализации
                 var appConfig = services.BuildServiceProvider().GetRequiredService<IAppConfig>();

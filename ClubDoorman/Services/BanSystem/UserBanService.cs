@@ -5,6 +5,7 @@ using ClubDoorman.Handlers;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services;
 
 namespace ClubDoorman.Services.BanSystem;
 
@@ -30,7 +31,7 @@ public class UserBanService : IUserBanService
     private readonly IStatisticsService _statisticsService;
     private readonly GlobalStatsManager _globalStatsManager;
     private readonly IUserManager _userManager;
-    private readonly IUserStateManager _userStateManager;
+    private readonly IUserCleanupService _userCleanupService;
 
     public UserBanService(
         ITelegramBotClientWrapper bot,
@@ -43,7 +44,7 @@ public class UserBanService : IUserBanService
         IStatisticsService statisticsService,
         GlobalStatsManager globalStatsManager,
         IUserManager userManager,
-        IUserStateManager userStateManager)
+        IUserCleanupService userCleanupService)
     {
         _bot = bot;
         _messageService = messageService;
@@ -55,7 +56,7 @@ public class UserBanService : IUserBanService
         _statisticsService = statisticsService;
         _globalStatsManager = globalStatsManager;
         _userManager = userManager;
-        _userStateManager = userStateManager;
+        _userCleanupService = userCleanupService;
     }
 
     public async Task BanUserForLongNameAsync(Message? userJoinMessage, User user, string reason, TimeSpan? banDuration, CancellationToken cancellationToken)
@@ -97,7 +98,7 @@ public class UserBanService : IUserBanService
             await DeleteMessageAsync(userJoinMessage, cancellationToken: cancellationToken);
             
             // Удаляем из списка одобренных (как в старом коде)
-            if (_userManager.RemoveApproval(user.Id, chat.Id, removeAll: true))
+            if (_userCleanupService.RemoveUserFromAllApprovals(user.Id, "Бан по блэклисту"))
             {
                 await _messageService.SendAdminNotificationAsync(
                     AdminNotificationType.UserCleanup,
@@ -421,7 +422,7 @@ public class UserBanService : IUserBanService
 
     private async Task CleanupUserDataAsync(User user, Chat chat, CancellationToken cancellationToken)
     {
-        _userStateManager.CleanupUserFromAllLists(user.Id, chat.Id);
+        _userCleanupService.RemoveUserFromGroupApproval(user.Id, chat.Id, "Очистка при бане");
         _violationTracker.ResetViolations(user.Id, chat.Id, ViolationType.MlSpam);
         _violationTracker.ResetViolations(user.Id, chat.Id, ViolationType.StopWords);
         _violationTracker.ResetViolations(user.Id, chat.Id, ViolationType.TooManyEmojis);
@@ -500,7 +501,7 @@ public class UserBanService : IUserBanService
 
     private async Task RemoveUserFromApprovedAsync(User user, Message message, Chat chat, CancellationToken cancellationToken)
     {
-        if (_userManager.RemoveApproval(user.Id))
+        if (_userCleanupService.RemoveUserFromGlobalApproval(user.Id, "Автобан по блэклисту"))
         {
             try
             {
