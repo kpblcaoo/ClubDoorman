@@ -987,12 +987,19 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
             {
                 var warningData = new SimpleNotificationData(user, message.Chat, reason);
                 // Отправляем стандартное предупреждение новичку как реплай на сообщение, которое будет удалено
+                var replyParams = new ReplyParameters { MessageId = message.MessageId };
+                _logger.LogDebug("Отправляем предупреждение с реплаем на сообщение {MessageId} в чате {ChatId}", message.MessageId, message.Chat.Id);
+                
+                // Дополнительная диагностика
+                _logger.LogDebug("Информация о сообщении для реплая: ChatId={ChatId}, MessageId={MessageId}, FromUserId={FromUserId}", 
+                    message.Chat.Id, message.MessageId, message.From?.Id);
+                
                 warningMessage = await _messageService.SendUserNotificationWithReplyAsync(
                     user, 
                     message.Chat, 
                     UserNotificationType.ModerationWarning, 
                     warningData, 
-                    new ReplyParameters { MessageId = message.MessageId },
+                    replyParams,
                     cancellationToken
                 );
                 
@@ -1153,12 +1160,15 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
                 {
                     var warningData = new SimpleNotificationData(user, message.Chat, reason);
                     // Отправляем стандартное предупреждение новичку как реплай на сообщение, которое будет удалено
+                    var replyParams = new ReplyParameters { MessageId = message.MessageId };
+                    _logger.LogDebug("Отправляем предупреждение с реплаем на сообщение {MessageId} в чате {ChatId}", message.MessageId, message.Chat.Id);
+                    
                     warningMessage = await _messageService.SendUserNotificationWithReplyAsync(
                         user, 
                         message.Chat, 
                         UserNotificationType.ModerationWarning, 
                         warningData, 
-                        new ReplyParameters { MessageId = message.MessageId },
+                        replyParams,
                         cancellationToken
                     );
                     
@@ -1182,8 +1192,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // ЭТАП 4: Увеличенная задержка перед удалением
         try
         {
-            await Task.Delay(300, cancellationToken); // 300мс задержка (было 100мс)
-            _logger.LogDebug("Выполнена задержка 300мс между предупреждением и удалением");
+            await Task.Delay(500, cancellationToken); // 500мс задержка для корректной обработки реплая
+            _logger.LogDebug("Выполнена задержка 500мс между предупреждением и удалением");
         }
         catch (OperationCanceledException)
         {

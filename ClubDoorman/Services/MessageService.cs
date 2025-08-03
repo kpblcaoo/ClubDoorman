@@ -164,17 +164,39 @@ public class MessageService : IMessageService
                 message = _templates.FormatTemplate(template, data);
             }
             
-            var sent = await _bot.SendMessage(
-                chat.Id,
-                message,
-                parseMode: ParseMode.Html,
-                replyParameters: replyParameters,
-                cancellationToken: cancellationToken
-            );
+            _logger.LogDebug("Отправляем сообщение в Telegram API с replyParameters.MessageId = {ReplyMessageId}", replyParameters.MessageId);
             
-            _logger.LogDebug("Отправлено уведомление с реплаем на сообщение {ReplyMessageId} пользователю {UserId} в чате {ChatId} типа {Type}", 
-                replyParameters.MessageId, user.Id, chat.Id, type);
-            return sent;
+            // Попробуем сначала отправить с реплаем
+            try
+            {
+                var sent = await _bot.SendMessage(
+                    chat.Id,
+                    message,
+                    parseMode: ParseMode.Html,
+                    replyParameters: replyParameters,
+                    cancellationToken: cancellationToken
+                );
+                
+                _logger.LogDebug("Отправлено уведомление с реплаем на сообщение {ReplyMessageId} пользователю {UserId} в чате {ChatId} типа {Type}. Получен ответ: MessageId={SentMessageId}", 
+                    replyParameters.MessageId, user.Id, chat.Id, type, sent.MessageId);
+                return sent;
+            }
+            catch (Exception replyEx)
+            {
+                _logger.LogWarning(replyEx, "Не удалось отправить с реплаем, пробуем без реплая. ReplyMessageId={ReplyMessageId}", replyParameters.MessageId);
+                
+                // Если не получилось с реплаем, отправляем без реплая
+                var sent = await _bot.SendMessage(
+                    chat.Id,
+                    message,
+                    parseMode: ParseMode.Html,
+                    cancellationToken: cancellationToken
+                );
+                
+                _logger.LogDebug("Отправлено уведомление БЕЗ реплая пользователю {UserId} в чате {ChatId} типа {Type}. Получен ответ: MessageId={SentMessageId}", 
+                    user.Id, chat.Id, type, sent.MessageId);
+                return sent;
+            }
         }
         catch (Exception ex)
         {
