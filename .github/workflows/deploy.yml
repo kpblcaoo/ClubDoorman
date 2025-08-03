@@ -13,7 +13,7 @@ jobs:
 
     - name: Extract version number
       id: vars
-      run: echo "version=1.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
+      run: echo "version=2.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
       
     - name: Set lowercase repo name
       run: echo "repo_name=${{ github.repository }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_ENV
