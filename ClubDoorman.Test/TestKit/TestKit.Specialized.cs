@@ -618,6 +618,7 @@ namespace ClubDoorman.Test.TestKit
                         botClientMock.Object,
                         messageServiceMock.Object,
                         CreateMockUserBanService().Object,
+                        new Mock<IUserCleanupService>().Object,
                         moderationLoggerMock.Object
                     );
 
@@ -673,6 +674,7 @@ namespace ClubDoorman.Test.TestKit
                         botClientMock.Object,
                         messageServiceMock.Object,
                         CreateMockUserBanService().Object,
+                        new Mock<IUserCleanupService>().Object,
                         moderationLoggerMock.Object
                     );
 
@@ -740,6 +742,7 @@ namespace ClubDoorman.Test.TestKit
                         botClientMock.Object,
                         messageServiceMock.Object,
                         CreateMockUserBanService().Object,
+                        new Mock<IUserCleanupService>().Object,
                         loggerMock.Object
                     );
 

@@ -45,7 +45,8 @@ public class MessageHandlerTestFactory
     public Mock<IAppConfig> AppConfigMock { get; } = TK.CreateMockAppConfig();
     public Mock<IViolationTracker> ViolationTrackerMock { get; } = TK.CreateMockViolationTracker();
     public Mock<IUserBanService> UserBanServiceMock { get; } = TK.CreateMockUserBanService();
-    public Mock<IUserStateManager> UserStateManagerMock { get; } = TK.CreateMock<IUserStateManager>();
+
+    public Mock<IUserCleanupService> UserCleanupServiceMock { get; } = TK.CreateMock<IUserCleanupService>();
     
     public IUserBanService CreateRealUserBanService()
     {
@@ -54,13 +55,12 @@ public class MessageHandlerTestFactory
             MessageServiceMock.Object,
             UserFlowLoggerMock.Object,
             UserBanServiceLoggerMock.Object,
-            ModerationServiceMock.Object,
             ViolationTrackerMock.Object,
             AppConfigMock.Object,
             StatisticsServiceMock.Object,
             new GlobalStatsManager(),
             UserManagerMock.Object,
-            UserStateManagerMock.Object  // IUserStateManager
+            UserCleanupServiceMock.Object
         );
     }
     public Mock<ILogger<MessageHandler>> LoggerMock { get; } = TK.CreateLoggerMock<MessageHandler>();
@@ -381,6 +381,7 @@ public class MessageHandlerTestFactory
             FakeBotClient as ITelegramBotClient,
             mockMessageService.Object,
             UserBanServiceMock.Object,
+            new Mock<IUserCleanupService>().Object,
             mockLogger.Object
         );
     }

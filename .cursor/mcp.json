@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "testkitdex": {
+      "command": "/home/kpblc/projects/ClubDoorman/scripts/testkit-sql-indexer/bin/tk-mcp",
+      "env": {
+        "TESTKIT_ROOT": "/home/kpblc/projects/ClubDoorman",
+        "TESTKIT_DB_PATH": "/home/kpblc/projects/ClubDoorman/scripts/testkit-sql-indexer/testkit_index.db"
+      }
+    }
+  }
+} 

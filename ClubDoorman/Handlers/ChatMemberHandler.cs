@@ -22,6 +22,7 @@ public class ChatMemberHandler : IUpdateHandler
     private readonly IntroFlowService _introFlowService;
     private readonly IMessageService _messageService;
     private readonly IAppConfig _appConfig;
+    private readonly IUserCleanupService _userCleanupService;
 
     public ChatMemberHandler(
         ITelegramBotClientWrapper bot,
@@ -29,7 +30,8 @@ public class ChatMemberHandler : IUpdateHandler
         ILogger<ChatMemberHandler> logger,
         IntroFlowService introFlowService,
         IMessageService messageService,
-        IAppConfig appConfig)
+        IAppConfig appConfig,
+        IUserCleanupService userCleanupService)
     {
         _bot = bot;
         _userManager = userManager;
@@ -37,6 +39,7 @@ public class ChatMemberHandler : IUpdateHandler
         _introFlowService = introFlowService;
         _messageService = messageService;
         _appConfig = appConfig;
+        _userCleanupService = userCleanupService;
     }
 
     public bool CanHandle(Update update) => update.Type == UpdateType.ChatMember;
@@ -92,7 +95,7 @@ public class ChatMemberHandler : IUpdateHandler
                     : $" Его/её последним сообщением было:\n```\n{lastMessage}\n```";
                 
                 // Удаляем из списка доверенных
-                if (_userManager.RemoveApproval(user.Id, chatMember.Chat.Id, removeAll: true))
+                if (_userCleanupService.RemoveUserFromAllApprovals(user.Id, "Получение ограничений"))
                 {
                     var removedData = new UserRemovedFromApprovedNotificationData(
                         user, chatMember.Chat, "удален из списка одобренных после получения ограничений", 0, chatMember.Chat.Title ?? "");

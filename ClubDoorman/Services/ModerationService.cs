@@ -12,7 +12,7 @@ namespace ClubDoorman.Services;
 /// <summary>
 /// Сервис модерации сообщений
 /// </summary>
-public class ModerationService : IModerationService, IUserStateManager
+public class ModerationService : IModerationService
 {
     private readonly ISpamHamClassifier _classifier;
     private readonly IMimicryClassifier _mimicryClassifier;
@@ -23,6 +23,7 @@ public class ModerationService : IModerationService, IUserStateManager
     private readonly ITelegramBotClient _botClient;
     private readonly IMessageService _messageService;
     private readonly IUserBanService _userBanService;
+    private readonly IUserCleanupService _userCleanupService;
     private readonly ILogger<ModerationService> _logger;
 
     // Счетчики хороших сообщений для новой системы
@@ -48,6 +49,7 @@ public class ModerationService : IModerationService, IUserStateManager
         ITelegramBotClient botClient,
         IMessageService messageService,
         IUserBanService userBanService,
+        IUserCleanupService userCleanupService,
         ILogger<ModerationService> logger)
     {
         _classifier = classifier;
@@ -59,6 +61,7 @@ public class ModerationService : IModerationService, IUserStateManager
         _botClient = botClient;
         _messageService = messageService;
         _userBanService = userBanService;
+        _userCleanupService = userCleanupService;
         _logger = logger;
         
         // Логируем статус системы мимикрии
@@ -357,7 +360,7 @@ public class ModerationService : IModerationService, IUserStateManager
             _suspiciousUsersStorage.RemoveSuspicious(userId, chatId);
             
             // Удаляем из одобренных
-            _userManager.RemoveApproval(userId, chatId);
+            _userCleanupService.RemoveUserFromGroupApproval(userId, chatId, "Очистка из ModerationService");
             
             // Очищаем кэши сообщений
             var groupUserKey = $"{chatId}_{userId}";

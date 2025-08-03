@@ -49,3 +49,25 @@ test_bot.sh
 secrets.*
 tokens.*
 scripts/internal
+
+# Python cache and databases
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# TestKit SQL Indexer artifacts
+scripts/testkit-sql-indexer/*.db
+scripts/testkit-sql-indexer/*.sqlite
+scripts/testkit-sql-indexer/testkit_index_*.txt
+*.db.backup.*
+
+venv/
+.venv/
