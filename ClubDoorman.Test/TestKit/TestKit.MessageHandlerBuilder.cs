@@ -41,6 +41,7 @@ public class MessageHandlerBuilder
     private readonly Mock<IAppConfig> _appConfigMock = TK.CreateMockAppConfig();
     private readonly Mock<IViolationTracker> _violationTrackerMock = TK.CreateMockViolationTracker();
     private readonly Mock<IUserBanService> _userBanServiceMock = TK.CreateMockUserBanService();
+    private readonly Mock<ILogChatService> _logChatServiceMock = TK.CreateMock<ILogChatService>();
     private readonly Mock<ILogger<MessageHandler>> _loggerMock = TK.CreateLoggerMock<MessageHandler>();
     private readonly Mock<ILogger<SuspiciousCommandHandler>> _suspiciousCommandHandlerLoggerMock = TK.CreateLoggerMock<SuspiciousCommandHandler>();
     private readonly Mock<ISuspiciousUsersStorage> _suspiciousUsersStorageMock = TK.CreateMock<ISuspiciousUsersStorage>();
@@ -181,6 +182,16 @@ public class MessageHandlerBuilder
             It.IsAny<ReplyMarkup>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Message());
+        
+        // Настраиваем мок для ILogChatService
+        _logChatServiceMock.Setup(x => x.SendLogNotificationAsync(It.IsAny<Message>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        _logChatServiceMock.Setup(x => x.HandleLogBanAsync(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        
+        // Настраиваем IServiceProvider для возврата ILogChatService
+        _serviceProviderMock.Setup(x => x.GetService(typeof(ILogChatService)))
+            .Returns(_logChatServiceMock.Object);
         
         return this;
     }
@@ -357,4 +368,10 @@ public class MessageHandlerBuilder
     /// <tags>builders, message-handler, user-manager-mock, verification</tags>
     /// </summary>
     public Mock<IUserManager> UserManagerMock => _userManagerMock;
+
+    /// <summary>
+    /// Возвращает мок LogChatService для верификации
+    /// <tags>builders, message-handler, log-chat-service-mock, verification</tags>
+    /// </summary>
+    public Mock<ILogChatService> LogChatServiceMock => _logChatServiceMock;
 } 
