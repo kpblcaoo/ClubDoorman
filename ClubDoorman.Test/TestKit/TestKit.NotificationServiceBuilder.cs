@@ -37,6 +37,7 @@ public class NotificationServiceBuilder
     private readonly Mock<IViolationTracker> _violationTrackerMock = new();
     private readonly Mock<ILogger<MessageHandler>> _messageHandlerLoggerMock = new();
     private readonly Mock<IUserBanService> _userBanServiceMock = new();
+    private readonly Mock<ILogChatService> _logChatServiceMock = new();
     
     private Mock<IMessageHandler> _messageHandlerMock = new();
 
@@ -52,6 +53,16 @@ public class NotificationServiceBuilder
             .BuildMock();
             
         _messageHandlerMock = messageHandlerMock;
+        
+        // Настраиваем мок для ILogChatService
+        _logChatServiceMock.Setup(x => x.SendLogNotificationAsync(It.IsAny<Message>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        _logChatServiceMock.Setup(x => x.HandleLogBanAsync(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        
+        // Настраиваем IServiceProvider для возврата ILogChatService
+        _serviceProviderMock.Setup(x => x.GetService(typeof(ILogChatService)))
+            .Returns(_logChatServiceMock.Object);
         
         return this;
     }
@@ -82,4 +93,10 @@ public class NotificationServiceBuilder
     /// <tags>builders, notification-service, message-service-mock, fluent-api</tags>
     /// </summary>
     public Mock<IMessageService> MessageServiceMock => _messageServiceMock;
+
+    /// <summary>
+    /// Возвращает мок LogChatService для дополнительной настройки
+    /// <tags>builders, notification-service, log-chat-service-mock, fluent-api</tags>
+    /// </summary>
+    public Mock<ILogChatService> LogChatServiceMock => _logChatServiceMock;
 } 
