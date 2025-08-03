@@ -67,4 +67,7 @@ __pycache__/
 scripts/testkit-sql-indexer/*.db
 scripts/testkit-sql-indexer/*.sqlite
 scripts/testkit-sql-indexer/testkit_index_*.txt
-scripts/testkit-sql-indexer/*.db.backup.*
+*.db.backup.*
+
+venv/
+.venv/
