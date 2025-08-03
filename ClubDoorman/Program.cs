@@ -348,6 +348,7 @@ public class Program
                         provider.GetRequiredService<IMessageService>(),
                         provider.GetRequiredService<IViolationTracker>(),
                         provider.GetRequiredService<IUserBanService>(),
+                        provider.GetRequiredService<IServiceProvider>(),
                         provider.GetRequiredService<ILogger<CallbackQueryHandler>>());
                 });
                 services.AddSingleton<IUpdateHandler>(provider =>
@@ -464,6 +465,9 @@ public class Program
 
                 // Регистрация сервиса очистки пользователей
                 services.AddSingleton<IUserCleanupService, UserCleanupService>();
+
+                // Регистрация сервиса лог-чата
+                services.AddSingleton<ILogChatService, LogChatService>();
 
                 // Логируем статус AI и Mimicry систем после полной инициализации
                 services.PostConfigure<IAppConfig>(appConfig =>
