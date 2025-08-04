@@ -412,9 +412,21 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         );
     }
 
-    private async Task HandleSayCommandAsync(Message message, CancellationToken cancellationToken)
+    internal async Task HandleSayCommandAsync(Message message, CancellationToken cancellationToken)
     {
-        var parts = message.Text!.Split(' ', 3);
+        if (message?.Text == null)
+        {
+            await _messageService.SendUserNotificationAsync(
+                message?.From!,
+                message?.Chat!,
+                UserNotificationType.Warning,
+                new SimpleNotificationData(message?.From!, message?.Chat!, "Сообщение не может быть null"),
+                cancellationToken
+            );
+            return;
+        }
+        
+        var parts = message.Text.Split(' ', 3);
         if (parts.Length < 3)
         {
             await _messageService.SendUserNotificationAsync(
@@ -477,12 +489,16 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     }
 
     // Вспомогательная функция для поиска userId по username среди недавних пользователей (по кэшу)
-    private long? TryFindUserIdByUsername(string username)
+    internal long? TryFindUserIdByUsername(string username)
     {
+        if (string.IsNullOrEmpty(username))
+            return null;
+            
         // Можно использовать MemoryCache или другой кэш, если он есть
-        // Здесь пример с MemoryCache: ищем по ключам, где username встречался
+        // Здесь пример с MemoryCache: ищем по значениям, где username встречался
         foreach (var item in MemoryCache.Default)
         {
+            // Ищем в значении, а не в ключе
             if (item.Value is string text && text.Contains(username, StringComparison.OrdinalIgnoreCase))
             {
                 // Ключи вида chatId_userId
@@ -491,6 +507,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
                     return uid;
             }
         }
+        
         return null;
     }
 
@@ -630,7 +647,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         }
     }
 
-    private async Task HandleUserMessageAsync(Message message, bool isSilentMode, CancellationToken cancellationToken)
+    internal async Task HandleUserMessageAsync(Message message, bool isSilentMode, CancellationToken cancellationToken)
     {
         var user = message.From;
         var chat = message.Chat;
@@ -1256,7 +1273,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
 
     private static string LinkToGroupWithNameMessage(Chat chat, long messageId) => $"https://t.me/{chat.Username}/{messageId}";
 
-    private void DeleteMessageLater(Message message, TimeSpan after = default, CancellationToken cancellationToken = default)
+    internal void DeleteMessageLater(Message message, TimeSpan after = default, CancellationToken cancellationToken = default)
     {
         if (after == default)
             after = TimeSpan.FromMinutes(5);
@@ -1407,7 +1424,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     /// <summary>
     /// Обработка каскадного анализа ML -> AI для сообщений с низкой уверенностью ML
     /// </summary>
-    private async Task HandleAiCascadeAnalysis(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken)
+    internal async Task HandleAiCascadeAnalysis(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken)
     {
         var messageText = message.Text ?? message.Caption ?? "";
         var chat = message.Chat;
