@@ -498,11 +498,11 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
             return null;
             
         // Можно использовать MemoryCache или другой кэш, если он есть
-        // Здесь пример с MemoryCache: ищем по ключам, где username встречался
+        // Здесь пример с MemoryCache: ищем по значениям, где username встречался
         foreach (var item in MemoryCache.Default)
         {
-            // Ищем в ключе, а не в значении
-            if (item.Key.ToString().Contains(username, StringComparison.OrdinalIgnoreCase))
+            // Ищем в значении, а не в ключе
+            if (item.Value is string text && text.Contains(username, StringComparison.OrdinalIgnoreCase))
             {
                 // Ключи вида chatId_userId
                 var parts = item.Key.ToString().Split('_');
