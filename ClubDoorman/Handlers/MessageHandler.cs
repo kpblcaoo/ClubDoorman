@@ -647,7 +647,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         }
     }
 
-    private async Task HandleUserMessageAsync(Message message, bool isSilentMode, CancellationToken cancellationToken)
+    internal async Task HandleUserMessageAsync(Message message, bool isSilentMode, CancellationToken cancellationToken)
     {
         var user = message.From;
         var chat = message.Chat;
