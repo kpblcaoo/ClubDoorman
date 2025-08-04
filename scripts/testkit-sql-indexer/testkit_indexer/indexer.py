@@ -10,23 +10,27 @@ from .models import TestKitComponent
 from .scanner import TestKitScanner
 from .database import DatabaseManager
 from .reporter import ReportGenerator
+from .deduplicator import DeduplicationEngine, FileHashDeduplicator, SignatureDeduplicator, ContentDeduplicator
 
 class TestKitIndexer:
     """Main indexer class that orchestrates the indexing process"""
     
-    def __init__(self, testkit_path: str, db_path: str = "testkit_index.db"):
+    def __init__(self, testkit_path: str, db_path: str = "testkit_index.db", 
+                 deduplication_strategy: str = "file_hash"):
         self.testkit_path = testkit_path
         self.db_path = db_path
+        self.deduplication_strategy = deduplication_strategy
         self.scanner = TestKitScanner(testkit_path)
         self.db_manager = DatabaseManager(db_path)
         self.reporter = ReportGenerator()
         self.components: List[TestKitComponent] = []
     
-    def run_indexing(self, generate_reports: bool = True) -> dict:
+    def run_indexing(self, generate_reports: bool = True, deduplicate: bool = True) -> dict:
         """Запускает полный процесс индексации"""
         print("Starting TestKit SQL Indexer...")
         print(f"TestKit path: {self.testkit_path}")
         print(f"Database path: {self.db_path}")
+        print(f"Deduplication strategy: {self.deduplication_strategy}")
         print()
         
         # Сканируем файлы
@@ -36,6 +40,11 @@ class TestKitIndexer:
         if not self.components:
             print("No components found!")
             return {}
+        
+        # Выполняем дедупликацию
+        if deduplicate:
+            print("Performing deduplication...")
+            self.components = self._deduplicate_components(self.components)
         
         # Создаем базу данных
         print("Creating database...")
@@ -96,4 +105,18 @@ class TestKitIndexer:
             'scan_stats': scan_stats,
             'db_stats': db_stats,
             'components_count': len(self.components)
-        } 
+        }
+    
+    def _deduplicate_components(self, components: List[TestKitComponent]) -> List[TestKitComponent]:
+        """Выполняет дедупликацию компонентов"""
+        if self.deduplication_strategy == "file_hash":
+            engine = DeduplicationEngine(FileHashDeduplicator())
+        elif self.deduplication_strategy == "signature":
+            engine = DeduplicationEngine(SignatureDeduplicator())
+        elif self.deduplication_strategy == "content":
+            engine = DeduplicationEngine(ContentDeduplicator())
+        else:
+            print(f"Warning: Unknown deduplication strategy '{self.deduplication_strategy}', skipping deduplication")
+            return components
+        
+        return engine.deduplicate(components) 

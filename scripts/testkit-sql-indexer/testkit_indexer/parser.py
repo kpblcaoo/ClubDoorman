@@ -5,7 +5,7 @@ C# file parser for TestKit SQL Indexer
 
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Dict, Tuple
 from .models import TestKitMethod, TestKitComponent
 
 class CSharpParser:
@@ -13,6 +13,11 @@ class CSharpParser:
     
     def __init__(self):
         self.method_pattern = r'public\s+(static\s+)?(\w+(?:<[^>]+>)?)\s+(\w+)\s*\([^)]*\)'
+        self.usage_patterns = [
+            r'(\w+)\.(\w+)\s*\([^)]*\)',  # method calls
+            r'new\s+(\w+)\s*\([^)]*\)',   # constructor calls
+            r'(\w+)\.(\w+)\s*=',           # property access
+        ]
     
     def extract_class_name(self, content: str) -> str:
         """Извлекает имя класса"""
@@ -57,8 +62,9 @@ class CSharpParser:
                 # Определяем теги
                 tags = self.determine_tags(method_name, return_type, description)
                 
-                # Создаем сигнатуру
+                # Создаем сигнатуру (уже полная)
                 signature = line.strip()
+                full_signature = signature  # Используем ту же строку
                 
                 method = TestKitMethod(
                     name=method_name,
@@ -69,12 +75,13 @@ class CSharpParser:
                     is_static=is_static,
                     is_generic=is_generic,
                     signature=signature,
-                    line_number=i + 1
+                    line_number=i + 1,
+                    full_signature=full_signature
                 )
                 methods.append(method)
         
         return methods
-
+    
     def extract_method_summary(self, lines: List[str], method_line: int) -> str:
         """Извлекает описание метода из комментариев"""
         description = ""
@@ -100,12 +107,55 @@ class CSharpParser:
                 if comment:
                     description = comment
                     break
-            elif line.strip() == "":
-                continue
-            else:
+            elif line.strip():
+                # Если встретили непустую строку без комментария, останавливаемся
                 break
         
         return description
+
+    def extract_usage_examples(self, content: str, target_methods: List[str]) -> Dict[str, List[str]]:
+        """Извлекает примеры использования методов из кода"""
+        examples = {}
+        lines = content.split('\n')
+        
+        for line_num, line in enumerate(lines, 1):
+            for method_name in target_methods:
+                # Ищем вызовы методов
+                patterns = [
+                    rf'\b{method_name}\s*\([^)]*\)',  # method calls
+                    rf'\b{method_name}\s*\[[^\]]*\]',  # indexer calls
+                    rf'\b{method_name}\s*\.',          # property access
+                ]
+                
+                for pattern in patterns:
+                    matches = re.finditer(pattern, line)
+                    for match in matches:
+                        if method_name not in examples:
+                            examples[method_name] = []
+                        
+                        # Получаем контекст (несколько строк до и после)
+                        context_start = max(0, line_num - 3)
+                        context_end = min(len(lines), line_num + 2)
+                        context_lines = lines[context_start-1:context_end]
+                        
+                        # Формируем пример с номером строки
+                        example = f"// Line {line_num}\n" + "\n".join(context_lines)
+                        examples[method_name].append(example)
+        
+        return examples
+
+    def extract_method_signature_with_params(self, content: str, method_name: str) -> str:
+        """Извлекает полную сигнатуру метода с параметрами"""
+        lines = content.split('\n')
+        
+        for line in lines:
+            # Ищем объявление метода
+            pattern = rf'public\s+(static\s+)?(\w+(?:<[^>]+>)?)\s+{re.escape(method_name)}\s*\([^)]*\)'
+            match = re.search(pattern, line)
+            if match:
+                return line.strip()
+        
+        return ""
 
     def determine_tags(self, method_name: str, return_type: str, description: str = "") -> List[str]:
         """Определяет теги на основе имени метода, типа возврата и описания"""
