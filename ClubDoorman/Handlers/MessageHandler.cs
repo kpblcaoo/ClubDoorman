@@ -480,8 +480,11 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     }
 
     // Вспомогательная функция для поиска userId по username среди недавних пользователей (по кэшу)
-    private long? TryFindUserIdByUsername(string username)
+    internal long? TryFindUserIdByUsername(string username)
     {
+        if (string.IsNullOrEmpty(username))
+            return null;
+            
         // Можно использовать MemoryCache или другой кэш, если он есть
         // Здесь пример с MemoryCache: ищем по ключам, где username встречался
         foreach (var item in MemoryCache.Default)
