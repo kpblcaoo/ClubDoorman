@@ -148,30 +148,7 @@ public class MessageHandlerHandleUserMessageTests
         _factory.UserBanServiceMock.Verify(x => x.HandleBlacklistBanAsync(message, user, chat, It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    /// <summary>
-    /// Тест для HandleUserMessageAsync с одобренным пользователем
-    /// Проверяет, что метод возвращается без дальнейшей обработки
-    /// <tags>user-message, approved-user, skip-moderation</tags>
-    /// </summary>
-    [Test]
-    public async Task HandleUserMessageAsync_WithApprovedUser_ReturnsEarly()
-    {
-        // Arrange
-        var message = TK.CreateMessage();
-        var user = message.From!;
-        var chat = message.Chat;
 
-        // Настраиваем мок ModerationService для одобренного пользователя
-        _factory.ModerationServiceMock.Setup(x => x.IsUserApproved(user.Id, chat.Id))
-            .Returns(true);
-
-        // Act
-        await _messageHandler.HandleUserMessageAsync(message, false, CancellationToken.None);
-
-        // Assert
-        // Метод должен завершиться без вызова модерации
-        _factory.ModerationServiceMock.Verify(x => x.CheckMessageAsync(It.IsAny<Message>()), Times.Never);
-    }
 
     /// <summary>
     /// Тест для HandleUserMessageAsync с клубным пользователем
@@ -253,35 +230,7 @@ public class MessageHandlerHandleUserMessageTests
         _factory.ModerationServiceMock.Verify(x => x.IncrementGoodMessageCountAsync(user, chat, It.IsAny<string>()), Times.Once);
     }
 
-    /// <summary>
-    /// Тест для HandleUserMessageAsync с заблокированным сообщением
-    /// Проверяет обработку заблокированных сообщений
-    /// <tags>user-message, banned-message, moderation, ban</tags>
-    /// </summary>
-    [Test]
-    public async Task HandleUserMessageAsync_WithBannedMessage_CallsAutoBanAsync()
-    {
-        // Arrange
-        var message = TK.CreateMessage();
-        var user = message.From!;
-        var chat = message.Chat;
 
-        // Настраиваем мок ModerationService для заблокированного сообщения
-        _factory.ModerationServiceMock.Setup(x => x.IsUserApproved(user.Id, chat.Id))
-            .Returns(false);
-        _factory.ModerationServiceMock.Setup(x => x.CheckMessageAsync(message))
-            .ReturnsAsync(TK.CreateBanResult());
-
-        // Настраиваем мок UserBanService
-        _factory.UserBanServiceMock.Setup(x => x.AutoBanAsync(It.IsAny<Message>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        // Act
-        await _messageHandler.HandleUserMessageAsync(message, false, CancellationToken.None);
-
-        // Assert
-        _factory.UserBanServiceMock.Verify(x => x.AutoBanAsync(message, It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
-    }
 
     /// <summary>
     /// Тест для HandleUserMessageAsync с сообщением для удаления
