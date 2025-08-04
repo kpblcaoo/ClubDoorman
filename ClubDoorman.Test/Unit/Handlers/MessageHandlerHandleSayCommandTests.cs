@@ -63,10 +63,9 @@ public class MessageHandlerHandleSayCommandTests
     {
         // Arrange
         var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        message.Text = "/say @testuser Привет!";
-        var targetUserId = 12345L;
+        message.Text = "/say 12345 Привет!"; // Используем userId вместо username
 
-        // Настраиваем мок для успешного поиска пользователя
+        // Настраиваем мок для успешной отправки
         _factory.WithBotSetup(mock =>
         {
             mock.Setup(x => x.SendMessage(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), null, null, It.IsAny<CancellationToken>()))

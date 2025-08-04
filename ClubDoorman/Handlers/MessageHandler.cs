@@ -417,7 +417,19 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
 
     internal async Task HandleSayCommandAsync(Message message, CancellationToken cancellationToken)
     {
-        var parts = message.Text!.Split(' ', 3);
+        if (message?.Text == null)
+        {
+            await _messageService.SendUserNotificationAsync(
+                message?.From!,
+                message?.Chat!,
+                UserNotificationType.Warning,
+                new SimpleNotificationData(message?.From!, message?.Chat!, "Сообщение не может быть null"),
+                cancellationToken
+            );
+            return;
+        }
+        
+        var parts = message.Text.Split(' ', 3);
         if (parts.Length < 3)
         {
             await _messageService.SendUserNotificationAsync(
@@ -489,7 +501,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // Здесь пример с MemoryCache: ищем по ключам, где username встречался
         foreach (var item in MemoryCache.Default)
         {
-            if (item.Value is string text && text.Contains(username, StringComparison.OrdinalIgnoreCase))
+            // Ищем в ключе, а не в значении
+            if (item.Key.ToString().Contains(username, StringComparison.OrdinalIgnoreCase))
             {
                 // Ключи вида chatId_userId
                 var parts = item.Key.ToString().Split('_');
@@ -497,6 +510,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
                     return uid;
             }
         }
+        
         return null;
     }
 
