@@ -415,7 +415,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         );
     }
 
-    private async Task HandleSayCommandAsync(Message message, CancellationToken cancellationToken)
+    internal async Task HandleSayCommandAsync(Message message, CancellationToken cancellationToken)
     {
         var parts = message.Text!.Split(' ', 3);
         if (parts.Length < 3)
@@ -1229,7 +1229,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
 
     private static string LinkToGroupWithNameMessage(Chat chat, long messageId) => $"https://t.me/{chat.Username}/{messageId}";
 
-    private void DeleteMessageLater(Message message, TimeSpan after = default, CancellationToken cancellationToken = default)
+    internal void DeleteMessageLater(Message message, TimeSpan after = default, CancellationToken cancellationToken = default)
     {
         if (after == default)
             after = TimeSpan.FromMinutes(5);
@@ -1380,7 +1380,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     /// <summary>
     /// Обработка каскадного анализа ML -> AI для сообщений с низкой уверенностью ML
     /// </summary>
-    private async Task HandleAiCascadeAnalysis(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken)
+    internal async Task HandleAiCascadeAnalysis(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken)
     {
         var messageText = message.Text ?? message.Caption ?? "";
         var chat = message.Chat;
