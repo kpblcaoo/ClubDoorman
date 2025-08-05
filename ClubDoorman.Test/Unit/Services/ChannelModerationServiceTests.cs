@@ -1,51 +1,150 @@
 using ClubDoorman.Handlers;
+using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
-using ClubDoorman.Test.TestKit;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NUnit.Framework;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace ClubDoorman.Test.Unit.Services;
 
 /// <summary>
 /// Тесты для ChannelModerationService
-/// <tags>unit, services, channel-moderation, proxy</tags>
+/// <tags>channel, moderation, tests</tags>
 /// </summary>
-[TestFixture]
-[Category("unit")]
-[Category("services")]
-[Category("channel-moderation")]
 public class ChannelModerationServiceTests
 {
-    private Mock<IMessageHandler> _messageHandlerMock = null!;
+    private Mock<ITelegramBotClientWrapper> _botMock = null!;
+    private Mock<IModerationService> _moderationServiceMock = null!;
+    private Mock<IUserBanService> _userBanServiceMock = null!;
     private Mock<ILogger<ChannelModerationService>> _loggerMock = null!;
     private ChannelModerationService _service = null!;
 
-    [SetUp]
+        [SetUp]
     public void Setup()
     {
-        _messageHandlerMock = new Mock<IMessageHandler>();
+        _botMock = new Mock<ITelegramBotClientWrapper>();
+        _moderationServiceMock = new Mock<IModerationService>();
+        _userBanServiceMock = new Mock<IUserBanService>();
         _loggerMock = new Mock<ILogger<ChannelModerationService>>();
-        _service = new ChannelModerationService(_messageHandlerMock.Object, _loggerMock.Object);
+
+        _service = new ChannelModerationService(
+            _botMock.Object,
+            _moderationServiceMock.Object,
+            _userBanServiceMock.Object,
+            _loggerMock.Object);
     }
 
-    /// <summary>
-    /// POC: Проверка проксирования вызова HandleChannelMessageAsync
-    /// <tags>poc, proxy, channel-moderation</tags>
-    /// </summary>
     [Test]
-    public async Task HandleChannelMessageAsync_ValidMessage_ProxiesToMessageHandler()
+    public async Task IsChannelOwnerAsync_WhenUserIsOwner_ShouldReturnTrue()
     {
         // Arrange
-        var message = TK.CreateMessage();
-        var cancellationToken = CancellationToken.None;
+        var message = CreateTestMessage();
+        var channelAdmins = new[]
+        {
+            new ChatMemberOwner { User = new User { Id = 123 } }
+        };
+        
+        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(channelAdmins);
 
         // Act
-        await _service.HandleChannelMessageAsync(message, cancellationToken);
+        var result = await _service.IsChannelOwnerAsync(message);
 
         // Assert
-        _messageHandlerMock.Verify(x => x.HandleChannelMessageAsync(message, cancellationToken), Times.Once);
+        Assert.That(result, Is.True);
+    }
+
+    [Test]
+    public async Task IsChannelOwnerAsync_WhenUserIsNotOwner_ShouldReturnFalse()
+    {
+        // Arrange
+        var message = CreateTestMessage();
+        var channelAdmins = new[]
+        {
+            new ChatMemberOwner { User = new User { Id = 456 } }
+        };
+        
+        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(channelAdmins);
+
+        // Act
+        var result = await _service.IsChannelOwnerAsync(message);
+
+        // Assert
+        Assert.That(result, Is.False);
+    }
+
+    [Test]
+    public async Task ShouldAllowChannelMessageAsync_WhenUserIsOwner_ShouldReturnTrue()
+    {
+        // Arrange
+        var message = CreateTestMessage();
+        var channelAdmins = new[]
+        {
+            new ChatMemberOwner { User = new User { Id = 123 } }
+        };
+        
+        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(channelAdmins);
+        _botMock.Setup(x => x.GetChatAsync(It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Chat { Id = 1, Type = ChatType.Supergroup });
+
+        // Act
+        var result = await _service.ShouldAllowChannelMessageAsync(message);
+
+        // Assert
+        Assert.That(result, Is.True);
+    }
+
+    [Test]
+    public async Task ShouldAllowChannelMessageAsync_WhenChannelDiscussion_ShouldReturnTrue()
+    {
+        // Arrange
+        var message = CreateTestMessage();
+        message.IsAutomaticForward = true;
+        
+        _botMock.Setup(x => x.GetChatAsync(It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Chat { Id = 1, Type = ChatType.Supergroup });
+
+        // Act
+        var result = await _service.ShouldAllowChannelMessageAsync(message);
+
+        // Assert
+        Assert.That(result, Is.True);
+    }
+
+    [Test]
+    public async Task ShouldAllowChannelMessageAsync_WhenUnknownChannel_ShouldReturnFalse()
+    {
+        // Arrange
+        var message = CreateTestMessage();
+        var channelAdmins = new[]
+        {
+            new ChatMemberOwner { User = new User { Id = 456 } }
+        };
+        
+        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(channelAdmins);
+        _botMock.Setup(x => x.GetChatAsync(It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Chat { Id = 1, Type = ChatType.Supergroup });
+
+        // Act
+        var result = await _service.ShouldAllowChannelMessageAsync(message);
+
+        // Assert
+        Assert.That(result, Is.False);
+    }
+
+    private static Message CreateTestMessage()
+    {
+        return new Message
+        {
+            From = new User { Id = 123, FirstName = "Test", Username = "testuser" },
+            Chat = new Chat { Id = 1, Title = "Test Chat", Type = ChatType.Supergroup },
+            SenderChat = new Chat { Id = 2, Title = "Test Channel", Type = ChatType.Channel },
+            Text = "Test message"
+        };
     }
 } 

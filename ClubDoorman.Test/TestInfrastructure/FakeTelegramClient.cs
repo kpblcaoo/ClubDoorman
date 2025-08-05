@@ -515,6 +515,65 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
         return Task.FromResult(chatMember);
     }
 
+    public Task<ChatMember[]> GetChatAdministratorsAsync(ChatId chatId, CancellationToken cancellationToken = default)
+    {
+        if (ShouldThrowException)
+            throw ExceptionToThrow ?? new Exception("Fake exception");
+
+        // Возвращаем фейковых администраторов чата
+        var administrators = new ChatMember[]
+        {
+            new ChatMemberOwner
+            {
+                User = new User { Id = 123, FirstName = "TestOwner", Username = "testowner" },
+                IsAnonymous = false,
+                CustomTitle = "Owner"
+            },
+            new ChatMemberAdministrator
+            {
+                User = new User { Id = 456, FirstName = "TestAdmin", Username = "testadmin" },
+                IsAnonymous = false,
+                CanManageChat = true,
+                CanDeleteMessages = true,
+                CanManageVideoChats = true,
+                CanRestrictMembers = true,
+                CanPromoteMembers = true,
+                CanChangeInfo = true,
+                CanInviteUsers = true,
+                CanPostMessages = false,
+                CanEditMessages = false,
+                CanPinMessages = false,
+                CanPostStories = false,
+                CanEditStories = false,
+                CanDeleteStories = false,
+                CustomTitle = "Admin"
+            }
+        };
+
+        OperationLog.Add($"GetChatAdministratorsAsync: chatId={chatId.Identifier}");
+        return Task.FromResult(administrators);
+    }
+
+    public Task<Chat> GetChatAsync(ChatId chatId, CancellationToken cancellationToken = default)
+    {
+        if (ShouldThrowException)
+            throw ExceptionToThrow ?? new Exception("Fake exception");
+
+        // Возвращаем фейковую информацию о чате
+        var chat = new Chat
+        {
+            Id = chatId.Identifier ?? 0,
+            Type = ChatType.Supergroup,
+            Title = "Test Chat",
+            Username = "testchat",
+            FirstName = null,
+            LastName = null
+        };
+
+        OperationLog.Add($"GetChatAsync: chatId={chatId.Identifier}");
+        return Task.FromResult(chat);
+    }
+
     // Методы для тестирования
     public void Reset()
     {
