@@ -46,7 +46,7 @@ public class ChannelModerationServiceTests
             new ChatMemberOwner { User = new User { Id = 123 } }
         };
         
-        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
 
         // Act
@@ -66,7 +66,7 @@ public class ChannelModerationServiceTests
             new ChatMemberOwner { User = new User { Id = 456 } }
         };
         
-        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
 
         // Act
@@ -86,9 +86,9 @@ public class ChannelModerationServiceTests
             new ChatMemberOwner { User = new User { Id = 123 } }
         };
         
-        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
-        _botMock.Setup(x => x.GetChatAsync(It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+        _botMock.Setup(x => x.GetChatAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Chat { Id = 1, Type = ChatType.Supergroup });
 
         // Act
@@ -105,7 +105,7 @@ public class ChannelModerationServiceTests
         var message = CreateTestMessage();
         message.IsAutomaticForward = true;
         
-        _botMock.Setup(x => x.GetChatAsync(It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+        _botMock.Setup(x => x.GetChatAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Chat { Id = 1, Type = ChatType.Supergroup });
 
         // Act
@@ -125,9 +125,9 @@ public class ChannelModerationServiceTests
             new ChatMemberOwner { User = new User { Id = 456 } }
         };
         
-        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+        _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
-        _botMock.Setup(x => x.GetChatAsync(It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+        _botMock.Setup(x => x.GetChatAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Chat { Id = 1, Type = ChatType.Supergroup });
 
         // Act

@@ -60,6 +60,10 @@ public class MessageHandlerBanExceptionTests
         var chatLinkFormatterMock = new Mock<IChatLinkFormatter>();
         var violationTrackerMock = new Mock<IViolationTracker>();
         
+        // Настраиваем ServiceProvider для возврата IChannelModerationService
+        serviceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+            .Returns(new Mock<IChannelModerationService>().Object);
+        
         // Настраиваем базовые моки
         appConfigMock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
         appConfigMock.Setup(x => x.DisabledChats).Returns(new HashSet<long>());

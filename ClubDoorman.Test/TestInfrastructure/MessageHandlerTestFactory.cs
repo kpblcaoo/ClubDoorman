@@ -72,6 +72,13 @@ public class MessageHandlerTestFactory
 
     public MessageHandler CreateMessageHandler()
     {
+        // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
+        if (!ServiceProviderMock.Setups.Any(s => s.ToString().Contains("IChannelModerationService")))
+        {
+            ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+                .Returns(ChannelModerationServiceMock.Object);
+        }
+        
         return new MessageHandler(
             BotMock.Object,
             ModerationServiceMock.Object,
@@ -96,6 +103,13 @@ public class MessageHandlerTestFactory
     
     public MessageHandler CreateMessageHandlerWithRealUserBanService()
     {
+        // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
+        if (!ServiceProviderMock.Setups.Any(s => s.ToString().Contains("IChannelModerationService")))
+        {
+            ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+                .Returns(ChannelModerationServiceMock.Object);
+        }
+        
         return new MessageHandler(
             BotMock.Object,
             ModerationServiceMock.Object,
@@ -426,6 +440,13 @@ public class MessageHandlerTestFactory
 
     public MessageHandler CreateMessageHandlerWithFake(FakeTelegramClient fakeClient)
     {
+        // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
+        if (!ServiceProviderMock.Setups.Any(s => s.ToString().Contains("IChannelModerationService")))
+        {
+            ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+                .Returns(ChannelModerationServiceMock.Object);
+        }
+        
         // Настраиваем мок для удаления сообщений
         TelegramBotClientWrapperMock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Callback<ChatId, int, CancellationToken>((chatId, messageId, token) =>

@@ -55,6 +55,10 @@ public class MessageHandlerBanBasicTests
         var violationTrackerMock = new Mock<IViolationTracker>();
         var userBanServiceMock = TK.CreateMockUserBanService();
         
+        // Настраиваем ServiceProvider для возврата IChannelModerationService
+        serviceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+            .Returns(new Mock<IChannelModerationService>().Object);
+        
         // Настраиваем базовые моки
         appConfigMock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
         appConfigMock.Setup(x => x.DisabledChats).Returns(new HashSet<long>());

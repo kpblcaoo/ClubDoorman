@@ -290,6 +290,13 @@ public class MessageHandlerBuilder
     /// </summary>
     public MessageHandler Build()
     {
+        // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
+        if (!_serviceProviderMock.Setups.Any(s => s.ToString().Contains("IChannelModerationService")))
+        {
+            _serviceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+                .Returns(_channelModerationServiceMock.Object);
+        }
+        
         return new MessageHandler(
             _botMock.Object,
             _moderationServiceMock.Object,
