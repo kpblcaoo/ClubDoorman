@@ -300,4 +300,20 @@ public class TelegramBotClientWrapper : ITelegramBotClientWrapper
     {
         return await _bot.GetChatMember(chatId, userId, cancellationToken);
     }
+
+    /// <summary>
+    /// Получает список администраторов чата
+    /// </summary>
+    public async Task<ChatMember[]> GetChatAdministratorsAsync(ChatId chatId, CancellationToken cancellationToken = default)
+    {
+        return await _bot.GetChatAdministrators(chatId, cancellationToken);
+    }
+
+    /// <summary>
+    /// Получает информацию о чате (альтернативный метод)
+    /// </summary>
+    public async Task<Chat> GetChatAsync(ChatId chatId, CancellationToken cancellationToken = default)
+    {
+        return await _bot.GetChat(chatId, cancellationToken);
+    }
 } 

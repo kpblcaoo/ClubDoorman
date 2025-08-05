@@ -266,18 +266,10 @@ public class MessageHandlerBanTests
         var update = new Update { Message = message };
         await handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем legacy поведение (прямые вызовы бота)
-        factory.BotMock.Verify(
-            x => x.BanChatSenderChat(
-                It.IsAny<ChatId>(),
-                It.IsAny<long>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-        
-        factory.BotMock.Verify(
-            x => x.DeleteMessage(
-                It.IsAny<ChatId>(),
-                It.IsAny<int>(),
+        // Assert - проверяем новое поведение через ChannelModerationService
+        factory.ChannelModerationServiceMock.Verify(
+            x => x.HandleChannelMessageAsync(
+                It.IsAny<Message>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -581,18 +573,10 @@ public class MessageHandlerBanTests
         var update = new Update { Message = message };
         await handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем legacy поведение (прямые вызовы бота)
-        factory.BotMock.Verify(
-            x => x.BanChatSenderChat(
-                It.IsAny<ChatId>(),
-                It.IsAny<long>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-        
-        factory.BotMock.Verify(
-            x => x.DeleteMessage(
-                It.IsAny<ChatId>(),
-                It.IsAny<int>(),
+        // Assert - проверяем новое поведение через ChannelModerationService
+        factory.ChannelModerationServiceMock.Verify(
+            x => x.HandleChannelMessageAsync(
+                It.IsAny<Message>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

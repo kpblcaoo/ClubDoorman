@@ -173,4 +173,14 @@ public interface ITelegramBotClientWrapper
     /// Получает информацию о члене чата
     /// </summary>
     Task<ChatMember> GetChatMember(ChatId chatId, long userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Получает список администраторов чата
+    /// </summary>
+    Task<ChatMember[]> GetChatAdministratorsAsync(ChatId chatId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Получает информацию о чате (альтернативный метод)
+    /// </summary>
+    Task<Chat> GetChatAsync(ChatId chatId, CancellationToken cancellationToken = default);
 } 
