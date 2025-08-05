@@ -45,6 +45,7 @@ public class MessageHandlerTestFactory
     public Mock<IAppConfig> AppConfigMock { get; } = TK.CreateMockAppConfig();
     public Mock<IViolationTracker> ViolationTrackerMock { get; } = TK.CreateMockViolationTracker();
     public Mock<IUserBanService> UserBanServiceMock { get; } = TK.CreateMockUserBanService();
+    public Mock<IChannelModerationService> ChannelModerationServiceMock { get; } = TK.CreateMock<IChannelModerationService>();
 
     public Mock<IUserCleanupService> UserCleanupServiceMock { get; } = TK.CreateMock<IUserCleanupService>();
     
@@ -304,6 +305,10 @@ public class MessageHandlerTestFactory
                 .Returns(startCommandHandler);
             mock.Setup(x => x.GetService(typeof(SuspiciousCommandHandler)))
                 .Returns(suspiciousCommandHandler);
+            
+            // Настраиваем ServiceProvider для возврата IChannelModerationService
+            mock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+                .Returns(ChannelModerationServiceMock.Object);
         });
         
         return this;

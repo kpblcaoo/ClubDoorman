@@ -43,6 +43,10 @@ public class MessageHandlerGoldenMasterTests
         // Настраиваем UserManager для HandleBlacklistBan
         _factory.UserManagerMock.Setup(x => x.RemoveApproval(It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<bool>())).Returns(false);
         
+        // Настраиваем ServiceProvider для возврата IChannelModerationService
+        _factory.ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+            .Returns(_factory.ChannelModerationServiceMock.Object);
+        
         _messageHandler = _factory.CreateMessageHandlerWithRealUserBanService();
         _userBanService = _factory.CreateRealUserBanService();
     }

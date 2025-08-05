@@ -106,7 +106,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         _violationTracker = violationTracker ?? throw new ArgumentNullException(nameof(violationTracker));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
-        _channelModerationService = serviceProvider.GetRequiredService<IChannelModerationService>();
+        _channelModerationService = serviceProvider.GetService<IChannelModerationService>() 
+            ?? throw new InvalidOperationException("IChannelModerationService is not registered in the DI container");
     }
 
     /// <summary>

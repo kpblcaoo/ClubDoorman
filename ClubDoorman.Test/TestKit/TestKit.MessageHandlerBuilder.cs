@@ -42,6 +42,7 @@ public class MessageHandlerBuilder
     private readonly Mock<IViolationTracker> _violationTrackerMock = TK.CreateMockViolationTracker();
     private readonly Mock<IUserBanService> _userBanServiceMock = TK.CreateMockUserBanService();
     private readonly Mock<ILogChatService> _logChatServiceMock = TK.CreateMock<ILogChatService>();
+    private readonly Mock<IChannelModerationService> _channelModerationServiceMock = TK.CreateMock<IChannelModerationService>();
     private readonly Mock<ILogger<MessageHandler>> _loggerMock = TK.CreateLoggerMock<MessageHandler>();
     private readonly Mock<ILogger<SuspiciousCommandHandler>> _suspiciousCommandHandlerLoggerMock = TK.CreateLoggerMock<SuspiciousCommandHandler>();
     private readonly Mock<ISuspiciousUsersStorage> _suspiciousUsersStorageMock = TK.CreateMock<ISuspiciousUsersStorage>();
@@ -192,6 +193,10 @@ public class MessageHandlerBuilder
         // Настраиваем IServiceProvider для возврата ILogChatService
         _serviceProviderMock.Setup(x => x.GetService(typeof(ILogChatService)))
             .Returns(_logChatServiceMock.Object);
+        
+        // Настраиваем IServiceProvider для возврата IChannelModerationService
+        _serviceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+            .Returns(_channelModerationServiceMock.Object);
         
         return this;
     }
