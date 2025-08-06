@@ -234,32 +234,8 @@ public class Program
                 // Централизованная система сообщений (перенесено в MessagingModule)
                 services.Configure<LoggingConfiguration>(options => { });
 
-                // Обработчики обновлений
-                services.AddSingleton<IUpdateHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IUpdateHandler (MessageHandler) factory called");
-                    return new MessageHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<IModerationService>(),
-                        provider.GetRequiredService<ICaptchaService>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<ISpamHamClassifier>(),
-                        provider.GetRequiredService<IBadMessageManager>(),
-                        provider.GetRequiredService<IAiChecks>(),
-                        provider.GetRequiredService<GlobalStatsManager>(),
-                        provider.GetRequiredService<IStatisticsService>(),
-                        provider.GetRequiredService<IServiceProvider>(),
-                        provider.GetRequiredService<IUserFlowLogger>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IChatLinkFormatter>(),
-                        provider.GetRequiredService<IBotPermissionsService>(),
-                        provider.GetRequiredService<IAppConfig>(),
-                        provider.GetRequiredService<IViolationTracker>(),
-                        provider.GetRequiredService<ILogger<MessageHandler>>(),
-                        provider.GetRequiredService<IUserBanService>());
-                });
-
+                // Обработчики обновлений уже зарегистрированы в HandlersModule
+                // Убираем дублирующую регистрацию MessageHandler
 
                 // Новые прокси-сервисы для рефакторинга
 
