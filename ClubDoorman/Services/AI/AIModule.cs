@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.BadMessage;
 
 namespace ClubDoorman.Services.AI;
 

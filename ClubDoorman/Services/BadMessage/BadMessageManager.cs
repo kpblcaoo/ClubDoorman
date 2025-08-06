@@ -3,7 +3,7 @@ using System.Text;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.BadMessage;
 
 /// <summary>
 /// Менеджер для хранения и проверки известных плохих сообщений (спам/оскорбления и т.д.).
