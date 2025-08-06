@@ -12,8 +12,9 @@ using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Handlers;
 
-namespace ClubDoorman.Handlers;
+namespace ClubDoorman.Services.Handlers;
 
 /// <summary>
 /// Обработчик изменений участников чата
