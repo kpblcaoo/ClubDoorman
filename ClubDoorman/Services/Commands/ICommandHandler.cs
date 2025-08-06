@@ -1,6 +1,6 @@
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Handlers;
+namespace ClubDoorman.Services.Commands;
 
 /// <summary>
 /// Интерфейс для обработки команд

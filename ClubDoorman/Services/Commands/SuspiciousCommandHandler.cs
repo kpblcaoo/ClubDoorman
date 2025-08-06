@@ -8,7 +8,7 @@ using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Handlers.Commands;
+namespace ClubDoorman.Services.Commands;
 
 /// <summary>
 /// Обработчик команд для управления подозрительными пользователями

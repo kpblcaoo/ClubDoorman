@@ -13,11 +13,12 @@ using Moq;
 using Microsoft.Extensions.Logging;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Requests;
-using ClubDoorman.Handlers.Commands;
+
 using ClubDoorman.Test.TestKit;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Commands;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 

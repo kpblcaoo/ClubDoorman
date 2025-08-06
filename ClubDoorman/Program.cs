@@ -4,7 +4,6 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Handlers;
-using ClubDoorman.Handlers.Commands;
 using ClubDoorman.Models.Logging;
 
 using ClubDoorman.Services.Core.Configuration;
@@ -13,6 +12,7 @@ using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Commands;
 using Telegram.Bot;
 using DotNetEnv;
 using ClubDoorman.Services.Messaging;
@@ -371,7 +371,7 @@ public class Program
                         provider.GetRequiredService<ILogger<MessageHandler>>(),
                         provider.GetRequiredService<IUserBanService>());
                 });
-                services.AddSingleton<ICommandProcessingService, CommandProcessingService>();
+                services.AddCommandsServices();
                         services.AddSingleton<IChannelModerationService>(provider =>
         {
             var logger = provider.GetRequiredService<ILogger<Program>>();
@@ -383,50 +383,6 @@ public class Program
                 provider.GetRequiredService<ILogger<ChannelModerationService>>());
         });
                 services.AddSingleton<IUserJoinService, UserJoinService>();
-
-                // Обработчики команд
-                services.AddSingleton<ICommandHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ICommandHandler (StartCommandHandler) factory called");
-                    return new StartCommandHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ILogger<StartCommandHandler>>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
-                services.AddSingleton<StartCommandHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] StartCommandHandler factory called");
-                    return new StartCommandHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ILogger<StartCommandHandler>>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
-                services.AddSingleton<ICommandHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ICommandHandler (SuspiciousCommandHandler) factory called");
-                    return new SuspiciousCommandHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<IModerationService>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<ILogger<SuspiciousCommandHandler>>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
-                services.AddSingleton<SuspiciousCommandHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] SuspiciousCommandHandler factory called");
-                    return new SuspiciousCommandHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<IModerationService>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<ILogger<SuspiciousCommandHandler>>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
 
                 // Регистрация сервиса лог-чата (перенесено в MessagingModule)
 

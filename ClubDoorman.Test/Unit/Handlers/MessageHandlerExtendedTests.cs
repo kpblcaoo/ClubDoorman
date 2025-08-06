@@ -1,5 +1,5 @@
 using ClubDoorman.Handlers;
-using ClubDoorman.Handlers.Commands;
+
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Test.TestInfrastructure;
 using NUnit.Framework;
@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Commands;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 

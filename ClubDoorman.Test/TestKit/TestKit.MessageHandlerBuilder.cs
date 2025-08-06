@@ -1,5 +1,5 @@
 using ClubDoorman.Handlers;
-using ClubDoorman.Handlers.Commands;
+
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Infrastructure;
@@ -23,6 +23,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Commands;
 
 namespace ClubDoorman.Test.TestKit;
 
