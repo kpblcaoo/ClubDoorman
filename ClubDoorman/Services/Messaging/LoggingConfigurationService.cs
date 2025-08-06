@@ -1,9 +1,8 @@
 using ClubDoorman.Models.Logging;
 using ClubDoorman.Models.Notifications;
 using Microsoft.Extensions.Options;
-using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Messaging;
 
 /// <summary>
 /// Сервис для работы с конфигурацией логирования
