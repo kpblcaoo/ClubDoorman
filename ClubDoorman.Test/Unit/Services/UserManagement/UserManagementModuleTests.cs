@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.UserJoin;
 
 namespace ClubDoorman.Test.Unit.Services.UserManagement;
 

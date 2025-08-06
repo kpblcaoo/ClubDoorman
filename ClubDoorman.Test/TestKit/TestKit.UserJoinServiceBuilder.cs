@@ -19,6 +19,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.UserJoin;
 
 namespace ClubDoorman.Test.TestKit;
 

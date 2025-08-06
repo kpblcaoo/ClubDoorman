@@ -9,6 +9,7 @@ using ClubDoorman.Models;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.UserJoin;
 
 namespace ClubDoorman.Test.Integration;
 

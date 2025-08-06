@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.UserJoin;
 
 namespace ClubDoorman.Services.UserManagement;
 
