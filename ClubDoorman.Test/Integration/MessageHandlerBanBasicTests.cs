@@ -1,3 +1,4 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
@@ -9,7 +10,7 @@ using NUnit.Framework;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;

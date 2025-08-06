@@ -1,8 +1,9 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Moderation;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Handlers;
 using ClubDoorman.Infrastructure;

@@ -2,7 +2,7 @@ using ClubDoorman.Infrastructure;
 using Telegram.Bot.Types;
 using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.UserFlow;
 
 /// <summary>
 /// Централизованный логгер для отслеживания пользовательского флоу

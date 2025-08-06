@@ -4,7 +4,7 @@ using Telegram.Bot.Types.Enums;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Infrastructure;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;

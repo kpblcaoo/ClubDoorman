@@ -1,8 +1,7 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;

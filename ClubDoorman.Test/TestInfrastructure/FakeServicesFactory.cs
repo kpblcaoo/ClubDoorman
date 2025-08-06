@@ -1,3 +1,4 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Handlers;
@@ -6,7 +7,7 @@ using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Requests;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Handlers;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;

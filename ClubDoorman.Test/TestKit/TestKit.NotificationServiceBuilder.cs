@@ -1,8 +1,9 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Handlers;
 
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;

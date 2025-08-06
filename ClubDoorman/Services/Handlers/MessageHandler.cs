@@ -10,7 +10,7 @@ using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Requests;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Core.Configuration;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 using Telegram.Bot.Types;

@@ -1,3 +1,4 @@
+using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using ClubDoorman.Handlers;
 

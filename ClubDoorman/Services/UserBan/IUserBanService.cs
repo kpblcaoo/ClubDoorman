@@ -1,6 +1,6 @@
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services.BanSystem;
+namespace ClubDoorman.Services.UserBan;
 
 /// <summary>
 /// Сервис для управления банами пользователей (заглушка для совместимости с тестами)

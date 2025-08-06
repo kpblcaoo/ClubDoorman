@@ -1,3 +1,4 @@
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using ClubDoorman.Services.Messaging;
@@ -6,7 +7,7 @@ using ClubDoorman.Services.Telegram;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Logging;
 using ClubDoorman.Services.Core.Configuration;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Options;
 using Moq;
 

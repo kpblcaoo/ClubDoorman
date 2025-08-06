@@ -1,7 +1,8 @@
+using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using Telegram.Bot.Types;
 using ClubDoorman.Services.AI;
 

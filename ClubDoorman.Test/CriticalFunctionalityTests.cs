@@ -1,5 +1,6 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.TextProcessing;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;

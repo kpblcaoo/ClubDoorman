@@ -1,9 +1,10 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.Moderation;
 using NUnit.Framework;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using Moq;

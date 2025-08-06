@@ -1,4 +1,4 @@
-namespace ClubDoorman.Services.BanSystem;
+namespace ClubDoorman.Services.UserBan;
 
 /// <summary>
 /// Типы банов пользователей

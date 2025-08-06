@@ -2,15 +2,15 @@ using Serilog;
 using Serilog.Events;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Services.LinkFormatting;
 using ClubDoorman.Services.Dispatcher;
 using ClubDoorman.Services.UserJoin;
 using ClubDoorman.Services.Notification;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.ChannelModeration;
 using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Logging;
 
@@ -110,6 +110,7 @@ public class Program
                 services.AddModerationServices();
                 services.AddChannelModerationServices();
                 services.AddSuspiciousUsersServices();
+                services.AddUserFlowServices();
 
                 // Telegram Bot Client - создаем после регистрации IAppConfig
                 services.AddSingleton<TelegramBotClient>(provider =>

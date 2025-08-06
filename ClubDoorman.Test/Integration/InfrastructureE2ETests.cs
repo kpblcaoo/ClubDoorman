@@ -1,7 +1,8 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Test.TestInfrastructure;
 using FluentAssertions;

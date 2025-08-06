@@ -1,3 +1,4 @@
+using ClubDoorman.Services.UserBan;
 using System;
 
 namespace ClubDoorman.TestInfrastructure;
