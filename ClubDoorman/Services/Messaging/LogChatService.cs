@@ -1,7 +1,7 @@
 using System.Runtime.Caching;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models.Notifications;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;

@@ -1,10 +1,12 @@
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Telegram.Bot.Types;

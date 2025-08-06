@@ -1,8 +1,18 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
 using Serilog;
 using Serilog.Events;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.LinkFormatting;
+using ClubDoorman.Services.Dispatcher;
+using ClubDoorman.Services.UserJoin;
+using ClubDoorman.Services.Notification;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Logging;
 
@@ -17,6 +27,7 @@ using ClubDoorman.Services.Handlers;
 using Telegram.Bot;
 using DotNetEnv;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.TextProcessing;
 
 namespace ClubDoorman;
 
@@ -93,6 +104,17 @@ public class Program
             {
                 // Регистрация конфигурации приложения
                 services.AddConfigurationServices();
+                services.AddLinkFormattingServices();
+                services.AddDispatcherServices();
+                services.AddUserJoinServices();
+                services.AddNotificationServices();
+                services.AddUserBanServices();
+                services.AddModerationServices();
+                services.AddChannelModerationServices();
+                services.AddSuspiciousUsersServices();
+                services.AddUserFlowServices();
+                services.AddViolationServices();
+                services.AddBadMessageServices();
 
                 // Telegram Bot Client - создаем после регистрации IAppConfig
                 services.AddSingleton<TelegramBotClient>(provider =>
@@ -149,6 +171,7 @@ public class Program
                 services.AddAIServices();
                 services.AddUserManagementServices();
                 services.AddMessagingServices();
+                services.AddTextProcessingServices();
                 
                 // Классификаторы и менеджеры
 

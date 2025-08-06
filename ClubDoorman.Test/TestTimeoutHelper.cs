@@ -1,3 +1,4 @@
+using ClubDoorman.Services.UserBan;
 using System.Text.Json;
 using NUnit.Framework;
 

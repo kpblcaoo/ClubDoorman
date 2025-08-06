@@ -1,3 +1,4 @@
+using ClubDoorman.Services.UserBan;
 namespace ClubDoorman.Test.TestData;
 
 /// <summary>

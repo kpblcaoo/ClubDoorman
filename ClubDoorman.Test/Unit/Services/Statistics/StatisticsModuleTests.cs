@@ -1,3 +1,4 @@
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using ClubDoorman.Services.Statistics;

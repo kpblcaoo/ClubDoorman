@@ -1,7 +1,8 @@
+using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Models.Notifications;
