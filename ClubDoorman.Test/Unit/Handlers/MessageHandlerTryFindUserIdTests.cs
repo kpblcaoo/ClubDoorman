@@ -1,3 +1,4 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Test.TestKit;
 using NUnit.Framework;

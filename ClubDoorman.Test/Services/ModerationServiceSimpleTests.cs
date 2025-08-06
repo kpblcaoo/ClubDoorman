@@ -1,5 +1,9 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Test.TestData;
 using ClubDoorman.Models;

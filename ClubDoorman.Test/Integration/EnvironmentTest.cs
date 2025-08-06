@@ -1,3 +1,4 @@
+using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 
 namespace ClubDoorman.Test.Integration;

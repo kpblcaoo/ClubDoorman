@@ -1,7 +1,10 @@
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Infrastructure;
 using Telegram.Bot.Types;

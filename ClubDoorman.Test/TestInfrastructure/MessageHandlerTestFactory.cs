@@ -1,7 +1,13 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;

@@ -1,0 +1,158 @@
+АНАЛИЗ ОСТАВШИХСЯ СЕРВИСОВ
+==================================================
+
+ОСТАВШИЕСЯ СЕРВИСЫ:
+- TextProcessor.cs
+- IUserFlowLogger.cs
+- ModerationService.cs
+- ChannelModerationService.cs
+- IChannelModerationService.cs
+- BadMessageManager.cs
+- IModerationService.cs
+- SuspiciousUsersStorage.cs
+- SimpleFilters.cs
+- IViolationTracker.cs
+- ViolationTracker.cs
+- IBotPermissionsService.cs
+- IUpdateDispatcher.cs
+- ISuspiciousUsersStorage.cs
+- IBadMessageManager.cs
+- UserFlowLogger.cs
+- Handlers/ChatMemberHandler.cs
+- Handlers/CallbackQueryHandler.cs
+- Handlers/IntroFlowService.cs
+- Handlers/BotPermissionsService.cs
+- Handlers/UpdateDispatcher.cs
+- Handlers/MessageHandler.cs
+- Commands/ICommandHandler.cs
+- Commands/StartCommandHandler.cs
+- Commands/SuspiciousCommandHandler.cs
+- Commands/ICommandProcessingService.cs
+- Commands/CommandProcessingService.cs
+- BanSystem/BanType.cs
+- BanSystem/UserBanService.cs
+- BanSystem/IUserBanService.cs
+- Messaging/MessageTemplates.cs
+- Messaging/ILogChatService.cs
+- Messaging/LoggingConfigurationService.cs
+- Messaging/IServiceChatDispatcher.cs
+- Messaging/IMessageService.cs
+- Messaging/IChatLinkFormatter.cs
+- Messaging/LogChatService.cs
+- Messaging/MessageService.cs
+- Messaging/NotificationService.cs
+- Messaging/ServiceChatDispatcher.cs
+- Messaging/INotificationService.cs
+- Messaging/ChatLinkFormatter.cs
+- Messaging/ILoggingConfigurationService.cs
+- Telegram/ITelegramBotClientWrapper.cs
+- Telegram/TelegramBotClientWrapper.cs
+- AI/IAiChecks.cs
+- AI/MimicryClassifier.cs
+- AI/IMimicryClassifier.cs
+- AI/ISpamHamClassifier.cs
+- AI/AiChecks.cs
+- AI/SpamHamClassifier.cs
+- UserManagement/UserJoinService.cs
+- UserManagement/IUserJoinService.cs
+- UserManagement/ApprovedUsersStorage.cs
+- UserManagement/IUserManager.cs
+- UserManagement/IUserCleanupService.cs
+- UserManagement/UserCleanupService.cs
+- UserManagement/UserManager.cs
+- Statistics/GlobalStatsManager.cs
+- Statistics/StatisticsService.cs
+- Statistics/IStatisticsService.cs
+- Captcha/CaptchaService.cs
+- Captcha/ICaptchaService.cs
+- Core/Configuration/IAppConfig.cs
+- Core/Configuration/AppConfig.cs
+
+СТАТИСТИКА СЛОЖНОСТИ:
+- MessageHandler.cs: 1156 строк кода
+- ModerationService.cs: 659 строк кода
+- CallbackQueryHandler.cs: 540 строк кода
+- AiChecks.cs: 535 строк кода
+- UserBanService.cs: 481 строк кода
+- MessageService.cs: 382 строк кода
+- ServiceChatDispatcher.cs: 362 строк кода
+- ApprovedUsersStorage.cs: 320 строк кода
+- MessageTemplates.cs: 289 строк кода
+- UserManager.cs: 233 строк кода
+- CaptchaService.cs: 215 строк кода
+- TelegramBotClientWrapper.cs: 210 строк кода
+- ChannelModerationService.cs: 195 строк кода
+- SuspiciousUsersStorage.cs: 194 строк кода
+- GlobalStatsManager.cs: 183 строк кода
+- IntroFlowService.cs: 166 строк кода
+- SpamHamClassifier.cs: 166 строк кода
+- LogChatService.cs: 160 строк кода
+- SimpleFilters.cs: 148 строк кода
+- SuspiciousCommandHandler.cs: 146 строк кода
+- UserFlowLogger.cs: 143 строк кода
+- MimicryClassifier.cs: 118 строк кода
+- ChatMemberHandler.cs: 108 строк кода
+- StartCommandHandler.cs: 103 строк кода
+- StatisticsService.cs: 91 строк кода
+- BotPermissionsService.cs: 83 строк кода
+- ITelegramBotClientWrapper.cs: 82 строк кода
+- ViolationTracker.cs: 75 строк кода
+- LoggingConfigurationService.cs: 74 строк кода
+- BadMessageManager.cs: 70 строк кода
+- UserCleanupService.cs: 65 строк кода
+- TextProcessor.cs: 53 строк кода
+- UpdateDispatcher.cs: 47 строк кода
+- ChatLinkFormatter.cs: 44 строк кода
+- AppConfig.cs: 30 строк кода
+- IUserFlowLogger.cs: 28 строк кода
+- NotificationService.cs: 28 строк кода
+- IAppConfig.cs: 28 строк кода
+- UserJoinService.cs: 25 строк кода
+- IMessageService.cs: 21 строк кода
+- HandlersModule.cs: 20 строк кода
+- CommandProcessingService.cs: 19 строк кода
+- IAiChecks.cs: 19 строк кода
+- IModerationService.cs: 18 строк кода
+- CommandsModule.cs: 17 строк кода
+- UserManagementModule.cs: 17 строк кода
+- MessagingModule.cs: 16 строк кода
+- ISuspiciousUsersStorage.cs: 14 строк кода
+- IUserBanService.cs: 14 строк кода
+- AIModule.cs: 14 строк кода
+- ILoggingConfigurationService.cs: 13 строк кода
+- ICaptchaService.cs: 13 строк кода
+- CaptchaModule.cs: 13 строк кода
+- BanType.cs: 12 строк кода
+- IStatisticsService.cs: 12 строк кода
+- TelegramModule.cs: 11 строк кода
+- StatisticsModule.cs: 11 строк кода
+- INotificationService.cs: 10 строк кода
+- IUserManager.cs: 10 строк кода
+- ConfigurationModule.cs: 10 строк кода
+- IChannelModerationService.cs: 9 строк кода
+- IServiceChatDispatcher.cs: 9 строк кода
+- IBotPermissionsService.cs: 8 строк кода
+- ISpamHamClassifier.cs: 8 строк кода
+- IViolationTracker.cs: 7 строк кода
+- ICommandHandler.cs: 7 строк кода
+- ILogChatService.cs: 7 строк кода
+- IChatLinkFormatter.cs: 7 строк кода
+- IUserJoinService.cs: 7 строк кода
+- IUserCleanupService.cs: 7 строк кода
+- IUpdateDispatcher.cs: 6 строк кода
+- IBadMessageManager.cs: 6 строк кода
+- ICommandProcessingService.cs: 6 строк кода
+- IMimicryClassifier.cs: 5 строк кода
+
+ЗАВИСИМОСТИ:
+- Services -> AI, Telegram, Messaging, UserManagement, Core.Configuration, BanSystem
+- Handlers -> AI, Telegram, Messaging, UserManagement, Commands, Core.Configuration, Statistics, Captcha, BanSystem
+- Commands -> Core.Configuration, Telegram, Messaging
+- BanSystem -> Telegram, Messaging, UserManagement, Core.Configuration, Statistics, BanSystem
+- Messaging -> Core.Configuration, Telegram, BanSystem
+- Telegram -> Messaging
+- AI -> Core.Configuration, AI, Telegram, Messaging
+- UserManagement -> Core.Configuration, UserManagement, BanSystem, Messaging
+- Statistics -> Telegram, Statistics, Messaging
+- Captcha -> Core.Configuration, Telegram, Messaging
+- Configuration -> Core.Configuration, Messaging

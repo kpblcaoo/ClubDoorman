@@ -1,3 +1,8 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -6,7 +11,7 @@ using NUnit.Framework;
 using Telegram.Bot;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;

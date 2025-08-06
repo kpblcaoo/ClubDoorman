@@ -1,7 +1,10 @@
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Telegram.Bot.Types;

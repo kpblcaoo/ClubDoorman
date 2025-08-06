@@ -1,3 +1,5 @@
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.Caching;
@@ -11,7 +13,7 @@ using System.Text.Json;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Core.Configuration;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services.Telegram;

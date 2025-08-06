@@ -1,8 +1,18 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
 using Serilog;
 using Serilog.Events;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.LinkFormatting;
+using ClubDoorman.Services.Dispatcher;
+using ClubDoorman.Services.UserJoin;
+using ClubDoorman.Services.Notification;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Logging;
 
@@ -17,6 +27,7 @@ using ClubDoorman.Services.Handlers;
 using Telegram.Bot;
 using DotNetEnv;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.TextProcessing;
 
 namespace ClubDoorman;
 
@@ -93,6 +104,17 @@ public class Program
             {
                 // Регистрация конфигурации приложения
                 services.AddConfigurationServices();
+                services.AddLinkFormattingServices();
+                services.AddDispatcherServices();
+                services.AddUserJoinServices();
+                services.AddNotificationServices();
+                services.AddUserBanServices();
+                services.AddModerationServices();
+                services.AddChannelModerationServices();
+                services.AddSuspiciousUsersServices();
+                services.AddUserFlowServices();
+                services.AddViolationServices();
+                services.AddBadMessageServices();
 
                 // Telegram Bot Client - создаем после регистрации IAppConfig
                 services.AddSingleton<TelegramBotClient>(provider =>
@@ -149,6 +171,7 @@ public class Program
                 services.AddAIServices();
                 services.AddUserManagementServices();
                 services.AddMessagingServices();
+                services.AddTextProcessingServices();
                 
                 // Классификаторы и менеджеры
 
@@ -211,32 +234,8 @@ public class Program
                 // Централизованная система сообщений (перенесено в MessagingModule)
                 services.Configure<LoggingConfiguration>(options => { });
 
-                // Обработчики обновлений
-                services.AddSingleton<IUpdateHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IUpdateHandler (MessageHandler) factory called");
-                    return new MessageHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<IModerationService>(),
-                        provider.GetRequiredService<ICaptchaService>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<ISpamHamClassifier>(),
-                        provider.GetRequiredService<IBadMessageManager>(),
-                        provider.GetRequiredService<IAiChecks>(),
-                        provider.GetRequiredService<GlobalStatsManager>(),
-                        provider.GetRequiredService<IStatisticsService>(),
-                        provider.GetRequiredService<IServiceProvider>(),
-                        provider.GetRequiredService<IUserFlowLogger>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IChatLinkFormatter>(),
-                        provider.GetRequiredService<IBotPermissionsService>(),
-                        provider.GetRequiredService<IAppConfig>(),
-                        provider.GetRequiredService<IViolationTracker>(),
-                        provider.GetRequiredService<ILogger<MessageHandler>>(),
-                        provider.GetRequiredService<IUserBanService>());
-                });
-
+                // Обработчики обновлений уже зарегистрированы в HandlersModule
+                // Убираем дублирующую регистрацию MessageHandler
 
                 // Новые прокси-сервисы для рефакторинга
 

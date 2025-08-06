@@ -1,9 +1,14 @@
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services.Messaging;
 
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Requests;
@@ -19,6 +24,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.UserJoin;
 
 namespace ClubDoorman.Test.TestKit;
 

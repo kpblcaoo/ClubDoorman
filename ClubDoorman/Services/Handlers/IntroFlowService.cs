@@ -1,7 +1,8 @@
+using ClubDoorman.Services.Moderation;
 using System.Diagnostics;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Requests;
 using Telegram.Bot;

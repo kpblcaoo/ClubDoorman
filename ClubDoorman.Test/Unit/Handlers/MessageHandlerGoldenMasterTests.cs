@@ -1,10 +1,15 @@
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestKit;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
