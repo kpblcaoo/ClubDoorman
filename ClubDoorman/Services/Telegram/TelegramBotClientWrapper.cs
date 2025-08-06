@@ -65,11 +65,24 @@ public class TelegramBotClientWrapper : ITelegramBotClientWrapper
         int messageId,
         CancellationToken cancellationToken = default)
     {
-        await _bot.DeleteMessage(
-            chatId,
-            messageId,
-            cancellationToken: cancellationToken);
-        return true;
+        try
+        {
+            await _bot.DeleteMessage(
+                chatId,
+                messageId,
+                cancellationToken: cancellationToken);
+            return true;
+        }
+        catch (Exception ex) when (ex.Message.Contains("message to delete not found") || ex.Message.Contains("Bad Request"))
+        {
+            // Сообщение уже удалено или недоступно - возвращаем false
+            return false;
+        }
+        catch (Exception ex)
+        {
+            // Другие ошибки - возвращаем false
+            return false;
+        }
     }
 
     /// <summary>
@@ -107,7 +120,20 @@ public class TelegramBotClientWrapper : ITelegramBotClientWrapper
     /// </summary>
     public async Task DeleteMessage(ChatId chatId, int messageId, CancellationToken cancellationToken = default)
     {
-        await _bot.DeleteMessage(chatId, messageId, cancellationToken);
+        try
+        {
+            await _bot.DeleteMessage(chatId, messageId, cancellationToken);
+        }
+        catch (Exception ex) when (ex.Message.Contains("message to delete not found") || ex.Message.Contains("Bad Request"))
+        {
+            // Сообщение уже удалено или недоступно - это нормальная ситуация
+            // Не пробрасываем исключение, так как это не является ошибкой
+        }
+        catch (Exception ex)
+        {
+            // Другие ошибки - пробрасываем исключение
+            throw;
+        }
     }
 
     /// <summary>
