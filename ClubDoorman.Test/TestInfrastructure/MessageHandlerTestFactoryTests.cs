@@ -1,3 +1,4 @@
+using ClubDoorman.Services.Moderation;
 using ClubDoorman.Handlers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;

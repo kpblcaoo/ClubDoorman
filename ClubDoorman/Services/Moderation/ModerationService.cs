@@ -11,7 +11,7 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.TextProcessing;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Moderation;
 
 /// <summary>
 /// Сервис модерации сообщений

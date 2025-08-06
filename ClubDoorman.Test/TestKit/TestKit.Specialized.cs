@@ -1,3 +1,4 @@
+using ClubDoorman.Services.Moderation;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;

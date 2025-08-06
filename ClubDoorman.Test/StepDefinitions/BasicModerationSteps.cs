@@ -1,3 +1,4 @@
+using ClubDoorman.Services.Moderation;
 using NUnit.Framework;
 using TechTalk.SpecFlow;
 using ClubDoorman.Models;

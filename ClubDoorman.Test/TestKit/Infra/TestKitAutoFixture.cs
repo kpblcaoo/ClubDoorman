@@ -1,3 +1,4 @@
+using ClubDoorman.Services.Moderation;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using ClubDoorman.Services;

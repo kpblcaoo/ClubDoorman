@@ -1,3 +1,4 @@
+using ClubDoorman.Services.Moderation;
 using ClubDoorman.Handlers;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Services;
