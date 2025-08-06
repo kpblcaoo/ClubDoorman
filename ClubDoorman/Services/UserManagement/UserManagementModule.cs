@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.Services.UserManagement;
 
@@ -18,6 +20,8 @@ public static class UserManagementModule
         services.AddSingleton<ApprovedUsersStorage>();
         services.AddSingleton<IUserCleanupService, UserCleanupService>();
         services.AddSingleton<IUserJoinService, UserJoinService>();
+        services.AddSingleton<IUserBanService, UserBanService>();
+        services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
         
         return services;
     }

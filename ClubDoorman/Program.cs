@@ -173,23 +173,7 @@ public class Program
                     logger.LogDebug("[DI] IViolationTracker factory called");
                     return new ViolationTracker(provider.GetRequiredService<ILogger<ViolationTracker>>(), provider.GetRequiredService<IAppConfig>());
                 });
-                services.AddSingleton<IUserBanService>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IUserBanService factory called");
-                    return new UserBanService(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IUserFlowLogger>(),
-                        provider.GetRequiredService<ILogger<UserBanService>>(),
-                        provider.GetRequiredService<IViolationTracker>(),
-                        provider.GetRequiredService<IAppConfig>(),
-                        provider.GetRequiredService<IStatisticsService>(),
-                        provider.GetRequiredService<GlobalStatsManager>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<IUserCleanupService>()
-                    );
-                });
+
                 
 
                 
@@ -245,12 +229,7 @@ public class Program
                         provider.GetRequiredService<IAppConfig>());
                 });
 
-                services.AddSingleton<IUserFlowLogger>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IUserFlowLogger factory called");
-                    return new UserFlowLogger(provider.GetRequiredService<ILogger<UserFlowLogger>>());
-                });
+
                 services.AddSingleton<IBotPermissionsService>(provider =>
                 {
                     var logger = provider.GetRequiredService<ILogger<Program>>();
