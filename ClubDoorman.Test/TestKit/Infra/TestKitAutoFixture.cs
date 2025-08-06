@@ -8,6 +8,7 @@ using ClubDoorman.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
 
 namespace ClubDoorman.Test.TestKit.Infra;
 

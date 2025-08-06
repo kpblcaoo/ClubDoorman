@@ -1,6 +1,6 @@
 using ClubDoorman.Models;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Statistics;
 
 /// <summary>
 /// Сервис статистики

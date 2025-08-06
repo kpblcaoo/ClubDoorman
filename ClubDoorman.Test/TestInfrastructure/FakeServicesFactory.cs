@@ -11,6 +11,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using static ClubDoorman.Services.AiChecks;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Statistics;
 
 namespace ClubDoorman.TestInfrastructure;
 

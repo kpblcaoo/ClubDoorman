@@ -3,7 +3,7 @@ using System.Text;
 using Telegram.Bot;
 using ClubDoorman.Services.Telegram;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Statistics;
 
 public class GlobalStatsManager
 {

@@ -4,8 +4,9 @@ using ClubDoorman.Models;
 using ClubDoorman.Infrastructure;
 using Telegram.Bot;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Statistics;
 
 /// <summary>
 /// Сервис статистики

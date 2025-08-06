@@ -18,6 +18,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
 
 namespace ClubDoorman.Test.TestKit;
 

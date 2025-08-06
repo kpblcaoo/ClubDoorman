@@ -8,6 +8,7 @@ using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
 
 namespace ClubDoorman.Services.BanSystem;
 

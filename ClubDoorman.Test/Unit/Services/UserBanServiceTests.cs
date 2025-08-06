@@ -12,6 +12,7 @@ using ClubDoorman.Test.TestData;
 using ClubDoorman.Test.TestKit;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
 
 namespace ClubDoorman.Test.Unit.Services;
 

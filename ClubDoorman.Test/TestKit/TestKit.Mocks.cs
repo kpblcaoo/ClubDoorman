@@ -9,6 +9,7 @@ using Moq;
 using Microsoft.Extensions.Logging;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
 
 namespace ClubDoorman.Test.TestKit
 {

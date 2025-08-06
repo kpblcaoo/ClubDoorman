@@ -15,6 +15,7 @@ using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
 
 namespace ClubDoorman;
 

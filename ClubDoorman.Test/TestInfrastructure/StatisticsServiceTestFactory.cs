@@ -7,6 +7,7 @@ using NUnit.Framework;
 using Telegram.Bot;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
 
 namespace ClubDoorman.TestInfrastructure;
 

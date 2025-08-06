@@ -13,6 +13,7 @@ using Telegram.Bot.Types;
 using ClubDoorman.Test.TestKit.Builders.MockBuilders;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
 
 namespace ClubDoorman.Test.TestKit;
 
