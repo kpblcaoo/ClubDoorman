@@ -1,8 +1,6 @@
-using ClubDoorman.Services.BadMessage;
-using ClubDoorman.Services.Violation;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services;

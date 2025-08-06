@@ -1,6 +1,6 @@
 using ClubDoorman.Services.Violation;
-
-namespace ClubDoorman.Services;
+using ClubDoorman.Services.Moderation;
+namespace ClubDoorman.Services.Violation;
 
 /// <summary>
 /// Интерфейс для сервиса отслеживания нарушений пользователей

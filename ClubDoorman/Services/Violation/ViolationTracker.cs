@@ -1,3 +1,5 @@
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.Moderation;
 using System.Collections.Concurrent;
 using System.Runtime.Caching;
 using ClubDoorman.Services.Core.Configuration;

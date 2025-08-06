@@ -1,3 +1,9 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
 using Serilog;
 using Serilog.Events;
 using ClubDoorman.Infrastructure;
@@ -6,13 +12,7 @@ using ClubDoorman.Services.LinkFormatting;
 using ClubDoorman.Services.Dispatcher;
 using ClubDoorman.Services.UserJoin;
 using ClubDoorman.Services.Notification;
-using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.ChannelModeration;
-using ClubDoorman.Services.SuspiciousUsers;
-using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.UserBan;
-using ClubDoorman.Services.Violation;
-using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Logging;
 

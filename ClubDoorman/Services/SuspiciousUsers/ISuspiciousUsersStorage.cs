@@ -1,6 +1,8 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.Moderation;
 using ClubDoorman.Models;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.SuspiciousUsers;
 
 /// <summary>
 /// Интерфейс для управления списком подозрительных пользователей

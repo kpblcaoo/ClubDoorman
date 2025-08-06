@@ -1,4 +1,6 @@
-namespace ClubDoorman.Services;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+namespace ClubDoorman.Services.BadMessage;
 
 /// <summary>
 /// Интерфейс для менеджера плохих сообщений

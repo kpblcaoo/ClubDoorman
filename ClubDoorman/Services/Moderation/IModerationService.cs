@@ -1,7 +1,8 @@
+using ClubDoorman.Services.Moderation;
 using ClubDoorman.Models;
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Moderation;
 
 /// <summary>
 /// Сервис модерации сообщений

@@ -1,3 +1,6 @@
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
 using System.Runtime.Caching;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;

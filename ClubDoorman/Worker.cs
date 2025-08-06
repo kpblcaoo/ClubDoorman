@@ -1,3 +1,5 @@
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.Caching;

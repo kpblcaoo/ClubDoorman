@@ -1,8 +1,7 @@
-using ClubDoorman.Services.BadMessage;
-using ClubDoorman.Services.Violation;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;

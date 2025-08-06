@@ -1,6 +1,8 @@
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Moderation;
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.ChannelModeration;
 
 /// <summary>
 /// Сервис для модерации каналов
