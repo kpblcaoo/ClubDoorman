@@ -9,6 +9,7 @@ using ClubDoorman.Models.Logging;
 using ClubDoorman.Services.UserJoin;
 using ClubDoorman.Services.Notifications;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
 using Telegram.Bot;
 using DotNetEnv;
 
@@ -138,12 +139,7 @@ public class Program
                     logger.LogDebug("[DI] ITelegramBotClient factory called");
                     return provider.GetRequiredService<TelegramBotClient>();
                 });
-                services.AddSingleton<ITelegramBotClientWrapper>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ITelegramBotClientWrapper factory called");
-                    return new TelegramBotClientWrapper(provider.GetRequiredService<TelegramBotClient>());
-                });
+                services.AddTelegramServices();
                 
                 // Классификаторы и менеджеры
                 services.AddSingleton<ISpamHamClassifier>(provider =>

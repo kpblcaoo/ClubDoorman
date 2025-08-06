@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 

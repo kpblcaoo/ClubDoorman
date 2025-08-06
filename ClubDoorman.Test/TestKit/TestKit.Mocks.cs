@@ -8,6 +8,7 @@ using Telegram.Bot.Types.Enums;
 using Moq;
 using Microsoft.Extensions.Logging;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Test.TestKit
 {

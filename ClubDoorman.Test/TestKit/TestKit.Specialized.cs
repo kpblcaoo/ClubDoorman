@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Moq;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Test.TestKit
 {

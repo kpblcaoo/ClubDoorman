@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Test.TestKit;
 

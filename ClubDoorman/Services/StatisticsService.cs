@@ -3,6 +3,7 @@ using System.Text;
 using ClubDoorman.Models;
 using ClubDoorman.Infrastructure;
 using Telegram.Bot;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Services;
 

@@ -2,7 +2,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types.Enums;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Telegram;
 
 /// <summary>
 /// Интерфейс-обертка для TelegramBotClient для возможности мокирования в тестах

@@ -13,6 +13,7 @@ using Moq;
 using Microsoft.Extensions.Logging;
 using FluentAssertions;
 using DotNetEnv;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Test.StepDefinitions.Common
 {

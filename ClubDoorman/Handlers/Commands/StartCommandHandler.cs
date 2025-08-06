@@ -5,6 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Handlers.Commands;
 

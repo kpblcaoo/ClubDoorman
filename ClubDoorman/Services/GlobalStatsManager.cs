@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text;
 using Telegram.Bot;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Services;
 

@@ -3,6 +3,7 @@ using ClubDoorman.Models.Notifications;
 using System.Runtime.Caching;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Services;
 
@@ -50,7 +51,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
             await _bot.SendMessageAsync(
                 Config.AdminChatId,
                 message,
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                parseMode: global::Telegram.Bot.Types.Enums.ParseMode.Html,
                 replyMarkup: GetAdminChatReplyMarkup(notification),
                 cancellationToken: cancellationToken);
 
@@ -76,7 +77,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
             await _bot.SendMessageAsync(
                 chatId,
                 message,
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                parseMode: global::Telegram.Bot.Types.Enums.ParseMode.Html,
                 cancellationToken: cancellationToken);
 
             _logger.LogDebug("📝 Уведомление отправлено в лог-чат: {NotificationType}", notification.GetType().Name);
@@ -308,7 +309,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
                 Config.AdminChatId,
                 inputFile,
                 caption: photoCaption,
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                parseMode: global::Telegram.Bot.Types.Enums.ParseMode.Html,
                 cancellationToken: cancellationToken
             );
             replyParams = new ReplyParameters { MessageId = photoMsg.MessageId };
@@ -342,7 +343,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
         var mainMessage = await _bot.SendMessageAsync(
             Config.AdminChatId,
             message,
-            parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+            parseMode: global::Telegram.Bot.Types.Enums.ParseMode.Html,
             replyMarkup: GetAdminChatReplyMarkup(data),
             replyParameters: replyParams,
             cancellationToken: cancellationToken
@@ -456,8 +457,8 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
         
         return chat.Type switch
         {
-            Telegram.Bot.Types.Enums.ChatType.Supergroup => $"https://t.me/c/{chat.Id.ToString()[4..]}/{messageId}",
-            Telegram.Bot.Types.Enums.ChatType.Group when !string.IsNullOrEmpty(chat.Username) => $"https://t.me/{chat.Username}/{messageId}",
+            global::Telegram.Bot.Types.Enums.ChatType.Supergroup => $"https://t.me/c/{chat.Id.ToString()[4..]}/{messageId}",
+            global::Telegram.Bot.Types.Enums.ChatType.Group when !string.IsNullOrEmpty(chat.Username) => $"https://t.me/{chat.Username}/{messageId}",
             _ => $"ID: {messageId}"
         };
     }

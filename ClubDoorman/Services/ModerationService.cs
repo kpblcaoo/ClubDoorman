@@ -431,7 +431,7 @@ public class ModerationService : IModerationService
             await _botClient.RestrictChatMember(
                 chatId: chatId,
                 userId: userId,
-                permissions: new Telegram.Bot.Types.ChatPermissions
+                permissions: new global::Telegram.Bot.Types.ChatPermissions
                 {
                     CanSendMessages = true,
                     CanSendAudios = true,
@@ -572,23 +572,23 @@ public class ModerationService : IModerationService
              _logger.LogDebug("🎛️ Создаем кнопки: одобрить={Approve}, забанить={Ban}, AI={Ai}", 
                  approveCallback, banCallback, aiCallback);
              
-             var keyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(new[]
+             var keyboard = new global::Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(new[]
              {
                  new[]
                  {
-                     Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("✅ Одобрить", approveCallback),
-                     Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("🚫 Забанить", banCallback)
+                     global::Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("✅ Одобрить", approveCallback),
+                     global::Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("🚫 Забанить", banCallback)
                  },
                  new[]
                  {
-                     Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("🔍 AI анализ вкл/выкл", aiCallback)
+                     global::Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("🔍 AI анализ вкл/выкл", aiCallback)
                  }
              });
 
              await _botClient.SendMessage(
                  chatId: Config.LogAdminChatId,
                  text: messageText,
-                 parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                 parseMode: global::Telegram.Bot.Types.Enums.ParseMode.Markdown,
                  replyMarkup: keyboard,
                  cancellationToken: default
              );
@@ -650,8 +650,8 @@ public class ModerationService : IModerationService
             if (message.Entities != null)
             {
                 var hasUrlEntities = message.Entities.Any(e => 
-                    e.Type == Telegram.Bot.Types.Enums.MessageEntityType.Url ||
-                    e.Type == Telegram.Bot.Types.Enums.MessageEntityType.TextLink);
+                    e.Type == global::Telegram.Bot.Types.Enums.MessageEntityType.Url ||
+                    e.Type == global::Telegram.Bot.Types.Enums.MessageEntityType.TextLink);
                 
                 if (hasUrlEntities)
                 {
@@ -757,7 +757,7 @@ public class ModerationService : IModerationService
             await _botClient.RestrictChatMember(
                 chatId: chat.Id,
                 userId: user.Id,
-                permissions: new Telegram.Bot.Types.ChatPermissions
+                permissions: new global::Telegram.Bot.Types.ChatPermissions
                 {
                     CanSendMessages = false,
                     CanSendAudios = false,

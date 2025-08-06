@@ -12,6 +12,7 @@ using System.Reflection;
 using Moq;
 using ClubDoorman.Models;
 using ClubDoorman.Test.TestInfrastructure;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Test.Unit.Services;
 
@@ -37,7 +38,7 @@ public class CaptchaServiceFakeTests
         // Arrange
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
-        .ReturnsAsync(new Telegram.Bot.Types.Message());
+        .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
@@ -65,7 +66,7 @@ public class CaptchaServiceFakeTests
         // Arrange
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
-        .ReturnsAsync(new Telegram.Bot.Types.Message());
+        .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
@@ -90,7 +91,7 @@ public class CaptchaServiceFakeTests
         // Arrange
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
-        .ReturnsAsync(new Telegram.Bot.Types.Message());
+        .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
@@ -118,7 +119,7 @@ public class CaptchaServiceFakeTests
         // Arrange
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
-        .ReturnsAsync(new Telegram.Bot.Types.Message());
+        .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
@@ -188,7 +189,7 @@ public class CaptchaServiceFakeTests
         // Arrange
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
-        .ReturnsAsync(new Telegram.Bot.Types.Message());
+        .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
@@ -214,7 +215,7 @@ public class CaptchaServiceFakeTests
         // Arrange
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
-        .ReturnsAsync(new Telegram.Bot.Types.Message());
+        .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
@@ -256,7 +257,7 @@ public class CaptchaServiceFakeTests
         // Arrange
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
-        .ReturnsAsync(new Telegram.Bot.Types.Message());
+        .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,
@@ -284,7 +285,7 @@ public class CaptchaServiceFakeTests
         // Arrange
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
-        .ReturnsAsync(new Telegram.Bot.Types.Message());
+        .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
         var service = new CaptchaService(
             new Mock<ITelegramBotClientWrapper>().Object,

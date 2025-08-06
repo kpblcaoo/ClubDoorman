@@ -11,6 +11,7 @@ using Moq;
 using Telegram.Bot.Types;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Test.TestKit;
 

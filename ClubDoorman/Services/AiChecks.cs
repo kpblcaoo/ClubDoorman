@@ -10,6 +10,7 @@ using Telegram.Bot.Types;
 using tryAGI.OpenAI;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Services;
 
@@ -92,7 +93,7 @@ public class AiChecks : IAiChecks
     /// <summary>
     /// Получает вероятность того, что профиль создан для привлечения внимания/спама
     /// </summary>
-    public async ValueTask<SpamPhotoBio> GetAttentionBaitProbability(Telegram.Bot.Types.User user, Func<string, Task>? ifChanged = default)
+    public async ValueTask<SpamPhotoBio> GetAttentionBaitProbability(global::Telegram.Bot.Types.User user, Func<string, Task>? ifChanged = default)
     {
         return await GetAttentionBaitProbability(user, null, ifChanged);
     }
@@ -100,7 +101,7 @@ public class AiChecks : IAiChecks
     /// <summary>
     /// Получает вероятность того, что профиль создан для привлечения внимания/спама (с учетом первого сообщения)
     /// </summary>
-    public async ValueTask<SpamPhotoBio> GetAttentionBaitProbability(Telegram.Bot.Types.User user, string? messageText, Func<string, Task>? ifChanged = default)
+    public async ValueTask<SpamPhotoBio> GetAttentionBaitProbability(global::Telegram.Bot.Types.User user, string? messageText, Func<string, Task>? ifChanged = default)
     {
         if (user == null)
         {
@@ -258,7 +259,7 @@ public class AiChecks : IAiChecks
     /// <summary>
     /// Анализирует фото профиля на предмет сексуализированного контента
     /// </summary>
-    private async ValueTask<SpamPhotoBio> GetEroticPhotoBaitProbability(Telegram.Bot.Types.User user, ChatFullInfo userChat)
+    private async ValueTask<SpamPhotoBio> GetEroticPhotoBaitProbability(global::Telegram.Bot.Types.User user, ChatFullInfo userChat)
     {
         if (_api == null)
             return new SpamPhotoBio(new SpamProbability(), [], "");
@@ -410,7 +411,7 @@ public class AiChecks : IAiChecks
     /// </summary>
     public async ValueTask<SpamProbability> GetSuspiciousUserSpamProbability(
         Message message, 
-        Telegram.Bot.Types.User user, 
+        global::Telegram.Bot.Types.User user, 
         List<string> firstMessages, 
         double mimicryScore)
     {
@@ -523,7 +524,7 @@ public class AiChecks : IAiChecks
     /// </summary>
     public async ValueTask<SpamProbability> GetCascadeAnalysisProbability(
         Message message, 
-        Telegram.Bot.Types.User user, 
+        global::Telegram.Bot.Types.User user, 
         double mlScore, 
         bool mlSpamDecision)
     {

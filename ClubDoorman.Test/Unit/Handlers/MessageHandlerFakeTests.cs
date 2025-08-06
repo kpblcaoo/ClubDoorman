@@ -15,6 +15,7 @@ using ClubDoorman.Models;
 using ClubDoorman.Models.Requests;
 using ClubDoorman.Handlers.Commands;
 using ClubDoorman.Test.TestKit;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 

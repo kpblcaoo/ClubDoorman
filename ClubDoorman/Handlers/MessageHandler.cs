@@ -16,6 +16,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Extensions;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Handlers;
 

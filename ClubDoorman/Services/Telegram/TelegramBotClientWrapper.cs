@@ -3,7 +3,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types.Enums;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Telegram;
 
 /// <summary>
 /// Реализация интерфейса-обертки для TelegramBotClient

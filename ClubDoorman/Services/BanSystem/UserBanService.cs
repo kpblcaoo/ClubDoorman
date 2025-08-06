@@ -7,6 +7,7 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Services.BanSystem;
 

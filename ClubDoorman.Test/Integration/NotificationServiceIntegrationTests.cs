@@ -12,6 +12,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Threading.Tasks;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Test.Integration;
 
