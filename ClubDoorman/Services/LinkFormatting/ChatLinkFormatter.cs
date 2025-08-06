@@ -1,8 +1,9 @@
 using Telegram.Bot.Types;
 using Telegram.Bot;
 using Telegram.Bot.Extensions;
+using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services.Messaging;
+namespace ClubDoorman.Services.LinkFormatting;
 
 /// <summary>
 /// Реализация форматирования ссылок на Telegram чаты в Markdown

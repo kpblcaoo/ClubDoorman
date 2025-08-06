@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using ClubDoorman.Services.LinkFormatting;
 
 namespace ClubDoorman.Services.Messaging;
 

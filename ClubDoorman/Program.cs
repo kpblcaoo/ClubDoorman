@@ -3,6 +3,7 @@ using Serilog.Events;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.LinkFormatting;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Logging;
 
@@ -94,6 +95,7 @@ public class Program
             {
                 // Регистрация конфигурации приложения
                 services.AddConfigurationServices();
+                services.AddLinkFormattingServices();
 
                 // Telegram Bot Client - создаем после регистрации IAppConfig
                 services.AddSingleton<TelegramBotClient>(provider =>
