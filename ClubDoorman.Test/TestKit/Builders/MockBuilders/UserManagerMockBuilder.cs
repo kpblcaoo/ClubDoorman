@@ -1,6 +1,7 @@
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using Moq;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.Test.TestKit.Builders.MockBuilders;
 

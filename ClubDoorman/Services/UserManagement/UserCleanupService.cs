@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
+using ClubDoorman.Services.UserManagement;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.UserManagement;
 
 /// <summary>
 /// Реализация сервиса для очистки пользователей из списков одобренных

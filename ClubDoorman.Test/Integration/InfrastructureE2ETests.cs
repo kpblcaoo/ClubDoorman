@@ -12,6 +12,7 @@ using Telegram.Bot.Types.Enums;
 using ClubDoorman.Models;
 using Telegram.Bot;
 using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.Test.Integration;
 

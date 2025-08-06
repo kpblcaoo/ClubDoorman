@@ -8,6 +8,7 @@ using Telegram.Bot;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.TestInfrastructure;
 

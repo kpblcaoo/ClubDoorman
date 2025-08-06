@@ -2,7 +2,7 @@ using ClubDoorman.Handlers;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services.UserJoin;
+namespace ClubDoorman.Services.UserManagement;
 
 /// <summary>
 /// Сервис для обработки присоединения новых пользователей

@@ -1,11 +1,12 @@
 using NUnit.Framework;
 using ClubDoorman.Handlers;
-using ClubDoorman.Services.UserJoin;
+
 using ClubDoorman.Test.TestKit;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Telegram.Bot.Types;
 using ClubDoorman.Models;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.Test.Integration;
 

@@ -1,6 +1,6 @@
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services.UserJoin;
+namespace ClubDoorman.Services.UserManagement;
 
 /// <summary>
 /// Сервис для обработки присоединения новых пользователей

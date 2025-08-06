@@ -7,6 +7,7 @@ using ClubDoorman.Services.BanSystem;
 using Telegram.Bot.Types;
 using Telegram.Bot;
 using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.Services;
 

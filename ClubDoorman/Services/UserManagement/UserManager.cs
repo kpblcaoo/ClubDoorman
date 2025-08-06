@@ -3,8 +3,9 @@ using System.Globalization;
 using System.Net.Http.Json;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.UserManagement;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.UserManagement;
 
 internal sealed class UserManager : IUserManager
 {

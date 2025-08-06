@@ -10,6 +10,7 @@ using Telegram.Bot;
 using Moq;
 using Microsoft.Extensions.Logging;
 using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.Test.StepDefinitions
 {

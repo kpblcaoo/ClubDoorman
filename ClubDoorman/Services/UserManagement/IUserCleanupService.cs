@@ -1,4 +1,4 @@
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.UserManagement;
 
 /// <summary>
 /// Сервис для очистки пользователей из списков одобренных

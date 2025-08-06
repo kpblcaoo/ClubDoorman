@@ -8,6 +8,7 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Test.TestKit.Infra;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.Test.TestKit;
 

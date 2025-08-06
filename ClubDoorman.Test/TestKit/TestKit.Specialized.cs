@@ -11,6 +11,7 @@ using Telegram.Bot.Types;
 using Moq;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.Test.TestKit
 {

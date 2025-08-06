@@ -6,12 +6,12 @@ using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Handlers;
 using ClubDoorman.Handlers.Commands;
 using ClubDoorman.Models.Logging;
-using ClubDoorman.Services.UserJoin;
 using ClubDoorman.Services.Notifications;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
 using Telegram.Bot;
 using DotNetEnv;
 
@@ -144,6 +144,7 @@ public class Program
                 services.AddTelegramServices();
                 services.AddStatisticsServices();
                 services.AddAIServices();
+                services.AddUserManagementServices();
                 
                 // Классификаторы и менеджеры
                 services.AddSingleton<ISpamHamClassifier>(provider =>
@@ -455,26 +456,7 @@ public class Program
                         provider.GetRequiredService<IAppConfig>());
                 });
 
-                // Регистрация системы одобрения
-                services.AddSingleton<ApprovedUsersStorage>();
-                services.AddSingleton<UserManager>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] UserManager factory called");
-                    return new UserManager(
-                        provider.GetRequiredService<ILogger<UserManager>>(),
-                        provider.GetRequiredService<ApprovedUsersStorage>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
-                services.AddSingleton<IUserManager>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IUserManager proxy factory called");
-                    return provider.GetRequiredService<UserManager>();
-                });
-
-                // Регистрация сервиса очистки пользователей
-                services.AddSingleton<IUserCleanupService, UserCleanupService>();
+                // Регистрация сервиса лог-чата
 
                 // Регистрация сервиса лог-чата
                 services.AddSingleton<ILogChatService, LogChatService>();
