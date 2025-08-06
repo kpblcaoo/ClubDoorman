@@ -2,7 +2,7 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Models.Notifications;
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Messaging;
 
 /// <summary>
 /// Система шаблонов сообщений для Telegram

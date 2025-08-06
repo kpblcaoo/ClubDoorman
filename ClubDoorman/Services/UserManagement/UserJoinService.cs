@@ -1,6 +1,7 @@
 using ClubDoorman.Handlers;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services.UserManagement;
 

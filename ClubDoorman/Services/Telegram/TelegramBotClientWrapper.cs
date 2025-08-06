@@ -2,6 +2,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types.Enums;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services.Telegram;
 

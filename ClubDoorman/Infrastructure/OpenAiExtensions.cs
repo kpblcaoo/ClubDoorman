@@ -1,5 +1,6 @@
 using System.Text;
 using tryAGI.OpenAI;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Infrastructure;
 

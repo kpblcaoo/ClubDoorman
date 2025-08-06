@@ -1,6 +1,6 @@
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Messaging;
 
 /// <summary>
 /// Сервис для работы с лог-чатом

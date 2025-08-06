@@ -5,6 +5,7 @@ using ClubDoorman.Infrastructure;
 using Telegram.Bot;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services.Statistics;
 

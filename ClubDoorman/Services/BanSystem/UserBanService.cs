@@ -10,6 +10,7 @@ using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services.BanSystem;
 

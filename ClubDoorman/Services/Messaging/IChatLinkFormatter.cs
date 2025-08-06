@@ -1,6 +1,6 @@
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Messaging;
 
 /// <summary>
 /// Интерфейс для форматирования ссылок на Telegram чаты в Markdown

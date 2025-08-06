@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services.UserManagement;
 

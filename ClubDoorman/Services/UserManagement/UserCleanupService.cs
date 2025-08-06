@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services.UserManagement;
 

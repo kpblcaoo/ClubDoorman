@@ -10,7 +10,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Messaging;
 
 /// <summary>
 /// Сервис для работы с лог-чатом

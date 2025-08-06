@@ -6,7 +6,7 @@ using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Handlers;
 using ClubDoorman.Handlers.Commands;
 using ClubDoorman.Models.Logging;
-using ClubDoorman.Services.Notifications;
+
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
@@ -14,6 +14,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using Telegram.Bot;
 using DotNetEnv;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman;
 
@@ -145,6 +146,7 @@ public class Program
                 services.AddStatisticsServices();
                 services.AddAIServices();
                 services.AddUserManagementServices();
+                services.AddMessagingServices();
                 
                 // Классификаторы и менеджеры
                 services.AddSingleton<ISpamHamClassifier>(provider =>
@@ -272,12 +274,7 @@ public class Program
                         provider.GetRequiredService<IUserBanService>(),
                         provider.GetRequiredService<IAppConfig>());
                 });
-                services.AddSingleton<IChatLinkFormatter>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IChatLinkFormatter factory called");
-                    return new ChatLinkFormatter();
-                });
+
                 services.AddSingleton<IUserFlowLogger>(provider =>
                 {
                     var logger = provider.GetRequiredService<ILogger<Program>>();
@@ -291,24 +288,8 @@ public class Program
                     return new BotPermissionsService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<BotPermissionsService>>());
                 });
 
-                // Централизованная система сообщений
-                services.AddSingleton<MessageTemplates>();
+                // Централизованная система сообщений (перенесено в MessagingModule)
                 services.Configure<LoggingConfiguration>(options => { });
-                services.AddSingleton<ILoggingConfigurationService, LoggingConfigurationService>();
-                services.AddSingleton<IServiceChatDispatcher, ServiceChatDispatcher>();
-                services.AddSingleton<IMessageService>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IMessageService factory called");
-                    return new MessageService(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ILogger<MessageService>>(),
-                        provider.GetRequiredService<MessageTemplates>(),
-                        provider.GetRequiredService<ILoggingConfigurationService>(),
-                        provider.GetRequiredService<IServiceChatDispatcher>(),
-                        provider.GetRequiredService<IAppConfig>()
-                    );
-                });
 
                 // Обработчики обновлений
                 services.AddSingleton<IUpdateHandler>(provider =>
@@ -410,7 +391,6 @@ public class Program
                 provider.GetRequiredService<ILogger<ChannelModerationService>>());
         });
                 services.AddSingleton<IUserJoinService, UserJoinService>();
-                services.AddSingleton<INotificationService, NotificationService>();
 
                 // Обработчики команд
                 services.AddSingleton<ICommandHandler>(provider =>
@@ -456,10 +436,7 @@ public class Program
                         provider.GetRequiredService<IAppConfig>());
                 });
 
-                // Регистрация сервиса лог-чата
-
-                // Регистрация сервиса лог-чата
-                services.AddSingleton<ILogChatService, LogChatService>();
+                // Регистрация сервиса лог-чата (перенесено в MessagingModule)
 
                 // Логируем статус AI и Mimicry систем после полной инициализации
                 services.PostConfigure<IAppConfig>(appConfig =>

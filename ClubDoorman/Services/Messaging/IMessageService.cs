@@ -3,7 +3,7 @@ using ClubDoorman.Models.Requests;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Messaging;
 
 /// <summary>
 /// Сервис для отправки уведомлений в Telegram

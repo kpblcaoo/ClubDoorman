@@ -14,6 +14,7 @@ using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.TestInfrastructure;
 

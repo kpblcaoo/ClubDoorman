@@ -1,5 +1,5 @@
 using ClubDoorman.Handlers;
-using ClubDoorman.Services.Notifications;
+
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Test.TestInfrastructure;
@@ -15,6 +15,7 @@ using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Test.TestKit;
 

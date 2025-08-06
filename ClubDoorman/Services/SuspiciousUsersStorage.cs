@@ -1,5 +1,6 @@
 using System.Text.Json;
 using ClubDoorman.Models;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services;
 

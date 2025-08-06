@@ -1,3 +1,4 @@
+using ClubDoorman.Services.Messaging;
 namespace ClubDoorman.Infrastructure;
 
 /// <summary>

@@ -5,7 +5,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using ClubDoorman.Services.Telegram;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Messaging;
 
 /// <summary>
 /// Реализация диспетчера сервис-чатов для разделения сообщений по админ-чату и лог-чату

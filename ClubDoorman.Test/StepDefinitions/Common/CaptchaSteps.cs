@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using FluentAssertions;
 using System.Reflection;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Test.StepDefinitions.Common
 {

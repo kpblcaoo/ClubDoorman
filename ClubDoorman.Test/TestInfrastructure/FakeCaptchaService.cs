@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.TestInfrastructure;
 

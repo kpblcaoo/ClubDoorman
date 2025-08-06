@@ -6,6 +6,7 @@ using Moq;
 using NUnit.Framework;
 using Microsoft.Extensions.Logging;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Test.Services;
 

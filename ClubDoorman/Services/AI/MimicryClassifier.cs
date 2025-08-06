@@ -1,4 +1,5 @@
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services.AI;
 

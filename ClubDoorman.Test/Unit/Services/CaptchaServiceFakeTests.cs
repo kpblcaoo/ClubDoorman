@@ -13,6 +13,7 @@ using Moq;
 using ClubDoorman.Models;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Test.Unit.Services;
 

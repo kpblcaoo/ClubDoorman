@@ -7,6 +7,7 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Transforms.Text;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.AI;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services.AI;
 

@@ -1,6 +1,7 @@
 using ClubDoorman.Models.Logging;
 using ClubDoorman.Models.Notifications;
 using Microsoft.Extensions.Options;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services;
 

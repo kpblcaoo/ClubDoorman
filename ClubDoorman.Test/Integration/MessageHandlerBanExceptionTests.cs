@@ -15,6 +15,7 @@ using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Test.Integration;
 

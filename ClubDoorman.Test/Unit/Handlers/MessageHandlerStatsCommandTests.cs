@@ -7,6 +7,7 @@ using NUnit.Framework;
 using System.Reflection;
 using Telegram.Bot.Types;
 using Moq;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 

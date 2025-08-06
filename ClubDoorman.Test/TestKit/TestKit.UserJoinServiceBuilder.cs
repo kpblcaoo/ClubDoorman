@@ -1,4 +1,5 @@
 using ClubDoorman.Handlers;
+using ClubDoorman.Services.Messaging;
 
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services;
