@@ -160,12 +160,7 @@ public class Program
                         provider.GetRequiredService<ILogger<AiChecks>>(),
                         provider.GetRequiredService<IAppConfig>());
                 });
-                services.AddSingleton<GlobalStatsManager>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] GlobalStatsManager factory called");
-                    return new GlobalStatsManager();
-                });
+
 
                 services.AddSingleton<IViolationTracker>(provider =>
                 {
