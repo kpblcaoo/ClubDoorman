@@ -12,7 +12,7 @@ using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services.BanSystem;
+namespace ClubDoorman.Services.UserBan;
 
 /// <summary>
 /// Сервис для управления банами пользователей
