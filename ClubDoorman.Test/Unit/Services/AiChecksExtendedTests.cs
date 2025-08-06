@@ -9,6 +9,7 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Test.Unit.Services;
 

@@ -2,6 +2,7 @@ using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Models;
 using Moq;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.TestKit.Builders.MockBuilders;
 

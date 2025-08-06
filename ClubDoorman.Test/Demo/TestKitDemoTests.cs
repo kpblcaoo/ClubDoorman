@@ -2,6 +2,8 @@ using ClubDoorman.Handlers;
 using ClubDoorman.TestInfrastructure;
 using NUnit.Framework;
 using ClubDoorman.Test.TestKit;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test;
 

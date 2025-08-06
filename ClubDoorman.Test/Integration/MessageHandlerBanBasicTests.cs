@@ -9,6 +9,13 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Integration;
 

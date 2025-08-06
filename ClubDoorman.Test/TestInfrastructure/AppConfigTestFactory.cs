@@ -1,6 +1,7 @@
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using Moq;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Test.TestInfrastructure;
 

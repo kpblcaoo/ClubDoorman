@@ -13,6 +13,7 @@ using NUnit.Framework;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 

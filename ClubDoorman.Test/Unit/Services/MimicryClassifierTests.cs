@@ -4,6 +4,7 @@ using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Test.Unit.Services;
 

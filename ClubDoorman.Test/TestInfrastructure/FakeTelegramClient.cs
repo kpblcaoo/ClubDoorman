@@ -6,6 +6,7 @@ using System.Text;
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Test.TestData;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.TestInfrastructure;
 

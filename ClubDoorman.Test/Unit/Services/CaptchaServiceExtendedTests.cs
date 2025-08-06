@@ -15,6 +15,7 @@ using Telegram.Bot;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.Unit.Services;
 

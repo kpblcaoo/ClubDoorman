@@ -1,5 +1,6 @@
 using Telegram.Bot.Types;
 using ClubDoorman.Models;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.TestKit.Builders;
 

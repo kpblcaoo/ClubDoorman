@@ -6,6 +6,7 @@ using Moq;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.Test.Unit.Services;
 

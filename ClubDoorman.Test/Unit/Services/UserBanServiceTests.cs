@@ -10,6 +10,13 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Test.TestData;
 using ClubDoorman.Test.TestKit;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.Unit.Services;
 

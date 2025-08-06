@@ -4,12 +4,19 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Handlers;
-using ClubDoorman.Handlers.Commands;
 using ClubDoorman.Models.Logging;
-using ClubDoorman.Services.UserJoin;
-using ClubDoorman.Services.Notifications;
+
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Commands;
+using ClubDoorman.Services.Handlers;
 using Telegram.Bot;
 using DotNetEnv;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman;
 
@@ -85,7 +92,7 @@ public class Program
             .ConfigureServices(services =>
             {
                 // Регистрация конфигурации приложения
-                services.AddSingleton<IAppConfig, AppConfig>();
+                services.AddConfigurationServices();
 
                 // Telegram Bot Client - создаем после регистрации IAppConfig
                 services.AddSingleton<TelegramBotClient>(provider =>
@@ -137,32 +144,14 @@ public class Program
                     logger.LogDebug("[DI] ITelegramBotClient factory called");
                     return provider.GetRequiredService<TelegramBotClient>();
                 });
-                services.AddSingleton<ITelegramBotClientWrapper>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ITelegramBotClientWrapper factory called");
-                    return new TelegramBotClientWrapper(provider.GetRequiredService<TelegramBotClient>());
-                });
+                services.AddTelegramServices();
+                services.AddStatisticsServices();
+                services.AddAIServices();
+                services.AddUserManagementServices();
+                services.AddMessagingServices();
                 
                 // Классификаторы и менеджеры
-                services.AddSingleton<ISpamHamClassifier>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ISpamHamClassifier factory called");
-                    return new SpamHamClassifier(provider.GetRequiredService<ILogger<SpamHamClassifier>>());
-                });
-                services.AddSingleton<IMimicryClassifier>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IMimicryClassifier factory called");
-                    return new MimicryClassifier(provider.GetRequiredService<ILogger<MimicryClassifier>>());
-                });
-                services.AddSingleton<IBadMessageManager>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IBadMessageManager factory called");
-                    return new BadMessageManager();
-                });
+
                 services.AddSingleton<IAiChecks>(provider =>
                 {
                     var logger = provider.GetRequiredService<ILogger<Program>>();
@@ -172,51 +161,20 @@ public class Program
                         provider.GetRequiredService<ILogger<AiChecks>>(),
                         provider.GetRequiredService<IAppConfig>());
                 });
-                services.AddSingleton<GlobalStatsManager>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] GlobalStatsManager factory called");
-                    return new GlobalStatsManager();
-                });
-                services.AddSingleton<ISuspiciousUsersStorage>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ISuspiciousUsersStorage factory called");
-                    return new SuspiciousUsersStorage(provider.GetRequiredService<ILogger<SuspiciousUsersStorage>>());
-                });
+
+
                 services.AddSingleton<IViolationTracker>(provider =>
                 {
                     var logger = provider.GetRequiredService<ILogger<Program>>();
                     logger.LogDebug("[DI] IViolationTracker factory called");
                     return new ViolationTracker(provider.GetRequiredService<ILogger<ViolationTracker>>(), provider.GetRequiredService<IAppConfig>());
                 });
-                services.AddSingleton<IUserBanService>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IUserBanService factory called");
-                    return new UserBanService(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IUserFlowLogger>(),
-                        provider.GetRequiredService<ILogger<UserBanService>>(),
-                        provider.GetRequiredService<IViolationTracker>(),
-                        provider.GetRequiredService<IAppConfig>(),
-                        provider.GetRequiredService<IStatisticsService>(),
-                        provider.GetRequiredService<GlobalStatsManager>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<IUserCleanupService>()
-                    );
-                });
+
                 
 
                 
                 // Новые сервисы
-                services.AddSingleton<IUpdateDispatcher>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IUpdateDispatcher factory called");
-                    return new UpdateDispatcher(provider.GetServices<IUpdateHandler>(), provider.GetRequiredService<ILogger<UpdateDispatcher>>());
-                });
+
                 services.AddSingleton<IStatisticsService>(provider =>
                 {
                     var logger = provider.GetRequiredService<ILogger<Program>>();
@@ -226,16 +184,8 @@ public class Program
                         provider.GetRequiredService<ILogger<StatisticsService>>(),
                         provider.GetRequiredService<IChatLinkFormatter>());
                 });
-                services.AddSingleton<ICaptchaService>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ICaptchaService factory called");
-                    return new CaptchaService(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ILogger<CaptchaService>>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
+                services.AddCaptchaServices();
+                services.AddHandlersServices();
                 services.AddSingleton<IModerationService>(provider =>
                 {
                     var logger = provider.GetRequiredService<ILogger<Program>>();
@@ -253,60 +203,13 @@ public class Program
                         provider.GetRequiredService<IUserCleanupService>(),
                         provider.GetRequiredService<ILogger<ModerationService>>());
                 });
-                services.AddSingleton<IntroFlowService>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IntroFlowService factory called");
-                    return new IntroFlowService(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ILogger<IntroFlowService>>(),
-                        provider.GetRequiredService<ICaptchaService>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<IAiChecks>(),
-                        provider.GetRequiredService<IStatisticsService>(),
-                        provider.GetRequiredService<GlobalStatsManager>(),
-                        provider.GetRequiredService<IModerationService>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IUserBanService>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
-                services.AddSingleton<IChatLinkFormatter>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IChatLinkFormatter factory called");
-                    return new ChatLinkFormatter();
-                });
-                services.AddSingleton<IUserFlowLogger>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IUserFlowLogger factory called");
-                    return new UserFlowLogger(provider.GetRequiredService<ILogger<UserFlowLogger>>());
-                });
-                services.AddSingleton<IBotPermissionsService>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IBotPermissionsService factory called");
-                    return new BotPermissionsService(provider.GetRequiredService<ITelegramBotClientWrapper>(), provider.GetRequiredService<ILogger<BotPermissionsService>>());
-                });
 
-                // Централизованная система сообщений
-                services.AddSingleton<MessageTemplates>();
+
+
+
+
+                // Централизованная система сообщений (перенесено в MessagingModule)
                 services.Configure<LoggingConfiguration>(options => { });
-                services.AddSingleton<ILoggingConfigurationService, LoggingConfigurationService>();
-                services.AddSingleton<IServiceChatDispatcher, ServiceChatDispatcher>();
-                services.AddSingleton<IMessageService>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IMessageService factory called");
-                    return new MessageService(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ILogger<MessageService>>(),
-                        provider.GetRequiredService<MessageTemplates>(),
-                        provider.GetRequiredService<ILoggingConfigurationService>(),
-                        provider.GetRequiredService<IServiceChatDispatcher>(),
-                        provider.GetRequiredService<IAppConfig>()
-                    );
-                });
 
                 // Обработчики обновлений
                 services.AddSingleton<IUpdateHandler>(provider =>
@@ -333,70 +236,11 @@ public class Program
                         provider.GetRequiredService<ILogger<MessageHandler>>(),
                         provider.GetRequiredService<IUserBanService>());
                 });
-                services.AddSingleton<IUpdateHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IUpdateHandler (CallbackQueryHandler) factory called");
-                    return new CallbackQueryHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ICaptchaService>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<IBadMessageManager>(),
-                        provider.GetRequiredService<IStatisticsService>(),
-                        provider.GetRequiredService<IAiChecks>(),
-                        provider.GetRequiredService<IModerationService>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IViolationTracker>(),
-                        provider.GetRequiredService<IUserBanService>(),
-                        provider.GetRequiredService<IServiceProvider>(),
-                        provider.GetRequiredService<ILogger<CallbackQueryHandler>>());
-                });
-                services.AddSingleton<IUpdateHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IUpdateHandler (ChatMemberHandler) factory called");
-                    return new ChatMemberHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<ILogger<ChatMemberHandler>>(),
-                        provider.GetRequiredService<IntroFlowService>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IAppConfig>(),
-                        provider.GetRequiredService<IUserCleanupService>());
-                });
+
 
                 // Новые прокси-сервисы для рефакторинга
-                services.AddSingleton<IMessageHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IMessageHandler proxy factory called");
-                    return provider.GetRequiredService<MessageHandler>();
-                });
-                services.AddSingleton<MessageHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] MessageHandler factory called");
-                    return new MessageHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<IModerationService>(),
-                        provider.GetRequiredService<ICaptchaService>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<ISpamHamClassifier>(),
-                        provider.GetRequiredService<IBadMessageManager>(),
-                        provider.GetRequiredService<IAiChecks>(),
-                        provider.GetRequiredService<GlobalStatsManager>(),
-                        provider.GetRequiredService<IStatisticsService>(),
-                        provider.GetRequiredService<IServiceProvider>(),
-                        provider.GetRequiredService<IUserFlowLogger>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IChatLinkFormatter>(),
-                        provider.GetRequiredService<IBotPermissionsService>(),
-                        provider.GetRequiredService<IAppConfig>(),
-                        provider.GetRequiredService<IViolationTracker>(),
-                        provider.GetRequiredService<ILogger<MessageHandler>>(),
-                        provider.GetRequiredService<IUserBanService>());
-                });
-                services.AddSingleton<ICommandProcessingService, CommandProcessingService>();
+
+                services.AddCommandsServices();
                         services.AddSingleton<IChannelModerationService>(provider =>
         {
             var logger = provider.GetRequiredService<ILogger<Program>>();
@@ -408,75 +252,8 @@ public class Program
                 provider.GetRequiredService<ILogger<ChannelModerationService>>());
         });
                 services.AddSingleton<IUserJoinService, UserJoinService>();
-                services.AddSingleton<INotificationService, NotificationService>();
 
-                // Обработчики команд
-                services.AddSingleton<ICommandHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ICommandHandler (StartCommandHandler) factory called");
-                    return new StartCommandHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ILogger<StartCommandHandler>>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
-                services.AddSingleton<StartCommandHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] StartCommandHandler factory called");
-                    return new StartCommandHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ILogger<StartCommandHandler>>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
-                services.AddSingleton<ICommandHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ICommandHandler (SuspiciousCommandHandler) factory called");
-                    return new SuspiciousCommandHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<IModerationService>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<ILogger<SuspiciousCommandHandler>>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
-                services.AddSingleton<SuspiciousCommandHandler>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] SuspiciousCommandHandler factory called");
-                    return new SuspiciousCommandHandler(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<IModerationService>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<ILogger<SuspiciousCommandHandler>>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
-
-                // Регистрация системы одобрения
-                services.AddSingleton<ApprovedUsersStorage>();
-                services.AddSingleton<UserManager>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] UserManager factory called");
-                    return new UserManager(
-                        provider.GetRequiredService<ILogger<UserManager>>(),
-                        provider.GetRequiredService<ApprovedUsersStorage>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
-                services.AddSingleton<IUserManager>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IUserManager proxy factory called");
-                    return provider.GetRequiredService<UserManager>();
-                });
-
-                // Регистрация сервиса очистки пользователей
-                services.AddSingleton<IUserCleanupService, UserCleanupService>();
-
-                // Регистрация сервиса лог-чата
-                services.AddSingleton<ILogChatService, LogChatService>();
+                // Регистрация сервиса лог-чата (перенесено в MessagingModule)
 
                 // Логируем статус AI и Mimicry систем после полной инициализации
                 services.PostConfigure<IAppConfig>(appConfig =>

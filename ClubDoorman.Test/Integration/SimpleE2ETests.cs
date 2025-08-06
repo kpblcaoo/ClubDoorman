@@ -7,6 +7,7 @@ using NUnit.Framework;
 using System.Reflection;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Test.Integration;
 
