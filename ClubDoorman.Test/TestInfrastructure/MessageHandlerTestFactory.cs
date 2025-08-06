@@ -45,6 +45,7 @@ public class MessageHandlerTestFactory
     public Mock<IAppConfig> AppConfigMock { get; } = TK.CreateMockAppConfig();
     public Mock<IViolationTracker> ViolationTrackerMock { get; } = TK.CreateMockViolationTracker();
     public Mock<IUserBanService> UserBanServiceMock { get; } = TK.CreateMockUserBanService();
+    public Mock<IChannelModerationService> ChannelModerationServiceMock { get; } = TK.CreateMock<IChannelModerationService>();
 
     public Mock<IUserCleanupService> UserCleanupServiceMock { get; } = TK.CreateMock<IUserCleanupService>();
     
@@ -71,6 +72,13 @@ public class MessageHandlerTestFactory
 
     public MessageHandler CreateMessageHandler()
     {
+        // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
+        if (!ServiceProviderMock.Setups.Any(s => s.ToString().Contains("IChannelModerationService")))
+        {
+            ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+                .Returns(ChannelModerationServiceMock.Object);
+        }
+        
         return new MessageHandler(
             BotMock.Object,
             ModerationServiceMock.Object,
@@ -95,6 +103,13 @@ public class MessageHandlerTestFactory
     
     public MessageHandler CreateMessageHandlerWithRealUserBanService()
     {
+        // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
+        if (!ServiceProviderMock.Setups.Any(s => s.ToString().Contains("IChannelModerationService")))
+        {
+            ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+                .Returns(ChannelModerationServiceMock.Object);
+        }
+        
         return new MessageHandler(
             BotMock.Object,
             ModerationServiceMock.Object,
@@ -304,6 +319,10 @@ public class MessageHandlerTestFactory
                 .Returns(startCommandHandler);
             mock.Setup(x => x.GetService(typeof(SuspiciousCommandHandler)))
                 .Returns(suspiciousCommandHandler);
+            
+            // Настраиваем ServiceProvider для возврата IChannelModerationService
+            mock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+                .Returns(ChannelModerationServiceMock.Object);
         });
         
         return this;
@@ -421,6 +440,13 @@ public class MessageHandlerTestFactory
 
     public MessageHandler CreateMessageHandlerWithFake(FakeTelegramClient fakeClient)
     {
+        // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
+        if (!ServiceProviderMock.Setups.Any(s => s.ToString().Contains("IChannelModerationService")))
+        {
+            ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+                .Returns(ChannelModerationServiceMock.Object);
+        }
+        
         // Настраиваем мок для удаления сообщений
         TelegramBotClientWrapperMock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Callback<ChatId, int, CancellationToken>((chatId, messageId, token) =>

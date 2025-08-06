@@ -66,6 +66,42 @@ public static class TestKitAutoFixture
         fixture.Customize<IUserManager>(composer => composer
             .FromFactory(() => TK.CreateMockUserManager().Object));
 
+        fixture.Customize<IChannelModerationService>(composer => composer
+            .FromFactory(() => TK.CreateMock<IChannelModerationService>().Object));
+
+        // Отключаем AutoProperties для MessageHandler чтобы избежать проблем с DI
+        fixture.Customize<MessageHandler>(composer => composer
+            .FromFactory(() =>
+            {
+                var bot = TK.CreateMockBotClientWrapper().Object;
+                var moderationService = TK.CreateMockModerationService().Object;
+                var captchaService = TK.CreateMockCaptchaService().Object;
+                var userManager = TK.CreateMockUserManager().Object;
+                var classifier = TK.CreateMockSpamHamClassifier().Object;
+                var badMessageManager = new Mock<IBadMessageManager>().Object;
+                var aiChecks = TK.CreateMockAiChecks().Object;
+                var globalStatsManager = new GlobalStatsManager();
+                var statisticsService = TK.CreateMockStatisticsService().Object;
+                var serviceProvider = new Mock<IServiceProvider>();
+                serviceProvider.Setup(x => x.GetService(typeof(IChannelModerationService)))
+                    .Returns(TK.CreateMock<IChannelModerationService>().Object);
+                var userFlowLogger = new Mock<IUserFlowLogger>().Object;
+                var messageService = TK.CreateMockMessageService().Object;
+                var chatLinkFormatter = new Mock<IChatLinkFormatter>().Object;
+                var botPermissionsService = TK.CreateMockBotPermissionsService().Object;
+                var appConfig = TK.CreateMockAppConfig().Object;
+                var violationTracker = new ViolationTracker(new Mock<ILogger<ViolationTracker>>().Object, appConfig);
+                var logger = new Mock<ILogger<MessageHandler>>().Object;
+                var userBanService = TK.CreateMockUserBanService().Object;
+
+                return new MessageHandler(
+                    bot, moderationService, captchaService, userManager, classifier,
+                    badMessageManager, aiChecks, globalStatsManager, statisticsService,
+                    serviceProvider.Object, userFlowLogger, messageService, chatLinkFormatter,
+                    botPermissionsService, appConfig, violationTracker, logger, userBanService);
+            })
+            .OmitAutoProperties());
+
         return fixture;
     }
 
@@ -283,7 +319,7 @@ public static class TestKitAutoFixture
     /// </summary>
     public static (T sut, IFixture fixture) CreateWithFixture<T>()
     {
-        var fixture = new Fixture().Customize(new AutoMoqCustomization());
+        var fixture = CreateFixture(); // Используем нашу кастомизированную фикстуру
         var sut = fixture.Create<T>();
         return (sut, fixture);
     }

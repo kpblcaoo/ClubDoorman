@@ -397,7 +397,16 @@ public class Program
                         provider.GetRequiredService<IUserBanService>());
                 });
                 services.AddSingleton<ICommandProcessingService, CommandProcessingService>();
-                services.AddSingleton<IChannelModerationService, ChannelModerationService>();
+                        services.AddSingleton<IChannelModerationService>(provider =>
+        {
+            var logger = provider.GetRequiredService<ILogger<Program>>();
+            logger.LogDebug("[DI] IChannelModerationService factory called");
+            return new ChannelModerationService(
+                provider.GetRequiredService<ITelegramBotClientWrapper>(),
+                provider.GetRequiredService<IModerationService>(),
+                provider.GetRequiredService<IUserBanService>(),
+                provider.GetRequiredService<ILogger<ChannelModerationService>>());
+        });
                 services.AddSingleton<IUserJoinService, UserJoinService>();
                 services.AddSingleton<INotificationService, NotificationService>();
 

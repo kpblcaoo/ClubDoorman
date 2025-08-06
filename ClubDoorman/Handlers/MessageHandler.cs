@@ -41,6 +41,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     private readonly IAppConfig _appConfig;
     private readonly IViolationTracker _violationTracker;
     private readonly IUserBanService _userBanService;
+    private readonly IChannelModerationService _channelModerationService;
 
     // Флаги присоединившихся пользователей (временные)
     private static readonly ConcurrentDictionary<string, byte> _joinedUserFlags = new();
@@ -105,6 +106,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         _violationTracker = violationTracker ?? throw new ArgumentNullException(nameof(violationTracker));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
+        _channelModerationService = serviceProvider.GetService<IChannelModerationService>() 
+            ?? throw new InvalidOperationException("IChannelModerationService is not registered in the DI container");
     }
 
     /// <summary>
@@ -593,41 +596,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
 
     public async Task HandleChannelMessageAsync(Message message, CancellationToken cancellationToken)
     {
-        var chat = message.Chat;
-        var senderChat = message.SenderChat!;
-
-        // Разрешаем сообщения от самого чата
-        if (senderChat.Id == chat.Id)
-            return;
-
-        // Разрешаем в announcement чатах
-        if (ChatSettingsManager.GetChatType(chat.Id) == "announcement")
-            return;
-
-        // Проверяем связанный чат
-        try
-        {
-            var chatFull = await _bot.GetChat(chat, cancellationToken);
-            // Проверяем, является ли это обсуждением канала
-            if (chat.Type == ChatType.Supergroup && message.IsAutomaticForward)
-                return;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Не удалось получить информацию о чате {ChatId}", chat.Id);
-        }
-
-        // Автобан каналов если включен
-        if (Config.ChannelAutoBan)
-        {
-            await _userBanService.AutoBanChannelAsync(message, cancellationToken);
-        }
-        else
-        {
-            // Просто репортим
-            _logger.LogInformation("Сообщение от канала {ChannelTitle} в чате {ChatTitle} - репорт в админ-чат", 
-                senderChat.Title, chat.Title);
-        }
+        _logger.LogDebug("🔍 MessageHandler: Делегируем обработку канала к ChannelModerationService");
+        await _channelModerationService.HandleChannelMessageAsync(message, cancellationToken);
     }
 
     private async Task HandleUserMessageAsync(Message message, bool isSilentMode, CancellationToken cancellationToken)

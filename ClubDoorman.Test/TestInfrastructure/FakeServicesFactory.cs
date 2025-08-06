@@ -145,6 +145,10 @@ public class FakeServicesFactory
         botPermissionsServiceMock.Setup(x => x.IsSilentModeAsync(It.IsAny<long>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
         botPermissionsServiceMock.Setup(x => x.GetBotChatMemberAsync(It.IsAny<long>(), It.IsAny<CancellationToken>())).ReturnsAsync((ChatMember?)null);
         
+        // Настраиваем ServiceProvider для возврата IChannelModerationService
+        serviceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+            .Returns(new Mock<IChannelModerationService>().Object);
+        
         var logger = _loggerFactory.CreateLogger<MessageHandler>();
 
         return new MessageHandler(
