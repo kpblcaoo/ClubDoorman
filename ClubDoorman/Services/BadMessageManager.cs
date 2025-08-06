@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services;
 

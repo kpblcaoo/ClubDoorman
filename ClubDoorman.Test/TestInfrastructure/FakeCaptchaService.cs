@@ -4,6 +4,10 @@ using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.TestInfrastructure;
 

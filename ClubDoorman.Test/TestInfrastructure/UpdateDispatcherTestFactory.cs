@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 using ClubDoorman.Handlers;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.TestInfrastructure;
 

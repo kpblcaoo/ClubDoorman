@@ -2,7 +2,7 @@ using NUnit.Framework;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
-using ClubDoorman.Services.Notifications;
+
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Test.TestKit;
@@ -12,6 +12,8 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Threading.Tasks;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Test.Integration;
 

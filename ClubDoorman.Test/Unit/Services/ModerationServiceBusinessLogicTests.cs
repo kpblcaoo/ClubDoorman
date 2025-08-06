@@ -232,7 +232,7 @@ public class ModerationServiceBusinessLogicTests
         var chatId = 789L;
         
         _factory.WithBotClientSetup(mock => 
-            mock.Setup(x => x.SendRequest(It.IsAny<Telegram.Bot.Requests.BanChatMemberRequest>(), It.IsAny<CancellationToken>()))
+            mock.Setup(x => x.SendRequest(It.IsAny<global::Telegram.Bot.Requests.BanChatMemberRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true));
 
         // Act
@@ -250,7 +250,7 @@ public class ModerationServiceBusinessLogicTests
         var chatId = 789L;
         
         _factory.WithBotClientSetup(mock => 
-            mock.Setup(x => x.SendRequest(It.IsAny<Telegram.Bot.Requests.RestrictChatMemberRequest>(), It.IsAny<CancellationToken>()))
+            mock.Setup(x => x.SendRequest(It.IsAny<global::Telegram.Bot.Requests.RestrictChatMemberRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true));
 
         // Act

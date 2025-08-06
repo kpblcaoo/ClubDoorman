@@ -2,12 +2,13 @@ using System.Collections.Concurrent;
 using System.Runtime.Caching;
 using System.Text;
 using Microsoft.Extensions.Logging;
-using ClubDoorman.Handlers.Commands;
+using ClubDoorman.Services.Commands;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Requests;
 using ClubDoorman.Services;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.BanSystem;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
@@ -15,6 +16,12 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Extensions;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Handlers;
 
@@ -382,6 +389,20 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         var report = _statisticsService.GetAllStats();
         var sb = new StringBuilder();
         sb.AppendLine("📊 *Статистика по группам:*\n");
+        
+        if (report == null || !report.Any())
+        {
+            sb.AppendLine("Ничего интересного не произошло 🎉");
+            await _messageService.SendUserNotificationAsync(
+                message.From!,
+                message.Chat,
+                UserNotificationType.SystemInfo,
+                new SimpleNotificationData(message.From!, message.Chat, sb.ToString()),
+                cancellationToken
+            );
+            return;
+        }
+        
         foreach (var (chatId, stats) in report.OrderBy(x => x.Value.ChatTitle))
         {
             var sum = stats.KnownBadMessage + stats.BlacklistBanned + stats.StoppedCaptcha + stats.LongNameBanned;

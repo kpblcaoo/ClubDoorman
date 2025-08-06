@@ -1,3 +1,4 @@
+using ClubDoorman.Services.Messaging;
 ﻿using System.Text.Encodings.Web;
 
 namespace ClubDoorman.Infrastructure

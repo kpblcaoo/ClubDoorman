@@ -4,6 +4,8 @@ using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Models;
 using NUnit.Framework;
 using ClubDoorman.Test.TestKit;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test;
 

@@ -6,6 +6,11 @@ using ClubDoorman.Models.Notifications;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Services;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services.BanSystem;
 

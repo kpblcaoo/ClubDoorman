@@ -1,6 +1,7 @@
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Handlers;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.TestKit.Builders.MockBuilders;
 

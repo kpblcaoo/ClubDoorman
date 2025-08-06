@@ -9,6 +9,9 @@ using Moq;
 using NUnit.Framework;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.Integration;
 

@@ -1,5 +1,6 @@
 using ClubDoorman.Infrastructure;
 using Telegram.Bot.Types;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Services;
 

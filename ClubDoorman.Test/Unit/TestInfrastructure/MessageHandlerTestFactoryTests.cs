@@ -8,6 +8,7 @@ using NUnit.Framework;
 using Moq;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.Unit.TestInfrastructure;
 

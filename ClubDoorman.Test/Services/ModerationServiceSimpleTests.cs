@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Threading;
 using ClubDoorman.Models.Notifications;
 using Telegram.Bot.Extensions;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.Services;
 

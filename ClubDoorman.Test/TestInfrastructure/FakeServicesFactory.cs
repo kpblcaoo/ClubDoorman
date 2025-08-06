@@ -9,7 +9,13 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
-using static ClubDoorman.Services.AiChecks;
+using static ClubDoorman.Services.AI.AiChecks;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.TestInfrastructure;
 

@@ -3,6 +3,7 @@ using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Models.Notifications;
 using Telegram.Bot.Types;
 using Moq;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Test.TestKit.Builders.MockBuilders;
 
