@@ -1,3 +1,4 @@
+using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using Microsoft.Extensions.Logging;

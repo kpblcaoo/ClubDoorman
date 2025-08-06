@@ -2,7 +2,7 @@ using System.Text.Json;
 using ClubDoorman.Models;
 using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.SuspiciousUsers;
 
 /// <summary>
 /// Сервис для управления списком подозрительных пользователей

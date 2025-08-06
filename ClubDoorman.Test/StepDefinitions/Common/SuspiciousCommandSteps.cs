@@ -1,3 +1,4 @@
+using ClubDoorman.Services.SuspiciousUsers;
 using NUnit.Framework;
 using TechTalk.SpecFlow;
 using ClubDoorman.Models;

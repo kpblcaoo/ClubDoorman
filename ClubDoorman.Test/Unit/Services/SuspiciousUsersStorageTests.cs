@@ -1,3 +1,4 @@
+using ClubDoorman.Services.SuspiciousUsers;
 using NUnit.Framework;
 using Moq;
 using ClubDoorman.Services;
