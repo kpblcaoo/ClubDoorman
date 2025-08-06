@@ -1,3 +1,5 @@
+using ClubDoorman.Services.Violation;
+
 namespace ClubDoorman.Services;
 
 /// <summary>

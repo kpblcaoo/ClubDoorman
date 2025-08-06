@@ -5,6 +5,7 @@ using ClubDoorman.Handlers;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.Violation;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;

@@ -1,3 +1,4 @@
+using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Moderation;
 using Microsoft.Extensions.DependencyInjection;

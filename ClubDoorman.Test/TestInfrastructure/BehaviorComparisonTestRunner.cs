@@ -1,3 +1,4 @@
+using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.UserBan;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;

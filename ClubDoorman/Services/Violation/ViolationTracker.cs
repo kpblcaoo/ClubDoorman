@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Runtime.Caching;
 using ClubDoorman.Services.Core.Configuration;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Violation;
 
 /// <summary>
 /// Типы нарушений для отслеживания
