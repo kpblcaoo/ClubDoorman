@@ -9,6 +9,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using tryAGI.OpenAI;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Services;
 

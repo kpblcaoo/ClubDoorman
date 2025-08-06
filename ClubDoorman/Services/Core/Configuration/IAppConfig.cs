@@ -1,4 +1,4 @@
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Core.Configuration;
 
 /// <summary>
 /// Интерфейс для конфигурации приложения

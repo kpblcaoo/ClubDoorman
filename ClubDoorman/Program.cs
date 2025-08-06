@@ -8,6 +8,7 @@ using ClubDoorman.Handlers.Commands;
 using ClubDoorman.Models.Logging;
 using ClubDoorman.Services.UserJoin;
 using ClubDoorman.Services.Notifications;
+using ClubDoorman.Services.Core.Configuration;
 using Telegram.Bot;
 using DotNetEnv;
 
@@ -85,7 +86,7 @@ public class Program
             .ConfigureServices(services =>
             {
                 // Регистрация конфигурации приложения
-                services.AddSingleton<IAppConfig, AppConfig>();
+                services.AddConfigurationServices();
 
                 // Telegram Bot Client - создаем после регистрации IAppConfig
                 services.AddSingleton<TelegramBotClient>(provider =>

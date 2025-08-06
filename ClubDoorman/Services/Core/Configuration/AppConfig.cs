@@ -1,6 +1,5 @@
 using ClubDoorman.Infrastructure;
-
-namespace ClubDoorman.Services;
+using ClubDoorman.Services.Core.Configuration;
 
 /// <summary>
 /// Реализация конфигурации приложения

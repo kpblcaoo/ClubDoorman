@@ -13,6 +13,7 @@ using ClubDoorman.Models;
 using ClubDoorman.Handlers;
 using Moq;
 using DotNetEnv;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Test.Integration;
 

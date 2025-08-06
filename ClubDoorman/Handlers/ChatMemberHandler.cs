@@ -8,6 +8,7 @@ using Telegram.Bot;
 using Telegram.Bot.Extensions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Handlers;
 

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Runtime.Caching;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Services;
 

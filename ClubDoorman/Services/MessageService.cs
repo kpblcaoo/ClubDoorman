@@ -2,6 +2,7 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Requests;
 using ClubDoorman.Models.Logging;
+using ClubDoorman.Services.Core.Configuration;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;

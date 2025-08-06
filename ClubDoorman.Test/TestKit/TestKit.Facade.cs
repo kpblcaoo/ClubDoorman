@@ -11,6 +11,7 @@ using Telegram.Bot.Types;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Moq;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Test.TestKit
 {

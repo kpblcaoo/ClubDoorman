@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Telegram.Bot.Types;
 using ClubDoorman.Models.Notifications;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Test.TestKit;
 

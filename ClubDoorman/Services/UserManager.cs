@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Net.Http.Json;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Services;
 
@@ -204,8 +205,8 @@ internal sealed class UserManager : IUserManager
         var url = $"{_appConfig.ClubUrl}user/by_telegram_id/{userId}.json";
         try
         {
-            using var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(5));
+                    using var cts = new CancellationTokenSource();
+        cts.CancelAfter(TimeSpan.FromSeconds(5));
             var get = await _clubHttpClient.GetAsync(url, cts.Token);
             
             if (!get.IsSuccessStatusCode)
