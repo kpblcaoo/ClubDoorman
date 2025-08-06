@@ -1,4 +1,4 @@
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.AI;
 
 /// <summary>
 /// Интерфейс для классификатора мимикрии

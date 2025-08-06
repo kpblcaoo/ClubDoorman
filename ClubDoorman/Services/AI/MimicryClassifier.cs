@@ -1,6 +1,6 @@
 using ClubDoorman.Infrastructure;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.AI;
 
 /// <summary>
 /// Классификатор для анализа первых сообщений пользователя на предмет мимикрии (имитации нормального поведения)

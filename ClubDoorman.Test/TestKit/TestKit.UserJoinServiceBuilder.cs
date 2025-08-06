@@ -14,6 +14,7 @@ using ClubDoorman.Test.TestKit.Builders.MockBuilders;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Test.TestKit;
 

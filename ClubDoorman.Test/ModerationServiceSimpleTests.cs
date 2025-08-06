@@ -10,6 +10,7 @@ using NUnit.Framework;
 using Moq;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Test;
 

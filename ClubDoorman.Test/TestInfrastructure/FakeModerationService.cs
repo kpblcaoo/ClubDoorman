@@ -4,6 +4,7 @@ using ClubDoorman.Services.BanSystem;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.TestInfrastructure;
 

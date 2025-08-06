@@ -9,6 +9,7 @@ using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.TestInfrastructure;
 

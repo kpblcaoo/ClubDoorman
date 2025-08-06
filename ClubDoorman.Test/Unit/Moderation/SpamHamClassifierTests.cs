@@ -5,6 +5,7 @@ using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Test.Unit.Moderation;
 

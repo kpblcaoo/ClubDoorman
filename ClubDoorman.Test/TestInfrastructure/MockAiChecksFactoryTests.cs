@@ -3,6 +3,7 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using Telegram.Bot.Types;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.TestInfrastructure;
 

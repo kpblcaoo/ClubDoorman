@@ -7,6 +7,7 @@ using Telegram.Bot.Types;
 using Moq;
 using Microsoft.Extensions.Logging;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Test.Unit.Services;
 

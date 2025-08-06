@@ -11,6 +11,7 @@ using ClubDoorman.Services.Notifications;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
 using Telegram.Bot;
 using DotNetEnv;
 
@@ -142,6 +143,7 @@ public class Program
                 });
                 services.AddTelegramServices();
                 services.AddStatisticsServices();
+                services.AddAIServices();
                 
                 // Классификаторы и менеджеры
                 services.AddSingleton<ISpamHamClassifier>(provider =>

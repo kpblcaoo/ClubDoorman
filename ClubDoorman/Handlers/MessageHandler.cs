@@ -18,6 +18,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Extensions;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Handlers;
 

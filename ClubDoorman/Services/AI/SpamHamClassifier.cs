@@ -6,8 +6,9 @@ using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Transforms.Text;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.AI;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.AI;
 
 internal class MessageData
 {

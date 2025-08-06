@@ -1,6 +1,6 @@
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.AI;
 
 /// <summary>
 /// Интерфейс для AI проверок

@@ -15,6 +15,7 @@ using Moq;
 using DotNetEnv;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Test.Integration;
 

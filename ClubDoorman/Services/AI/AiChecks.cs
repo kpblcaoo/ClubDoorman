@@ -11,8 +11,9 @@ using tryAGI.OpenAI;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.AI;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.AI;
 
 public class AiChecks : IAiChecks
 {
