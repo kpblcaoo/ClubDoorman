@@ -79,7 +79,7 @@ public class TelegramBotClientWrapperTests
         // Мы не можем вызвать реальный API, но можем проверить структуру кода
         
         // Проверяем, что в TelegramBotClientWrapper.GetChatFullInfo есть строка Photo = chat.Photo
-        var wrapperCode = File.ReadAllText("../../../../ClubDoorman/Services/TelegramBotClientWrapper.cs");
+        var wrapperCode = File.ReadAllText("../../../../ClubDoorman/Services/Telegram/TelegramBotClientWrapper.cs");
         Assert.That(wrapperCode, Does.Contain("Photo = chat.Photo"), 
             "TelegramBotClientWrapper.GetChatFullInfo должен копировать Photo из Chat");
         

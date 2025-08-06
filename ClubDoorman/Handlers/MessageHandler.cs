@@ -385,6 +385,20 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         var report = _statisticsService.GetAllStats();
         var sb = new StringBuilder();
         sb.AppendLine("📊 *Статистика по группам:*\n");
+        
+        if (report == null || !report.Any())
+        {
+            sb.AppendLine("Ничего интересного не произошло 🎉");
+            await _messageService.SendUserNotificationAsync(
+                message.From!,
+                message.Chat,
+                UserNotificationType.SystemInfo,
+                new SimpleNotificationData(message.From!, message.Chat, sb.ToString()),
+                cancellationToken
+            );
+            return;
+        }
+        
         foreach (var (chatId, stats) in report.OrderBy(x => x.Value.ChatTitle))
         {
             var sum = stats.KnownBadMessage + stats.BlacklistBanned + stats.StoppedCaptcha + stats.LongNameBanned;
