@@ -17,6 +17,7 @@ using ClubDoorman.Handlers.Commands;
 using ClubDoorman.Test.TestKit;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 

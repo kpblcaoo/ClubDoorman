@@ -10,6 +10,7 @@ using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.TestInfrastructure;
 

@@ -7,6 +7,7 @@ using Telegram.Bot.Types;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.TestInfrastructure;
 

@@ -12,6 +12,7 @@ using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Captcha;
 using Telegram.Bot;
 using DotNetEnv;
 using ClubDoorman.Services.Messaging;
@@ -230,16 +231,7 @@ public class Program
                         provider.GetRequiredService<ILogger<StatisticsService>>(),
                         provider.GetRequiredService<IChatLinkFormatter>());
                 });
-                services.AddSingleton<ICaptchaService>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ICaptchaService factory called");
-                    return new CaptchaService(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ILogger<CaptchaService>>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IAppConfig>());
-                });
+                services.AddCaptchaServices();
                 services.AddSingleton<IModerationService>(provider =>
                 {
                     var logger = provider.GetRequiredService<ILogger<Program>>();

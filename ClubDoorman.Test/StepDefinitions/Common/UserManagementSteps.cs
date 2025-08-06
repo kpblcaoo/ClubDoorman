@@ -13,6 +13,7 @@ using Moq;
 using Microsoft.Extensions.Logging;
 using FluentAssertions;
 using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.StepDefinitions.Common
 {

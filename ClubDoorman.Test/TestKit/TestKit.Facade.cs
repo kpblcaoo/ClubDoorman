@@ -12,6 +12,7 @@ using AutoFixture;
 using AutoFixture.AutoMoq;
 using Moq;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.TestKit
 {

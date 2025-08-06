@@ -10,7 +10,7 @@ using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Captcha;
 
 /// <summary>
 /// Сервис для работы с капчей
@@ -80,14 +80,14 @@ public class CaptchaService : ICaptchaService
         
         while (challenge.Count < challengeLength)
         {
-            var rand = Random.Shared.Next(Captcha.CaptchaList.Count);
+            var rand = Random.Shared.Next(Infrastructure.Captcha.CaptchaList.Count);
             if (!challenge.Contains(rand))
                 challenge.Add(rand);
         }
         
         var correctAnswer = challenge[correctAnswerIndex];
         var keyboard = challenge
-            .Select(x => new InlineKeyboardButton(Captcha.CaptchaList[x].Emoji) 
+            .Select(x => new InlineKeyboardButton(Infrastructure.Captcha.CaptchaList[x].Emoji) 
             { 
                 CallbackData = $"cap_{request.User.Id}_{x}" 
             })
@@ -109,7 +109,7 @@ public class CaptchaService : ICaptchaService
         }
 
         var welcomeMessage = $"Привет, <a href=\"tg://user?id={request.User.Id}\">{System.Net.WebUtility.HtmlEncode(fullNameForDisplay)}</a>! " +
-                            $"Антиспам: на какой кнопке {Captcha.CaptchaList[correctAnswer].Description}?";
+                            $"Антиспам: на какой кнопке {Infrastructure.Captcha.CaptchaList[correctAnswer].Description}?";
 
         // Добавляем заглушку для рекламы если нужно
         var isNoAdGroup = IsNoAdGroup(request.Chat.Id);

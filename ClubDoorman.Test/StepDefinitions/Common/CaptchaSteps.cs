@@ -16,6 +16,7 @@ using FluentAssertions;
 using System.Reflection;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.StepDefinitions.Common
 {

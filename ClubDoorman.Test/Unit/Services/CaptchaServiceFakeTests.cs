@@ -14,6 +14,7 @@ using ClubDoorman.Models;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.Unit.Services;
 

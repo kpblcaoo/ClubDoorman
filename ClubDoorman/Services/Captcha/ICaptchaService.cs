@@ -2,7 +2,7 @@ using ClubDoorman.Models;
 using ClubDoorman.Models.Requests;
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Captcha;
 
 /// <summary>
 /// Сервис для работы с капчей
