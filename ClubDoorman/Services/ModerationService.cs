@@ -9,6 +9,7 @@ using Telegram.Bot;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.TextProcessing;
 
 namespace ClubDoorman.Services;
 

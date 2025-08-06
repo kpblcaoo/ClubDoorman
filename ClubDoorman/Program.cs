@@ -17,6 +17,7 @@ using ClubDoorman.Services.Handlers;
 using Telegram.Bot;
 using DotNetEnv;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.TextProcessing;
 
 namespace ClubDoorman;
 
@@ -149,6 +150,7 @@ public class Program
                 services.AddAIServices();
                 services.AddUserManagementServices();
                 services.AddMessagingServices();
+                services.AddTextProcessingServices();
                 
                 // Классификаторы и менеджеры
 

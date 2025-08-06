@@ -1,5 +1,6 @@
 using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.TextProcessing;
 using NUnit.Framework;
 
 namespace ClubDoorman.Test;
