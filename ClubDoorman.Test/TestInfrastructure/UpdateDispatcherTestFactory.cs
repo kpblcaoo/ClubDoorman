@@ -7,6 +7,7 @@ using NUnit.Framework;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Dispatcher;
 
 namespace ClubDoorman.TestInfrastructure;
 

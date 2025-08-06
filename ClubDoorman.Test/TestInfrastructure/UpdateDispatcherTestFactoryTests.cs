@@ -6,6 +6,7 @@ using Moq;
 using NUnit.Framework;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Dispatcher;
 
 namespace ClubDoorman.TestInfrastructure;
 

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using ClubDoorman.Handlers;
+using ClubDoorman.Services.Dispatcher;
 
 namespace ClubDoorman.Services.Handlers;
 
