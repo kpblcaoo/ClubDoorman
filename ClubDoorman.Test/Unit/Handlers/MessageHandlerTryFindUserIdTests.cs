@@ -2,6 +2,7 @@ using ClubDoorman.Handlers;
 using ClubDoorman.Test.TestKit;
 using NUnit.Framework;
 using System.Runtime.Caching;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 

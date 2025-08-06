@@ -2,7 +2,7 @@ using ClubDoorman.Handlers;
 using Telegram.Bot.Types;
 using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Handlers;
 
 /// <summary>
 /// Диспетчер обновлений Telegram

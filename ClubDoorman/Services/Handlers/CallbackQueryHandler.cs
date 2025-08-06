@@ -14,8 +14,9 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Handlers;
 
-namespace ClubDoorman.Handlers;
+namespace ClubDoorman.Services.Handlers;
 
 /// <summary>
 /// Обработчик callback запросов
@@ -521,7 +522,7 @@ public class CallbackQueryHandler : IUpdateHandler
                 callbackQuery.Message!.Chat.Id,
                 callbackQuery.Message.MessageId,
                 $"{callbackQuery.Message.Text}\n\n{message}",
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                parseMode: ParseMode.Html,
                 cancellationToken: cancellationToken
             );
         }

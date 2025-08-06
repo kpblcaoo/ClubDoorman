@@ -16,7 +16,7 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Handlers;
 
 /// <summary>
 /// Сервис для обработки приветствия новых участников

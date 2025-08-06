@@ -13,6 +13,7 @@ using ClubDoorman.Services;
 using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Test.TestKit;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Integration;
 

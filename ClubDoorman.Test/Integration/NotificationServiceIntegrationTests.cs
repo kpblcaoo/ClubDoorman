@@ -14,6 +14,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using System.Threading.Tasks;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Integration;
 

@@ -6,7 +6,7 @@ using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.Handlers;
 
 /// <summary>
 /// Реализация сервиса для проверки прав бота в чатах

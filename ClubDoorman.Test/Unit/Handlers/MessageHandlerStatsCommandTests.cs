@@ -8,6 +8,7 @@ using System.Reflection;
 using Telegram.Bot.Types;
 using Moq;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 

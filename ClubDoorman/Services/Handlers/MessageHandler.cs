@@ -22,8 +22,9 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Handlers;
 
-namespace ClubDoorman.Handlers;
+namespace ClubDoorman.Services.Handlers;
 
 /// <summary>
 /// Обработчик сообщений

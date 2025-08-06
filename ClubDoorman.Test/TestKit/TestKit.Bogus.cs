@@ -2,6 +2,7 @@ using Bogus;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Test.TestKit.Infra;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.TestKit;
 

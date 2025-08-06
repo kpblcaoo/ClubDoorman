@@ -8,6 +8,7 @@ using Telegram.Bot.Types;
 using ClubDoorman.Models;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Integration;
 
