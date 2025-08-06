@@ -17,6 +17,8 @@ public static class AIModule
         services.AddSingleton<IAiChecks, AiChecks>();
         services.AddSingleton<ISpamHamClassifier, SpamHamClassifier>();
         services.AddSingleton<IMimicryClassifier, MimicryClassifier>();
+        services.AddSingleton<IBadMessageManager, BadMessageManager>();
+        services.AddSingleton<ISuspiciousUsersStorage, SuspiciousUsersStorage>();
         
         return services;
     }

@@ -150,24 +150,7 @@ public class Program
                 services.AddMessagingServices();
                 
                 // Классификаторы и менеджеры
-                services.AddSingleton<ISpamHamClassifier>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ISpamHamClassifier factory called");
-                    return new SpamHamClassifier(provider.GetRequiredService<ILogger<SpamHamClassifier>>());
-                });
-                services.AddSingleton<IMimicryClassifier>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IMimicryClassifier factory called");
-                    return new MimicryClassifier(provider.GetRequiredService<ILogger<MimicryClassifier>>());
-                });
-                services.AddSingleton<IBadMessageManager>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IBadMessageManager factory called");
-                    return new BadMessageManager();
-                });
+
                 services.AddSingleton<IAiChecks>(provider =>
                 {
                     var logger = provider.GetRequiredService<ILogger<Program>>();
@@ -183,12 +166,7 @@ public class Program
                     logger.LogDebug("[DI] GlobalStatsManager factory called");
                     return new GlobalStatsManager();
                 });
-                services.AddSingleton<ISuspiciousUsersStorage>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ISuspiciousUsersStorage factory called");
-                    return new SuspiciousUsersStorage(provider.GetRequiredService<ILogger<SuspiciousUsersStorage>>());
-                });
+
                 services.AddSingleton<IViolationTracker>(provider =>
                 {
                     var logger = provider.GetRequiredService<ILogger<Program>>();
