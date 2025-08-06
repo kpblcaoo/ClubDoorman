@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.TestKit;
 

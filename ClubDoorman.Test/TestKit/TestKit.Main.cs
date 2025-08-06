@@ -5,6 +5,7 @@ using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Test.TestData;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.TestKit
 {

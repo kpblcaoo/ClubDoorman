@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Telegram.Bot.Types;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Unit.Handlers
 {

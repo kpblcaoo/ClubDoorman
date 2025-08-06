@@ -3,6 +3,7 @@ using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Requests;
 using ClubDoorman.Services;
+using ClubDoorman.Services.Handlers;
 using ClubDoorman.Services.BanSystem;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;

@@ -10,6 +10,7 @@ using Moq;
 using NUnit.Framework;
 using Telegram.Bot.Types;
 using Times = Moq.Times;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
