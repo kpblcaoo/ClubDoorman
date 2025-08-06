@@ -1,4 +1,5 @@
 using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.ChannelModeration;
 using ClubDoorman.Handlers;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;

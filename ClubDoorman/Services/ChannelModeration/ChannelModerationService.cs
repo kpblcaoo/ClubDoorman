@@ -7,7 +7,7 @@ using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services;
+namespace ClubDoorman.Services.ChannelModeration;
 
 /// <summary>
 /// Сервис для модерации каналов
