@@ -6,6 +6,7 @@ using ClubDoorman.Services.BanSystem;
 using ClubDoorman.Services.LinkFormatting;
 using ClubDoorman.Services.Dispatcher;
 using ClubDoorman.Services.UserJoin;
+using ClubDoorman.Services.Notification;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Logging;
 
@@ -100,6 +101,7 @@ public class Program
                 services.AddLinkFormattingServices();
                 services.AddDispatcherServices();
                 services.AddUserJoinServices();
+                services.AddNotificationServices();
 
                 // Telegram Bot Client - создаем после регистрации IAppConfig
                 services.AddSingleton<TelegramBotClient>(provider =>

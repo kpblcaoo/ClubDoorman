@@ -1,8 +1,9 @@
 using Telegram.Bot.Types;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Handlers;
+using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services.Messaging;
+namespace ClubDoorman.Services.Notification;
 
 /// <summary>
 /// Сервис для отправки уведомлений и управления сообщениями

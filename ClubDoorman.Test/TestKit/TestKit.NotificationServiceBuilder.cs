@@ -18,6 +18,7 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Notification;
 
 namespace ClubDoorman.Test.TestKit;
 
