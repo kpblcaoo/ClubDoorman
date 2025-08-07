@@ -1,5 +1,9 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Test.TestInfrastructure;
@@ -10,6 +14,8 @@ using NUnit.Framework;
 using Moq;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.Test;
 

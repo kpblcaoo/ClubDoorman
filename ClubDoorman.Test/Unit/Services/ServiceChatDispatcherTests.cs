@@ -1,5 +1,6 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@ using NUnit.Framework;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman.Test.Unit.Services;
 

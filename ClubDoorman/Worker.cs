@@ -1,3 +1,5 @@
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.Caching;
@@ -10,9 +12,16 @@ using Telegram.Bot.Types.ReplyMarkups;
 using System.Text.Json;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Messaging;
 
 namespace ClubDoorman;
 

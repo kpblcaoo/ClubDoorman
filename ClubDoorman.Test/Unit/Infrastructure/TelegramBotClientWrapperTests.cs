@@ -1,11 +1,13 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Test.Unit.Infrastructure;
 
@@ -78,7 +80,7 @@ public class TelegramBotClientWrapperTests
         // Мы не можем вызвать реальный API, но можем проверить структуру кода
         
         // Проверяем, что в TelegramBotClientWrapper.GetChatFullInfo есть строка Photo = chat.Photo
-        var wrapperCode = File.ReadAllText("../../../../ClubDoorman/Services/TelegramBotClientWrapper.cs");
+        var wrapperCode = File.ReadAllText("../../../../ClubDoorman/Services/Telegram/TelegramBotClientWrapper.cs");
         Assert.That(wrapperCode, Does.Contain("Photo = chat.Photo"), 
             "TelegramBotClientWrapper.GetChatFullInfo должен копировать Photo из Chat");
         

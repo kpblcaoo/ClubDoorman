@@ -1,5 +1,6 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Requests;
@@ -15,6 +16,7 @@ using Telegram.Bot;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.Unit.Services;
 

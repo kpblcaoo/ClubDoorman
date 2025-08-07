@@ -1,6 +1,8 @@
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Test.TestData;
 using ClubDoorman.Handlers;
@@ -11,6 +13,9 @@ using Telegram.Bot.Types;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using Moq;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.TestKit
 {

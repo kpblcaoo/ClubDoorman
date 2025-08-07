@@ -1,6 +1,9 @@
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestKit;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -12,8 +15,13 @@ using Moq;
 using Microsoft.Extensions.Logging;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Requests;
-using ClubDoorman.Handlers.Commands;
+
 using ClubDoorman.Test.TestKit;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Commands;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 

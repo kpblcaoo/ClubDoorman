@@ -1,7 +1,9 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using NUnit.Framework;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.Unit.TestInfrastructure;
 

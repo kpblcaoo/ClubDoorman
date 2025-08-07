@@ -1,9 +1,13 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using TechTalk.SpecFlow;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.TestInfrastructure;

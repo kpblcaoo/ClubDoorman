@@ -1,6 +1,9 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Infrastructure;
 using Microsoft.Extensions.Logging;
@@ -232,7 +235,7 @@ public class ModerationServiceBusinessLogicTests
         var chatId = 789L;
         
         _factory.WithBotClientSetup(mock => 
-            mock.Setup(x => x.SendRequest(It.IsAny<Telegram.Bot.Requests.BanChatMemberRequest>(), It.IsAny<CancellationToken>()))
+            mock.Setup(x => x.SendRequest(It.IsAny<global::Telegram.Bot.Requests.BanChatMemberRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true));
 
         // Act
@@ -250,7 +253,7 @@ public class ModerationServiceBusinessLogicTests
         var chatId = 789L;
         
         _factory.WithBotClientSetup(mock => 
-            mock.Setup(x => x.SendRequest(It.IsAny<Telegram.Bot.Requests.RestrictChatMemberRequest>(), It.IsAny<CancellationToken>()))
+            mock.Setup(x => x.SendRequest(It.IsAny<global::Telegram.Bot.Requests.RestrictChatMemberRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true));
 
         // Act

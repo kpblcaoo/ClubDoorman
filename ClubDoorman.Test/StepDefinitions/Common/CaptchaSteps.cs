@@ -1,9 +1,10 @@
+using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using TechTalk.SpecFlow;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Requests;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Test.TestData;
@@ -14,6 +15,9 @@ using Moq;
 using Microsoft.Extensions.Logging;
 using FluentAssertions;
 using System.Reflection;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.StepDefinitions.Common
 {

@@ -1,7 +1,12 @@
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
-using ClubDoorman.Services.Notifications;
+
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;
@@ -10,6 +15,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Telegram.Bot.Types;
 using ClubDoorman.Models.Notifications;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Notification;
 
 namespace ClubDoorman.Test.TestKit;
 

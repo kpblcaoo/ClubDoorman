@@ -1,5 +1,8 @@
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Infrastructure;
 using Telegram.Bot;
@@ -7,6 +10,14 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Moq;
 using Microsoft.Extensions.Logging;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.TestKit
 {

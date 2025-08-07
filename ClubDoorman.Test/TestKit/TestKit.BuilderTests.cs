@@ -1,13 +1,22 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestKit;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.TestKit;
 

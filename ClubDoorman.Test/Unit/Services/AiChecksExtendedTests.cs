@@ -1,5 +1,6 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Test.TestData;
 using NUnit.Framework;
@@ -9,6 +10,7 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Test.Unit.Services;
 

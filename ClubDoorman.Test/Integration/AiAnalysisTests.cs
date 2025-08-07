@@ -1,5 +1,10 @@
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Test.TestKit;
@@ -13,6 +18,12 @@ using ClubDoorman.Models;
 using ClubDoorman.Handlers;
 using Moq;
 using DotNetEnv;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.Test.Integration;
 

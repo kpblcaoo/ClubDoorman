@@ -1,8 +1,9 @@
+using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using TechTalk.SpecFlow;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.TestInfrastructure;
 using Telegram.Bot.Types;
@@ -13,6 +14,9 @@ using Moq;
 using Microsoft.Extensions.Logging;
 using FluentAssertions;
 using DotNetEnv;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
 
 namespace ClubDoorman.Test.StepDefinitions.Common
 {

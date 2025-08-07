@@ -1,9 +1,11 @@
+using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using Moq;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Test.Unit.Services;
 

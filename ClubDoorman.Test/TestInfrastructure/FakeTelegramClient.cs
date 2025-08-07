@@ -1,11 +1,13 @@
+using ClubDoorman.Services.UserBan;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types.Enums;
 using System.Text;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestData;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.TestInfrastructure;
 

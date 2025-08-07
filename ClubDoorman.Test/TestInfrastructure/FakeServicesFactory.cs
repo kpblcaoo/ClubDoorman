@@ -1,15 +1,29 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Requests;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
-using static ClubDoorman.Services.AiChecks;
+using static ClubDoorman.Services.AI.AiChecks;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
 
 namespace ClubDoorman.TestInfrastructure;
 

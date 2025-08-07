@@ -1,11 +1,13 @@
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services;
-using ClubDoorman.Services.BanSystem;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestKit;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Telegram.Bot.Types;
+using ClubDoorman.Services.Commands;
 
 namespace ClubDoorman.Test.Unit.Services;
 
