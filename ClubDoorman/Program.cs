@@ -298,6 +298,7 @@ public class Program
         Console.WriteLine($"   • DOORMAN_GLOBAL_APPROVAL_MODE: {Config.GlobalApprovalMode}");
         Console.WriteLine($"   • DOORMAN_BLACKLIST_AUTOBAN_DISABLE: {!Config.BlacklistAutoBan}");
         Console.WriteLine($"   • DOORMAN_CHANNELS_AUTOBAN_DISABLE: {!Config.ChannelAutoBan}");
+        Console.WriteLine($"   • DOORMAN_BAN_FOLDER_INVITE_USERS: {Config.BanFolderInviteUsers}");
         Console.WriteLine($"   • DOORMAN_BUTTON_AUTOBAN_DISABLE: {!Config.ButtonAutoBan}");
         Console.WriteLine($"   • DOORMAN_HIGH_CONFIDENCE_AUTOBAN_DISABLE: {!Config.HighConfidenceAutoBan}");
         Console.WriteLine($"   • DOORMAN_LOW_CONFIDENCE_HAM_ENABLE: {Config.LowConfidenceHamForward}");

@@ -13,6 +13,7 @@ using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
+using ClubDoorman.Services.UserJoin;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -28,6 +29,7 @@ public class ChatMemberHandler : IUpdateHandler
     private readonly IMessageService _messageService;
     private readonly IAppConfig _appConfig;
     private readonly IUserCleanupService _userCleanupService;
+    private readonly IFolderInviteService _folderInviteService;
 
     public ChatMemberHandler(
         ITelegramBotClientWrapper bot,
@@ -36,7 +38,8 @@ public class ChatMemberHandler : IUpdateHandler
         IntroFlowService introFlowService,
         IMessageService messageService,
         IAppConfig appConfig,
-        IUserCleanupService userCleanupService)
+        IUserCleanupService userCleanupService,
+        IFolderInviteService folderInviteService)
     {
         _bot = bot;
         _userManager = userManager;
@@ -45,6 +48,7 @@ public class ChatMemberHandler : IUpdateHandler
         _messageService = messageService;
         _appConfig = appConfig;
         _userCleanupService = userCleanupService;
+        _folderInviteService = folderInviteService;
     }
 
     public bool CanHandle(Update update) => update.Type == UpdateType.ChatMember;
@@ -81,12 +85,19 @@ public class ChatMemberHandler : IUpdateHandler
                     _logger.LogInformation("==================== НОВЫЙ УЧАСТНИК ====================\nПользователь {User} (id={UserId}, username={Username}) зашел в группу '{ChatTitle}' (id={ChatId})\n========================================================", 
                         (u.FirstName + (string.IsNullOrEmpty(u.LastName) ? "" : " " + u.LastName)), u.Id, u.Username ?? "-", chatMember.Chat.Title ?? "-", chatMember.Chat.Id);
                     
-                    // Запускаем IntroFlow через сервис
-                    _ = Task.Run(async () =>
+                    // Проверяем вход через папку
+                    var wasBannedForFolderInvite = await _folderInviteService.HandleFolderInviteAsync(chatMember, cancellationToken);
+                    
+                    // Если пользователь не был забанен за вход через папку, запускаем обычный IntroFlow
+                    if (!wasBannedForFolderInvite)
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(2));
-                        await _introFlowService.ProcessNewUserAsync(null, newChatMember.User, chatMember.Chat);
-                    });
+                        // Запускаем IntroFlow через сервис
+                        _ = Task.Run(async () =>
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(2));
+                            await _introFlowService.ProcessNewUserAsync(null, newChatMember.User, chatMember.Chat);
+                        });
+                    }
                 }
                 break;
             }

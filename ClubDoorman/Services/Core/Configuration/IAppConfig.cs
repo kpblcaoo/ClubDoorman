@@ -97,6 +97,11 @@ public interface IAppConfig
     bool TextMentionFilterEnabled { get; }
     
     /// <summary>
+    /// Автоматически банить пользователей, входящих через папки
+    /// </summary>
+    bool BanFolderInviteUsers { get; }
+    
+    /// <summary>
     /// Количество повторных нарушений ML фильтра перед баном
     /// </summary>
     int MlViolationsBeforeBan { get; }
