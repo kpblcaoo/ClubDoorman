@@ -194,6 +194,7 @@ public class UserBanService : IUserBanService
                 var r when r.Contains("многовато эмоджи") => ViolationType.TooManyEmojis,
                 var r when r.Contains("lookalike") => ViolationType.LookalikeSymbols,
                 var r when r.Contains("Банальное приветствие") => ViolationType.BoringGreetings,
+                var r when r.Contains("непройденная капча") => ViolationType.CaptchaFailed,
                 _ => null
             };
             

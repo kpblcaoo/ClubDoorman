@@ -1,6 +1,6 @@
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.Violation;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Models.Requests;
 using Microsoft.Extensions.Logging;
@@ -27,13 +27,35 @@ public class CaptchaServiceFakeTests
 {
     private CaptchaServiceTestFactory _factory = null!;
     private Mock<IMessageService> _messageServiceMock = null!;
+    private Chat chat = null!;
+    private User user = null!;
+    private CaptchaInfo captchaInfo = null!;
+    private string key = null!;
 
     [SetUp]
     public void Setup()
     {
         _messageServiceMock = new Mock<IMessageService>();
         _factory = new CaptchaServiceTestFactory();
+        
+        // Создаем тестовые данные
+        chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
+        user = new User { Id = 789, FirstName = "Test", LastName = "User" };
+        captchaInfo = new CaptchaInfo(chat.Id, chat.Title, DateTime.UtcNow, user, 1, new CancellationTokenSource(), null);
+        key = "123456_789";
     }
+
+            private CaptchaService CreateCaptchaService()
+        {
+            return new CaptchaService(
+                new Mock<ITelegramBotClientWrapper>().Object,
+                new Mock<ILogger<CaptchaService>>().Object,
+                _messageServiceMock.Object,
+                AppConfigTestFactory.CreateDefault(),
+                new Mock<IViolationTracker>().Object,
+                new Mock<IUserBanService>().Object
+            );
+        }
 
     [Test]
     public async Task CreateCaptchaAsync_ValidUser_SendsWelcomeMessage()
@@ -43,15 +65,7 @@ public class CaptchaServiceFakeTests
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
-        var service = new CaptchaService(
-            new Mock<ITelegramBotClientWrapper>().Object,
-            new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object,
-            AppConfigTestFactory.CreateDefault()
-        );
-        
-        var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
-        var user = new User { Id = 789, FirstName = "Test", LastName = "User" };
+        var service = CreateCaptchaService();
 
         // Act
         var captchaInfo = await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
@@ -71,18 +85,11 @@ public class CaptchaServiceFakeTests
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
-        var service = new CaptchaService(
-            new Mock<ITelegramBotClientWrapper>().Object,
-            new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object,
-            AppConfigTestFactory.CreateDefault()
-        );
-        
-        var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
-        var user = new User { Id = 789, FirstName = "p0rn", LastName = "user" };
+        var service = CreateCaptchaService();
+        var userWithInappropriateName = new User { Id = 999, FirstName = "p0rn", LastName = "User" };
 
         // Act
-        await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
+        var captchaInfo = await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, userWithInappropriateName, null));
 
         // Assert
         _messageServiceMock.Verify(x => x.SendCaptchaMessageAsync(It.IsAny<SendCaptchaMessageRequest>()), Times.Once);
@@ -96,21 +103,12 @@ public class CaptchaServiceFakeTests
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
-        var service = new CaptchaService(
-            new Mock<ITelegramBotClientWrapper>().Object,
-            new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object,
-            AppConfigTestFactory.CreateDefault()
-        );
+        var service = CreateCaptchaService();
         
-        var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
-        var user = new User { Id = 789, FirstName = "Test", LastName = "User" };
-
-        var captchaInfo = await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
+        // Act - сначала создаем капчу
+        var createdCaptcha = await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
         var key = service.GenerateKey(chat.Id, user.Id);
-
-        // Act
-        var result = await service.ValidateCaptchaAsync(key, captchaInfo.CorrectAnswer);
+        var result = await service.ValidateCaptchaAsync(key, createdCaptcha.CorrectAnswer);
 
         // Assert
         Assert.That(result, Is.True);
@@ -124,17 +122,7 @@ public class CaptchaServiceFakeTests
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
-        var service = new CaptchaService(
-            new Mock<ITelegramBotClientWrapper>().Object,
-            new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object,
-            AppConfigTestFactory.CreateDefault()
-        );
-        
-        var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
-        var user = new User { Id = 789, FirstName = "Test", LastName = "User" };
-
-        await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
+        var service = CreateCaptchaService();
         var key = service.GenerateKey(chat.Id, user.Id);
 
         // Act
@@ -152,16 +140,8 @@ public class CaptchaServiceFakeTests
             It.IsAny<SendCaptchaMessageRequest>()))
         .ThrowsAsync(new Exception("Telegram API error"));
         
-        var service = new CaptchaService(
-            new Mock<ITelegramBotClientWrapper>().Object,
-            new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object,
-            AppConfigTestFactory.CreateDefault()
-        );
+        var service = CreateCaptchaService();
         
-        var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
-        var user = new User { Id = 789, FirstName = "Test", LastName = "User" };
-
         // Act & Assert
         var caughtException = Assert.ThrowsAsync<Exception>(async () =>
         {
@@ -194,18 +174,10 @@ public class CaptchaServiceFakeTests
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
-        var service = new CaptchaService(
-            new Mock<ITelegramBotClientWrapper>().Object,
-            new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object,
-            AppConfigTestFactory.CreateDefault()
-        );
-        
-        var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
-        var user = new User { Id = 789, FirstName = "Test", LastName = "User" };
+        var service = CreateCaptchaService();
 
         // Act
-        await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
+        var captchaInfo = await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
 
         // Assert
         _messageServiceMock.Verify(x => x.SendCaptchaMessageAsync(
@@ -220,17 +192,7 @@ public class CaptchaServiceFakeTests
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
-        var service = new CaptchaService(
-            new Mock<ITelegramBotClientWrapper>().Object,
-            new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object,
-            AppConfigTestFactory.CreateDefault()
-        );
-        
-        var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
-        var user = new User { Id = 789, FirstName = "Test", LastName = "User" };
-
-        await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
+        var service = CreateCaptchaService();
         var key = service.GenerateKey(chat.Id, user.Id);
 
         // Act - используем неправильный ответ, чтобы проверить что капча работает
@@ -255,25 +217,17 @@ public class CaptchaServiceFakeTests
     }
 
     [Test]
-    public void GetCaptchaInfo_ValidKey_ReturnsCaptchaInfo()
+    public async Task GetCaptchaInfo_ValidKey_ReturnsCaptchaInfo()
     {
         // Arrange
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
-        var service = new CaptchaService(
-            new Mock<ITelegramBotClientWrapper>().Object,
-            new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object,
-            AppConfigTestFactory.CreateDefault()
-        );
+        var service = CreateCaptchaService();
         
-        var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
-        var user = new User { Id = 789, FirstName = "Test", LastName = "User" };
-
-        // Act
-        _ = service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null)).Result;
+        // Act - сначала создаем капчу
+        var createdCaptcha = await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
         var key = service.GenerateKey(chat.Id, user.Id);
         var captchaInfo = service.GetCaptchaInfo(key);
 
@@ -283,25 +237,17 @@ public class CaptchaServiceFakeTests
     }
 
     [Test]
-    public void RemoveCaptcha_ValidKey_ReturnsTrue()
+    public async Task RemoveCaptcha_ValidKey_ReturnsTrue()
     {
         // Arrange
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
         
-        var service = new CaptchaService(
-            new Mock<ITelegramBotClientWrapper>().Object,
-            new Mock<ILogger<CaptchaService>>().Object,
-            _messageServiceMock.Object,
-            AppConfigTestFactory.CreateDefault()
-        );
+        var service = CreateCaptchaService();
         
-        var chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
-        var user = new User { Id = 789, FirstName = "Test", LastName = "User" };
-
-        // Act
-        _ = service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null)).Result;
+        // Act - сначала создаем капчу
+        var createdCaptcha = await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
         var key = service.GenerateKey(chat.Id, user.Id);
         var result = service.RemoveCaptcha(key);
 

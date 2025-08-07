@@ -121,6 +121,11 @@ public interface IAppConfig
     /// </summary>
     int BoringGreetingsViolationsBeforeBan { get; }
     
+    /// <summary>
+    /// Количество непройденных капч перед баном
+    /// </summary>
+    int CaptchaViolationsBeforeBan { get; }
+    
                 /// <summary>
     /// Отправлять уведомления о банах за повторные нарушения в админ-чат вместо лог-чата
     /// </summary>

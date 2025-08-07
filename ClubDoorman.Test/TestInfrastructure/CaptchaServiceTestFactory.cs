@@ -15,6 +15,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Violation;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -30,16 +31,19 @@ public class CaptchaServiceTestFactory
     public Mock<ILogger<CaptchaService>> LoggerMock { get; } = new();
     public Mock<IMessageService> MessageServiceMock { get; } = new();
     public Mock<IAppConfig> AppConfigMock { get; } = new();
+    public Mock<IViolationTracker> ViolationTrackerMock { get; } = new();
 
-    public CaptchaService CreateCaptchaService()
-    {
-        return new CaptchaService(
-            BotMock.Object,
-            LoggerMock.Object,
-            MessageServiceMock.Object,
-            AppConfigMock.Object
-        );
-    }
+            public CaptchaService CreateCaptchaService()
+        {
+            return new CaptchaService(
+                BotMock.Object,
+                LoggerMock.Object,
+                MessageServiceMock.Object,
+                AppConfigMock.Object,
+                ViolationTrackerMock.Object,
+                new Mock<IUserBanService>().Object
+            );
+        }
 
     #region Configuration Methods
 
@@ -64,6 +68,12 @@ public class CaptchaServiceTestFactory
     public CaptchaServiceTestFactory WithAppConfigSetup(Action<Mock<IAppConfig>> setup)
     {
         setup(AppConfigMock);
+        return this;
+    }
+
+    public CaptchaServiceTestFactory WithViolationTrackerSetup(Action<Mock<IViolationTracker>> setup)
+    {
+        setup(ViolationTrackerMock);
         return this;
     }
 
@@ -120,7 +130,9 @@ public class CaptchaServiceTestFactory
             fakeClient,
             LoggerMock.Object,
             MessageServiceMock.Object,
-            AppConfigMock.Object
+            AppConfigMock.Object,
+            ViolationTrackerMock.Object,
+            new Mock<IUserBanService>().Object
         );
     }
     

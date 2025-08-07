@@ -18,6 +18,7 @@ using System.Reflection;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Violation;
 
 namespace ClubDoorman.Test.StepDefinitions.Common
 {
@@ -52,7 +53,9 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 telegramWrapper,
                 _loggerFactory.CreateLogger<CaptchaService>(),
                 messageService,
-                appConfig
+                appConfig,
+                new Mock<IViolationTracker>().Object,
+                new Mock<IUserBanService>().Object
             );
             
             // Инициализируем _testMessage из ScenarioContext если он есть

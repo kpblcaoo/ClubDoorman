@@ -16,6 +16,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Violation;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -85,15 +86,17 @@ public class StatisticsServiceTestFactory
         );
     }
 
-    public CaptchaService CreateCaptchaServiceWithFake()
-    {
-        return new CaptchaService(
-            new Mock<ITelegramBotClientWrapper>().Object,
-            new Mock<ILogger<CaptchaService>>().Object,
-            new Mock<IMessageService>().Object,
-            AppConfigTestFactory.CreateDefault()
-        );
-    }
+            public CaptchaService CreateCaptchaServiceWithFake()
+        {
+            return new CaptchaService(
+                new Mock<ITelegramBotClientWrapper>().Object,
+                new Mock<ILogger<CaptchaService>>().Object,
+                new Mock<IMessageService>().Object,
+                AppConfigTestFactory.CreateDefault(),
+                new Mock<IViolationTracker>().Object,
+                new Mock<IUserBanService>().Object
+            );
+        }
 
     public async Task<StatisticsService> CreateAsync()
     {

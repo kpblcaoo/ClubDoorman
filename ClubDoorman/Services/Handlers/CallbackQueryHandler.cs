@@ -169,36 +169,56 @@ public class CallbackQueryHandler : IUpdateHandler
 
         _statisticsService.IncrementCaptcha(captchaInfo.ChatId);
 
+        // Регистрируем нарушение за непройденную капчу
+        var shouldBan = _violationTracker.RegisterViolation(captchaInfo.User.Id, captchaInfo.ChatId, ViolationType.CaptchaFailed);
+        
+        if (shouldBan)
+        {
+            _logger.LogWarning("Пользователь {User} (id={UserId}) достиг лимита непройденных капч в группе '{ChatTitle}' (id={ChatId}) - бан навсегда", 
+                Utils.FullName(captchaInfo.User), captchaInfo.User.Id, captchaInfo.ChatTitle ?? "-", captchaInfo.ChatId);
+        }
+
         try
         {
-            // Банируем на 20 минут
+            // Если достигнут лимит нарушений - бан навсегда, иначе временный бан на 20 минут
+            var banUntilDate = shouldBan ? null : (DateTime?)DateTime.UtcNow.AddMinutes(20);
+            
             await _bot.BanChatMember(
                 captchaInfo.ChatId, 
                 captchaInfo.User.Id, 
-                DateTime.UtcNow + TimeSpan.FromMinutes(20), 
+                banUntilDate, 
                 revokeMessages: false,
                 cancellationToken: cancellationToken
             );
 
-            // Удаляем сообщение о входе
+                        // Удаляем сообщение о входе
             if (captchaInfo.UserJoinedMessage != null)
             {
                 await _bot.DeleteMessage(captchaInfo.ChatId, captchaInfo.UserJoinedMessage.MessageId, cancellationToken);
             }
 
-            // Планируем разбан через 20 минут
-            _ = Task.Run(async () =>
+            // Отправляем уведомление через централизованную систему
+            if (shouldBan && captchaInfo.UserJoinedMessage != null)
             {
-                try
+                await _userBanService.TrackViolationAndBanIfNeededAsync(captchaInfo.UserJoinedMessage, captchaInfo.User, "непройденная капча", cancellationToken);
+            }
+
+            // Планируем разбан через 20 минут только если это не постоянный бан
+            if (!shouldBan)
+            {
+                _ = Task.Run(async () =>
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(20), cancellationToken);
-                    await _bot.UnbanChatMember(captchaInfo.ChatId, captchaInfo.User.Id, cancellationToken: cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Ошибка при разбане пользователя {UserId}", captchaInfo.User.Id);
-                }
-            }, cancellationToken);
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(20), cancellationToken);
+                        await _bot.UnbanChatMember(captchaInfo.ChatId, captchaInfo.User.Id, cancellationToken: cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Ошибка при разбане пользователя {UserId}", captchaInfo.User.Id);
+                    }
+                }, cancellationToken);
+            }
         }
         catch (Exception ex)
         {
