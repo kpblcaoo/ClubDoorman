@@ -99,6 +99,11 @@ public class AppConfig : IAppConfig
     public bool TextMentionFilterEnabled => Config.TextMentionFilterEnabled;
     
     /// <summary>
+    /// Автоматически банить пользователей, входящих через папки
+    /// </summary>
+    public bool BanFolderInviteUsers => Config.BanFolderInviteUsers;
+    
+    /// <summary>
     /// Количество повторных нарушений ML фильтра перед баном
     /// </summary>
     public int MlViolationsBeforeBan => Config.MlViolationsBeforeBan;

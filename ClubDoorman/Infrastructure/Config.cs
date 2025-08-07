@@ -225,6 +225,11 @@ namespace ClubDoorman.Infrastructure
         public static bool HighConfidenceAutoBan { get; } = !GetEnvironmentBool("DOORMAN_HIGH_CONFIDENCE_AUTOBAN_DISABLE");
         
         /// <summary>
+        /// Автоматически банить пользователей, входящих через папки
+        /// </summary>
+        public static bool BanFolderInviteUsers { get; } = GetEnvironmentBool("DOORMAN_BAN_FOLDER_INVITE_USERS");
+        
+        /// <summary>
         /// Отключить приветственные сообщения
         /// </summary>
         public static bool DisableWelcome { get; } = GetEnvironmentBool("DOORMAN_DISABLE_WELCOME");
