@@ -19,6 +19,7 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.UserJoin;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -46,7 +47,8 @@ public class ChatMemberHandlerTestFactory
             new IntroFlowService(BotMock.Object, new Mock<ILogger<IntroFlowService>>().Object, new Mock<ICaptchaService>().Object, UserManagerMock.Object, new AiChecks(BotMock.Object, new Mock<ILogger<AiChecks>>().Object, AppConfigTestFactory.CreateDefault()), new Mock<IStatisticsService>().Object, new Mock<GlobalStatsManager>().Object, new Mock<IModerationService>().Object, new Mock<IMessageService>().Object, new Mock<IUserBanService>().Object, AppConfigMock.Object),
             MessageServiceMock.Object,
             AppConfigMock.Object,
-            new Mock<IUserCleanupService>().Object
+            new Mock<IUserCleanupService>().Object,
+            new Mock<IFolderInviteService>().Object
         );
     }
 

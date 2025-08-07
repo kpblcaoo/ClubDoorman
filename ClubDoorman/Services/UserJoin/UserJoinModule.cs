@@ -6,7 +6,7 @@ public static class UserJoinModule
 {
     public static IServiceCollection AddUserJoinServices(this IServiceCollection services)
     {
-        // TODO: Добавить регистрацию сервисов если необходимо
+        services.AddScoped<IFolderInviteService, FolderInviteService>();
         return services;
     }
 }
