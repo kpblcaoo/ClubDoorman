@@ -420,13 +420,13 @@ public class MessageHandlerTestFactory
         );
     }
 
-    public CaptchaService CreateCaptchaServiceWithFake()
-    {
-        var mockLogger = new Mock<ILogger<CaptchaService>>();
-        var mockMessageService = new Mock<IMessageService>();
-        var mockAppConfig = new Mock<IAppConfig>();
-        return new CaptchaService(TelegramBotClientWrapperMock.Object, mockLogger.Object, mockMessageService.Object, mockAppConfig.Object);
-    }
+            public CaptchaService CreateCaptchaServiceWithFake()
+        {
+            var mockLogger = new Mock<ILogger<CaptchaService>>();
+            var mockMessageService = new Mock<IMessageService>();
+            var mockAppConfig = new Mock<IAppConfig>();
+            return new CaptchaService(TelegramBotClientWrapperMock.Object, mockLogger.Object, mockMessageService.Object, mockAppConfig.Object, ViolationTrackerMock.Object, new Mock<IUserBanService>().Object);
+        }
 
     public IUserManager CreateUserManagerWithFake()
     {

@@ -16,7 +16,9 @@ using Telegram.Bot;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Violation;
 
 namespace ClubDoorman.Test.Unit.Services;
 
@@ -37,6 +39,7 @@ public class CaptchaServiceExtendedTests
             {
                 mock.Setup(x => x.NoCaptchaGroups).Returns(new HashSet<long>());
                 mock.Setup(x => x.NoVpnAdGroups).Returns(new HashSet<long>());
+                mock.Setup(x => x.CaptchaViolationsBeforeBan).Returns(3);
             })
             .WithMessageServiceSetup(mock =>
             {
@@ -46,6 +49,11 @@ public class CaptchaServiceExtendedTests
                         Chat = new Chat { Id = 123456 },
                         Date = DateTime.UtcNow
                     });
+            })
+            .WithViolationTrackerSetup(mock =>
+            {
+                mock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>()))
+                    .Returns(false);
             });
     }
 
@@ -618,7 +626,144 @@ public class CaptchaServiceExtendedTests
 
     #endregion
 
+    #region Captcha Violation Tracking Tests
 
+    [Test]
+    public async Task BanExpiredCaptchaUsersAsync_ExpiredCaptcha_RegistersViolation()
+    {
+        // Arrange
+        var service = _factory.CreateCaptchaService();
+        var chat = CreateTestChat();
+        var user = CreateTestUser();
+        var joinMessage = CreateTestMessage();
+        
+        // Создаем капчу с истекшим временем
+        var expiredTime = DateTime.UtcNow.AddMinutes(-2);
+        var captchaInfo = new CaptchaInfo(
+            chat.Id,
+            chat.Title,
+            expiredTime,
+            user,
+            0, // CorrectAnswer
+            new CancellationTokenSource(),
+            joinMessage
+        );
+        
+        // Добавляем капчу напрямую в сервис (через reflection для тестирования)
+        var captchaNeededUsersField = typeof(CaptchaService).GetField("_captchaNeededUsers", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var captchaNeededUsers = (System.Collections.Concurrent.ConcurrentDictionary<string, CaptchaInfo>)captchaNeededUsersField!.GetValue(service)!;
+        var key = service.GenerateKey(chat.Id, user.Id);
+        captchaNeededUsers.TryAdd(key, captchaInfo);
+        
+        // Настраиваем моки
+        _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _factory.BotMock.Setup(x => x.DeleteMessageAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _factory.ViolationTrackerMock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>()))
+            .Returns(false);
+
+        // Act
+        await service.BanExpiredCaptchaUsersAsync();
+
+        // Assert
+        _factory.ViolationTrackerMock.Verify(
+            x => x.RegisterViolation(user.Id, chat.Id, ViolationType.CaptchaFailed), 
+            Times.Once);
+    }
+
+    [Test]
+    public async Task BanExpiredCaptchaUsersAsync_ExpiredCaptchaWithViolationLimit_ReturnsTrueAndBansPermanently()
+    {
+        // Arrange
+        var service = _factory.CreateCaptchaService();
+        var chat = CreateTestChat();
+        var user = CreateTestUser();
+        var joinMessage = CreateTestMessage();
+        
+        // Создаем капчу с истекшим временем
+        var expiredTime = DateTime.UtcNow.AddMinutes(-2);
+        var captchaInfo = new CaptchaInfo(
+            chat.Id,
+            chat.Title,
+            expiredTime,
+            user,
+            0, // CorrectAnswer
+            new CancellationTokenSource(),
+            joinMessage
+        );
+        
+        // Добавляем капчу напрямую в сервис (через reflection для тестирования)
+        var captchaNeededUsersField = typeof(CaptchaService).GetField("_captchaNeededUsers", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var captchaNeededUsers = (System.Collections.Concurrent.ConcurrentDictionary<string, CaptchaInfo>)captchaNeededUsersField!.GetValue(service)!;
+        var key = service.GenerateKey(chat.Id, user.Id);
+        captchaNeededUsers.TryAdd(key, captchaInfo);
+        
+        // Настраиваем моки
+        _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _factory.BotMock.Setup(x => x.DeleteMessageAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _factory.ViolationTrackerMock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>()))
+            .Returns(true); // Достигнут лимит нарушений
+
+        // Act
+        await service.BanExpiredCaptchaUsersAsync();
+
+        // Assert
+        _factory.BotMock.Verify(
+            x => x.BanChatMemberAsync(chat.Id, user.Id, null, true, It.IsAny<CancellationToken>()), // null = бан навсегда
+            Times.Once);
+    }
+
+    [Test]
+    public async Task BanExpiredCaptchaUsersAsync_ExpiredCaptchaWithoutViolationLimit_ReturnsFalseAndBansTemporarily()
+    {
+        // Arrange
+        var service = _factory.CreateCaptchaService();
+        var chat = CreateTestChat();
+        var user = CreateTestUser();
+        var joinMessage = CreateTestMessage();
+        
+        // Создаем капчу с истекшим временем
+        var expiredTime = DateTime.UtcNow.AddMinutes(-2);
+        var captchaInfo = new CaptchaInfo(
+            chat.Id,
+            chat.Title,
+            expiredTime,
+            user,
+            0, // CorrectAnswer
+            new CancellationTokenSource(),
+            joinMessage
+        );
+        
+        // Добавляем капчу напрямую в сервис (через reflection для тестирования)
+        var captchaNeededUsersField = typeof(CaptchaService).GetField("_captchaNeededUsers", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var captchaNeededUsers = (System.Collections.Concurrent.ConcurrentDictionary<string, CaptchaInfo>)captchaNeededUsersField!.GetValue(service)!;
+        var key = service.GenerateKey(chat.Id, user.Id);
+        captchaNeededUsers.TryAdd(key, captchaInfo);
+        
+        // Настраиваем моки
+        _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _factory.BotMock.Setup(x => x.DeleteMessageAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _factory.ViolationTrackerMock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>()))
+            .Returns(false); // Не достигнут лимит нарушений
+
+        // Act
+        await service.BanExpiredCaptchaUsersAsync();
+
+        // Assert
+        _factory.BotMock.Verify(
+            x => x.BanChatMemberAsync(It.IsAny<long>(), It.IsAny<long>(), It.Is<DateTime?>(d => d.HasValue), It.IsAny<bool>(), It.IsAny<CancellationToken>()), // Временный бан
+            Times.Once);
+    }
+
+    #endregion
 
     #region Helper Methods
 

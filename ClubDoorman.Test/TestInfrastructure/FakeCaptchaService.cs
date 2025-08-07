@@ -9,6 +9,7 @@ using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Violation;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -22,6 +23,7 @@ public class FakeCaptchaService : ICaptchaService
     private readonly ITelegramBotClientWrapper _bot;
     private readonly IMessageService _messageService;
     private readonly IAppConfig _appConfig;
+    private readonly IViolationTracker _violationTracker;
 
     // Настраиваемые результаты
     public bool NextResult { get; set; } = true;
@@ -36,12 +38,14 @@ public class FakeCaptchaService : ICaptchaService
         ITelegramBotClientWrapper bot,
         ILogger<FakeCaptchaService> logger,
         IMessageService messageService,
-        IAppConfig appConfig)
+        IAppConfig appConfig,
+        IViolationTracker violationTracker)
     {
         _bot = bot;
         _logger = logger;
         _messageService = messageService;
         _appConfig = appConfig;
+        _violationTracker = violationTracker;
     }
 
     /// <summary>

@@ -9,6 +9,8 @@ using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.UserBan;
 
 namespace ClubDoorman.Services.Captcha;
 
@@ -32,6 +34,8 @@ public class CaptchaService : ICaptchaService
     private readonly ILogger<CaptchaService> _logger;
     private readonly IMessageService _messageService;
     private readonly IAppConfig _appConfig;
+    private readonly IViolationTracker _violationTracker;
+    private readonly IUserBanService _userBanService;
 
     // Черный список имен для отображения
     private readonly List<string> _namesBlacklist = ["p0rn", "porn", "порн", "п0рн", "pоrn", "пoрн", "bot"];
@@ -41,12 +45,17 @@ public class CaptchaService : ICaptchaService
     /// </summary>
     /// <param name="bot">Клиент Telegram бота</param>
     /// <param name="logger">Логгер для записи событий</param>
-    public CaptchaService(ITelegramBotClientWrapper bot, ILogger<CaptchaService> logger, IMessageService messageService, IAppConfig appConfig)
+    /// <param name="messageService">Сервис сообщений</param>
+    /// <param name="appConfig">Конфигурация приложения</param>
+    /// <param name="violationTracker">Трекер нарушений</param>
+    public CaptchaService(ITelegramBotClientWrapper bot, ILogger<CaptchaService> logger, IMessageService messageService, IAppConfig appConfig, IViolationTracker violationTracker, IUserBanService userBanService)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
         _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
+        _violationTracker = violationTracker ?? throw new ArgumentNullException(nameof(violationTracker));
+        _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
     }
 
     /// <summary>
@@ -284,29 +293,51 @@ public class CaptchaService : ICaptchaService
                 _logger.LogInformation("Пользователь {User} (id={UserId}) не прошёл капчу (таймаут) в группе '{ChatTitle}' (id={ChatId})", 
                     Utils.FullName(captchaInfo.User), captchaInfo.User.Id, captchaInfo.ChatTitle ?? "-", captchaInfo.ChatId);
 
+                // Регистрируем нарушение за непройденную капчу
+                var shouldBan = _violationTracker.RegisterViolation(captchaInfo.User.Id, captchaInfo.ChatId, ViolationType.CaptchaFailed);
+                
+                if (shouldBan)
+                {
+                    _logger.LogWarning("Пользователь {User} (id={UserId}) достиг лимита непройденных капч в группе '{ChatTitle}' (id={ChatId}) - бан навсегда", 
+                        Utils.FullName(captchaInfo.User), captchaInfo.User.Id, captchaInfo.ChatTitle ?? "-", captchaInfo.ChatId);
+                }
+
                 _captchaNeededUsers.TryRemove(key, out _);
                 
                 try
                 {
+                    // Если достигнут лимит нарушений - бан навсегда, иначе временный бан на 20 минут
+                    var banUntilDate = shouldBan ? null : (DateTime?)now.AddMinutes(20);
+                    
                     await _bot.BanChatMemberAsync(captchaInfo.ChatId, captchaInfo.User.Id, 
-                        untilDate: now + TimeSpan.FromMinutes(20), revokeMessages: true);
+                        untilDate: banUntilDate, revokeMessages: true);
                     
                     if (captchaInfo.UserJoinedMessage != null)
                         await _bot.DeleteMessageAsync(captchaInfo.ChatId, captchaInfo.UserJoinedMessage.MessageId);
 
-                    // Разбан через некоторое время
-                    _ = Task.Run(async () =>
+                    // Отправляем уведомление через централизованную систему
+                    if (shouldBan && captchaInfo.UserJoinedMessage != null)
                     {
-                        try
+                        // Используем существующее сообщение для передачи в UserBanService
+                        await _userBanService.TrackViolationAndBanIfNeededAsync(captchaInfo.UserJoinedMessage, captchaInfo.User, "непройденная капча (таймаут)", CancellationToken.None);
+                    }
+
+                    // Разбан через 20 минут только если это не постоянный бан
+                    if (!shouldBan)
+                    {
+                        _ = Task.Run(async () =>
                         {
-                            await Task.Delay(TimeSpan.FromMinutes(20));
-                            await _bot.UnbanChatMemberAsync(captchaInfo.ChatId, captchaInfo.User.Id);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning(ex, "Ошибка при разбане пользователя {UserId}", captchaInfo.User.Id);
-                        }
-                    });
+                            try
+                            {
+                                await Task.Delay(TimeSpan.FromMinutes(20));
+                                await _bot.UnbanChatMemberAsync(captchaInfo.ChatId, captchaInfo.User.Id);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Ошибка при разбане пользователя {UserId}", captchaInfo.User.Id);
+                            }
+                        });
+                    }
                 }
                 catch (Exception ex)
                 {

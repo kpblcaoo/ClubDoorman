@@ -34,7 +34,12 @@ public enum ViolationType
     /// <summary>
     /// Банальные приветствия
     /// </summary>
-    BoringGreetings
+    BoringGreetings,
+    
+    /// <summary>
+    /// Непройденная капча
+    /// </summary>
+    CaptchaFailed
 }
 
 /// <summary>
@@ -124,6 +129,7 @@ public class ViolationTracker : IViolationTracker
             ViolationType.TooManyEmojis => _appConfig.EmojiViolationsBeforeBan,
             ViolationType.LookalikeSymbols => _appConfig.LookalikeViolationsBeforeBan,
             ViolationType.BoringGreetings => _appConfig.BoringGreetingsViolationsBeforeBan,
+            ViolationType.CaptchaFailed => _appConfig.CaptchaViolationsBeforeBan,
             _ => 0
         };
     }
@@ -142,6 +148,7 @@ public class ViolationTracker : IViolationTracker
             ViolationType.TooManyEmojis => "много эмодзи",
             ViolationType.LookalikeSymbols => "lookalike символы",
             ViolationType.BoringGreetings => "банальные приветствия",
+            ViolationType.CaptchaFailed => "непройденная капча",
             _ => "неизвестное нарушение"
         };
     }
