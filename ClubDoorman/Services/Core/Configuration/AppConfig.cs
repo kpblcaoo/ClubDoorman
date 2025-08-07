@@ -123,6 +123,11 @@ public class AppConfig : IAppConfig
     /// </summary>
     public int BoringGreetingsViolationsBeforeBan => Config.BoringGreetingsViolationsBeforeBan;
     
+    /// <summary>
+    /// Количество непройденных капч перед баном
+    /// </summary>
+    public int CaptchaViolationsBeforeBan => Config.CaptchaViolationsBeforeBan;
+    
             /// <summary>
         /// Отправлять уведомления о банах за повторные нарушения в админ-чат вместо лог-чата
         /// </summary>

@@ -148,15 +148,17 @@ public class CallbackQueryHandlerTestFactory
         );
     }
 
-    public CaptchaService CreateCaptchaServiceWithFake()
-    {
-        return new CaptchaService(
-            new Mock<ITelegramBotClientWrapper>().Object,
-            new Mock<ILogger<CaptchaService>>().Object,
-            new Mock<IMessageService>().Object,
-            AppConfigTestFactory.CreateDefault()
-        );
-    }
+            public CaptchaService CreateCaptchaServiceWithFake()
+        {
+            return new CaptchaService(
+                new Mock<ITelegramBotClientWrapper>().Object,
+                new Mock<ILogger<CaptchaService>>().Object,
+                new Mock<IMessageService>().Object,
+                AppConfigTestFactory.CreateDefault(),
+                new Mock<IViolationTracker>().Object,
+                new Mock<IUserBanService>().Object
+            );
+        }
 
     public IUserManager CreateUserManagerWithFake()
     {

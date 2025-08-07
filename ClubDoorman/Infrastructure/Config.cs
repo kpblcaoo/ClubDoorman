@@ -163,6 +163,11 @@ namespace ClubDoorman.Infrastructure
     /// </summary>
     public static int BoringGreetingsViolationsBeforeBan { get; } = GetEnvironmentInt("DOORMAN_BORING_GREETINGS_VIOLATIONS_BEFORE_BAN", 0);
     
+    /// <summary>
+    /// Количество непройденных капч перед баном (0 = отключено)
+    /// </summary>
+    public static int CaptchaViolationsBeforeBan { get; } = GetEnvironmentInt("DOORMAN_CAPTCHA_VIOLATIONS_BEFORE_BAN", 0);
+    
             /// <summary>
         /// Отправлять уведомления о банах за повторные нарушения в админ-чат вместо лог-чата
         /// </summary>

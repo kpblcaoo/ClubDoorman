@@ -55,7 +55,7 @@ public class FakeServicesFactory
         var messageService = new Mock<IMessageService>().Object;
         var logger = _loggerFactory.CreateLogger<FakeCaptchaService>();
         
-        return new FakeCaptchaService(_fakeBot, logger, messageService, _appConfig);
+        return new FakeCaptchaService(_fakeBot, logger, messageService, _appConfig, new Mock<IViolationTracker>().Object);
     }
 
     /// <summary>
