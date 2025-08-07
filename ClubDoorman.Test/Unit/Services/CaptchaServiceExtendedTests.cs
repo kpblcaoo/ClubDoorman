@@ -19,6 +19,7 @@ using System.Linq;
 using System.Reflection;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Violation;
+using ChatId = Telegram.Bot.Types.ChatId;
 
 namespace ClubDoorman.Test.Unit.Services;
 
@@ -657,9 +658,9 @@ public class CaptchaServiceExtendedTests
         captchaNeededUsers.TryAdd(key, captchaInfo);
         
         // Настраиваем моки
-        _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+        _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<ChatId>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        _factory.BotMock.Setup(x => x.DeleteMessageAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _factory.BotMock.Setup(x => x.DeleteMessageAsync(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         _factory.ViolationTrackerMock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>()))
             .Returns(false);
@@ -702,9 +703,9 @@ public class CaptchaServiceExtendedTests
         captchaNeededUsers.TryAdd(key, captchaInfo);
         
         // Настраиваем моки
-        _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+        _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<ChatId>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        _factory.BotMock.Setup(x => x.DeleteMessageAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _factory.BotMock.Setup(x => x.DeleteMessageAsync(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         _factory.ViolationTrackerMock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>()))
             .Returns(true); // Достигнут лимит нарушений
@@ -747,9 +748,9 @@ public class CaptchaServiceExtendedTests
         captchaNeededUsers.TryAdd(key, captchaInfo);
         
         // Настраиваем моки
-        _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+        _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<ChatId>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        _factory.BotMock.Setup(x => x.DeleteMessageAsync(It.IsAny<long>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _factory.BotMock.Setup(x => x.DeleteMessageAsync(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         _factory.ViolationTrackerMock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>()))
             .Returns(false); // Не достигнут лимит нарушений
@@ -759,7 +760,7 @@ public class CaptchaServiceExtendedTests
 
         // Assert
         _factory.BotMock.Verify(
-            x => x.BanChatMemberAsync(It.IsAny<long>(), It.IsAny<long>(), It.Is<DateTime?>(d => d.HasValue), It.IsAny<bool>(), It.IsAny<CancellationToken>()), // Временный бан
+            x => x.BanChatMemberAsync(It.IsAny<ChatId>(), It.IsAny<long>(), It.Is<DateTime?>(d => d.HasValue), It.IsAny<bool>(), It.IsAny<CancellationToken>()), // Временный бан
             Times.Once);
     }
 
