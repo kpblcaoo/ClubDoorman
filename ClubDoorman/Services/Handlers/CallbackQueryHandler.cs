@@ -83,6 +83,49 @@ public class CallbackQueryHandler : IUpdateHandler
         var callbackQuery = update.CallbackQuery!;
         var cbData = callbackQuery.Data;
         
+        // Начинаем корреляционный scope для трейсинга
+        using var correlationScope = _logger.BeginCorrelationScope(callbackQuery.Message?.MessageId, callbackQuery.Message?.Chat.Id);
+        
+        // Трейс: входная точка
+        _logger.LogTrace(_loggingFlags, "Routed->CallbackQueryHandler", new { data = cbData, userId = callbackQuery.From.Id });
+
+        // Golden Master: сохраняем входные данные
+        var inputData = new { update = update, timestamp = DateTime.UtcNow };
+        object? outputData = null;
+
+        try
+        {
+            await HandleCallbackQueryInternalAsync(callbackQuery, cancellationToken);
+            
+            // Golden Master: успешное завершение
+            outputData = new { success = true, timestamp = DateTime.UtcNow };
+            _logger.LogTrace(_loggingFlags, "CallbackQueryHandler->Completed", new { data = cbData });
+        }
+        catch (Exception ex)
+        {
+            // Golden Master: ошибка
+            outputData = new { success = false, error = ex.Message, timestamp = DateTime.UtcNow };
+            _logger.LogTrace(_loggingFlags, "CallbackQueryHandler->Error", new { data = cbData, error = ex.Message });
+            throw;
+        }
+        finally
+        {
+            // Записываем Golden Master файл (используем hash от cbData как messageId для уникальности)
+            if (_loggingFlags.GoldenMasterEnabled)
+            {
+                var messageId = cbData?.GetHashCode() ?? callbackQuery.From.Id.GetHashCode();
+                await GoldenMasterRecorder.RecordAsync(inputData, outputData, "CallbackQueryHandler", messageId, _loggingFlags, _logger);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Внутренняя логика обработки callback query (вынесена для Golden Master)
+    /// </summary>
+    private async Task HandleCallbackQueryInternalAsync(CallbackQuery callbackQuery, CancellationToken cancellationToken)
+    {
+        var cbData = callbackQuery.Data;
+        
         _logger.LogDebug("📞 Получен callback: {Data} от пользователя {User} в чате {Chat}", 
             cbData, callbackQuery.From.Username ?? callbackQuery.From.FirstName, callbackQuery.Message?.Chat.Id);
         
@@ -103,11 +146,13 @@ public class CallbackQueryHandler : IUpdateHandler
         {
             if (message.Chat.Id == Config.AdminChatId || message.Chat.Id == Config.LogAdminChatId)
             {
+                _logger.LogTrace(_loggingFlags, "CallbackQueryHandler->AdminCallback", new { data = cbData });
                 _logger.LogDebug("🔧 Обрабатываем админский callback: {Data}", cbData);
                 await HandleAdminCallback(callbackQuery, cancellationToken);
             }
             else
             {
+                _logger.LogTrace(_loggingFlags, "CallbackQueryHandler->UserCallback", new { data = cbData });
                 _logger.LogDebug("🎯 Обрабатываем капча callback: {Data}", cbData);
                 await HandleCaptchaCallback(callbackQuery, cancellationToken);
             }
