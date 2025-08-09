@@ -18,6 +18,9 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -38,6 +41,7 @@ public class CallbackQueryHandler : IUpdateHandler
     private readonly IUserBanService _userBanService;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<CallbackQueryHandler> _logger;
+    private readonly LoggingFlags _loggingFlags;
 
     public CallbackQueryHandler(
         ITelegramBotClientWrapper bot,
@@ -51,7 +55,8 @@ public class CallbackQueryHandler : IUpdateHandler
         IViolationTracker violationTracker,
         IUserBanService userBanService,
         IServiceProvider serviceProvider,
-        ILogger<CallbackQueryHandler> logger)
+        ILogger<CallbackQueryHandler> logger,
+        IOptions<LoggingFlags> loggingFlags)
     {
         _bot = bot;
         _captchaService = captchaService;
@@ -65,6 +70,7 @@ public class CallbackQueryHandler : IUpdateHandler
         _userBanService = userBanService;
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _loggingFlags = loggingFlags?.Value ?? throw new ArgumentNullException(nameof(loggingFlags));
     }
 
     public bool CanHandle(Update update)

@@ -29,6 +29,9 @@ using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.TextProcessing;
 using ClubDoorman.Handlers;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -56,6 +59,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     private readonly IViolationTracker _violationTracker;
     private readonly IUserBanService _userBanService;
     private readonly IChannelModerationService _channelModerationService;
+    private readonly LoggingFlags _loggingFlags;
 
     // Флаги присоединившихся пользователей (временные)
     private static readonly ConcurrentDictionary<string, byte> _joinedUserFlags = new();
@@ -100,7 +104,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         IAppConfig appConfig,
         IViolationTracker violationTracker,
         ILogger<MessageHandler> logger,
-        IUserBanService userBanService)
+        IUserBanService userBanService,
+        IOptions<LoggingFlags> loggingFlags)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
@@ -120,6 +125,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         _violationTracker = violationTracker ?? throw new ArgumentNullException(nameof(violationTracker));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
+        _loggingFlags = loggingFlags?.Value ?? throw new ArgumentNullException(nameof(loggingFlags));
         _channelModerationService = serviceProvider.GetService<IChannelModerationService>() 
             ?? throw new InvalidOperationException("IChannelModerationService is not registered in the DI container");
     }
@@ -149,9 +155,50 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         var message = update.EditedMessage ?? update.Message!;
         var chat = message.Chat;
 
-        _logger.LogDebug("MessageHandler получил сообщение {MessageId} в чате {ChatId} от пользователя {UserId}", 
-            message.MessageId, chat.Id, message.From?.Id);
+        // Начинаем корреляционный scope для трейсинга
+        using var correlationScope = _logger.BeginCorrelationScope(message.MessageId, chat.Id);
+        
+        // Трейс: входная точка
+        _logger.LogTrace(_loggingFlags, "Routed->MessageHandler", new { messageId = message.MessageId, chatId = chat.Id, userId = message.From?.Id });
 
+        // Golden Master: сохраняем входные данные
+        var inputData = new { update = update, timestamp = DateTime.UtcNow };
+        object? outputData = null;
+
+        try
+        {
+            _logger.LogDebug("MessageHandler получил сообщение {MessageId} в чате {ChatId} от пользователя {UserId}", 
+                message.MessageId, chat.Id, message.From?.Id);
+
+            // Основная логика обработки
+            await HandleMessageInternalAsync(message, chat, cancellationToken);
+            
+            // Golden Master: успешное завершение
+            outputData = new { success = true, timestamp = DateTime.UtcNow };
+            _logger.LogTrace(_loggingFlags, "MessageHandler->Completed", new { messageId = message.MessageId });
+        }
+        catch (Exception ex)
+        {
+            // Golden Master: ошибка
+            outputData = new { success = false, error = ex.Message, timestamp = DateTime.UtcNow };
+            _logger.LogTrace(_loggingFlags, "MessageHandler->Error", new { messageId = message.MessageId, error = ex.Message });
+            throw;
+        }
+        finally
+        {
+            // Записываем Golden Master файл
+            if (_loggingFlags.GoldenMasterEnabled)
+            {
+                await GoldenMasterRecorder.RecordAsync(inputData, outputData, "MessageHandler", message.MessageId, _loggingFlags, _logger);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Внутренняя логика обработки сообщения (вынесена для Golden Master)
+    /// </summary>
+    private async Task HandleMessageInternalAsync(Message message, Chat chat, CancellationToken cancellationToken)
+    {
         // Проверка whitelist - если активен, работаем только в разрешённых чатах
         // ИСКЛЮЧЕНИЕ: админ-чаты всегда обрабатываются (для команд /spam, /ham и т.д.)
         var isAdminChat = chat.Id == _appConfig.AdminChatId || chat.Id == _appConfig.LogAdminChatId;
@@ -179,6 +226,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // Обработка команд
         if (message.Text?.StartsWith("/") == true)
         {
+            _logger.LogTrace(_loggingFlags, "MessageHandler->Command", new { messageId = message.MessageId, command = message.Text.Split(' ')[0] });
             await HandleCommandAsync(message, cancellationToken);
             return;
         }
@@ -193,6 +241,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // Обработка новых участников
         if (message.NewChatMembers != null && chat.Id != _appConfig.AdminChatId)
         {
+            _logger.LogTrace(_loggingFlags, "MessageHandler->NewMembers", new { messageId = message.MessageId, membersCount = message.NewChatMembers.Length });
             await HandleNewMembersAsync(message, cancellationToken);
             return;
         }
@@ -215,11 +264,13 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // Сообщения от каналов
         if (message.SenderChat != null)
         {
+            _logger.LogTrace(_loggingFlags, "MessageHandler->Channel", new { messageId = message.MessageId, senderChatId = message.SenderChat.Id });
             await HandleChannelMessageAsync(message, cancellationToken);
             return;
         }
 
         // Обычные сообщения пользователей
+        _logger.LogTrace(_loggingFlags, "MessageHandler->UserMessage", new { messageId = message.MessageId, userId = message.From?.Id });
         await HandleUserMessageAsync(message, isSilentMode, cancellationToken);
     }
 
