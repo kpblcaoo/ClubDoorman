@@ -222,7 +222,7 @@ public class SomeService(ILogger<SomeService> logger, IDependency dep)
 - `docker-compose.yml`: Local development setup
 
 ## Agent Instructions
-
+0. **ALL** new branches for development must be based on the `next-dev` branch.
 1. **ALWAYS** use .NET 9.0 SDK before any dotnet commands
 2. **ALWAYS** run `dotnet restore` before building
 3. **EXCLUDE** real-api, BDD, disabled, and demo tests in standard runs
