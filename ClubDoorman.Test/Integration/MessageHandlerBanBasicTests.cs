@@ -111,7 +111,8 @@ public class MessageHandlerBanBasicTests
             appConfigMock.Object,
             violationTrackerMock.Object,
             loggerMock.Object,
-            userBanServiceMock.Object
+            userBanServiceMock.Object,
+            LoggingFlagsTestHelper.CreateMockLoggingFlags()
         );
     }
 

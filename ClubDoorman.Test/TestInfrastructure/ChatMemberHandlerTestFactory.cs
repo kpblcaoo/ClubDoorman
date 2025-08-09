@@ -48,7 +48,8 @@ public class ChatMemberHandlerTestFactory
             MessageServiceMock.Object,
             AppConfigMock.Object,
             new Mock<IUserCleanupService>().Object,
-            new Mock<IFolderInviteService>().Object
+            new Mock<IFolderInviteService>().Object,
+            LoggingFlagsTestHelper.CreateMockLoggingFlags()
         );
     }
 

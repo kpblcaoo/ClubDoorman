@@ -71,7 +71,8 @@ public class CallbackQueryHandlerTests
             new ViolationTracker(_mockViolationTrackerLogger.Object, _mockAppConfig.Object),
             _mockUserBanService.Object,
             mockServiceProvider.Object,
-            _mockLogger.Object
+            _mockLogger.Object,
+            LoggingFlagsTestHelper.CreateMockLoggingFlags()
         );
     }
 

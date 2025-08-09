@@ -112,7 +112,8 @@ public class MessageHandlerTestFactory
             AppConfigMock.Object,
             ViolationTrackerMock.Object,
             LoggerMock.Object,
-            UserBanServiceMock.Object
+            UserBanServiceMock.Object,
+            LoggingFlagsTestHelper.CreateMockLoggingFlags()
         );
     }
     
@@ -143,7 +144,8 @@ public class MessageHandlerTestFactory
             AppConfigMock.Object,
             ViolationTrackerMock.Object,
             LoggerMock.Object,
-            CreateRealUserBanService()
+            CreateRealUserBanService(),
+            LoggingFlagsTestHelper.CreateMockLoggingFlags()
         );
     }
 
@@ -487,7 +489,8 @@ public class MessageHandlerTestFactory
             AppConfigMock.Object,
             ViolationTrackerMock.Object,
             LoggerMock.Object,
-            UserBanServiceMock.Object
+            UserBanServiceMock.Object,
+            LoggingFlagsTestHelper.CreateMockLoggingFlags()
         );
     }
 

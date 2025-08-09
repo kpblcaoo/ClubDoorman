@@ -57,7 +57,8 @@ public class CallbackQueryHandlerTestFactory
             ViolationTrackerMock.Object,
             UserBanServiceMock.Object,
             ServiceProviderMock.Object,
-            LoggerMock.Object
+            LoggerMock.Object,
+            LoggingFlagsTestHelper.CreateMockLoggingFlags()
         );
     }
 

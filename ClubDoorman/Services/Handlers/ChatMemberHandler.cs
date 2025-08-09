@@ -186,7 +186,6 @@ public class ChatMemberHandler : IUpdateHandler
                 );
                 break;
         }
-        }
     }
 
     private static string FullName(string firstName, string? lastName) =>

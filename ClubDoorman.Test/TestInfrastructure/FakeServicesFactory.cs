@@ -183,7 +183,8 @@ public class FakeServicesFactory
             _appConfig,
             new ViolationTracker(_loggerFactory.CreateLogger<ViolationTracker>(), _appConfig),
             logger,
-            new Mock<IUserBanService>().Object);
+            new Mock<IUserBanService>().Object,
+            LoggingFlagsTestHelper.CreateMockLoggingFlags());
     }
 
     /// <summary>

@@ -111,7 +111,8 @@ public static class TestKitAutoFixture
                     bot, moderationService, captchaService, userManager, classifier,
                     badMessageManager, aiChecks, globalStatsManager, statisticsService,
                     serviceProvider.Object, userFlowLogger, messageService, chatLinkFormatter,
-                    botPermissionsService, appConfig, violationTracker, logger, userBanService);
+                    botPermissionsService, appConfig, violationTracker, logger, userBanService,
+                    LoggingFlagsTestHelper.CreateMockLoggingFlags());
             })
             .OmitAutoProperties());
 
