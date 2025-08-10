@@ -2,6 +2,20 @@ using ClubDoorman.Services.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.LinkFormatting;
+using ClubDoorman.Handlers;
+using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services;
 
 namespace ClubDoorman.Test.Unit.Services.Commands;
 
@@ -15,6 +29,30 @@ namespace ClubDoorman.Test.Unit.Services.Commands;
 public class CommandRouterIntegrationTests
 {
     /// <summary>
+    /// Настройка зависимостей для тестирования командных обработчиков
+    /// </summary>
+    private void SetupDependencies(IServiceCollection services)
+    {
+        // Добавляем необходимые зависимости для тестирования
+        services.AddSingleton(Mock.Of<ITelegramBotClientWrapper>());
+        services.AddSingleton(Mock.Of<IMessageHandler>());
+        services.AddSingleton(Mock.Of<IAppConfig>());
+        services.AddSingleton(Mock.Of<IModerationService>());
+        services.AddSingleton(Mock.Of<IMessageService>());
+        services.AddSingleton(Mock.Of<ISpamHamClassifier>());
+        services.AddSingleton(Mock.Of<IBotPermissionsService>());
+        services.AddSingleton(Mock.Of<IBadMessageManager>());
+        services.AddSingleton(Mock.Of<IAiChecks>());
+        services.AddSingleton(Mock.Of<IStatisticsService>());
+        services.AddSingleton(Mock.Of<IUserFlowLogger>());
+        services.AddSingleton(Mock.Of<IChatLinkFormatter>());
+        services.AddSingleton(Mock.Of<IViolationTracker>());
+        services.AddSingleton(Mock.Of<IUserBanService>());
+        services.AddSingleton(Mock.Of<IChannelModerationService>());
+        services.AddSingleton(Mock.Of<ILogChatService>());
+    }
+
+    /// <summary>
     /// Проверка успешной регистрации CommandRouter в DI контейнере
     /// <tags>di-registration, integration</tags>
     /// </summary>
@@ -24,6 +62,7 @@ public class CommandRouterIntegrationTests
         // Arrange
         var services = new ServiceCollection();
         services.AddLogging();
+        SetupDependencies(services);
         services.AddCommandsServices();
 
         // Act
@@ -45,6 +84,7 @@ public class CommandRouterIntegrationTests
         // Arrange
         var services = new ServiceCollection();
         services.AddLogging();
+        SetupDependencies(services);
         services.AddCommandsServices();
 
         // Act
@@ -79,6 +119,7 @@ public class CommandRouterIntegrationTests
         // Arrange
         var services = new ServiceCollection();
         services.AddLogging();
+        SetupDependencies(services);
         services.AddCommandsServices();
 
         // Act
