@@ -24,6 +24,7 @@ public static class MessagingModule
         services.AddSingleton<IChatLinkFormatter, ChatLinkFormatter>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<ILogChatService, LogChatService>();
+        services.AddScoped<IAdminNotificationService, AdminNotificationService>();
         
         return services;
     }

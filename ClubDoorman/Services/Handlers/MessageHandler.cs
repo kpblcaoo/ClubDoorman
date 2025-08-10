@@ -58,6 +58,10 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     private readonly ISuspiciousCommandHandler _suspiciousCommandHandler;
     private readonly ICommandRouter _commandRouter;
     private readonly ILogChatService _logChatService;
+    
+    // Новые сервисы для разгрузки MessageHandler
+    private readonly IAiCascadeService _aiCascadeService;
+    private readonly IAdminNotificationService _adminNotificationService;
 
     // Флаги присоединившихся пользователей (временные)
     private static readonly ConcurrentDictionary<string, byte> _joinedUserFlags = new();
@@ -109,7 +113,9 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         IStartCommandHandler startCommandHandler,
         ISuspiciousCommandHandler suspiciousCommandHandler,
         ICommandRouter commandRouter,
-        ILogChatService logChatService)
+        ILogChatService logChatService,
+        IAiCascadeService aiCascadeService,
+        IAdminNotificationService adminNotificationService)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
@@ -133,6 +139,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         _suspiciousCommandHandler = suspiciousCommandHandler ?? throw new ArgumentNullException(nameof(suspiciousCommandHandler));
         _commandRouter = commandRouter ?? throw new ArgumentNullException(nameof(commandRouter));
         _logChatService = logChatService ?? throw new ArgumentNullException(nameof(logChatService));
+        _aiCascadeService = aiCascadeService ?? throw new ArgumentNullException(nameof(aiCascadeService));
+        _adminNotificationService = adminNotificationService ?? throw new ArgumentNullException(nameof(adminNotificationService));
     }
 
     /// <summary>
@@ -815,7 +823,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // Выполняем только если базовая модерация разрешила сообщение
         if (moderationResult.Action == ModerationAction.Allow)
         {
-            var profileAnalysisResult = await PerformAiProfileAnalysis(message, user, chat, cancellationToken);
+            var profileAnalysisResult = await _aiCascadeService.PerformAiProfileAnalysisAsync(message, user, chat, cancellationToken);
             if (profileAnalysisResult)
             {
                 // Пользователь получил ограничения за подозрительный профиль, возвращаемся
@@ -851,11 +859,11 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
                     // Специальная обработка для ссылок и банальных приветствий - отправляем в лог-чат без предупреждения пользователю
                     if (moderationResult.Reason.Contains("Ссылки запрещены") || moderationResult.Reason.Contains("Банальное приветствие"))
                     {
-                        await DeleteAndReportToLogChat(message, moderationResult.Reason, cancellationToken);
+                        await _adminNotificationService.DeleteAndReportToLogChatAsync(message, moderationResult.Reason, cancellationToken);
                     }
                     else
                     {
-                        await DeleteAndReportMessage(message, moderationResult.Reason, isSilentMode, cancellationToken);
+                        await _adminNotificationService.DeleteAndReportMessageAsync(message, moderationResult.Reason, isSilentMode, cancellationToken);
                     }
                     _logger.LogInformation("Сообщение успешно обработано для удаления");
                     
@@ -870,17 +878,17 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
             
             case ModerationAction.Report:
                 _logger.LogInformation("Отправка в админ-чат: {Reason}", moderationResult.Reason);
-                await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
+                await _adminNotificationService.DontDeleteButReportMessageAsync(message, user, isSilentMode, cancellationToken);
                 break;
             
             case ModerationAction.RequireManualReview:
                 _logger.LogInformation("Требует ручной проверки: {Reason}", moderationResult.Reason);
-                await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
+                await _adminNotificationService.DontDeleteButReportMessageAsync(message, user, isSilentMode, cancellationToken);
                 break;
             
             case ModerationAction.RequireAiAnalysis:
                 _logger.LogInformation("ML не уверен, запускаем AI анализ: {Reason}", moderationResult.Reason);
-                await HandleAiCascadeAnalysis(message, user, moderationResult.Confidence ?? 0, isSilentMode, cancellationToken);
+                await _aiCascadeService.HandleAiCascadeAnalysisAsync(message, user, moderationResult.Confidence ?? 0, isSilentMode, cancellationToken);
                 break;
         }
     }

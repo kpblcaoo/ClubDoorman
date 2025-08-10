@@ -22,6 +22,7 @@ public static class AIModule
         services.AddSingleton<IMimicryClassifier, MimicryClassifier>();
         services.AddSingleton<IBadMessageManager, BadMessageManager>();
         services.AddSingleton<ISuspiciousUsersStorage, SuspiciousUsersStorage>();
+        services.AddScoped<IAiCascadeService, AiCascadeService>();
         
         return services;
     }
