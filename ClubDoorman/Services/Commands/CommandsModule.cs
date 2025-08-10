@@ -34,6 +34,7 @@ public static class CommandsModule
         services.AddSingleton<ICommandHandler, SpamCommandHandler>();
         services.AddSingleton<ICommandHandler, HamCommandHandler>();
         services.AddSingleton<ICommandHandler, StatsCommandHandler>();
+        services.AddSingleton<StatsCommandHandler>(); // Регистрируем как конкретный тип для StatsAliasCommandHandler
         services.AddSingleton<ICommandHandler, StatsAliasCommandHandler>();
         services.AddSingleton<ICommandHandler, SayCommandHandler>();
         
