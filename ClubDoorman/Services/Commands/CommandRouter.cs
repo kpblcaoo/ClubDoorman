@@ -37,6 +37,7 @@ public class CommandRouter : ICommandRouter
     /// <returns>true, если команда была обработана; false, если обработчик не найден</returns>
     public async Task<bool> HandleCommandAsync(Message message, CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("[CommandRouter] Вызван для команды: {Text} (UserId={UserId}, ChatId={ChatId})", message?.Text, message?.From?.Id, message?.Chat?.Id);
         if (message?.Text == null || !message.Text.StartsWith("/"))
         {
             _logger.LogDebug("Сообщение не является командой: {Text}", message?.Text);
