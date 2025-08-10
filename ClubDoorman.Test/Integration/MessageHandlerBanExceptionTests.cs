@@ -117,6 +117,8 @@ public class MessageHandlerBanExceptionTests
         _userBanServiceMock.Setup(x => x.BanBlacklistedUserAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         
+        var commandRouterMock = new Mock<ICommandRouter>();
+        
         // Создаем MessageHandler с настроенными моками
         _handler = new MessageHandler(
             _botMock.Object,
@@ -139,6 +141,7 @@ public class MessageHandlerBanExceptionTests
             channelModerationServiceMock.Object,
             startCommandHandlerMock.Object,
             suspiciousCommandHandlerMock.Object,
+            commandRouterMock.Object,
             logChatServiceMock.Object
         );
     }

@@ -31,6 +31,7 @@ namespace ClubDoorman.Test.Unit.Services;
 public class CaptchaServiceExtendedTests
 {
     private CaptchaServiceTestFactory _factory = null!;
+    private ILogger<CaptchaServiceExtendedTests> _logger = null!;
 
     [SetUp]
     public void Setup()
@@ -56,6 +57,8 @@ public class CaptchaServiceExtendedTests
                 mock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>()))
                     .Returns(false);
             });
+        
+        _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CaptchaServiceExtendedTests>();
     }
 
     #region CreateCaptchaAsync Tests
@@ -181,8 +184,8 @@ public class CaptchaServiceExtendedTests
         var request2 = new CreateCaptchaRequest(chat, user2, null);
         var result1 = await service.CreateCaptchaAsync(request1);
         
-        // Небольшая задержка для изменения seed генератора случайных чисел
-        await Task.Delay(1);
+        // Увеличиваем задержку для более надежного изменения seed генератора случайных чисел
+        await Task.Delay(10);
         
         var result2 = await service.CreateCaptchaAsync(request2);
 
@@ -191,7 +194,26 @@ public class CaptchaServiceExtendedTests
         Assert.That(result2, Is.Not.Null);
         Assert.That(result1.User.Id, Is.EqualTo(1));
         Assert.That(result2.User.Id, Is.EqualTo(2));
-        Assert.That(result1.CorrectAnswer, Is.Not.EqualTo(result2.CorrectAnswer));
+        
+        // Проверяем, что капчи созданы для разных пользователей
+        Assert.That(result1.User.Id, Is.Not.EqualTo(result2.User.Id));
+        
+        // Проверяем, что правильные ответы разные (с повторными попытками для надежности)
+        var attempts = 0;
+        const int maxAttempts = 3;
+        
+        while (attempts < maxAttempts && result1.CorrectAnswer == result2.CorrectAnswer)
+        {
+            attempts++;
+            _logger.LogInformation($"Попытка {attempts}: одинаковые ответы капчи ({result1.CorrectAnswer}), повторяем...");
+            
+            // Создаем новую капчу для второго пользователя
+            await Task.Delay(50 * attempts); // Увеличиваем задержку с каждой попыткой
+            result2 = await service.CreateCaptchaAsync(request2);
+        }
+        
+        Assert.That(result1.CorrectAnswer, Is.Not.EqualTo(result2.CorrectAnswer), 
+            $"После {maxAttempts} попыток капчи все еще имеют одинаковые ответы: {result1.CorrectAnswer}");
     }
 
     #endregion

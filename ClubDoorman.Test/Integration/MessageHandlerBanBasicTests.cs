@@ -98,6 +98,7 @@ public class MessageHandlerBanBasicTests
         var suspiciousCommandHandlerMock = new Mock<ISuspiciousCommandHandler>();
         var channelModerationServiceMock = new Mock<IChannelModerationService>();
         var logChatServiceMock = new Mock<ILogChatService>();
+        var commandRouterMock = new Mock<ICommandRouter>();
         
         // Создаем MessageHandler с настроенными моками
         _handler = new MessageHandler(
@@ -121,6 +122,7 @@ public class MessageHandlerBanBasicTests
             channelModerationServiceMock.Object,
             startCommandHandlerMock.Object,
             suspiciousCommandHandlerMock.Object,
+            commandRouterMock.Object,
             logChatServiceMock.Object
         );
     }

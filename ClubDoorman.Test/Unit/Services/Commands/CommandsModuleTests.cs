@@ -8,6 +8,12 @@ using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.ChannelModeration;
 
 namespace ClubDoorman.Test.Unit.Services.Commands;
 
@@ -33,6 +39,17 @@ public class CommandsModuleTests
         _services.AddSingleton(Mock.Of<IAppConfig>());
         _services.AddSingleton(Mock.Of<IModerationService>());
         _services.AddSingleton(Mock.Of<IMessageService>());
+        _services.AddSingleton(Mock.Of<ISpamHamClassifier>());
+        _services.AddSingleton(Mock.Of<IBotPermissionsService>());
+        _services.AddSingleton(Mock.Of<IBadMessageManager>());
+        _services.AddSingleton(Mock.Of<IAiChecks>());
+        _services.AddSingleton(Mock.Of<IStatisticsService>());
+        _services.AddSingleton(Mock.Of<IUserFlowLogger>());
+        _services.AddSingleton(Mock.Of<IChatLinkFormatter>());
+        _services.AddSingleton(Mock.Of<IViolationTracker>());
+        _services.AddSingleton(Mock.Of<IUserBanService>());
+        _services.AddSingleton(Mock.Of<IChannelModerationService>());
+        _services.AddSingleton(Mock.Of<ILogChatService>());
         
         // Добавляем логгеры
         _services.AddLogging();
