@@ -5,6 +5,8 @@ using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.Commands;
+using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
@@ -24,6 +26,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -165,6 +168,10 @@ public class FakeServicesFactory
         
         var logger = _loggerFactory.CreateLogger<MessageHandler>();
 
+        // Create mock command handlers
+        var startCommandHandler = Mock.Of<IStartCommandHandler>();
+        var suspiciousCommandHandler = Mock.Of<ISuspiciousCommandHandler>();
+        
         return new MessageHandler(
             _fakeBot,
             moderationService ?? moderationServiceMock.Object,
@@ -175,7 +182,6 @@ public class FakeServicesFactory
             aiChecksMock.Object,
             globalStatsManager,
             statisticsServiceMock.Object,
-            serviceProviderMock.Object,
             userFlowLoggerMock.Object,
             messageServiceMock.Object,
             chatLinkFormatterMock.Object,
@@ -183,7 +189,11 @@ public class FakeServicesFactory
             _appConfig,
             new ViolationTracker(_loggerFactory.CreateLogger<ViolationTracker>(), _appConfig),
             logger,
-            new Mock<IUserBanService>().Object);
+            new Mock<IUserBanService>().Object,
+            new Mock<IChannelModerationService>().Object,
+            startCommandHandler,
+            suspiciousCommandHandler,
+            new Mock<ILogChatService>().Object);
     }
 
     /// <summary>

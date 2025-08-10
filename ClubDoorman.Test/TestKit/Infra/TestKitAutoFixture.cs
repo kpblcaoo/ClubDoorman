@@ -20,6 +20,8 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Commands;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Test.TestKit.Infra;
 
@@ -95,9 +97,6 @@ public static class TestKitAutoFixture
                 var aiChecks = TK.CreateMockAiChecks().Object;
                 var globalStatsManager = new GlobalStatsManager();
                 var statisticsService = TK.CreateMockStatisticsService().Object;
-                var serviceProvider = new Mock<IServiceProvider>();
-                serviceProvider.Setup(x => x.GetService(typeof(IChannelModerationService)))
-                    .Returns(TK.CreateMock<IChannelModerationService>().Object);
                 var userFlowLogger = new Mock<IUserFlowLogger>().Object;
                 var messageService = TK.CreateMockMessageService().Object;
                 var chatLinkFormatter = new Mock<IChatLinkFormatter>().Object;
@@ -106,12 +105,26 @@ public static class TestKitAutoFixture
                 var violationTracker = new ViolationTracker(new Mock<ILogger<ViolationTracker>>().Object, appConfig);
                 var logger = new Mock<ILogger<MessageHandler>>().Object;
                 var userBanService = TK.CreateMockUserBanService().Object;
+                var channelModerationService = TK.CreateMock<IChannelModerationService>().Object;
+                var startCommandHandler = new Mock<StartCommandHandler>(
+                    Mock.Of<ITelegramBotClientWrapper>(),
+                    Mock.Of<ILogger<StartCommandHandler>>(),
+                    Mock.Of<IMessageService>(),
+                    Mock.Of<IAppConfig>()).Object;
+                var suspiciousCommandHandler = new Mock<SuspiciousCommandHandler>(
+                    Mock.Of<ITelegramBotClientWrapper>(),
+                    Mock.Of<IModerationService>(),
+                    Mock.Of<IMessageService>(),
+                    Mock.Of<ILogger<SuspiciousCommandHandler>>(),
+                    Mock.Of<IAppConfig>()).Object;
+                var logChatService = TK.CreateMock<ILogChatService>().Object;
 
                 return new MessageHandler(
                     bot, moderationService, captchaService, userManager, classifier,
                     badMessageManager, aiChecks, globalStatsManager, statisticsService,
-                    serviceProvider.Object, userFlowLogger, messageService, chatLinkFormatter,
-                    botPermissionsService, appConfig, violationTracker, logger, userBanService);
+                    userFlowLogger, messageService, chatLinkFormatter,
+                    botPermissionsService, appConfig, violationTracker, logger, userBanService,
+                    channelModerationService, startCommandHandler, suspiciousCommandHandler, logChatService);
             })
             .OmitAutoProperties());
 

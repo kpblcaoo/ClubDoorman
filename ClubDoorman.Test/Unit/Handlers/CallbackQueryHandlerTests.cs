@@ -41,6 +41,7 @@ public class CallbackQueryHandlerTests
     private Mock<ILogger<ViolationTracker>> _mockViolationTrackerLogger = null!;
     private Mock<IAppConfig> _mockAppConfig = null!;
     private Mock<IUserBanService> _mockUserBanService = null!;
+    private Mock<ILogChatService> _mockLogChatService = null!;
 
     [SetUp]
     public void Setup()
@@ -57,7 +58,7 @@ public class CallbackQueryHandlerTests
         _mockViolationTrackerLogger = new Mock<ILogger<ViolationTracker>>();
         _mockAppConfig = new Mock<IAppConfig>();
         _mockUserBanService = new Mock<IUserBanService>();
-        var mockServiceProvider = new Mock<IServiceProvider>();
+        _mockLogChatService = new Mock<ILogChatService>();
 
         _handler = new CallbackQueryHandler(
             _mockBot.Object,
@@ -70,7 +71,7 @@ public class CallbackQueryHandlerTests
             _mockMessageService.Object,
             new ViolationTracker(_mockViolationTrackerLogger.Object, _mockAppConfig.Object),
             _mockUserBanService.Object,
-            mockServiceProvider.Object,
+            _mockLogChatService.Object,
             _mockLogger.Object
         );
     }

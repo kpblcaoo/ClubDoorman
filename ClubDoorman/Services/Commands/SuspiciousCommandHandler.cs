@@ -14,7 +14,7 @@ namespace ClubDoorman.Services.Commands;
 /// <summary>
 /// Обработчик команд для управления подозрительными пользователями
 /// </summary>
-public class SuspiciousCommandHandler : ICommandHandler
+public class SuspiciousCommandHandler : ISuspiciousCommandHandler
 {
     private readonly ITelegramBotClientWrapper _bot;
     private readonly IModerationService _moderationService;

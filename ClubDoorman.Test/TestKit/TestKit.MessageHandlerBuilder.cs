@@ -59,6 +59,11 @@ public class MessageHandlerBuilder
     private readonly Mock<IUserBanService> _userBanServiceMock = TK.CreateMockUserBanService();
     private readonly Mock<ILogChatService> _logChatServiceMock = TK.CreateMock<ILogChatService>();
     private readonly Mock<IChannelModerationService> _channelModerationServiceMock = TK.CreateMock<IChannelModerationService>();
+    
+    // Мокаем интерфейсы командных обработчиков
+    private readonly Mock<IStartCommandHandler> _startCommandHandlerMock = TK.CreateMock<IStartCommandHandler>();
+    private readonly Mock<ISuspiciousCommandHandler> _suspiciousCommandHandlerMock = TK.CreateMock<ISuspiciousCommandHandler>();
+    
     private readonly Mock<ILogger<MessageHandler>> _loggerMock = TK.CreateLoggerMock<MessageHandler>();
     private readonly Mock<ILogger<SuspiciousCommandHandler>> _suspiciousCommandHandlerLoggerMock = TK.CreateLoggerMock<SuspiciousCommandHandler>();
     private readonly Mock<ISuspiciousUsersStorage> _suspiciousUsersStorageMock = TK.CreateMock<ISuspiciousUsersStorage>();
@@ -306,13 +311,6 @@ public class MessageHandlerBuilder
     /// </summary>
     public MessageHandler Build()
     {
-        // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
-        if (!_serviceProviderMock.Setups.Any(s => s.ToString().Contains("IChannelModerationService")))
-        {
-            _serviceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
-                .Returns(_channelModerationServiceMock.Object);
-        }
-        
         return new MessageHandler(
             _botMock.Object,
             _moderationServiceMock.Object,
@@ -323,7 +321,6 @@ public class MessageHandlerBuilder
             _aiChecksMock.Object,
             new GlobalStatsManager(),
             _statisticsServiceMock.Object,
-            _serviceProviderMock.Object,
             _userFlowLoggerMock.Object,
             _messageServiceMock.Object,
             _chatLinkFormatterMock.Object,
@@ -331,7 +328,11 @@ public class MessageHandlerBuilder
             _appConfigMock.Object,
             _violationTrackerMock.Object,
             _loggerMock.Object,
-            _userBanServiceMock.Object
+            _userBanServiceMock.Object,
+            _channelModerationServiceMock.Object,
+            _startCommandHandlerMock.Object,
+            _suspiciousCommandHandlerMock.Object,
+            _logChatServiceMock.Object
         );
     }
 

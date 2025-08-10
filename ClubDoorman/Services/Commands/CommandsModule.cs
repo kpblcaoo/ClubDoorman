@@ -19,9 +19,9 @@ public static class CommandsModule
     {
         services.AddSingleton<ICommandProcessingService, CommandProcessingService>();
         services.AddSingleton<ICommandHandler, StartCommandHandler>();
-        services.AddSingleton<StartCommandHandler>();
+        services.AddSingleton<IStartCommandHandler, StartCommandHandler>();
         services.AddSingleton<ICommandHandler, SuspiciousCommandHandler>();
-        services.AddSingleton<SuspiciousCommandHandler>();
+        services.AddSingleton<ISuspiciousCommandHandler, SuspiciousCommandHandler>();
         
         return services;
     }
