@@ -15,7 +15,6 @@ using ClubDoorman.Models.Requests;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.UserBan;
-using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -28,6 +27,7 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.TextProcessing;
+using ClubDoorman.Services.Commands;
 using ClubDoorman.Handlers;
 
 namespace ClubDoorman.Services.Handlers;
@@ -47,7 +47,6 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     private readonly GlobalStatsManager _globalStatsManager;
     private readonly IStatisticsService _statisticsService;
     private readonly ILogger<MessageHandler> _logger;
-    private readonly IServiceProvider _serviceProvider;
     private readonly IUserFlowLogger _userFlowLogger;
     private readonly IMessageService _messageService;
     private readonly IChatLinkFormatter _chatLinkFormatter;
@@ -56,6 +55,9 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     private readonly IViolationTracker _violationTracker;
     private readonly IUserBanService _userBanService;
     private readonly IChannelModerationService _channelModerationService;
+    private readonly StartCommandHandler _startCommandHandler;
+    private readonly SuspiciousCommandHandler _suspiciousCommandHandler;
+    private readonly ILogChatService _logChatService;
 
     // Флаги присоединившихся пользователей (временные)
     private static readonly ConcurrentDictionary<string, byte> _joinedUserFlags = new();
@@ -72,7 +74,6 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     /// <param name="aiChecks">AI проверки</param>
     /// <param name="globalStatsManager">Менеджер глобальной статистики</param>
     /// <param name="statisticsService">Сервис статистики</param>
-    /// <param name="serviceProvider">Провайдер сервисов</param>
     /// <param name="userFlowLogger">Логгер пользовательского флоу</param>
     /// <param name="messageService">Сервис уведомлений</param>
     /// <param name="chatLinkFormatter">Форматтер ссылок на чаты</param>
@@ -81,6 +82,10 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     /// <param name="violationTracker">Трекер нарушений</param>
     /// <param name="logger">Логгер</param>
     /// <param name="userBanService">Сервис управления банами пользователей</param>
+    /// <param name="channelModerationService">Сервис модерации каналов</param>
+    /// <param name="startCommandHandler">Обработчик команды /start</param>
+    /// <param name="suspiciousCommandHandler">Обработчик команды /suspicious</param>
+    /// <param name="logChatService">Сервис лог-чата</param>
     /// <exception cref="ArgumentNullException">Если любой из параметров равен null</exception>
     public MessageHandler(
         ITelegramBotClientWrapper bot,
@@ -92,7 +97,6 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         IAiChecks aiChecks,
         GlobalStatsManager globalStatsManager,
         IStatisticsService statisticsService,
-        IServiceProvider serviceProvider,
         IUserFlowLogger userFlowLogger,
         IMessageService messageService,
         IChatLinkFormatter chatLinkFormatter,
@@ -100,7 +104,11 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         IAppConfig appConfig,
         IViolationTracker violationTracker,
         ILogger<MessageHandler> logger,
-        IUserBanService userBanService)
+        IUserBanService userBanService,
+        IChannelModerationService channelModerationService,
+        StartCommandHandler startCommandHandler,
+        SuspiciousCommandHandler suspiciousCommandHandler,
+        ILogChatService logChatService)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
@@ -111,7 +119,6 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         _aiChecks = aiChecks ?? throw new ArgumentNullException(nameof(aiChecks));
         _globalStatsManager = globalStatsManager ?? throw new ArgumentNullException(nameof(globalStatsManager));
         _statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _userFlowLogger = userFlowLogger ?? throw new ArgumentNullException(nameof(userFlowLogger));
         _messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
         _chatLinkFormatter = chatLinkFormatter ?? throw new ArgumentNullException(nameof(chatLinkFormatter));
@@ -120,8 +127,10 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         _violationTracker = violationTracker ?? throw new ArgumentNullException(nameof(violationTracker));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
-        _channelModerationService = serviceProvider.GetService<IChannelModerationService>() 
-            ?? throw new InvalidOperationException("IChannelModerationService is not registered in the DI container");
+        _channelModerationService = channelModerationService ?? throw new ArgumentNullException(nameof(channelModerationService));
+        _startCommandHandler = startCommandHandler ?? throw new ArgumentNullException(nameof(startCommandHandler));
+        _suspiciousCommandHandler = suspiciousCommandHandler ?? throw new ArgumentNullException(nameof(suspiciousCommandHandler));
+        _logChatService = logChatService ?? throw new ArgumentNullException(nameof(logChatService));
     }
 
     /// <summary>
@@ -231,18 +240,16 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // Обработка команды /start
         if (command == "start")
         {
-            // Получаем StartCommandHandler из DI и делегируем обработку
-            var startHandler = _serviceProvider.GetRequiredService<StartCommandHandler>();
-            await startHandler.HandleAsync(message, cancellationToken);
+            // Делегируем обработку StartCommandHandler
+            await _startCommandHandler.HandleAsync(message, cancellationToken);
             return;
         }
 
         // Обработка команды /suspicious
         if (command == "suspicious")
         {
-            // Получаем SuspiciousCommandHandler из DI и делегируем обработку
-            var suspiciousHandler = _serviceProvider.GetRequiredService<SuspiciousCommandHandler>();
-            await suspiciousHandler.HandleAsync(message, cancellationToken);
+            // Делегируем обработку SuspiciousCommandHandler
+            await _suspiciousCommandHandler.HandleAsync(message, cancellationToken);
             return;
         }
 
@@ -900,8 +907,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         var user = message.From;
 
         // Используем сервис лог-чата для отправки уведомления
-        var logChatService = _serviceProvider.GetRequiredService<ILogChatService>();
-        await logChatService.SendLogNotificationAsync(message, reason, cancellationToken);
+        await _logChatService.SendLogNotificationAsync(message, reason, cancellationToken);
         
         // Небольшая задержка перед предупреждением для избежания race condition
         try

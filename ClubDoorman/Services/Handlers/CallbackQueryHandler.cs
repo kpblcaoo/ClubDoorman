@@ -36,7 +36,7 @@ public class CallbackQueryHandler : IUpdateHandler
     private readonly IMessageService _messageService;
     private readonly IViolationTracker _violationTracker;
     private readonly IUserBanService _userBanService;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogChatService _logChatService;
     private readonly ILogger<CallbackQueryHandler> _logger;
 
     public CallbackQueryHandler(
@@ -50,7 +50,7 @@ public class CallbackQueryHandler : IUpdateHandler
         IMessageService messageService,
         IViolationTracker violationTracker,
         IUserBanService userBanService,
-        IServiceProvider serviceProvider,
+        ILogChatService logChatService,
         ILogger<CallbackQueryHandler> logger)
     {
         _bot = bot;
@@ -63,7 +63,7 @@ public class CallbackQueryHandler : IUpdateHandler
         _messageService = messageService;
         _violationTracker = violationTracker;
         _userBanService = userBanService;
-        _serviceProvider = serviceProvider;
+        _logChatService = logChatService;
         _logger = logger;
     }
 
@@ -381,8 +381,7 @@ public class CallbackQueryHandler : IUpdateHandler
         try
         {
             // Используем сервис лог-чата для обработки бана
-            var logChatService = _serviceProvider.GetRequiredService<ILogChatService>();
-            await logChatService.HandleLogBanAsync(chatId, userId, adminName, cancellationToken);
+            await _logChatService.HandleLogBanAsync(chatId, userId, adminName, cancellationToken);
             
             // Обновляем сообщение с результатом действия (без упоминания автобана)
             var banMessage = $"{callbackQuery.Message.Text}\n\n🚫 Забанен администратором {adminName}\n🧹 Пользователь очищен из всех списков";
