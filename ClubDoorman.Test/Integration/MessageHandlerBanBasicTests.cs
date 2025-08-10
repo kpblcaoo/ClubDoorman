@@ -21,9 +21,8 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
-using ClubDoorman.Services.Handlers;
 using ClubDoorman.Services.Commands;
-using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Integration;
 
@@ -64,23 +63,15 @@ public class MessageHandlerBanBasicTests
         var aiChecksMock = new Mock<IAiChecks>();
         var globalStatsManagerMock = new Mock<GlobalStatsManager>();
         var statisticsServiceMock = new Mock<IStatisticsService>();
+        var serviceProviderMock = new Mock<IServiceProvider>();
         var userFlowLoggerMock = new Mock<IUserFlowLogger>();
         var chatLinkFormatterMock = new Mock<IChatLinkFormatter>();
         var violationTrackerMock = new Mock<IViolationTracker>();
         var userBanServiceMock = TK.CreateMockUserBanService();
-        var channelModerationServiceMock = new Mock<IChannelModerationService>();
-        var startCommandHandlerMock = new Mock<StartCommandHandler>(
-            Mock.Of<ITelegramBotClientWrapper>(),
-            Mock.Of<ILogger<StartCommandHandler>>(),
-            Mock.Of<IMessageService>(),
-            Mock.Of<IAppConfig>());
-        var suspiciousCommandHandlerMock = new Mock<SuspiciousCommandHandler>(
-            Mock.Of<ITelegramBotClientWrapper>(),
-            Mock.Of<IModerationService>(),
-            Mock.Of<IMessageService>(),
-            Mock.Of<ILogger<SuspiciousCommandHandler>>(),
-            Mock.Of<IAppConfig>());
-        var logChatServiceMock = new Mock<ILogChatService>();
+        
+        // Настраиваем ServiceProvider для возврата IChannelModerationService
+        serviceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
+            .Returns(new Mock<IChannelModerationService>().Object);
         
         // Настраиваем базовые моки
         appConfigMock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
@@ -101,6 +92,12 @@ public class MessageHandlerBanBasicTests
         
         _moderationServiceMock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
             .Returns(false);
+        
+        // Создаем моки для командных обработчиков
+        var startCommandHandlerMock = new Mock<IStartCommandHandler>();
+        var suspiciousCommandHandlerMock = new Mock<ISuspiciousCommandHandler>();
+        var channelModerationServiceMock = new Mock<IChannelModerationService>();
+        var logChatServiceMock = new Mock<ILogChatService>();
         
         // Создаем MessageHandler с настроенными моками
         _handler = new MessageHandler(

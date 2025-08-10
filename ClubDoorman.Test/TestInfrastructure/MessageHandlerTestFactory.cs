@@ -63,8 +63,6 @@ public class MessageHandlerTestFactory
     public Mock<IViolationTracker> ViolationTrackerMock { get; } = TK.CreateMockViolationTracker();
     public Mock<IUserBanService> UserBanServiceMock { get; } = TK.CreateMockUserBanService();
     public Mock<IChannelModerationService> ChannelModerationServiceMock { get; } = TK.CreateMock<IChannelModerationService>();
-    public Mock<StartCommandHandler> StartCommandHandlerMock { get; } = TK.CreateMock<StartCommandHandler>();
-    public Mock<SuspiciousCommandHandler> SuspiciousCommandHandlerMock { get; } = TK.CreateMock<SuspiciousCommandHandler>();
     public Mock<ILogChatService> LogChatServiceMock { get; } = TK.CreateMock<ILogChatService>();
 
     public Mock<IUserCleanupService> UserCleanupServiceMock { get; } = TK.CreateMock<IUserCleanupService>();
@@ -89,6 +87,12 @@ public class MessageHandlerTestFactory
     public Mock<ILogger<SuspiciousCommandHandler>> SuspiciousCommandHandlerLoggerMock { get; } = TK.CreateLoggerMock<SuspiciousCommandHandler>();
     public Mock<ISuspiciousUsersStorage> SuspiciousUsersStorageMock { get; } = TK.CreateMock<ISuspiciousUsersStorage>();
     public FakeTelegramClient FakeBotClient { get; } = FakeTelegramClientFactory.Create();
+
+    // Мокаем интерфейсы командных обработчиков
+    public Mock<IStartCommandHandler> StartCommandHandlerMock { get; } = TK.CreateMock<IStartCommandHandler>();
+    public Mock<ISuspiciousCommandHandler> SuspiciousCommandHandlerMock { get; } = TK.CreateMock<ISuspiciousCommandHandler>();
+
+
 
     public MessageHandler CreateMessageHandler()
     {

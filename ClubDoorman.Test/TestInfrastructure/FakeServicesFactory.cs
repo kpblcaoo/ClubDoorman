@@ -169,18 +169,8 @@ public class FakeServicesFactory
         var logger = _loggerFactory.CreateLogger<MessageHandler>();
 
         // Create mock command handlers
-        var startCommandHandlerMock = new Mock<StartCommandHandler>(
-            Mock.Of<ITelegramBotClientWrapper>(),
-            Mock.Of<ILogger<StartCommandHandler>>(),
-            Mock.Of<IMessageService>(),
-            Mock.Of<IAppConfig>());
-        
-        var suspiciousCommandHandlerMock = new Mock<SuspiciousCommandHandler>(
-            Mock.Of<ITelegramBotClientWrapper>(),
-            Mock.Of<IModerationService>(),
-            Mock.Of<IMessageService>(),
-            Mock.Of<ILogger<SuspiciousCommandHandler>>(),
-            Mock.Of<IAppConfig>());
+        var startCommandHandler = Mock.Of<IStartCommandHandler>();
+        var suspiciousCommandHandler = Mock.Of<ISuspiciousCommandHandler>();
         
         return new MessageHandler(
             _fakeBot,
@@ -201,8 +191,8 @@ public class FakeServicesFactory
             logger,
             new Mock<IUserBanService>().Object,
             new Mock<IChannelModerationService>().Object,
-            startCommandHandlerMock.Object,
-            suspiciousCommandHandlerMock.Object,
+            startCommandHandler,
+            suspiciousCommandHandler,
             new Mock<ILogChatService>().Object);
     }
 

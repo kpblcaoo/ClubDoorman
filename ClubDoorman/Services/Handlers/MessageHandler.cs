@@ -55,8 +55,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     private readonly IViolationTracker _violationTracker;
     private readonly IUserBanService _userBanService;
     private readonly IChannelModerationService _channelModerationService;
-    private readonly StartCommandHandler _startCommandHandler;
-    private readonly SuspiciousCommandHandler _suspiciousCommandHandler;
+    private readonly IStartCommandHandler _startCommandHandler;
+    private readonly ISuspiciousCommandHandler _suspiciousCommandHandler;
     private readonly ILogChatService _logChatService;
 
     // Флаги присоединившихся пользователей (временные)
@@ -106,8 +106,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         ILogger<MessageHandler> logger,
         IUserBanService userBanService,
         IChannelModerationService channelModerationService,
-        StartCommandHandler startCommandHandler,
-        SuspiciousCommandHandler suspiciousCommandHandler,
+        IStartCommandHandler startCommandHandler,
+        ISuspiciousCommandHandler suspiciousCommandHandler,
         ILogChatService logChatService)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));

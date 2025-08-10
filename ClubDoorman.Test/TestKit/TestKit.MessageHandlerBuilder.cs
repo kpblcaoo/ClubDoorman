@@ -59,8 +59,11 @@ public class MessageHandlerBuilder
     private readonly Mock<IUserBanService> _userBanServiceMock = TK.CreateMockUserBanService();
     private readonly Mock<ILogChatService> _logChatServiceMock = TK.CreateMock<ILogChatService>();
     private readonly Mock<IChannelModerationService> _channelModerationServiceMock = TK.CreateMock<IChannelModerationService>();
-    private readonly Mock<StartCommandHandler> _startCommandHandlerMock = TK.CreateMock<StartCommandHandler>();
-    private readonly Mock<SuspiciousCommandHandler> _suspiciousCommandHandlerMock = TK.CreateMock<SuspiciousCommandHandler>();
+    
+    // Мокаем интерфейсы командных обработчиков
+    private readonly Mock<IStartCommandHandler> _startCommandHandlerMock = TK.CreateMock<IStartCommandHandler>();
+    private readonly Mock<ISuspiciousCommandHandler> _suspiciousCommandHandlerMock = TK.CreateMock<ISuspiciousCommandHandler>();
+    
     private readonly Mock<ILogger<MessageHandler>> _loggerMock = TK.CreateLoggerMock<MessageHandler>();
     private readonly Mock<ILogger<SuspiciousCommandHandler>> _suspiciousCommandHandlerLoggerMock = TK.CreateLoggerMock<SuspiciousCommandHandler>();
     private readonly Mock<ISuspiciousUsersStorage> _suspiciousUsersStorageMock = TK.CreateMock<ISuspiciousUsersStorage>();
