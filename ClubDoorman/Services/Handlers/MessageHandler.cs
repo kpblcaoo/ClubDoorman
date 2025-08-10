@@ -27,7 +27,6 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.TextProcessing;
-using ClubDoorman.Services.Commands;
 using ClubDoorman.Handlers;
 
 namespace ClubDoorman.Services.Handlers;
@@ -57,6 +56,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     private readonly IChannelModerationService _channelModerationService;
     private readonly IStartCommandHandler _startCommandHandler;
     private readonly ISuspiciousCommandHandler _suspiciousCommandHandler;
+    private readonly ICommandRouter _commandRouter;
     private readonly ILogChatService _logChatService;
 
     // Флаги присоединившихся пользователей (временные)
@@ -84,7 +84,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     /// <param name="userBanService">Сервис управления банами пользователей</param>
     /// <param name="channelModerationService">Сервис модерации каналов</param>
     /// <param name="startCommandHandler">Обработчик команды /start</param>
-    /// <param name="suspiciousCommandHandler">Обработчик команды /suspicious</param>
+    /// <param name="commandRouter">Маршрутизатор команд</param>
     /// <param name="logChatService">Сервис лог-чата</param>
     /// <exception cref="ArgumentNullException">Если любой из параметров равен null</exception>
     public MessageHandler(
@@ -108,6 +108,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         IChannelModerationService channelModerationService,
         IStartCommandHandler startCommandHandler,
         ISuspiciousCommandHandler suspiciousCommandHandler,
+        ICommandRouter commandRouter,
         ILogChatService logChatService)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
@@ -130,6 +131,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         _channelModerationService = channelModerationService ?? throw new ArgumentNullException(nameof(channelModerationService));
         _startCommandHandler = startCommandHandler ?? throw new ArgumentNullException(nameof(startCommandHandler));
         _suspiciousCommandHandler = suspiciousCommandHandler ?? throw new ArgumentNullException(nameof(suspiciousCommandHandler));
+        _commandRouter = commandRouter ?? throw new ArgumentNullException(nameof(commandRouter));
         _logChatService = logChatService ?? throw new ArgumentNullException(nameof(logChatService));
     }
 
@@ -234,39 +236,51 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
 
     public async Task HandleCommandAsync(Message message, CancellationToken cancellationToken)
     {
+        // Сначала пытаемся обработать команду через новый CommandRouter
+        var handled = await _commandRouter.HandleCommandAsync(message, cancellationToken);
+        
+        if (handled)
+        {
+            _logger.LogDebug("Команда обработана через CommandRouter: {Command}", 
+                message.Text?.Split(' ')[0]);
+            return;
+        }
+
+        // Если CommandRouter не обработал команду, используем старую логику для обратной совместимости
+        _logger.LogDebug("CommandRouter не обработал команду, используем fallback логику: {Command}", 
+            message.Text?.Split(' ')[0]);
+
         var commandText = message.Text!.Split(' ')[0].ToLower();
         var command = commandText.StartsWith("/") ? commandText.Substring(1) : commandText;
 
-        // Обработка команды /start
+        // Обработка команды /start (fallback)
         if (command == "start")
         {
-            // Делегируем обработку StartCommandHandler
             await _startCommandHandler.HandleAsync(message, cancellationToken);
             return;
         }
 
-        // Обработка команды /suspicious
+        // Обработка команды /suspicious (fallback)
         if (command == "suspicious")
         {
-            // Делегируем обработку SuspiciousCommandHandler
             await _suspiciousCommandHandler.HandleAsync(message, cancellationToken);
             return;
         }
 
-        // Админские команды (/spam, /ham, /check) - только в админ-чатах
+        // Админские команды - fallback к старой логике
         var isAdminChat = message.Chat.Id == _appConfig.AdminChatId || message.Chat.Id == _appConfig.LogAdminChatId;
         if (isAdminChat && message.ReplyToMessage != null && (command == "spam" || command == "ham" || command == "check"))
         {
             await HandleAdminCommandAsync(message, command, cancellationToken);
         }
         
-        // Команда статистики по группам (/stat, /stats) - только в админ-чатах
+        // Команда статистики по группам (/stat, /stats) - fallback к старой логике
         if (isAdminChat && (command == "stat" || command == "stats"))
         {
             await HandleStatsCommandAsync(message, cancellationToken);
         }
         
-        // Команда отправки сообщения (/say) - только в админ-чатах
+        // Команда отправки сообщения (/say) - fallback к старой логике
         if (isAdminChat && command == "say")
         {
             await HandleSayCommandAsync(message, cancellationToken);
