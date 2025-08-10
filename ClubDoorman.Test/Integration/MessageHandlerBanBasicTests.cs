@@ -4,6 +4,8 @@ using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
 using ClubDoorman.TestInfrastructure;
@@ -99,6 +101,8 @@ public class MessageHandlerBanBasicTests
         var channelModerationServiceMock = new Mock<IChannelModerationService>();
         var logChatServiceMock = new Mock<ILogChatService>();
         var commandRouterMock = new Mock<ICommandRouter>();
+        var aiCascadeServiceMock = new Mock<IAiCascadeService>();
+        var adminNotificationServiceMock = new Mock<IAdminNotificationService>();
         
         // Создаем MessageHandler с настроенными моками
         _handler = new MessageHandler(
@@ -123,7 +127,9 @@ public class MessageHandlerBanBasicTests
             startCommandHandlerMock.Object,
             suspiciousCommandHandlerMock.Object,
             commandRouterMock.Object,
-            logChatServiceMock.Object
+            logChatServiceMock.Object,
+            aiCascadeServiceMock.Object,
+            adminNotificationServiceMock.Object
         );
     }
 

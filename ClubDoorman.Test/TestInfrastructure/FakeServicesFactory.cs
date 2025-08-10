@@ -7,6 +7,7 @@ using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Commands;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.AI;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
@@ -172,6 +173,8 @@ public class FakeServicesFactory
         var startCommandHandler = Mock.Of<IStartCommandHandler>();
         var suspiciousCommandHandler = Mock.Of<ISuspiciousCommandHandler>();
         var commandRouter = Mock.Of<ICommandRouter>();
+        var aiCascadeService = Mock.Of<IAiCascadeService>();
+        var adminNotificationService = Mock.Of<IAdminNotificationService>();
         
         return new MessageHandler(
             _fakeBot,
@@ -195,7 +198,9 @@ public class FakeServicesFactory
             startCommandHandler,
             suspiciousCommandHandler,
             commandRouter,
-            new Mock<ILogChatService>().Object);
+            new Mock<ILogChatService>().Object,
+            aiCascadeService,
+            adminNotificationService);
     }
 
     /// <summary>

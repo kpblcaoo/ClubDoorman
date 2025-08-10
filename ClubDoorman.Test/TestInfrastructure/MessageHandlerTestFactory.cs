@@ -7,6 +7,7 @@ using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Commands;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.AI;
 using ClubDoorman.Handlers;
 
 using ClubDoorman.Services;
@@ -64,6 +65,10 @@ public class MessageHandlerTestFactory
     public Mock<IUserBanService> UserBanServiceMock { get; } = TK.CreateMockUserBanService();
     public Mock<IChannelModerationService> ChannelModerationServiceMock { get; } = TK.CreateMock<IChannelModerationService>();
     public Mock<ILogChatService> LogChatServiceMock { get; } = TK.CreateMock<ILogChatService>();
+    
+    // Новые сервисы для разгрузки MessageHandler
+    public Mock<IAiCascadeService> AiCascadeServiceMock { get; } = TK.CreateMock<IAiCascadeService>();
+    public Mock<IAdminNotificationService> AdminNotificationServiceMock { get; } = TK.CreateMock<IAdminNotificationService>();
 
     public Mock<IUserCleanupService> UserCleanupServiceMock { get; } = TK.CreateMock<IUserCleanupService>();
     
@@ -119,7 +124,9 @@ public class MessageHandlerTestFactory
             StartCommandHandlerMock.Object,
             SuspiciousCommandHandlerMock.Object,
             CommandRouterMock.Object,
-            LogChatServiceMock.Object
+            LogChatServiceMock.Object,
+            AiCascadeServiceMock.Object,
+            AdminNotificationServiceMock.Object
         );
     }
     
@@ -147,7 +154,9 @@ public class MessageHandlerTestFactory
             StartCommandHandlerMock.Object,
             SuspiciousCommandHandlerMock.Object,
             CommandRouterMock.Object,
-            LogChatServiceMock.Object
+            LogChatServiceMock.Object,
+            AiCascadeServiceMock.Object,
+            AdminNotificationServiceMock.Object
         );
     }
 
@@ -495,7 +504,9 @@ public class MessageHandlerTestFactory
             StartCommandHandlerMock.Object,
             SuspiciousCommandHandlerMock.Object,
             CommandRouterMock.Object,
-            LogChatServiceMock.Object
+            LogChatServiceMock.Object,
+            AiCascadeServiceMock.Object,
+            AdminNotificationServiceMock.Object
         );
     }
 

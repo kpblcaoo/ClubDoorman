@@ -60,6 +60,10 @@ public class MessageHandlerBuilder
     private readonly Mock<ILogChatService> _logChatServiceMock = TK.CreateMock<ILogChatService>();
     private readonly Mock<IChannelModerationService> _channelModerationServiceMock = TK.CreateMock<IChannelModerationService>();
     
+    // Новые сервисы для разгрузки MessageHandler
+    private readonly Mock<IAiCascadeService> _aiCascadeServiceMock = TK.CreateMock<IAiCascadeService>();
+    private readonly Mock<IAdminNotificationService> _adminNotificationServiceMock = TK.CreateMock<IAdminNotificationService>();
+    
     // Мокаем интерфейсы командных обработчиков
     private readonly Mock<IStartCommandHandler> _startCommandHandlerMock = TK.CreateMock<IStartCommandHandler>();
     private readonly Mock<ISuspiciousCommandHandler> _suspiciousCommandHandlerMock = TK.CreateMock<ISuspiciousCommandHandler>();
@@ -334,7 +338,9 @@ public class MessageHandlerBuilder
             _startCommandHandlerMock.Object,
             _suspiciousCommandHandlerMock.Object,
             _commandRouterMock.Object,
-            _logChatServiceMock.Object
+            _logChatServiceMock.Object,
+            _aiCascadeServiceMock.Object,
+            _adminNotificationServiceMock.Object
         );
     }
 
