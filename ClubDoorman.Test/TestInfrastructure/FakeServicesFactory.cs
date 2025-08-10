@@ -93,7 +93,9 @@ public class FakeServicesFactory
     /// </summary>
     public MessageHandler CreateMessageHandler(
         FakeCaptchaService? captchaService = null,
-        FakeModerationService? moderationService = null)
+        FakeModerationService? moderationService = null,
+        ILogger<MessageHandler>? logger = null,
+        ILoggingFlagsConfig? loggingFlags = null)
     {
         // Создаем моки с правильной настройкой
         var userManagerMock = new Mock<IUserManager>();
@@ -163,7 +165,7 @@ public class FakeServicesFactory
         serviceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
             .Returns(new Mock<IChannelModerationService>().Object);
         
-        var logger = _loggerFactory.CreateLogger<MessageHandler>();
+        var defaultLogger = _loggerFactory.CreateLogger<MessageHandler>();
 
         return new MessageHandler(
             _fakeBot,
@@ -182,8 +184,9 @@ public class FakeServicesFactory
             botPermissionsServiceMock.Object,
             _appConfig,
             new ViolationTracker(_loggerFactory.CreateLogger<ViolationTracker>(), _appConfig),
-            logger,
-            new Mock<IUserBanService>().Object);
+            logger ?? defaultLogger,
+            new Mock<IUserBanService>().Object,
+            loggingFlags ?? new FakeLoggingFlagsConfig());
     }
 
     /// <summary>
@@ -263,5 +266,15 @@ public class FakeServicesFactory
             return factory.CreateModerationService()
                 .SetResult(new ModerationResult(ModerationAction.Report, "Обнаружена мимикрия", 0.8));
         }
+    }
+
+    /// <summary>
+    /// Fake implementation of ILoggingFlagsConfig for testing
+    /// </summary>
+    private class FakeLoggingFlagsConfig : ILoggingFlagsConfig
+    {
+        public bool TraceEnabled => false; // Disabled by default in tests
+        public bool GoldenMasterEnabled => false; // Disabled by default in tests
+        public double GoldenSampleRate => 0.0; // No sampling in tests
     }
 } 

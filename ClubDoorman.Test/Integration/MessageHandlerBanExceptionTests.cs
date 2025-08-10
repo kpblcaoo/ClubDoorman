@@ -18,6 +18,7 @@ using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
@@ -126,7 +127,8 @@ public class MessageHandlerBanExceptionTests
             appConfigMock.Object,
             violationTrackerMock.Object,
             _loggerMock.Object,
-            _userBanServiceMock.Object
+            _userBanServiceMock.Object,
+            new Mock<ILoggingFlagsConfig>().Object
         );
     }
 

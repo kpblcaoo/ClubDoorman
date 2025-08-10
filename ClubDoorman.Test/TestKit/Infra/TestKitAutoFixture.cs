@@ -18,6 +18,7 @@ using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
 
@@ -111,7 +112,8 @@ public static class TestKitAutoFixture
                     bot, moderationService, captchaService, userManager, classifier,
                     badMessageManager, aiChecks, globalStatsManager, statisticsService,
                     serviceProvider.Object, userFlowLogger, messageService, chatLinkFormatter,
-                    botPermissionsService, appConfig, violationTracker, logger, userBanService);
+                    botPermissionsService, appConfig, violationTracker, logger, userBanService,
+                    new Mock<ILoggingFlagsConfig>().Object);
             })
             .OmitAutoProperties());
 

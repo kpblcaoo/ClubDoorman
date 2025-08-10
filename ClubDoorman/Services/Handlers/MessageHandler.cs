@@ -29,6 +29,7 @@ using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.TextProcessing;
 using ClubDoorman.Handlers;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -56,6 +57,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     private readonly IViolationTracker _violationTracker;
     private readonly IUserBanService _userBanService;
     private readonly IChannelModerationService _channelModerationService;
+    private readonly ILoggingFlagsConfig _loggingFlags;
 
     // Флаги присоединившихся пользователей (временные)
     private static readonly ConcurrentDictionary<string, byte> _joinedUserFlags = new();
@@ -81,6 +83,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     /// <param name="violationTracker">Трекер нарушений</param>
     /// <param name="logger">Логгер</param>
     /// <param name="userBanService">Сервис управления банами пользователей</param>
+    /// <param name="loggingFlags">Конфигурация флагов логирования</param>
     /// <exception cref="ArgumentNullException">Если любой из параметров равен null</exception>
     public MessageHandler(
         ITelegramBotClientWrapper bot,
@@ -100,7 +103,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         IAppConfig appConfig,
         IViolationTracker violationTracker,
         ILogger<MessageHandler> logger,
-        IUserBanService userBanService)
+        IUserBanService userBanService,
+        ILoggingFlagsConfig loggingFlags)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
@@ -120,6 +124,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         _violationTracker = violationTracker ?? throw new ArgumentNullException(nameof(violationTracker));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
+        _loggingFlags = loggingFlags ?? throw new ArgumentNullException(nameof(loggingFlags));
         _channelModerationService = serviceProvider.GetService<IChannelModerationService>() 
             ?? throw new InvalidOperationException("IChannelModerationService is not registered in the DI container");
     }
@@ -146,6 +151,72 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         if (update.Message == null && update.EditedMessage == null) 
             throw new ArgumentNullException(nameof(update.Message));
 
+        var message = update.EditedMessage ?? update.Message!;
+        var chat = message.Chat;
+        var requestId = Guid.NewGuid().ToString("N")[..8]; // Short request ID
+
+        // CORRELATION SCOPE: Begin scope with msgId, chatId, requestId for log correlation
+        using var correlationScope = _logger.BeginScope(new Dictionary<string, object>
+        {
+            ["msgId"] = message.MessageId,
+            ["chatId"] = chat.Id,
+            ["requestId"] = requestId
+        });
+
+        // TRACE: Entry point
+        if (_loggingFlags.TraceEnabled)
+        {
+            TraceHelper.LogTrace(_logger, "MessageHandler->Entry", new { messageId = message.MessageId, chatId = chat.Id, userId = message.From?.Id });
+        }
+
+        // GOLDEN MASTER: Capture input
+        object? gmInput = null;
+        if (_loggingFlags.GoldenMasterEnabled)
+        {
+            gmInput = new { update = update, timestamp = DateTime.UtcNow };
+        }
+
+        try
+        {
+            await HandleAsyncInternal(update, cancellationToken);
+
+            // TRACE: Completed successfully
+            if (_loggingFlags.TraceEnabled)
+            {
+                TraceHelper.LogTrace(_logger, "MessageHandler->Success");
+            }
+
+            // GOLDEN MASTER: Record successful completion
+            if (_loggingFlags.GoldenMasterEnabled && gmInput != null)
+            {
+                var gmOutput = new { status = "success", timestamp = DateTime.UtcNow };
+                await GoldenMasterHelper.RecordAsync("MessageHandler", gmInput, gmOutput, message.MessageId, _loggingFlags.GoldenSampleRate, _logger);
+            }
+        }
+        catch (Exception ex)
+        {
+            // TRACE: Error occurred
+            if (_loggingFlags.TraceEnabled)
+            {
+                TraceHelper.LogTrace(_logger, "MessageHandler->Error", new { error = ex.Message });
+            }
+
+            // GOLDEN MASTER: Record error
+            if (_loggingFlags.GoldenMasterEnabled && gmInput != null)
+            {
+                var gmOutput = new { status = "error", error = ex.Message, timestamp = DateTime.UtcNow };
+                await GoldenMasterHelper.RecordAsync("MessageHandler", gmInput, gmOutput, message.MessageId, _loggingFlags.GoldenSampleRate, _logger);
+            }
+
+            throw; // Re-throw to maintain original behavior
+        }
+    }
+
+    /// <summary>
+    /// Внутренний метод обработки сообщений (оригинальная логика HandleAsync)
+    /// </summary>
+    private async Task HandleAsyncInternal(Update update, CancellationToken cancellationToken)
+    {
         var message = update.EditedMessage ?? update.Message!;
         var chat = message.Chat;
 
@@ -179,6 +250,11 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // Обработка команд
         if (message.Text?.StartsWith("/") == true)
         {
+            // TRACE: Routed to command handling
+            if (_loggingFlags.TraceEnabled)
+            {
+                TraceHelper.LogTrace(_logger, "Routed->Command", new { command = message.Text.Split(' ')[0] });
+            }
             await HandleCommandAsync(message, cancellationToken);
             return;
         }
@@ -193,6 +269,11 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // Обработка новых участников
         if (message.NewChatMembers != null && chat.Id != _appConfig.AdminChatId)
         {
+            // TRACE: Routed to new members handling
+            if (_loggingFlags.TraceEnabled)
+            {
+                TraceHelper.LogTrace(_logger, "Routed->NewMembers", new { memberCount = message.NewChatMembers.Length });
+            }
             await HandleNewMembersAsync(message, cancellationToken);
             return;
         }
@@ -775,6 +856,13 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
 
         // Модерация сообщения
         _userFlowLogger.LogModerationStarted(user, chat, messageText);
+        
+        // TRACE: Starting moderation
+        if (_loggingFlags.TraceEnabled)
+        {
+            TraceHelper.LogTrace(_logger, "Moderation->Start");
+        }
+        
         ModerationResult moderationResult;
         try
         {
@@ -790,11 +878,30 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         }
         _userFlowLogger.LogModerationResult(user, chat, moderationResult.Action.ToString(), moderationResult.Reason, moderationResult.Confidence);
         
+        // TRACE: Moderation completed
+        if (_loggingFlags.TraceEnabled)
+        {
+            TraceHelper.LogTrace(_logger, "Moderation->Done", new { action = moderationResult.Action.ToString(), confidence = moderationResult.Confidence });
+        }
+        
         // AI анализ профиля при первом сообщении (после базовой модерации)
         // Выполняем только если базовая модерация разрешила сообщение
         if (moderationResult.Action == ModerationAction.Allow)
         {
+            // TRACE: Starting AI analysis
+            if (_loggingFlags.TraceEnabled)
+            {
+                TraceHelper.LogTrace(_logger, "AI->Start");
+            }
+            
             var profileAnalysisResult = await PerformAiProfileAnalysis(message, user, chat, cancellationToken);
+            
+            // TRACE: AI analysis completed
+            if (_loggingFlags.TraceEnabled)
+            {
+                TraceHelper.LogTrace(_logger, "AI->Done", new { blocked = profileAnalysisResult });
+            }
+            
             if (profileAnalysisResult)
             {
                 // Пользователь получил ограничения за подозрительный профиль, возвращаемся
@@ -805,6 +912,12 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         switch (moderationResult.Action)
         {
             case ModerationAction.Allow:
+                // TRACE: Message kept
+                if (_loggingFlags.TraceEnabled)
+                {
+                    TraceHelper.LogTrace(_logger, "Decision->Kept", new { reason = moderationResult.Reason });
+                }
+                
                 _logger.LogDebug("Сообщение разрешено: {Reason}", moderationResult.Reason);
                 var allowedMessageText = message.Text ?? message.Caption ?? "";
                 
@@ -819,11 +932,23 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
                 break;
             
             case ModerationAction.Ban:
+                // TRACE: User banned
+                if (_loggingFlags.TraceEnabled)
+                {
+                    TraceHelper.LogTrace(_logger, "Decision->Banned", new { reason = moderationResult.Reason });
+                }
+                
                 _userFlowLogger.LogUserBanned(user, chat, moderationResult.Reason);
                 await _userBanService.AutoBanAsync(message, moderationResult.Reason, cancellationToken);
                 break;
             
             case ModerationAction.Delete:
+                // TRACE: Message deleted
+                if (_loggingFlags.TraceEnabled)
+                {
+                    TraceHelper.LogTrace(_logger, "Decision->Deleted", new { reason = moderationResult.Reason });
+                }
+                
                 _logger.LogInformation("Удаление сообщения: {Reason}", moderationResult.Reason);
                 try
                 {
@@ -848,16 +973,34 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
                 break;
             
             case ModerationAction.Report:
+                // TRACE: Message reported
+                if (_loggingFlags.TraceEnabled)
+                {
+                    TraceHelper.LogTrace(_logger, "Decision->Reported", new { reason = moderationResult.Reason });
+                }
+                
                 _logger.LogInformation("Отправка в админ-чат: {Reason}", moderationResult.Reason);
                 await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
                 break;
             
             case ModerationAction.RequireManualReview:
+                // TRACE: Manual review required
+                if (_loggingFlags.TraceEnabled)
+                {
+                    TraceHelper.LogTrace(_logger, "Decision->ManualReview", new { reason = moderationResult.Reason });
+                }
+                
                 _logger.LogInformation("Требует ручной проверки: {Reason}", moderationResult.Reason);
                 await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
                 break;
             
             case ModerationAction.RequireAiAnalysis:
+                // TRACE: AI analysis required
+                if (_loggingFlags.TraceEnabled)
+                {
+                    TraceHelper.LogTrace(_logger, "Decision->AiAnalysis", new { reason = moderationResult.Reason, confidence = moderationResult.Confidence });
+                }
+                
                 _logger.LogInformation("ML не уверен, запускаем AI анализ: {Reason}", moderationResult.Reason);
                 await HandleAiCascadeAnalysis(message, user, moderationResult.Confidence ?? 0, isSilentMode, cancellationToken);
                 break;
@@ -1497,6 +1640,171 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     {
         var update = new Update { Message = message };
         await HandleAsync(update, cancellationToken);
+    }
+
+    #endregion
+
+    #region Golden Master & Tracing Helpers
+
+    /// <summary>
+    /// Приватный хелпер для записи Golden Master данных
+    /// </summary>
+    private static class GoldenMasterHelper
+    {
+        /// <summary>
+        /// Записывает Golden Master данные для входа и выхода обработчика
+        /// </summary>
+        public static async Task RecordAsync<TInput, TOutput>(
+            string handlerName,
+            TInput input,
+            TOutput output,
+            long messageId,
+            double sampleRate,
+            ILogger logger)
+        {
+            try
+            {
+                // Проверяем сэмплирование
+                if (messageId % 10 != 0 && sampleRate < 1.0)
+                {
+                    return;
+                }
+
+                var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                var goldenDir = Path.Combine("golden", today, handlerName);
+                Directory.CreateDirectory(goldenDir);
+
+                var fileName = $"{messageId}.json";
+                var filePath = Path.Combine(goldenDir, fileName);
+
+                var gmData = new
+                {
+                    input = CanonicalizeObject(input),
+                    output = CanonicalizeObject(output)
+                };
+
+                var json = System.Text.Json.JsonSerializer.Serialize(gmData, new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+                });
+
+                await File.WriteAllTextAsync(filePath, json);
+                logger.LogDebug("Golden Master data recorded to {FilePath}", filePath);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to record Golden Master data for {HandlerName}, messageId {MessageId}", handlerName, messageId);
+            }
+        }
+
+        /// <summary>
+        /// Канонизирует объект для стабильной сериализации
+        /// </summary>
+        private static object? CanonicalizeObject(object? obj)
+        {
+            if (obj == null) return null;
+
+            var json = System.Text.Json.JsonSerializer.Serialize(obj, new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+            });
+
+            var doc = System.Text.Json.JsonDocument.Parse(json);
+            return CanonicalizeJsonElement(doc.RootElement);
+        }
+
+        /// <summary>
+        /// Канонизирует JSON элемент
+        /// </summary>
+        private static object? CanonicalizeJsonElement(System.Text.Json.JsonElement element)
+        {
+            return element.ValueKind switch
+            {
+                System.Text.Json.JsonValueKind.Object => element.EnumerateObject()
+                    .Where(prop => !IsTemporalProperty(prop.Name))
+                    .OrderBy(prop => prop.Name)
+                    .ToDictionary(prop => prop.Name, prop => CanonicalizeJsonElement(prop.Value)),
+                    
+                System.Text.Json.JsonValueKind.Array => element.EnumerateArray()
+                    .Select(CanonicalizeJsonElement)
+                    .OrderBy(v => v?.ToString())
+                    .ToArray(),
+                    
+                System.Text.Json.JsonValueKind.String => MaskPII(element.GetString()),
+                
+                System.Text.Json.JsonValueKind.Number => Math.Round(element.GetDouble(), 3),
+                
+                _ => element.ValueKind == System.Text.Json.JsonValueKind.True ||
+                     element.ValueKind == System.Text.Json.JsonValueKind.False ||
+                     element.ValueKind == System.Text.Json.JsonValueKind.Null
+                     ? element.GetRawText()
+                     : element.ToString()
+            };
+        }
+
+        /// <summary>
+        /// Проверяет, является ли свойство временным (timestamps, GUIDs, random)
+        /// </summary>
+        private static bool IsTemporalProperty(string propertyName)
+        {
+            var lowerName = propertyName.ToLowerInvariant();
+            return lowerName.Contains("timestamp") ||
+                   lowerName.Contains("time") ||
+                   lowerName.Contains("date") ||
+                   lowerName.Contains("guid") ||
+                   lowerName.Contains("id") && lowerName.Contains("random");
+        }
+
+        /// <summary>
+        /// Маскирует персональную информацию
+        /// </summary>
+        private static string? MaskPII(string? value)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+
+            // Маскируем телефоны
+            if (System.Text.RegularExpressions.Regex.IsMatch(value, @"\+?\d{10,15}"))
+                return "***PHONE***";
+
+            // Маскируем токены
+            if (value.Length > 20 && (value.Contains("bot") || value.Contains("token")))
+                return "***TOKEN***";
+
+            // Маскируем username если начинается с @
+            if (value.StartsWith("@"))
+                return "***USERNAME***";
+
+            return value;
+        }
+    }
+
+    /// <summary>
+    /// Приватный хелпер для событийного трейсинга
+    /// </summary>
+    private static class TraceHelper
+    {
+        /// <summary>
+        /// Логирует событие трейсинга
+        /// </summary>
+        public static void LogTrace(ILogger logger, string eventName, object? data = null)
+        {
+            if (!logger.IsEnabled(LogLevel.Debug)) return;
+
+            using var traceLogger = logger.BeginScope(new Dictionary<string, object> { ["TraceCategory"] = "ClubDoorman.Trace" });
+            
+            if (data != null)
+            {
+                logger.LogDebug("TRACE: {EventName} {Data}", eventName, System.Text.Json.JsonSerializer.Serialize(data, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+                }));
+            }
+            else
+            {
+                logger.LogDebug("TRACE: {EventName}", eventName);
+            }
+        }
     }
 
     #endregion

@@ -18,6 +18,7 @@ using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
@@ -111,7 +112,8 @@ public class MessageHandlerBanBasicTests
             appConfigMock.Object,
             violationTrackerMock.Object,
             loggerMock.Object,
-            userBanServiceMock.Object
+            userBanServiceMock.Object,
+            new Mock<ILoggingFlagsConfig>().Object
         );
     }
 

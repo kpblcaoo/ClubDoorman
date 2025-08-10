@@ -331,7 +331,8 @@ public class MessageHandlerBuilder
             _appConfigMock.Object,
             _violationTrackerMock.Object,
             _loggerMock.Object,
-            _userBanServiceMock.Object
+            _userBanServiceMock.Object,
+            new Mock<ILoggingFlagsConfig>().Object
         );
     }
 

@@ -97,6 +97,16 @@ public class Program
                                 retainedFileCountLimit: 7,
                                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [UserFlow] {Message:lj}{NewLine}{Exception}"
                             ))
+                        )
+                        .WriteTo.Logger(lc => lc
+                            .Filter.ByIncludingOnly(e => e.Properties.ContainsKey("TraceCategory") && 
+                                e.Properties["TraceCategory"].ToString().Contains("ClubDoorman.Trace"))
+                            .WriteTo.Async(a => a.File(
+                                path: Path.Combine(logsDir, "trace-.json"),
+                                rollingInterval: RollingInterval.Day,
+                                retainedFileCountLimit: 7,
+                                formatter: new Serilog.Formatting.Compact.CompactJsonFormatter()
+                            ))
                         );
                 }
             )

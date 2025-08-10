@@ -15,6 +15,7 @@ public static class ConfigurationModule
     public static IServiceCollection AddConfigurationServices(this IServiceCollection services)
     {
         services.AddSingleton<IAppConfig, AppConfig>();
+        services.AddSingleton<ILoggingFlagsConfig, LoggingFlagsConfig>();
         
         return services;
     }
