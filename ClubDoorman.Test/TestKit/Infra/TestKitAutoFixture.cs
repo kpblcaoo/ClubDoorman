@@ -118,13 +118,14 @@ public static class TestKitAutoFixture
                     Mock.Of<ILogger<SuspiciousCommandHandler>>(),
                     Mock.Of<IAppConfig>()).Object;
                 var logChatService = TK.CreateMock<ILogChatService>().Object;
+                var commandRouter = TK.CreateMock<ICommandRouter>().Object;
 
                 return new MessageHandler(
                     bot, moderationService, captchaService, userManager, classifier,
                     badMessageManager, aiChecks, globalStatsManager, statisticsService,
                     userFlowLogger, messageService, chatLinkFormatter,
                     botPermissionsService, appConfig, violationTracker, logger, userBanService,
-                    channelModerationService, startCommandHandler, suspiciousCommandHandler, logChatService);
+                    channelModerationService, startCommandHandler, suspiciousCommandHandler, commandRouter, logChatService);
             })
             .OmitAutoProperties());
 
