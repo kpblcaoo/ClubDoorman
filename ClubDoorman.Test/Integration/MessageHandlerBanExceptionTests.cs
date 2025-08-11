@@ -22,6 +22,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Core.Configuration;
@@ -147,7 +148,8 @@ public class MessageHandlerBanExceptionTests
             Mock.Of<IAiCascadeService>(),
             Mock.Of<INotificationService>(),
             Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
-            Mock.Of<ClubDoorman.Services.Notifications.IButtonsService>()
+            Mock.Of<ClubDoorman.Services.Notifications.IButtonsService>(),
+            Mock.Of<IUserJoinFacade>()
         );
     }
 

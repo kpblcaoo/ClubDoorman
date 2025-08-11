@@ -31,6 +31,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Handlers;
 
@@ -143,7 +144,7 @@ public static class TestKitAutoFixture
                     userFlowLogger, messageService, chatLinkFormatter,
                     botPermissionsService, appConfig, violationTracker, logger, userBanService,
                     channelModerationService, startCommandHandler, suspiciousCommandHandler, commandRouter, logChatService,
-                    joinedUserFlags, userIndex, aiCascadeService, notificationService, forwardingService, buttonsService);
+                    joinedUserFlags, userIndex, aiCascadeService, notificationService, forwardingService, buttonsService, TK.CreateMock<IUserJoinFacade>().Object);
             })
             .OmitAutoProperties());
 

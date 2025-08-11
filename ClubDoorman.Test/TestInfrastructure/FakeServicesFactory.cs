@@ -24,6 +24,7 @@ using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.AI;
 
@@ -211,7 +212,8 @@ public class FakeServicesFactory
             aiCascadeServiceMock.Object,
             Mock.Of<INotificationService>(),
             Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
-            Mock.Of<ClubDoorman.Services.Notifications.IButtonsService>());
+            Mock.Of<ClubDoorman.Services.Notifications.IButtonsService>(),
+            Mock.Of<IUserJoinFacade>());
     }
 
     /// <summary>

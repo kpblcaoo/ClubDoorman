@@ -28,6 +28,7 @@ using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services.TextProcessing; // restored
+using ClubDoorman.Features.UserJoin;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -65,6 +66,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     private readonly ClubDoorman.Services.Messaging.INotificationService _notificationService; // injected service (fully-qualified)
     private readonly ClubDoorman.Services.Notifications.IForwardingService _forwardingService; // injected service
     private readonly ClubDoorman.Services.Notifications.IButtonsService _buttonsService; // injected service
+    private readonly IUserJoinFacade _userJoinFacade; // injected service
 
     /// <summary>
     /// Создает экземпляр обработчика сообщений.
@@ -121,7 +123,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         IAiCascadeService aiCascadeService,
         ClubDoorman.Services.Messaging.INotificationService notificationService,
         ClubDoorman.Services.Notifications.IForwardingService forwardingService,
-        ClubDoorman.Services.Notifications.IButtonsService buttonsService)
+        ClubDoorman.Services.Notifications.IButtonsService buttonsService,
+        IUserJoinFacade userJoinFacade)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
@@ -151,6 +154,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         _forwardingService = forwardingService ?? throw new ArgumentNullException(nameof(forwardingService));
         _buttonsService = buttonsService ?? throw new ArgumentNullException(nameof(buttonsService));
+        _userJoinFacade = userJoinFacade ?? throw new ArgumentNullException(nameof(userJoinFacade));
     }
 
     /// <summary>
@@ -227,7 +231,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // Обработка новых участников
         if (message.NewChatMembers != null && chat.Id != _appConfig.AdminChatId)
         {
-            await HandleNewMembersAsync(message, cancellationToken);
+            await _userJoinFacade.HandleNewMembersAsync(message, cancellationToken);
             return;
         }
 
@@ -286,94 +290,14 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
 
     public async Task HandleNewMembersAsync(Message message, CancellationToken cancellationToken)
     {
-        if (message.NewChatMembers == null)
-        {
-            _logger.LogDebug("Сообщение о новых участниках не содержит данных о пользователях");
-            return;
-        }
-
-        foreach (var newUser in message.NewChatMembers.Where(x => x != null && !x.IsBot))
-        {
-            if (!_joinedUserFlags.IsUserRecentlyJoined(message.Chat.Id, newUser.Id))
-            {
-                _logger.LogInformation("==================== НОВЫЙ УЧАСТНИК ====================\n" +
-                    "Пользователь {User} (id={UserId}, username={Username}) зашел в группу '{ChatTitle}' (id={ChatId})\n" +
-                    "========================================================", 
-                    Utils.FullName(newUser), newUser.Id, newUser.Username ?? "-", message.Chat.Title ?? "-", message.Chat.Id);
-
-                _joinedUserFlags.MarkUserAsJoined(message.Chat.Id, newUser.Id);
-            }
-
-            await ProcessNewUserAsync(message, newUser, cancellationToken);
-        }
+        // WRAP: delegated to UserJoinFacade
+        await _userJoinFacade.HandleNewMembersAsync(message, cancellationToken);
     }
 
     public async Task ProcessNewUserAsync(Message userJoinMessage, User user, CancellationToken cancellationToken)
     {
-        if (user == null)
-        {
-            _logger.LogWarning("ProcessNewUserAsync вызван с null пользователем");
-            return;
-        }
-
-        if (userJoinMessage?.Chat == null)
-        {
-            _logger.LogWarning("ProcessNewUserAsync вызван с null сообщением или чатом");
-            return;
-        }
-
-        var chat = userJoinMessage.Chat;
-
-        // Проверка имени пользователя
-        if (_moderationService == null)
-        {
-            _logger.LogError("_moderationService равен null в ProcessNewUserAsync");
-            return;
-        }
-
-        var nameResult = await _moderationService.CheckUserNameAsync(user);
-        if (nameResult.Action == ModerationAction.Ban)
-        {
-            await _userBanService.BanUserForLongNameAsync(userJoinMessage, user, nameResult.Reason, null, cancellationToken);
-            return;
-        }
-        if (nameResult.Action == ModerationAction.Report)
-        {
-            await _userBanService.BanUserForLongNameAsync(userJoinMessage, user, nameResult.Reason, TimeSpan.FromMinutes(10), cancellationToken);
-            return;
-        }
-
-        // Проверка клубного пользователя
-        var clubUser = await _userManager.GetClubUsername(user.Id);
-        if (clubUser != null)
-        {
-            _logger.LogDebug("User is {Name} from club", clubUser);
-            return;
-        }
-
-        // Проверка блэклиста
-        if (await _userManager.InBanlist(user.Id))
-        {
-            await _userBanService.BanBlacklistedUserAsync(userJoinMessage, user, cancellationToken);
-            return;
-        }
-
-        // Проверяем, не находится ли пользователь уже в процессе прохождения капчи
-        var captchaKey = _captchaService.GenerateKey(chat.Id, user.Id);
-        if (_captchaService.GetCaptchaInfo(captchaKey) != null)
-        {
-            _logger.LogDebug("Пользователь уже проходит капчу");
-            return;
-        }
-
-        // Создаем капчу
-        var request = new CreateCaptchaRequest(chat, user, userJoinMessage);
-        var captchaInfo = await _captchaService.CreateCaptchaAsync(request);
-        if (captchaInfo == null)
-        {
-            _logger.LogInformation($"[NO_CAPTCHA] Капча не требуется для чата {chat.Id}");
-            return;
-        }
+        // WRAP: delegated to UserJoinFacade
+        await _userJoinFacade.ProcessNewUserAsync(userJoinMessage, user, cancellationToken);
     }
 
     public async Task HandleChannelMessageAsync(Message message, CancellationToken cancellationToken)

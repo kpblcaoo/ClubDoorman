@@ -9,6 +9,7 @@ using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.AI;
+using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Statistics;
@@ -66,7 +67,8 @@ public class MessageHandlerTryFindUserIdTests
             TestKitAutoFixture.Create<IAiCascadeService>(),
             TestKitAutoFixture.Create<ClubDoorman.Services.Messaging.INotificationService>(),
             TestKitAutoFixture.Create<ClubDoorman.Services.Notifications.IForwardingService>(),
-            TestKitAutoFixture.Create<ClubDoorman.Services.Notifications.IButtonsService>()
+            TestKitAutoFixture.Create<ClubDoorman.Services.Notifications.IButtonsService>(),
+            TestKitAutoFixture.Create<IUserJoinFacade>()
         );
         foreach (var item in MemoryCache.Default.ToList())
             MemoryCache.Default.Remove(item.Key);

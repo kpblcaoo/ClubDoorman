@@ -95,13 +95,10 @@ public class MessageHandlerBanTests
         var update = new Update { Message = userJoinMessage };
         await handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем вызов UserBanService
-        factory.UserBanServiceMock.Verify(
-            x => x.BanUserForLongNameAsync(
+        // Assert - проверяем вызов UserJoinFacade
+        factory.UserJoinFacadeMock.Verify(
+            x => x.HandleNewMembersAsync(
                 It.IsAny<Message>(),
-                It.IsAny<User>(),
-                It.IsAny<string>(),
-                It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -126,13 +123,10 @@ public class MessageHandlerBanTests
         var update = new Update { Message = userJoinMessage };
         await handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем вызов UserBanService
-        factory.UserBanServiceMock.Verify(
-            x => x.BanUserForLongNameAsync(
+        // Assert - проверяем вызов UserJoinFacade
+        factory.UserJoinFacadeMock.Verify(
+            x => x.HandleNewMembersAsync(
                 It.IsAny<Message>(),
-                It.IsAny<User>(),
-                It.IsAny<string>(),
-                It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -157,11 +151,10 @@ public class MessageHandlerBanTests
         var update = new Update { Message = userJoinMessage };
         await handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем вызов UserBanService
-        factory.UserBanServiceMock.Verify(
-            x => x.BanBlacklistedUserAsync(
+        // Assert - проверяем вызов UserJoinFacade
+        factory.UserJoinFacadeMock.Verify(
+            x => x.HandleNewMembersAsync(
                 It.IsAny<Message>(),
-                It.IsAny<User>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

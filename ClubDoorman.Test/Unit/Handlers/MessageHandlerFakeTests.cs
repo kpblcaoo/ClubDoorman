@@ -164,9 +164,11 @@ public class MessageHandlerFakeTests
         await service.HandleAsync(update);
 
         // Assert
-        // Проверяем, что была вызвана отправка капчи
-        _factory.CaptchaServiceMock.Verify(
-            x => x.CreateCaptchaAsync(It.IsAny<CreateCaptchaRequest>()),
+        // Проверяем, что был вызван UserJoinFacade
+        _factory.UserJoinFacadeMock.Verify(
+            x => x.HandleNewMembersAsync(
+                It.IsAny<Message>(),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -222,8 +224,10 @@ public class MessageHandlerFakeTests
 
         // Assert
         // Сервисные сообщения обрабатываются как новые участники
-        _factory.CaptchaServiceMock.Verify(
-            x => x.CreateCaptchaAsync(It.IsAny<CreateCaptchaRequest>()),
+        _factory.UserJoinFacadeMock.Verify(
+            x => x.HandleNewMembersAsync(
+                It.IsAny<Message>(),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 

@@ -30,6 +30,7 @@ using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Services.Notifications;
 using ClubDoorman.Models.Notifications;
@@ -68,6 +69,7 @@ public class MessageHandlerTestFactory
     public Mock<INotificationService> NotificationServiceMock { get; } = TK.CreateMock<INotificationService>();
     public Mock<ClubDoorman.Services.Notifications.IForwardingService> ForwardingServiceMock { get; } = TK.CreateMock<ClubDoorman.Services.Notifications.IForwardingService>();
     public Mock<ClubDoorman.Services.Notifications.IButtonsService> ButtonsServiceMock { get; } = TK.CreateMock<ClubDoorman.Services.Notifications.IButtonsService>();
+    public Mock<IUserJoinFacade> UserJoinFacadeMock { get; } = TK.CreateMock<IUserJoinFacade>();
 
     public Mock<IUserCleanupService> UserCleanupServiceMock { get; } = TK.CreateMock<IUserCleanupService>();
     public Mock<IJoinedUserFlags> JoinedUserFlagsMock { get; } = TK.CreateMock<IJoinedUserFlags>();
@@ -331,7 +333,8 @@ public class MessageHandlerTestFactory
             AiCascadeServiceMock.Object,
             NotificationServiceMock.Object,
             ForwardingServiceMock.Object,
-            ButtonsServiceMock.Object
+            ButtonsServiceMock.Object,
+            UserJoinFacadeMock.Object
         );
     }
     
@@ -365,7 +368,8 @@ public class MessageHandlerTestFactory
             AiCascadeServiceMock.Object,
             NotificationServiceMock.Object,
             ForwardingServiceMock.Object,
-            ButtonsServiceMock.Object
+            ButtonsServiceMock.Object,
+            UserJoinFacadeMock.Object
         );
     }
 
@@ -742,7 +746,8 @@ public class MessageHandlerTestFactory
             AiCascadeServiceMock.Object,
             NotificationServiceMock.Object,
             ForwardingServiceMock.Object,
-            ButtonsServiceMock.Object
+            ButtonsServiceMock.Object,
+            UserJoinFacadeMock.Object
         );
     }
 

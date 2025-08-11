@@ -12,6 +12,7 @@ using ClubDoorman.Services.LinkFormatting;
 using ClubDoorman.Services.Dispatcher;
 using ClubDoorman.Services.UserJoin;
 using ClubDoorman.Services.UserBan;
+using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Logging;
 
@@ -107,6 +108,7 @@ public class Program
                 services.AddDispatcherServices();
                 services.AddUserJoinServices();
                 services.AddUserBanServices();
+                services.AddUserJoinFeature();
                 services.AddModerationServices();
                 services.AddChannelModerationServices();
                 services.AddSuspiciousUsersServices();
