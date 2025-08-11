@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Infrastructure;
 
 namespace ClubDoorman.Services.Notifications;
 

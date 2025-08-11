@@ -69,6 +69,8 @@ public class MessageHandlerTestFactory
     public Mock<ClubDoorman.Services.Notifications.IButtonsService> ButtonsServiceMock { get; } = TK.CreateMock<ClubDoorman.Services.Notifications.IButtonsService>();
 
     public Mock<IUserCleanupService> UserCleanupServiceMock { get; } = TK.CreateMock<IUserCleanupService>();
+    public Mock<IJoinedUserFlags> JoinedUserFlagsMock { get; } = TK.CreateMock<IJoinedUserFlags>();
+    public Mock<IUserIndex> UserIndexMock { get; } = TK.CreateMock<IUserIndex>();
     
     // Поддержка FakeTelegramClient для AI Analysis тестов
     private FakeTelegramClient? _fakeTelegramClient;
@@ -315,6 +317,8 @@ public class MessageHandlerTestFactory
             SuspiciousCommandHandlerMock.Object,
             CommandRouterMock.Object,
             LogChatServiceMock.Object,
+            JoinedUserFlagsMock.Object,
+            UserIndexMock.Object,
             AiCascadeServiceMock.Object,
             NotificationServiceMock.Object,
             ForwardingServiceMock.Object,
@@ -347,6 +351,8 @@ public class MessageHandlerTestFactory
             SuspiciousCommandHandlerMock.Object,
             CommandRouterMock.Object,
             LogChatServiceMock.Object,
+            JoinedUserFlagsMock.Object,
+            UserIndexMock.Object,
             AiCascadeServiceMock.Object,
             NotificationServiceMock.Object,
             ForwardingServiceMock.Object,
@@ -699,6 +705,8 @@ public class MessageHandlerTestFactory
             SuspiciousCommandHandlerMock.Object,
             CommandRouterMock.Object,
             LogChatServiceMock.Object,
+            JoinedUserFlagsMock.Object,
+            UserIndexMock.Object,
             AiCascadeServiceMock.Object,
             NotificationServiceMock.Object,
             ForwardingServiceMock.Object,

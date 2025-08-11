@@ -12,10 +12,11 @@ using Microsoft.Extensions.Logging;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Infrastructure;
 
 namespace ClubDoorman.Services.Notifications;
 
-public class NotificationService : INotificationService
+public class NotificationService : ClubDoorman.Services.Messaging.INotificationService
 {
     private readonly ILogger<NotificationService> _logger;
     private readonly IMessageService _messageService;

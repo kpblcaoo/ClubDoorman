@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.UserJoin;
 using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.Core;
 
 namespace ClubDoorman.Services.UserManagement;
 
@@ -25,6 +26,8 @@ public static class UserManagementModule
         services.AddSingleton<IUserJoinService, UserJoinService>();
         services.AddSingleton<IUserBanService, UserBanService>();
         services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
+        services.AddSingleton<IJoinedUserFlags, JoinedUserFlags>();
+        services.AddSingleton<IUserIndex, UserIndex>();
         
         return services;
     }

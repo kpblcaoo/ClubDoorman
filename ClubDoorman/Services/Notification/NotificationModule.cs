@@ -6,7 +6,7 @@ public static class NotificationModule
 {
     public static IServiceCollection AddNotificationServices(this IServiceCollection services)
     {
-        // TODO: Добавить регистрацию сервисов если необходимо
+        // No-op: Notification services are registered in MessagingModule now
         return services;
     }
 }

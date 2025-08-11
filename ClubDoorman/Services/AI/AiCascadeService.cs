@@ -9,6 +9,11 @@ using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Infrastructure;
 
 namespace ClubDoorman.Services.AI;
 
@@ -16,6 +21,7 @@ public class AiCascadeService : IAiCascadeService
 {
     private readonly ILogger<AiCascadeService> _logger;
     private readonly IMessageService _messageService;
+    private readonly INotificationService _notificationService;
     private readonly IAppConfig _appConfig;
     private readonly ITelegramBotClientWrapper _bot;
     private readonly IAiChecks _aiChecks;
@@ -27,6 +33,7 @@ public class AiCascadeService : IAiCascadeService
     public AiCascadeService(
         ILogger<AiCascadeService> logger,
         IMessageService messageService,
+        INotificationService notificationService,
         IAppConfig appConfig,
         ITelegramBotClientWrapper bot,
         IAiChecks aiChecks,
@@ -37,6 +44,7 @@ public class AiCascadeService : IAiCascadeService
     {
         _logger = logger;
         _messageService = messageService;
+        _notificationService = notificationService;
         _appConfig = appConfig;
         _bot = bot;
         _aiChecks = aiChecks;
@@ -49,7 +57,7 @@ public class AiCascadeService : IAiCascadeService
     public async Task<bool> PerformAiProfileAnalysisAsync(Message message, User user, Chat chat, CancellationToken cancellationToken)
     {
         _logger.LogDebug("🤖 Запускаем AI анализ профиля пользователя {UserId} ({UserName})", 
-            user.Id, FullName(user.FirstName, user.LastName));
+            user.Id, Utils.FullName(user.FirstName, user.LastName));
         _logger.LogDebug("🔍 TRACE: PerformAiProfileAnalysis начат для пользователя {UserId}", user.Id);
         
         try
@@ -179,7 +187,7 @@ public class AiCascadeService : IAiCascadeService
         {
             _logger.LogWarning("🤖 AI каскадный анализ: пропускаем медиа без текста от {User}", Utils.FullName(user));
             // Для медиа без текста отправляем в ручную проверку
-            await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
+            await _notificationService.DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
             return;
         }
 
@@ -200,7 +208,7 @@ public class AiCascadeService : IAiCascadeService
             if (aiProbability >= 0.8) // Высокая вероятность спама по AI
             {
                 _logger.LogWarning("🤖🚫 AI каскадный анализ: определен спам (AI={AiScore}), удаляем сообщение", aiProbability);
-                await DeleteAndReportMessage(message, $"AI каскадный анализ: спам (ML={mlScore:F2}, AI={aiProbability:F2})", isSilentMode, cancellationToken);
+                await _notificationService.DeleteAndReportMessage(message, $"AI каскадный анализ: спам (ML={mlScore:F2}, AI={aiProbability:F2})", isSilentMode, cancellationToken);
                 
                 // Отслеживаем нарушения для повторных банов
                 await _userBanService.TrackViolationAndBanIfNeededAsync(message, user, $"AI каскадный анализ: спам (ML={mlScore:F2}, AI={aiProbability:F2})", cancellationToken);
@@ -208,7 +216,7 @@ public class AiCascadeService : IAiCascadeService
             else if (aiProbability >= 0.4) // Подозрительно - требует внимания админов
             {
                 _logger.LogInformation("🤖❓ AI каскадный анализ: подозрительное сообщение (AI={AiScore}), отправляем админам", aiProbability);
-                await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
+                await _notificationService.DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
             }
             else // AI считает сообщение безопасным
             {
@@ -223,7 +231,7 @@ public class AiCascadeService : IAiCascadeService
             _logger.LogError(ex, "❌ Ошибка при AI каскадном анализе для пользователя {UserId}", user.Id);
             
             // При ошибке AI отправляем в ручную проверку
-            await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
+            await _notificationService.DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
         }
     }
 }

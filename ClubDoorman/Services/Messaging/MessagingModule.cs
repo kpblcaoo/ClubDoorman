@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using ClubDoorman.Services.LinkFormatting;
-using ClubDoorman.Services.Notification;
+using ClubDoorman.Services.Notifications; // switched to Notifications namespace for implementation
 
 namespace ClubDoorman.Services.Messaging;
 
@@ -22,9 +22,10 @@ public static class MessagingModule
         services.AddSingleton<IServiceChatDispatcher, ServiceChatDispatcher>();
         services.AddSingleton<IMessageService, MessageService>();
         services.AddSingleton<IChatLinkFormatter, ChatLinkFormatter>();
+        // Bind Messaging.INotificationService to Notifications.NotificationService implementation
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<ILogChatService, LogChatService>();
         
         return services;
     }
-} 
+}
