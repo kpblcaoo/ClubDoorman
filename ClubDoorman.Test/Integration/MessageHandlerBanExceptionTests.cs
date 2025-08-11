@@ -16,7 +16,6 @@ using NUnit.Framework;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
@@ -142,7 +141,11 @@ public class MessageHandlerBanExceptionTests
             startCommandHandlerMock.Object,
             suspiciousCommandHandlerMock.Object,
             commandRouterMock.Object,
-            logChatServiceMock.Object
+            logChatServiceMock.Object,
+            Mock.Of<IAiCascadeService>(),
+            Mock.Of<INotificationService>(),
+            Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
+            Mock.Of<ClubDoorman.Services.Notifications.IButtonsService>()
         );
     }
 
@@ -399,4 +402,4 @@ public class MessageHandlerBanExceptionTests
         // Assert - проверяем что логирование произошло
         _loggerMock.Verify(x => x.Log(It.IsAny<LogLevel>(), It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.AtLeastOnce);
     }
-} 
+}

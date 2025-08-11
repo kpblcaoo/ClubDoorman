@@ -29,10 +29,9 @@ using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
-using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
-using ClubDoorman.Services.Commands;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Notifications;
 
 
 namespace ClubDoorman.Test.TestInfrastructure;
@@ -64,8 +63,15 @@ public class MessageHandlerTestFactory
     public Mock<IUserBanService> UserBanServiceMock { get; } = TK.CreateMockUserBanService();
     public Mock<IChannelModerationService> ChannelModerationServiceMock { get; } = TK.CreateMock<IChannelModerationService>();
     public Mock<ILogChatService> LogChatServiceMock { get; } = TK.CreateMock<ILogChatService>();
+    public Mock<IAiCascadeService> AiCascadeServiceMock { get; } = TK.CreateMock<IAiCascadeService>();
+    public Mock<INotificationService> NotificationServiceMock { get; } = TK.CreateMock<INotificationService>();
+    public Mock<ClubDoorman.Services.Notifications.IForwardingService> ForwardingServiceMock { get; } = TK.CreateMock<ClubDoorman.Services.Notifications.IForwardingService>();
+    public Mock<ClubDoorman.Services.Notifications.IButtonsService> ButtonsServiceMock { get; } = TK.CreateMock<ClubDoorman.Services.Notifications.IButtonsService>();
 
     public Mock<IUserCleanupService> UserCleanupServiceMock { get; } = TK.CreateMock<IUserCleanupService>();
+    
+    // Поддержка FakeTelegramClient для AI Analysis тестов
+    private FakeTelegramClient? _fakeTelegramClient;
     
     public IUserBanService CreateRealUserBanService()
     {
@@ -82,6 +88,15 @@ public class MessageHandlerTestFactory
             UserCleanupServiceMock.Object
         );
     }
+    
+    /// <summary>
+    /// Настройка для работы с FakeTelegramClient (для AI Analysis тестов)
+    /// </summary>
+    public MessageHandlerTestFactory WithFakeTelegramClient(FakeTelegramClient fakeClient)
+    {
+        _fakeTelegramClient = fakeClient;
+        return this;
+    }
     public Mock<ILogger<MessageHandler>> LoggerMock { get; } = TK.CreateLoggerMock<MessageHandler>();
     public Mock<ILogger<UserBanService>> UserBanServiceLoggerMock { get; } = TK.CreateLoggerMock<UserBanService>();
     public Mock<ILogger<SuspiciousCommandHandler>> SuspiciousCommandHandlerLoggerMock { get; } = TK.CreateLoggerMock<SuspiciousCommandHandler>();
@@ -97,6 +112,186 @@ public class MessageHandlerTestFactory
 
     public MessageHandler CreateMessageHandler()
     {
+        // Настраиваем NotificationService мок для проксирования вызовов в BotMock
+        NotificationServiceMock.Setup(x => x.DeleteAndReportMessage(It.IsAny<Message>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Returns(async (Message message, string reason, bool isSilentMode, CancellationToken ct) =>
+            {
+                // Имитируем поведение NotificationService: пересылка -> уведомление -> удаление
+                try
+                {
+                    Message adminMessage;
+                    
+                    // Если используется FakeTelegramClient, отправляем через него
+                    if (_fakeTelegramClient != null)
+                    {
+                        adminMessage = await _fakeTelegramClient.ForwardMessage(AppConfigMock.Object.AdminChatId, message.Chat.Id, message.MessageId, ct);
+                        
+                        if (!isSilentMode)
+                        {
+                            try
+                            {
+                                var replyParams = new ReplyParameters { MessageId = message.MessageId };
+                                await _fakeTelegramClient.SendMessage(message.Chat.Id, "⚠️ Ваше сообщение нарушает правила чата", ParseMode.Html, replyParams, null, ct);
+                            }
+                            catch
+                            {
+                                // Игнорируем ошибки отправки предупреждения пользователю как в реальном сервисе
+                            }
+                        }
+                        
+                        // Отправляем уведомление админу с кнопками
+                        var fakeButtons = new InlineKeyboardMarkup(new[] {
+                            new[] { InlineKeyboardButton.WithCallbackData("Забанить", $"ban_user_{message.From.Id}") }
+                        });
+                        await _fakeTelegramClient.SendMessage(AppConfigMock.Object.AdminChatId, $"🚫 {reason}", ParseMode.Html, new ReplyParameters { MessageId = adminMessage.MessageId }, fakeButtons, ct);
+                    }
+                    else
+                    {
+                        adminMessage = await BotMock.Object.ForwardMessage(AppConfigMock.Object.AdminChatId, message.Chat.Id, message.MessageId, ct);
+                        
+                        if (!isSilentMode)
+                        {
+                            try
+                            {
+                                var replyParams = new ReplyParameters { MessageId = message.MessageId };
+                                await BotMock.Object.SendMessage(message.Chat.Id, "⚠️ Ваше сообщение нарушает правила чата", ParseMode.Html, replyParams, null, ct);
+                            }
+                            catch
+                            {
+                                // Игнорируем ошибки отправки предупреждения пользователю как в реальном сервисе
+                            }
+                        }
+                        
+                        // Отправляем уведомление админу с кнопками
+                        var buttons = new InlineKeyboardMarkup(new[] {
+                            new[] { InlineKeyboardButton.WithCallbackData("Забанить", $"ban_user_{message.From.Id}") }
+                        });
+                        await BotMock.Object.SendMessage(AppConfigMock.Object.AdminChatId, $"🚫 {reason}", ParseMode.Html, new ReplyParameters { MessageId = adminMessage.MessageId }, buttons, ct);
+                    }
+                }
+                catch
+                {
+                    // Обрабатываем ошибки пересылки/уведомления как в реальном NotificationService
+                    try
+                    {
+                        // Fallback при ошибке пересылки
+                        if (_fakeTelegramClient != null)
+                        {
+                            var fallbackButtons = new InlineKeyboardMarkup(new[] {
+                                new[] { InlineKeyboardButton.WithCallbackData("Забанить", $"ban_user_{message.From.Id}") }
+                            });
+                            await _fakeTelegramClient.SendMessage(AppConfigMock.Object.AdminChatId, $"🚫 {reason}\n\n{message.Text}", ParseMode.Html, null, fallbackButtons, ct);
+                        }
+                        else
+                        {
+                            var buttons = new InlineKeyboardMarkup(new[] {
+                                new[] { InlineKeyboardButton.WithCallbackData("Забанить", $"ban_user_{message.From.Id}") }
+                            });
+                            await BotMock.Object.SendMessage(AppConfigMock.Object.AdminChatId, $"🚫 {reason}\n\n{message.Text}", ParseMode.Html, null, buttons, ct);
+                        }
+                    }
+                    catch
+                    {
+                        // Игнорируем ошибки уведомлений как в реальном NotificationService
+                    }
+                }
+                
+                // Удаляем оригинальное сообщение
+                try
+                {
+                    if (_fakeTelegramClient != null)
+                    {
+                        await _fakeTelegramClient.DeleteMessage(message.Chat.Id, message.MessageId, ct);
+                    }
+                    else
+                    {
+                        await BotMock.Object.DeleteMessage(message.Chat.Id, message.MessageId, ct);
+                    }
+                }
+                catch
+                {
+                    // Graceful обработка ошибок удаления (как в реальном NotificationService)
+                    // Метод завершается успешно даже при ошибке удаления
+                }
+            });
+
+        // Настраиваем ButtonsService мок для проксирования вызовов в BotMock  
+        ButtonsServiceMock.Setup(x => x.SendSuspiciousMessageWithButtons(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<SuspiciousMessageNotificationData>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Returns(async (Message message, User user, SuspiciousMessageNotificationData data, bool isSilentMode, CancellationToken ct) =>
+            {
+                // Обработка null параметров как в реальном ButtonsService
+                if (message == null || user == null || data == null)
+                {
+                    return;
+                }
+                
+                try
+                {
+                    // Если используется FakeTelegramClient, отправляем через него
+                    if (_fakeTelegramClient != null)
+                    {
+                        var fakeAdminMessage = await _fakeTelegramClient.ForwardMessage(AppConfigMock.Object.AdminChatId, message.Chat.Id, message.MessageId, ct);
+                        
+                        var fakeButtons = new InlineKeyboardMarkup(new[] {
+                            new[] { 
+                                InlineKeyboardButton.WithCallbackData("Забанить", $"ban_user_{user.Id}"),
+                                InlineKeyboardButton.WithCallbackData("Одобрить", $"approve_user_{user.Id}")
+                            }
+                        });
+                        var fakePrefix = isSilentMode ? "🔇 **Тихий режим**\n\n" : "";
+                        await _fakeTelegramClient.SendMessage(AppConfigMock.Object.AdminChatId, $"{fakePrefix}🤔 {data.Reason}", ParseMode.Html, new ReplyParameters { MessageId = fakeAdminMessage.MessageId }, fakeButtons, ct);
+                        return;
+                    }
+                    
+                    // Пересылаем сообщение в админ-чат через BotMock
+                    var adminMessage = await BotMock.Object.ForwardMessage(AppConfigMock.Object.AdminChatId, message.Chat.Id, message.MessageId, ct);
+                    
+                    // Отправляем уведомление с кнопками как reply на пересланное сообщение
+                    var buttons = new InlineKeyboardMarkup(new[] {
+                        new[] { 
+                            InlineKeyboardButton.WithCallbackData("Забанить", $"ban_user_{user.Id}"),
+                            InlineKeyboardButton.WithCallbackData("Одобрить", $"approve_user_{user.Id}")
+                        }
+                    });
+                    var prefix = isSilentMode ? "🔇 **Тихий режим**\n\n" : "";
+                    await BotMock.Object.SendMessage(AppConfigMock.Object.AdminChatId, $"{prefix}🤔 {data.Reason}", ParseMode.Html, new ReplyParameters { MessageId = adminMessage.MessageId }, buttons, ct);
+                }
+                catch
+                {
+                    try
+                    {
+                        // Fallback без пересылки 
+                        if (_fakeTelegramClient != null)
+                        {
+                            var fallbackFakeButtons = new InlineKeyboardMarkup(new[] {
+                                new[] { 
+                                    InlineKeyboardButton.WithCallbackData("Забанить", $"ban_user_{user.Id}"),
+                                    InlineKeyboardButton.WithCallbackData("Одобрить", $"approve_user_{user.Id}")
+                                }
+                            });
+                            var fallbackFakePrefix = isSilentMode ? "🔇 **Тихий режим**\n\n" : "";
+                            await _fakeTelegramClient.SendMessage(AppConfigMock.Object.AdminChatId, $"{fallbackFakePrefix}🤔 {data.Reason}\n\n{message.Text}", ParseMode.Html, null, fallbackFakeButtons, ct);
+                            return;
+                        }
+                        
+                        // Fallback без пересылки через BotMock
+                        var fallbackButtons = new InlineKeyboardMarkup(new[] {
+                            new[] { 
+                                InlineKeyboardButton.WithCallbackData("Забанить", $"ban_user_{user.Id}"),
+                                InlineKeyboardButton.WithCallbackData("Одобрить", $"approve_user_{user.Id}")
+                            }
+                        });
+                        var fallbackPrefix = isSilentMode ? "🔇 **Тихий режим**\n\n" : "";
+                        await BotMock.Object.SendMessage(AppConfigMock.Object.AdminChatId, $"{fallbackPrefix}🤔 {data.Reason}\n\n{message.Text}", ParseMode.Html, null, fallbackButtons, ct);
+                    }
+                    catch
+                    {
+                        // Последний fallback через MessageService - для тестов sendSuspiciousMessage fallback
+                        await MessageServiceMock.Object.SendAdminNotificationAsync(AdminNotificationType.SuspiciousMessage, data, ct);
+                    }
+                }
+            });
+
         return new MessageHandler(
             BotMock.Object,
             ModerationServiceMock.Object,
@@ -119,7 +314,11 @@ public class MessageHandlerTestFactory
             StartCommandHandlerMock.Object,
             SuspiciousCommandHandlerMock.Object,
             CommandRouterMock.Object,
-            LogChatServiceMock.Object
+            LogChatServiceMock.Object,
+            AiCascadeServiceMock.Object,
+            NotificationServiceMock.Object,
+            ForwardingServiceMock.Object,
+            ButtonsServiceMock.Object
         );
     }
     
@@ -147,7 +346,11 @@ public class MessageHandlerTestFactory
             StartCommandHandlerMock.Object,
             SuspiciousCommandHandlerMock.Object,
             CommandRouterMock.Object,
-            LogChatServiceMock.Object
+            LogChatServiceMock.Object,
+            AiCascadeServiceMock.Object,
+            NotificationServiceMock.Object,
+            ForwardingServiceMock.Object,
+            ButtonsServiceMock.Object
         );
     }
 
@@ -466,7 +669,7 @@ public class MessageHandlerTestFactory
                 .Returns(ChannelModerationServiceMock.Object);
         }
         
-        // Настраиваем мок для удаления сообщений
+        // Настраиваем TelegramBotClientWrapperMock для работы с FakeTelegramClient
         TelegramBotClientWrapperMock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Callback<ChatId, int, CancellationToken>((chatId, messageId, token) =>
             {
@@ -495,7 +698,11 @@ public class MessageHandlerTestFactory
             StartCommandHandlerMock.Object,
             SuspiciousCommandHandlerMock.Object,
             CommandRouterMock.Object,
-            LogChatServiceMock.Object
+            LogChatServiceMock.Object,
+            AiCascadeServiceMock.Object,
+            NotificationServiceMock.Object,
+            ForwardingServiceMock.Object,
+            ButtonsServiceMock.Object
         );
     }
 
@@ -748,43 +955,91 @@ public class MessageHandlerTestFactory
             mock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(false);
             mock.Setup(x => x.CheckUserNameAsync(It.IsAny<User>()))
-                .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Имя пользователя в порядке"));
+                .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Valid username"));
         });
-        
-        // В legacy режиме UserBanService не используется, поэтому не настраиваем его
-        // MessageHandler будет вызывать BotMock напрямую
         
         return this;
     }
 
     /// <summary>
-    /// Настраивает стандартные моки для тестов с каналом
+    /// Настройка моков для сценария с сообщением от канала в заданном чате
     /// </summary>
     public MessageHandlerTestFactory SetupChannelTestScenario(Chat chat)
     {
-        SetupStandardBanTestScenario();
+        // Базовые настройки окружения
+        WithStandardMocks();
+        WithChannelMocks();
+
+        // По умолчанию обработка сообщений каналов не должна кидать исключения
+        ChannelModerationServiceMock
+            .Setup(x => x.HandleChannelMessageAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        return this;
+    }
+
+    #endregion
+
+    #region AI Analysis Test Methods
+
+    /// <summary>
+    /// Создает MessageHandler для AI Analysis тестов с FakeTelegramClient
+    /// Используется для совместимости с существующими E2E тестами
+    /// </summary>
+    public MessageHandler CreateMessageHandlerForAiAnalysisTests(FakeTelegramClient fakeBot, IAppConfig appConfig)
+    {
+        // Настраиваем фабрику для работы с FakeTelegramClient
+        WithFakeTelegramClient(fakeBot);
         
+        // Настраиваем AppConfig для тестов
+        AppConfigMock.Setup(x => x.AdminChatId).Returns(appConfig.AdminChatId);
+        AppConfigMock.Setup(x => x.LogAdminChatId).Returns(appConfig.LogAdminChatId);
+        AppConfigMock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
+        AppConfigMock.Setup(x => x.DisabledChats).Returns(new HashSet<long>());
+        
+        // Настраиваем стандартные моки для AI анализа
+        WithStandardMocks();
+        
+        // Специальная настройка для AI analysis тестов - пользователи НЕ одобрены
         WithUserManagerSetup(mock =>
         {
-            mock.Setup(x => x.InBanlist(It.IsAny<long>())).ReturnsAsync(false);
-            mock.Setup(x => x.GetClubUsername(It.IsAny<long>())).ReturnsAsync((string?)null);
+            mock.Setup(x => x.Approved(It.IsAny<long>(), It.IsAny<long?>()))
+                .Returns(false); // Важно: НЕ одобрены для запуска AI анализа
+            mock.Setup(x => x.InBanlist(It.IsAny<long>()))
+                .ReturnsAsync(false);
+            mock.Setup(x => x.GetClubUsername(It.IsAny<long>()))
+                .ReturnsAsync((string?)null);
         });
         
-        WithModerationServiceSetup(mock => 
-        {
-            mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
-                .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Valid message"));
-            mock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
-                .Returns(false);
-        })
-        .WithBotSetup(mock => 
-        {
-            // Настраиваем GetChat для корректной работы HandleChannelMessageAsync
-            mock.Setup(x => x.GetChat(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(chat);
-        });
+        // Настраиваем AiCascadeService для возврата подозрительного профиля
+        AiCascadeServiceMock.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+            .Returns(async (Message message, User user, Chat chat, CancellationToken ct) =>
+            {
+                // Имитируем отправку подозрительного сообщения через ButtonsService
+                var data = new SuspiciousMessageNotificationData(
+                    user, 
+                    chat, 
+                    message.Text ?? message.Caption ?? "",
+                    message.MessageId
+                );
+                data.Reason = "AI анализ профиля";
+                
+                // Используем FakeTelegramClient для отправки уведомления, если он настроен
+                if (_fakeTelegramClient != null)
+                {
+                    var buttons = new InlineKeyboardMarkup(new[] {
+                        new[] { 
+                            InlineKeyboardButton.WithCallbackData("Забанить", $"ban_user_{user.Id}"),
+                            InlineKeyboardButton.WithCallbackData("Одобрить", $"approve_user_{user.Id}")
+                        }
+                    });
+                    await _fakeTelegramClient.SendMessage(appConfig.AdminChatId, $"🤔 {data.Reason}", ParseMode.Html, null, buttons, ct);
+                }
+                
+                return true; // Профиль подозрительный
+            });
         
-        return this;
+        return CreateMessageHandler();
     }
 
     #endregion

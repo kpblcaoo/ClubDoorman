@@ -1,3 +1,35 @@
+using System;
+using System.Runtime.Caching;
+using System.Threading;
+using System.Threading.Tasks;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Types.Enums;
+using ClubDoorman.Models.Notifications;
+using ClubDoorman.Models.Requests;
+using ClubDoorman.Models;
+using Microsoft.Extensions.Logging;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
+
+namespace ClubDoorman.Services.Notifications;
+
+public class ButtonsService : IButtonsService
+{
+    private readonly ILogger<ButtonsService> _logger;
+    private readonly IMessageService _messageService;
+    private readonly IAppConfig _appConfig;
+    private readonly ITelegramBotClientWrapper _bot;
+
+    public ButtonsService(ILogger<ButtonsService> logger, IMessageService messageService, IAppConfig appConfig, ITelegramBotClientWrapper bot)
+    {
+        _logger = logger;
+        _messageService = messageService;
+        _appConfig = appConfig;
+        _bot = bot;
+    }
+
     public async Task SendSuspiciousMessageWithButtons(Message message, User user, SuspiciousMessageNotificationData data, bool isSilentMode, CancellationToken cancellationToken)
     {
         try
@@ -109,5 +141,6 @@
             cancellationToken
         );
     }
+}
 
 

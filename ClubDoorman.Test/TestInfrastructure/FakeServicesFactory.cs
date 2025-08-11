@@ -13,7 +13,6 @@ using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Requests;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Handlers;
-using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -24,7 +23,6 @@ using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
-using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Telegram;
 
@@ -195,7 +193,11 @@ public class FakeServicesFactory
             startCommandHandler,
             suspiciousCommandHandler,
             commandRouter,
-            new Mock<ILogChatService>().Object);
+            new Mock<ILogChatService>().Object,
+            Mock.Of<IAiCascadeService>(),
+            Mock.Of<INotificationService>(),
+            Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
+            Mock.Of<ClubDoorman.Services.Notifications.IButtonsService>());
     }
 
     /// <summary>
@@ -276,4 +278,4 @@ public class FakeServicesFactory
                 .SetResult(new ModerationResult(ModerationAction.Report, "Обнаружена мимикрия", 0.8));
         }
     }
-} 
+}

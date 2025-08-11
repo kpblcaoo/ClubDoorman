@@ -1,27 +1,38 @@
+using AutoFixture;
+using AutoFixture.AutoMoq;
+
+using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.ChannelModeration;
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
-using AutoFixture;
-using AutoFixture.AutoMoq;
-using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Models;
 using ClubDoorman.Handlers;
+
+using ClubDoorman.Services;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Models;
+using ClubDoorman.Models.Notifications;
+using ClubDoorman.Test.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using Moq;
+using NUnit.Framework;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
-using ClubDoorman.Services.Handlers;
 using ClubDoorman.Services.Commands;
-using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.TestKit.Infra;
 
@@ -119,13 +130,18 @@ public static class TestKitAutoFixture
                     Mock.Of<IAppConfig>()).Object;
                 var logChatService = TK.CreateMock<ILogChatService>().Object;
                 var commandRouter = TK.CreateMock<ICommandRouter>().Object;
+                var aiCascadeService = TK.CreateMock<IAiCascadeService>().Object;
+                var notificationService = TK.CreateMock<INotificationService>().Object;
+                var forwardingService = TK.CreateMock<ClubDoorman.Services.Notifications.IForwardingService>().Object;
+                var buttonsService = TK.CreateMock<ClubDoorman.Services.Notifications.IButtonsService>().Object;
 
                 return new MessageHandler(
                     bot, moderationService, captchaService, userManager, classifier,
                     badMessageManager, aiChecks, globalStatsManager, statisticsService,
                     userFlowLogger, messageService, chatLinkFormatter,
                     botPermissionsService, appConfig, violationTracker, logger, userBanService,
-                    channelModerationService, startCommandHandler, suspiciousCommandHandler, commandRouter, logChatService);
+                    channelModerationService, startCommandHandler, suspiciousCommandHandler, commandRouter, logChatService,
+                    aiCascadeService, notificationService, forwardingService, buttonsService);
             })
             .OmitAutoProperties());
 
@@ -352,4 +368,4 @@ public static class TestKitAutoFixture
     }
 
     #endregion
-} 
+}

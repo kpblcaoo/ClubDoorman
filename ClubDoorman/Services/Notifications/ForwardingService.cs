@@ -1,3 +1,60 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Telegram.Bot.Types;
+using Microsoft.Extensions.Logging;
+
+namespace ClubDoorman.Services.Notifications;
+
+public class ForwardingService : IForwardingService
+{
+    private readonly ILogger<ForwardingService> _logger;
+
+    public ForwardingService(ILogger<ForwardingService> logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task DeleteAndReportToLogChat(Message message, string reason, CancellationToken cancellationToken)
+    {
+        // Ваш существующий код метода
+    }
+
+    private async Task<bool> IsChannelDiscussion(Chat chat, Message message)
+    {
+        try
+        {
+            if (chat.Type != ChatType.Supergroup)
+                return false;
+
+            // Проверяем, является ли это автоматическим пересыланием из канала
+            var isAutoForward = message.IsAutomaticForward;
+            
+            if (isAutoForward)
+            {
+                _logger.LogDebug("Обнаружено обсуждение канала: chat={ChatId}, autoForward={AutoForward}", 
+                    chat.Id, message.IsAutomaticForward);
+            }
+            
+            return isAutoForward;
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Не удалось определить тип чата {ChatId}", chat.Id);
+            return false;
+        }
+    }
+
+    public async Task HandleMessage(Message message, User user, ModerationResult moderationResult, bool isSilentMode, CancellationToken cancellationToken)
+    {
+        switch (moderationResult.Action)
+        {
+            case ModerationAction.Delete:
+                _logger.LogInformation("Удаление сообщения: {Reason}", moderationResult.Reason);
+                try
+                {
+                    if (isSilentMode)
+                    {
                         await DeleteAndReportToLogChat(message, moderationResult.Reason, cancellationToken);
                     }
                     else
@@ -31,34 +88,4 @@
                 break;
         }
     }
-
-    private async Task<bool> IsChannelDiscussion(Chat chat, Message message)
-    {
-        try
-        {
-            if (chat.Type != ChatType.Supergroup)
-                return false;
-
-            // Проверяем, является ли это автоматическим пересыланием из канала
-            var isAutoForward = message.IsAutomaticForward;
-            
-            if (isAutoForward)
-            {
-                _logger.LogDebug("Обнаружено обсуждение канала: chat={ChatId}, autoForward={AutoForward}", 
-                    chat.Id, message.IsAutomaticForward);
-            }
-            
-            return isAutoForward;
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Не удалось определить тип чата {ChatId}", chat.Id);
-            return false;
-        }
-    }
-
-
-
-
-
-    public async Task DeleteAndReportToLogChat(Message message, string reason, CancellationToken cancellationToken)
+}

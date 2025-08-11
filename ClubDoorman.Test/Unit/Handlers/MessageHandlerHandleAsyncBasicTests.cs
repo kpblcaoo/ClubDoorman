@@ -48,12 +48,16 @@ public class MessageHandlerHandleAsyncBasicTests
         _factory.WithUserManagerSetup(mock =>
         {
             mock.Setup(x => x.Approved(It.IsAny<long>(), It.IsAny<long?>()))
-                .Returns(true);
+                .Returns(false); // Пользователь НЕ одобрен для запуска AI анализа
             mock.Setup(x => x.GetClubUsername(It.IsAny<long>()))
                 .ReturnsAsync((string?)null);
             mock.Setup(x => x.InBanlist(It.IsAny<long>()))
                 .ReturnsAsync(false);
         });
+        
+        // Настройка AiCascadeService mock для AI анализа
+        _factory.AiCascadeServiceMock.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false); // false означает, что профиль не подозрительный
 
         _messageHandler = _factory.CreateMessageHandler();
     }
@@ -193,10 +197,10 @@ public class MessageHandlerHandleAsyncBasicTests
             Times.Once,
             "Должна вызваться проверка пользователя по блэклисту");
 
-        // Проверяем, что AI анализ запускается
-        _factory.AiChecksMock.Verify(
-            x => x.GetAttentionBaitProbability(It.Is<User>(u => u.Id == 12345), It.Is<string>(s => s == "Hello world"), It.IsAny<Func<string, Task>>()),
+        // Проверяем, что AI анализ запускается через AiCascadeService
+        _factory.AiCascadeServiceMock.Verify(
+            x => x.PerformAiProfileAnalysisAsync(It.Is<Message>(m => m.Text == "Hello world" && m.From!.Id == 12345), It.Is<User>(u => u.Id == 12345), It.Is<Chat>(c => c.Id == -1001234567890), It.IsAny<CancellationToken>()),
             Times.Once,
-            "Должен запуститься AI анализ профиля");
+            "Должен запуститься AI анализ профиля через AiCascadeService");
     }
 } 

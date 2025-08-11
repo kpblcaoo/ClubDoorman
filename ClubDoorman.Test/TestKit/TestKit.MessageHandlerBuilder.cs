@@ -8,7 +8,6 @@ using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
@@ -334,7 +333,11 @@ public class MessageHandlerBuilder
             _startCommandHandlerMock.Object,
             _suspiciousCommandHandlerMock.Object,
             _commandRouterMock.Object,
-            _logChatServiceMock.Object
+            _logChatServiceMock.Object,
+            Mock.Of<IAiCascadeService>(),
+            Mock.Of<INotificationService>(),
+            Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
+            Mock.Of<ClubDoorman.Services.Notifications.IButtonsService>()
         );
     }
 
@@ -411,4 +414,4 @@ public class MessageHandlerBuilder
     /// <tags>builders, message-handler, command-router-mock, verification</tags>
     /// </summary>
     public Mock<ICommandRouter> CommandRouterMock => _commandRouterMock;
-} 
+}

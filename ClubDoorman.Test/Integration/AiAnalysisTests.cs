@@ -133,9 +133,9 @@ public class AiAnalysisTests
     [Test]
     public async Task E2E_AI_Analysis_FirstMessage_ShouldTriggerAnalysis()
     {
-        // Arrange - используем новую фабрику фейковых сервисов
-        var factory = new FakeServicesFactory(_fakeBot, LoggerFactory.Create(builder => builder.AddConsole()), _appConfig);
-        var messageHandler = factory.CreateMessageHandler();
+        // Arrange - используем MessageHandlerTestFactory вместо FakeServicesFactory
+        var factory = new MessageHandlerTestFactory();
+        var messageHandler = factory.CreateMessageHandlerForAiAnalysisTests(_fakeBot, _appConfig);
         
         var suspiciousUser = new User
         {

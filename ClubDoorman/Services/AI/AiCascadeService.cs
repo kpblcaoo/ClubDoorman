@@ -1,3 +1,51 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Microsoft.Extensions.Logging;
+using ClubDoorman.Models;
+using ClubDoorman.Models.Notifications;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
+
+namespace ClubDoorman.Services.AI;
+
+public class AiCascadeService : IAiCascadeService
+{
+    private readonly ILogger<AiCascadeService> _logger;
+    private readonly IMessageService _messageService;
+    private readonly IAppConfig _appConfig;
+    private readonly ITelegramBotClientWrapper _bot;
+    private readonly IAiChecks _aiChecks;
+    private readonly GlobalStatsManager _globalStatsManager;
+    private readonly IUserFlowLogger _userFlowLogger;
+    private readonly IUserBanService _userBanService;
+    private readonly IModerationService _moderationService;
+
+    public AiCascadeService(
+        ILogger<AiCascadeService> logger,
+        IMessageService messageService,
+        IAppConfig appConfig,
+        ITelegramBotClientWrapper bot,
+        IAiChecks aiChecks,
+        GlobalStatsManager globalStatsManager,
+        IUserFlowLogger userFlowLogger,
+        IUserBanService userBanService,
+        IModerationService moderationService)
+    {
+        _logger = logger;
+        _messageService = messageService;
+        _appConfig = appConfig;
+        _bot = bot;
+        _aiChecks = aiChecks;
+        _globalStatsManager = globalStatsManager;
+        _userFlowLogger = userFlowLogger;
+        _userBanService = userBanService;
+        _moderationService = moderationService;
+    }
+
     public async Task<bool> PerformAiProfileAnalysisAsync(Message message, User user, Chat chat, CancellationToken cancellationToken)
     {
         _logger.LogDebug("🤖 Запускаем AI анализ профиля пользователя {UserId} ({UserName})", 
@@ -176,3 +224,6 @@
             
             // При ошибке AI отправляем в ручную проверку
             await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
+        }
+    }
+}

@@ -1,3 +1,42 @@
+using System;
+using System.Runtime.Caching;
+using System.Threading;
+using System.Threading.Tasks;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Types.Enums;
+using ClubDoorman.Models.Notifications;
+using ClubDoorman.Models.Requests;
+using ClubDoorman.Models;
+using Microsoft.Extensions.Logging;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
+
+namespace ClubDoorman.Services.Notifications;
+
+public class NotificationService : INotificationService
+{
+    private readonly ILogger<NotificationService> _logger;
+    private readonly IMessageService _messageService;
+    private readonly IAppConfig _appConfig;
+    private readonly ITelegramBotClientWrapper _bot;
+    private readonly ILogChatService _logChatService;
+
+    public NotificationService(
+        ILogger<NotificationService> logger,
+        IMessageService messageService,
+        IAppConfig appConfig,
+        ITelegramBotClientWrapper bot,
+        ILogChatService logChatService)
+    {
+        _logger = logger;
+        _messageService = messageService;
+        _appConfig = appConfig;
+        _bot = bot;
+        _logChatService = logChatService;
+    }
+
     public async Task DeleteAndReportToLogChat(Message message, string reason, CancellationToken cancellationToken)
     {
         _logger.LogDebug("Начинаем DeleteAndReportToLogChat для сообщения {MessageId} в чате {ChatId}", message.MessageId, message.Chat.Id);
@@ -361,7 +400,7 @@
     /// <summary>
     /// Обработка бана пользователя по блэклисту lols.bot при первом сообщении
     /// </summary>
-
+    /// 
 
     private static string FullName(string firstName, string? lastName) =>
         string.IsNullOrEmpty(lastName) ? firstName : $"{firstName} {lastName}";
@@ -395,5 +434,6 @@
             cancellationToken
         );
     }
+}
 
 
