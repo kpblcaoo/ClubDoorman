@@ -1,30 +1,39 @@
-using ClubDoorman.Services.Messaging;
 namespace ClubDoorman.Models.Notifications;
 
 /// <summary>
-/// Типы уведомлений для админского чата
+/// Типы уведомлений для администраторов
 /// </summary>
 public enum AdminNotificationType
 {
     /// <summary>
-    /// Автобан по блэклисту lols.bot
+    /// AI анализ профиля
+    /// </summary>
+    AiProfileAnalysis,
+    
+    /// <summary>
+    /// AI обнаружение с автоудалением
+    /// </summary>
+    AiDetectAutoDelete,
+    
+    /// <summary>
+    /// AI обнаружение подозрительного контента
+    /// </summary>
+    AiDetectSuspicious,
+    
+    /// <summary>
+    /// Автоматический бан
+    /// </summary>
+    AutoBan,
+    
+    /// <summary>
+    /// Автобан по чёрному списку
     /// </summary>
     AutoBanBlacklist,
     
     /// <summary>
-    /// Автобан из блэклиста
+    /// Автобан из чёрного списка
     /// </summary>
     AutoBanFromBlacklist,
-    
-    /// <summary>
-    /// Попытка бана в приватном чате
-    /// </summary>
-    PrivateChatBanAttempt,
-    
-    /// <summary>
-    /// Бан за длинное имя
-    /// </summary>
-    BanForLongName,
     
     /// <summary>
     /// Бан канала
@@ -32,24 +41,19 @@ public enum AdminNotificationType
     BanChannel,
     
     /// <summary>
-    /// Удаление из списка одобренных
+    /// Бан за длинное имя
     /// </summary>
-    RemovedFromApproved,
+    BanForLongName,
     
     /// <summary>
-    /// Сообщение от канала
+    /// Ошибка канала
+    /// </summary>
+    ChannelError,
+    
+    /// <summary>
+    /// Сообщение канала
     /// </summary>
     ChannelMessage,
-    
-    /// <summary>
-    /// Подозрительный пользователь
-    /// </summary>
-    SuspiciousUser,
-    
-    /// <summary>
-    /// AI анализ профиля
-    /// </summary>
-    AiProfileAnalysis,
     
     /// <summary>
     /// Ошибка модерации
@@ -57,72 +61,67 @@ public enum AdminNotificationType
     ModerationError,
     
     /// <summary>
+    /// Попытка бана в приватном чате
+    /// </summary>
+    PrivateChatBanAttempt,
+    
+    /// <summary>
+    /// Удалён из одобренных
+    /// </summary>
+    RemovedFromApproved,
+    
+    /// <summary>
+    /// Тихий режим
+    /// </summary>
+    SilentMode,
+    
+    /// <summary>
+    /// Успех
+    /// </summary>
+    Success,
+    
+    /// <summary>
+    /// Подозрительное сообщение
+    /// </summary>
+    SuspiciousMessage,
+    
+    /// <summary>
+    /// Подозрительный пользователь
+    /// </summary>
+    SuspiciousUser,
+    
+    /// <summary>
     /// Системная ошибка
     /// </summary>
     SystemError,
     
     /// <summary>
-    /// Автобан пользователя
-    /// </summary>
-    AutoBan,
-    
-    /// <summary>
-    /// Подозрительное сообщение (требует проверки)
-    /// </summary>
-    SuspiciousMessage,
-    
-    /// <summary>
-    /// Ошибка при работе с каналом
-    /// </summary>
-    ChannelError,
-    
-    /// <summary>
-    /// Очистка пользователя из списков
-    /// </summary>
-    UserCleanup,
-
-    /// <summary>
-    /// Пользователь одобрен администратором
-    /// </summary>
-    UserApproved,
-
-    /// <summary>
     /// Системная информация
     /// </summary>
     SystemInfo,
-
+    
     /// <summary>
-    /// Успешная операция
+    /// Пользователь одобрен
     /// </summary>
-    Success,
-
+    UserApproved,
+    
+    /// <summary>
+    /// Очистка пользователя
+    /// </summary>
+    UserCleanup,
+    
+    /// <summary>
+    /// Пользователь удалён из одобренных
+    /// </summary>
+    UserRemovedFromApproved,
+    
+    /// <summary>
+    /// Пользователь ограничен
+    /// </summary>
+    UserRestricted,
+    
     /// <summary>
     /// Предупреждение
     /// </summary>
-    Warning,
-
-    /// <summary>
-    /// AI детект - автоудаление спама
-    /// </summary>
-    AiDetectAutoDelete,
-
-    /// <summary>
-    /// AI детект - подозрительное сообщение
-    /// </summary>
-    AiDetectSuspicious,
-
-    /// <summary>
-    /// Пользователь удален из списка одобренных
-    /// </summary>
-    UserRemovedFromApproved,
-
-    /// <summary>
-    /// Пользователь получил ограничения
-    /// </summary>
-    UserRestricted,
-
-    /// <summary>
-    /// Бот работает в тихом режиме (без прав администратора)
-    /// </summary>
-    SilentMode
-} 
+    Warning
+}

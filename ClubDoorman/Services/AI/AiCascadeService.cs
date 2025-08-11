@@ -1,68 +1,74 @@
-using Telegram.Bot.Types;
 using ClubDoorman.Services.AI;
-using ClubDoorman.Services.Messaging;
-using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.Telegram;
-using ClubDoorman.Models.Notifications;
+using ClubDoorman.Services.Statistics;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Models.Notifications;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace ClubDoorman.Services.AI;
 
 /// <summary>
-/// Сервис для выполнения каскадного AI анализа сообщений
+/// Сервис для каскадного AI анализа профилей и сообщений
 /// </summary>
 public class AiCascadeService : IAiCascadeService
 {
-    private readonly IAiChecks _aiChecks;
-    private readonly IMessageService _messageService;
-    private readonly IModerationService _moderationService;
-    private readonly IUserBanService _userBanService;
     private readonly ITelegramBotClientWrapper _bot;
-    private readonly IAdminNotificationService _adminNotificationService;
+    private readonly IAiChecks _aiChecks;
+    private readonly IUserBanService _userBanService;
+    private readonly IModerationService _moderationService;
+    private readonly IMessageService _messageService;
+    private readonly IUserFlowLogger _userFlowLogger;
+    private readonly GlobalStatsManager _globalStatsManager;
     private readonly ILogger<AiCascadeService> _logger;
+    private readonly IAdminNotificationService _adminNotificationService;
 
     public AiCascadeService(
-        IAiChecks aiChecks,
-        IMessageService messageService,
-        IModerationService moderationService,
-        IUserBanService userBanService,
         ITelegramBotClientWrapper bot,
-        IAdminNotificationService adminNotificationService,
-        ILogger<AiCascadeService> logger)
+        IAiChecks aiChecks,
+        IUserBanService userBanService,
+        IModerationService moderationService,
+        IMessageService messageService,
+        IUserFlowLogger userFlowLogger,
+        GlobalStatsManager globalStatsManager,
+        ILogger<AiCascadeService> logger,
+        IAdminNotificationService adminNotificationService)
     {
-        _aiChecks = aiChecks ?? throw new ArgumentNullException(nameof(aiChecks));
-        _messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
-        _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
-        _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
-        _adminNotificationService = adminNotificationService ?? throw new ArgumentNullException(nameof(adminNotificationService));
+        _aiChecks = aiChecks ?? throw new ArgumentNullException(nameof(aiChecks));
+        _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
+        _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
+        _messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
+        _userFlowLogger = userFlowLogger ?? throw new ArgumentNullException(nameof(userFlowLogger));
+        _globalStatsManager = globalStatsManager ?? throw new ArgumentNullException(nameof(globalStatsManager));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _adminNotificationService = adminNotificationService ?? throw new ArgumentNullException(nameof(adminNotificationService));
     }
 
-    /// <summary>
-    /// Выполняет AI анализ профиля пользователя при первом сообщении
-    /// </summary>
-    public async Task<bool> PerformAiProfileAnalysisAsync(Message message, User user, Chat chat, CancellationToken cancellationToken = default)
+    public async Task<bool> PerformAiProfileAnalysisAsync(Message message, User user, Chat chat, CancellationToken cancellationToken)
     {
         _logger.LogDebug("🤖 Запускаем AI анализ профиля пользователя {UserId} ({UserName})", 
-            user.Id, Utils.FullName(user.FirstName, user.LastName));
+            user.Id, FullName(user.FirstName, user.LastName));
         _logger.LogDebug("🔍 TRACE: PerformAiProfileAnalysis начат для пользователя {UserId}", user.Id);
         
         try
         {
-            // Передаем первое сообщение в AI анализ
+            // ФИКС: Передаем первое сообщение в AI анализ
             var messageText = message.Text ?? message.Caption ?? "";
             var result = await _aiChecks.GetAttentionBaitProbability(user, messageText);
             _logger.LogDebug("🔍 TRACE: AiChecks.GetAttentionBaitProbability завершен для пользователя {UserId}", user.Id);
             _logger.LogInformation("🤖 AI анализ профиля: пользователь {UserId}, вероятность={Probability}, причина={Reason}", 
                 user.Id, result.SpamProbability.Probability, result.SpamProbability.Reason);
 
-            // Проверяем на банальность приветствия
+            // ФИКС: Восстанавливаем проверку на банальность приветствия
             var isBoringGreeting = AiChecks.IsBoringGreeting(messageText);
             
-            // Логика: высокий спам (>=0.9) действует всегда, средний (>=0.75) только с банальным приветствием
+            // ИСПРАВЛЕННАЯ ЛОГИКА: высокий спам (>=0.9) действует всегда, средний (>=0.75) только с банальным приветствием
             var isHighSpam = result.SpamProbability.Probability >= Consts.LlmHighProbability; // >= 0.9
             var isMediumSpamWithBoringGreeting = result.SpamProbability.Probability >= Consts.LlmLowProbability && isBoringGreeting; // >= 0.75 + банальное
             var shouldTriggerAction = isHighSpam || isMediumSpamWithBoringGreeting;
@@ -76,7 +82,7 @@ public class AiCascadeService : IAiCascadeService
                 _logger.LogWarning("🚫 AI определил подозрительный профиль: пользователь {UserId}, вероятность={Probability}, банальное приветствие={IsBoringGreeting}", 
                     user.Id, result.SpamProbability.Probability, isBoringGreeting);
 
-                // Сначала отправляем уведомление в админ-чат, потом удаляем сообщение
+                // ФИКС: Сначала отправляем уведомление в админ-чат, потом удаляем сообщение
                 var shouldDeleteMessage = result.SpamProbability.Probability >= Consts.LlmHighProbability; // >= 0.9
                 var automaticAction = shouldDeleteMessage 
                     ? "🗑️ Сообщение удалено + 🔇 Read-Only на 10 минут" 
@@ -110,26 +116,66 @@ public class AiCascadeService : IAiCascadeService
                         _logger.LogWarning(ex, "Не удалось удалить сообщение при AI анализе");
                     }
                 }
+                else
+                {
+                    _logger.LogInformation("💬 Сообщение НЕ удалено (средняя вероятность): {Probability:F2}", result.SpamProbability.Probability);
+                }
 
-                return true; // Пользователь получил ограничения
+                // Даем ридонли на 10 минут в любом случае
+                try
+                {
+                    var untilDate = DateTime.UtcNow.AddMinutes(10);
+                    await _bot.RestrictChatMember(
+                        chat.Id, 
+                        user.Id, 
+                        new ChatPermissions
+                        {
+                            CanSendMessages = false,
+                            CanSendAudios = false,
+                            CanSendDocuments = false,
+                            CanSendPhotos = false,
+                            CanSendVideos = false,
+                            CanSendVideoNotes = false,
+                            CanSendVoiceNotes = false,
+                            CanSendPolls = false,
+                            CanSendOtherMessages = false,
+                            CanAddWebPagePreviews = false,
+                            CanChangeInfo = false,
+                            CanInviteUsers = false,
+                            CanPinMessages = false,
+                            CanManageTopics = false
+                        },
+                        untilDate: (DateTime?)untilDate,
+                        cancellationToken: cancellationToken
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Не удалось дать ридонли пользователю");
+                }
+
+
+
+                _globalStatsManager.IncBan(chat.Id, chat.Title ?? "");
+                _userFlowLogger.LogUserRestricted(user, chat, $"AI анализ профиля: {result.SpamProbability.Reason}", TimeSpan.FromMinutes(10));
+                return true; // Возвращаем true - пользователь получил ограничения
             }
             else
             {
-                _logger.LogDebug("🤖✅ AI анализ профиля: пользователь безопасен, вероятность={Probability}", result.SpamProbability.Probability);
-                return false; // Всё хорошо
+                _logger.LogDebug("✅ AI анализ: профиль пользователя {UserId} выглядит безопасно (вероятность={Probability}, банальное приветствие={IsBoringGreeting})", 
+                    user.Id, result.SpamProbability.Probability, isBoringGreeting);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Ошибка при AI анализе профиля пользователя {UserId}", user.Id);
-            return false; // При ошибке считаем, что всё хорошо
+            _logger.LogWarning(ex, "❌ Ошибка при AI анализе профиля пользователя {UserId}", user.Id);
+            // Продолжаем выполнение даже при ошибке AI анализа
         }
+
+        return false; // Возвращаем false - профиль безопасен, продолжаем модерацию
     }
 
-    /// <summary>
-    /// Выполняет каскадный AI анализ на основе ML оценки
-    /// </summary>
-    public async Task HandleAiCascadeAnalysisAsync(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken = default)
+    public async Task HandleAiCascadeAnalysisAsync(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken)
     {
         var messageText = message.Text ?? message.Caption ?? "";
         var chat = message.Chat;
@@ -184,5 +230,10 @@ public class AiCascadeService : IAiCascadeService
             // При ошибке AI отправляем в ручную проверку
             await _adminNotificationService.DontDeleteButReportMessageAsync(message, user, isSilentMode, cancellationToken);
         }
+    }
+
+    private static string FullName(string? firstName, string? lastName)
+    {
+        return Utils.FullName(firstName, lastName);
     }
 }

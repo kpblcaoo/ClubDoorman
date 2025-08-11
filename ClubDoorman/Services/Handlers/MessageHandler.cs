@@ -58,8 +58,6 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     private readonly ISuspiciousCommandHandler _suspiciousCommandHandler;
     private readonly ICommandRouter _commandRouter;
     private readonly ILogChatService _logChatService;
-    
-    // Новые сервисы для разгрузки MessageHandler
     private readonly IAiCascadeService _aiCascadeService;
     private readonly IAdminNotificationService _adminNotificationService;
 
@@ -823,7 +821,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // Выполняем только если базовая модерация разрешила сообщение
         if (moderationResult.Action == ModerationAction.Allow)
         {
-            var profileAnalysisResult = await _aiCascadeService.PerformAiProfileAnalysisAsync(message, user, chat, cancellationToken);
+            var profileAnalysisResult = await PerformAiProfileAnalysis(message, user, chat, cancellationToken);
             if (profileAnalysisResult)
             {
                 // Пользователь получил ограничения за подозрительный профиль, возвращаемся
@@ -859,11 +857,11 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
                     // Специальная обработка для ссылок и банальных приветствий - отправляем в лог-чат без предупреждения пользователю
                     if (moderationResult.Reason.Contains("Ссылки запрещены") || moderationResult.Reason.Contains("Банальное приветствие"))
                     {
-                        await _adminNotificationService.DeleteAndReportToLogChatAsync(message, moderationResult.Reason, cancellationToken);
+                        await DeleteAndReportToLogChat(message, moderationResult.Reason, cancellationToken);
                     }
                     else
                     {
-                        await _adminNotificationService.DeleteAndReportMessageAsync(message, moderationResult.Reason, isSilentMode, cancellationToken);
+                        await DeleteAndReportMessage(message, moderationResult.Reason, isSilentMode, cancellationToken);
                     }
                     _logger.LogInformation("Сообщение успешно обработано для удаления");
                     
@@ -878,17 +876,17 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
             
             case ModerationAction.Report:
                 _logger.LogInformation("Отправка в админ-чат: {Reason}", moderationResult.Reason);
-                await _adminNotificationService.DontDeleteButReportMessageAsync(message, user, isSilentMode, cancellationToken);
+                await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
                 break;
             
             case ModerationAction.RequireManualReview:
                 _logger.LogInformation("Требует ручной проверки: {Reason}", moderationResult.Reason);
-                await _adminNotificationService.DontDeleteButReportMessageAsync(message, user, isSilentMode, cancellationToken);
+                await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
                 break;
             
             case ModerationAction.RequireAiAnalysis:
                 _logger.LogInformation("ML не уверен, запускаем AI анализ: {Reason}", moderationResult.Reason);
-                await _aiCascadeService.HandleAiCascadeAnalysisAsync(message, user, moderationResult.Confidence ?? 0, isSilentMode, cancellationToken);
+                await HandleAiCascadeAnalysis(message, user, moderationResult.Confidence ?? 0, isSilentMode, cancellationToken);
                 break;
         }
     }
@@ -1010,276 +1008,17 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
 
     public async Task DeleteAndReportMessage(Message message, string reason, bool isSilentMode, CancellationToken cancellationToken)
     {
-        _logger.LogWarning("🚀 НОВЫЙ КОД DeleteAndReportMessage v2.0 для сообщения {MessageId} в чате {ChatId}", message.MessageId, message.Chat.Id);
-        
-        var user = message.From;
-        var deletionMessagePart = $"{reason}";
-
-        try
-        {
-            // ЭТАП 1: Пересылаем сообщение в админ-чат (делаем это первым, чтобы избежать race condition)
-            var callbackDataBan = $"ban_{message.Chat.Id}_{user.Id}";
-            MemoryCache.Default.Add(callbackDataBan, message, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(12) });
-            
-            var keyboard = new InlineKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    new InlineKeyboardButton("🤖 бан") { CallbackData = callbackDataBan },
-                    new InlineKeyboardButton("😶 пропуск") { CallbackData = "noop" },
-                    new InlineKeyboardButton("🥰 свой") { CallbackData = $"approve_{user.Id}" }
-                }
-            });
-
-            var deletionData = new AutoBanNotificationData(
-                user, 
-                message.Chat, 
-                deletionMessagePart, 
-                reason, 
-                message.MessageId, 
-                LinkToMessage(message.Chat, message.MessageId)
-            );
-            
-            // Получаем шаблон и форматируем сообщение
-            var template = _messageService.GetTemplates().GetAdminTemplate(AdminNotificationType.AutoBan);
-            var messageText = _messageService.GetTemplates().FormatNotificationTemplate(template, deletionData);
-            
-            // Добавляем префикс тихого режима если нужно
-            if (isSilentMode)
-            {
-                messageText = $"🔇 <b>Тихий режим</b>\n\n{messageText}";
-            }
-            
-            // Пытаемся переслать сообщение, но если не получается - отправляем без пересылки
-            Message? forwardedMessage = null;
-            try
-            {
-                _logger.LogDebug("🔍 ПЕРЕСЫЛКА: из чата {FromChatId} сообщение {MessageId} в админ-чат {AdminChatId}", message.Chat.Id, message.MessageId, _appConfig.AdminChatId);
-                
-                // Пересылаем сообщение и сохраняем ссылку на него
-                forwardedMessage = await _bot.ForwardMessage(
-                    new ChatId(_appConfig.AdminChatId),
-                    message.Chat.Id,
-                    message.MessageId,
-                    cancellationToken: cancellationToken
-                );
-                
-                _logger.LogDebug("✅ Сообщение успешно переслано, ждем 150мс перед отправкой уведомления");
-                await Task.Delay(150, cancellationToken); // Задержка между пересылкой и уведомлением
-                
-                // Отправляем уведомление с кнопками как реплай на пересланное сообщение
-                await _bot.SendMessage(
-                    _appConfig.AdminChatId,
-                    messageText,
-                    parseMode: ParseMode.Html,
-                    replyMarkup: keyboard,
-                    replyParameters: forwardedMessage,
-                    cancellationToken: cancellationToken
-                );
-            }
-            catch (Exception forwardEx) when (forwardEx.Message.Contains("protected content") || forwardEx.Message.Contains("can't be forwarded"))
-            {
-                _logger.LogWarning("❌ Чат '{ChatTitle}' имеет защищенный контент, отправляем расширенное уведомление: {Error}", message.Chat.Title, forwardEx.Message);
-                
-                // Добавляем контент сообщения в уведомление, раз не можем переслать
-                var extendedMessageText = $"{messageText}\n\n" +
-                    $"📝 <b>Содержимое:</b>\n<code>{System.Net.WebUtility.HtmlEncode(message.Text?.Length > 500 ? message.Text[..500] + "..." : message.Text)}</code>";
-                
-                // Отправляем расширенное уведомление без пересылки
-                await _bot.SendMessage(
-                    _appConfig.AdminChatId,
-                    extendedMessageText,
-                    parseMode: ParseMode.Html,
-                    replyMarkup: keyboard,
-                    cancellationToken: cancellationToken
-                );
-            }
-            
-            _logger.LogDebug("Уведомление с кнопками успешно отправлено в админ-чат");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Не удалось отправить уведомление в админ-чат");
-        }
-
-        // ЭТАП 2: Увеличенная задержка для избежания race condition с Telegram API
-        try
-        {
-            await Task.Delay(200, cancellationToken); // 200мс задержка (было 50мс)
-            _logger.LogDebug("Выполнена задержка 200мс между пересылкой и предупреждением");
-        }
-        catch (OperationCanceledException)
-        {
-            // Игнорируем отмену операции
-        }
-
-        // ЭТАП 3: Отправляем предупреждение пользователю как реплай на оригинальное сообщение
-        Message? warningMessage = null;
-        if (!isSilentMode)
-        {
-            var warningKey = $"warning_{message.Chat.Id}_{user.Id}";
-            var existingWarning = MemoryCache.Default.Get(warningKey);
-            
-            if (existingWarning == null)
-            {
-                try
-                {
-                    var warningData = new SimpleNotificationData(user, message.Chat, reason);
-                    // Отправляем стандартное предупреждение новичку как реплай на сообщение, которое будет удалено
-                    var replyParams = new ReplyParameters { MessageId = message.MessageId };
-                    _logger.LogDebug("Отправляем предупреждение с реплаем на сообщение {MessageId} в чате {ChatId}", message.MessageId, message.Chat.Id);
-                    
-                    warningMessage = await _messageService.SendUserNotificationWithReplyAsync(
-                        user, 
-                        message.Chat, 
-                        UserNotificationType.ModerationWarning, 
-                        warningData, 
-                        replyParams,
-                        cancellationToken
-                    );
-                    
-                    // Сохраняем ID предупреждающего сообщения в кэше (на 10 минут, чтобы не спамить)
-                    MemoryCache.Default.Add(warningKey, warningMessage.MessageId, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(10) });
-                    
-                    DeleteMessageLater(warningMessage, TimeSpan.FromSeconds(40), cancellationToken);
-                    _logger.LogDebug("Предупреждение отправлено пользователю и будет удалено через 40 секунд");
-                }
-                catch (Exception e)
-                {
-                    _logger.LogWarning(e, "Не удалось отправить предупреждение пользователю");
-                }
-            }
-            else
-            {
-                _logger.LogDebug("Предупреждение пользователю {UserId} в чате {ChatId} уже было отправлено недавно, пропускаем", user.Id, message.Chat.Id);
-            }
-        }
-
-        // ЭТАП 4: Увеличенная задержка перед удалением
-        try
-        {
-            await Task.Delay(500, cancellationToken); // 500мс задержка для корректной обработки реплая
-            _logger.LogDebug("Выполнена задержка 500мс между предупреждением и удалением");
-        }
-        catch (OperationCanceledException)
-        {
-            // Игнорируем отмену операции
-        }
-        
-        // ЭТАП 5: Удаляем оригинальное сообщение
-        try
-        {
-            _logger.LogDebug("Пытаемся удалить сообщение {MessageId} из чата {ChatId}", message.MessageId, message.Chat.Id);
-            await _bot.DeleteMessage(message.Chat.Id, message.MessageId, cancellationToken: cancellationToken);
-            deletionMessagePart += ", сообщение удалено.";
-            _logger.LogDebug("Сообщение успешно удалено");
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Unable to delete message {MessageId} from chat {ChatId}", message.MessageId, message.Chat.Id);
-            deletionMessagePart += ", сообщение НЕ удалено (не хватило могущества?).";
-        }
+        await _adminNotificationService.DeleteAndReportMessageAsync(message, reason, isSilentMode, cancellationToken);
     }
 
     public async Task DontDeleteButReportMessage(Message message, User user, bool isSilentMode, CancellationToken cancellationToken)
     {
-        try
-        {
-            var suspiciousData = new SuspiciousMessageNotificationData(
-                user, 
-                message.Chat, 
-                message.Text ?? message.Caption ?? "[медиа]", 
-                message.MessageId
-            );
-            
-            // Отправляем уведомление с кнопками для подозрительного сообщения (форвард делается внутри)
-            await SendSuspiciousMessageWithButtons(message, user, suspiciousData, isSilentMode, cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Ошибка при пересылке сообщения");
-            var errorData = new ErrorNotificationData(
-                new InvalidOperationException("Не удалось переслать подозрительное сообщение"),
-                "Ошибка пересылки",
-                user,
-                message.Chat
-            );
-            await _messageService.SendAdminNotificationAsync(AdminNotificationType.SystemError, errorData, cancellationToken);
-        }
+        await _adminNotificationService.DontDeleteButReportMessageAsync(message, user, isSilentMode, cancellationToken);
     }
     
     public async Task SendSuspiciousMessageWithButtons(Message message, User user, SuspiciousMessageNotificationData data, bool isSilentMode, CancellationToken cancellationToken)
     {
-        try
-        {
-            var template = _messageService.GetTemplates().GetAdminTemplate(AdminNotificationType.SuspiciousMessage);
-            var messageText = _messageService.GetTemplates().FormatNotificationTemplate(template, data);
-            
-            // Добавляем префикс тихого режима если нужно
-            if (isSilentMode)
-            {
-                messageText = $"🔇 **Тихий режим**\n\n{messageText}";
-            }
-            
-            // Создаем кнопки реакции для админ-чата (стандартные кнопки: бан, пропуск, свой)
-            var callbackDataBan = $"ban_{message.Chat.Id}_{user.Id}";
-            MemoryCache.Default.Add(callbackDataBan, message, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(12) });
-            
-            var keyboard = new InlineKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    new InlineKeyboardButton("🤖 бан") { CallbackData = callbackDataBan },
-                    new InlineKeyboardButton("😶 пропуск") { CallbackData = "noop" },
-                    new InlineKeyboardButton("🥰 свой") { CallbackData = $"approve_{user.Id}" }
-                }
-            });
-            
-            // ФИКС: Пытаемся переслать сообщение, но если не получается - отправляем без пересылки
-            Message? forward = null;
-            try
-            {
-                // Сначала пересылаем оригинальное сообщение
-                forward = await _bot.ForwardMessage(
-                    new ChatId(_appConfig.AdminChatId),
-                    message.Chat.Id,
-                    message.MessageId,
-                    cancellationToken: cancellationToken
-                );
-                
-                // Отправляем уведомление с кнопками как ответ на форвард
-                await _bot.SendMessage(
-                    _appConfig.AdminChatId,
-                    messageText,
-                    parseMode: ParseMode.Html,
-                    replyParameters: forward,
-                    replyMarkup: keyboard,
-                    cancellationToken: cancellationToken
-                );
-            }
-            catch (Exception forwardEx) when (forwardEx.Message.Contains("protected content") || forwardEx.Message.Contains("can't be forwarded"))
-            {
-                _logger.LogWarning("Сообщение имеет защищенный контент, отправляем уведомление без пересылки: {Error}", forwardEx.Message);
-                
-                // Отправляем уведомление без пересылки (просто как обычное сообщение)
-                await _bot.SendMessage(
-                    _appConfig.AdminChatId,
-                    messageText,
-                    parseMode: ParseMode.Html,
-                    replyMarkup: keyboard,
-                    cancellationToken: cancellationToken
-                );
-            }
-            
-            _logger.LogDebug("Отправлено подозрительное сообщение с кнопками для пользователя {User} в чате {Chat}", 
-                Utils.FullName(user), message.Chat.Title);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Ошибка при отправке подозрительного сообщения с кнопками");
-            // Fallback: отправляем без кнопок
-            await _messageService.SendAdminNotificationAsync(AdminNotificationType.SuspiciousMessage, data, cancellationToken);
-        }
+        await _adminNotificationService.SendSuspiciousMessageWithButtonsAsync(message, user, data, isSilentMode, cancellationToken);
     }
 
     /// <summary>
@@ -1301,150 +1040,14 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
 
     internal void DeleteMessageLater(Message message, TimeSpan after = default, CancellationToken cancellationToken = default)
     {
-        if (after == default)
-            after = TimeSpan.FromMinutes(5);
-        _ = Task.Run(
-            async () =>
-            {
-                try
-                {
-                    await Task.Delay(after, cancellationToken);
-                    await _bot.DeleteMessage(message.Chat.Id, message.MessageId, cancellationToken: cancellationToken);
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    _logger.LogWarning(ex, "DeleteMessage");
-                }
-            },
-            cancellationToken
-        );
+        _adminNotificationService.DeleteMessageLater(message, after, cancellationToken);
     }
 
 
 
     private async Task<bool> PerformAiProfileAnalysis(Message message, User user, Chat chat, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("🤖 Запускаем AI анализ профиля пользователя {UserId} ({UserName})", 
-            user.Id, FullName(user.FirstName, user.LastName));
-        _logger.LogDebug("🔍 TRACE: PerformAiProfileAnalysis начат для пользователя {UserId}", user.Id);
-        
-        try
-        {
-            // ФИКС: Передаем первое сообщение в AI анализ
-            var messageText = message.Text ?? message.Caption ?? "";
-            var result = await _aiChecks.GetAttentionBaitProbability(user, messageText);
-            _logger.LogDebug("🔍 TRACE: AiChecks.GetAttentionBaitProbability завершен для пользователя {UserId}", user.Id);
-            _logger.LogInformation("🤖 AI анализ профиля: пользователь {UserId}, вероятность={Probability}, причина={Reason}", 
-                user.Id, result.SpamProbability.Probability, result.SpamProbability.Reason);
-
-            // ФИКС: Восстанавливаем проверку на банальность приветствия
-            var isBoringGreeting = AiChecks.IsBoringGreeting(messageText);
-            
-            // ИСПРАВЛЕННАЯ ЛОГИКА: высокий спам (>=0.9) действует всегда, средний (>=0.75) только с банальным приветствием
-            var isHighSpam = result.SpamProbability.Probability >= Consts.LlmHighProbability; // >= 0.9
-            var isMediumSpamWithBoringGreeting = result.SpamProbability.Probability >= Consts.LlmLowProbability && isBoringGreeting; // >= 0.75 + банальное
-            var shouldTriggerAction = isHighSpam || isMediumSpamWithBoringGreeting;
-            
-            _logger.LogDebug("🤖 AI анализ: вероятность={Probability}, банальное приветствие={IsBoringGreeting}, высокий спам={IsHighSpam}, действие={ShouldTrigger}", 
-                result.SpamProbability.Probability, isBoringGreeting, isHighSpam, shouldTriggerAction);
-
-            // Проверяем пороги вероятности спама + банальность приветствия
-            if (shouldTriggerAction) // >= 0.75 + банальное приветствие
-            {
-                _logger.LogWarning("🚫 AI определил подозрительный профиль: пользователь {UserId}, вероятность={Probability}, банальное приветствие={IsBoringGreeting}", 
-                    user.Id, result.SpamProbability.Probability, isBoringGreeting);
-
-                // ФИКС: Сначала отправляем уведомление в админ-чат, потом удаляем сообщение
-                var shouldDeleteMessage = result.SpamProbability.Probability >= Consts.LlmHighProbability; // >= 0.9
-                var automaticAction = shouldDeleteMessage 
-                    ? "🗑️ Сообщение удалено + 🔇 Read-Only на 10 минут" 
-                    : "🔇 Read-Only на 10 минут (сообщение оставлено)";
-                    
-                var aiProfileData = new AiProfileAnalysisData(
-                    user, 
-                    chat, 
-                    result.SpamProbability.Probability, 
-                    result.SpamProbability.Reason, 
-                    result.NameBio, 
-                    messageText, 
-                    result.Photo, 
-                    message.MessageId,
-                    automaticAction
-                );
-                
-                // Отправляем уведомление ПЕРЕД удалением сообщения (включая пересылку)
-                await _messageService.SendAiProfileAnalysisAsync(aiProfileData, cancellationToken);
-
-                // Теперь удаляем сообщение (если нужно)
-                if (shouldDeleteMessage)
-                {
-                    try
-                    {
-                        await _bot.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
-                        _logger.LogInformation("🗑️ Сообщение удалено из-за высокой вероятности спама: {Probability:F2}", result.SpamProbability.Probability);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Не удалось удалить сообщение при AI анализе");
-                    }
-                }
-                else
-                {
-                    _logger.LogInformation("💬 Сообщение НЕ удалено (средняя вероятность): {Probability:F2}", result.SpamProbability.Probability);
-                }
-
-                // Даем ридонли на 10 минут в любом случае
-                try
-                {
-                    var untilDate = DateTime.UtcNow.AddMinutes(10);
-                    await _bot.RestrictChatMember(
-                        chat.Id, 
-                        user.Id, 
-                        new ChatPermissions
-                        {
-                            CanSendMessages = false,
-                            CanSendAudios = false,
-                            CanSendDocuments = false,
-                            CanSendPhotos = false,
-                            CanSendVideos = false,
-                            CanSendVideoNotes = false,
-                            CanSendVoiceNotes = false,
-                            CanSendPolls = false,
-                            CanSendOtherMessages = false,
-                            CanAddWebPagePreviews = false,
-                            CanChangeInfo = false,
-                            CanInviteUsers = false,
-                            CanPinMessages = false,
-                            CanManageTopics = false
-                        },
-                        untilDate: (DateTime?)untilDate,
-                        cancellationToken: cancellationToken
-                    );
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Не удалось дать ридонли пользователю");
-                }
-
-
-
-                _globalStatsManager.IncBan(chat.Id, chat.Title ?? "");
-                _userFlowLogger.LogUserRestricted(user, chat, $"AI анализ профиля: {result.SpamProbability.Reason}", TimeSpan.FromMinutes(10));
-                return true; // Возвращаем true - пользователь получил ограничения
-            }
-            else
-            {
-                _logger.LogDebug("✅ AI анализ: профиль пользователя {UserId} выглядит безопасно (вероятность={Probability}, банальное приветствие={IsBoringGreeting})", 
-                    user.Id, result.SpamProbability.Probability, isBoringGreeting);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "❌ Ошибка при AI анализе профиля пользователя {UserId}", user.Id);
-            // Продолжаем выполнение даже при ошибке AI анализа
-        }
-
-        return false; // Возвращаем false - профиль безопасен, продолжаем модерацию
+        return await _aiCascadeService.PerformAiProfileAnalysisAsync(message, user, chat, cancellationToken);
     }
 
     /// <summary>
@@ -1452,59 +1055,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
     /// </summary>
     internal async Task HandleAiCascadeAnalysis(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken)
     {
-        var messageText = message.Text ?? message.Caption ?? "";
-        var chat = message.Chat;
-        
-        if (string.IsNullOrWhiteSpace(messageText))
-        {
-            _logger.LogWarning("🤖 AI каскадный анализ: пропускаем медиа без текста от {User}", Utils.FullName(user));
-            // Для медиа без текста отправляем в ручную проверку
-            await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
-            return;
-        }
-
-        try
-        {
-            _logger.LogInformation("🤖🔗 КАСКАДНЫЙ АНАЛИЗ: ML дал скор {MlScore}, запускаем AI для пользователя {User}: '{Text}'", 
-                mlScore, Utils.FullName(user), messageText.Substring(0, Math.Min(messageText.Length, 100)));
-
-            // Запускаем комплексный AI анализ (профиль + сообщение + ML данные)
-            var aiResult = await _aiChecks.GetCascadeAnalysisProbability(message, user, mlScore, false).AsTask().WaitAsync(TimeSpan.FromSeconds(30));
-            var aiProbability = aiResult.Probability;
-            var aiReason = aiResult.Reason ?? "Нет объяснения";
-
-            _logger.LogInformation("🤖✅ AI каскадный анализ завершен: пользователь {User}, ML={MlScore}, AI={AiScore}, причина: {AiReason}", 
-                Utils.FullName(user), mlScore, aiProbability, aiReason);
-
-            // Принимаем решение на основе AI анализа
-            if (aiProbability >= 0.8) // Высокая вероятность спама по AI
-            {
-                _logger.LogWarning("🤖🚫 AI каскадный анализ: определен спам (AI={AiScore}), удаляем сообщение", aiProbability);
-                await DeleteAndReportMessage(message, $"AI каскадный анализ: спам (ML={mlScore:F2}, AI={aiProbability:F2})", isSilentMode, cancellationToken);
-                
-                // Отслеживаем нарушения для повторных банов
-                await _userBanService.TrackViolationAndBanIfNeededAsync(message, user, $"AI каскадный анализ: спам (ML={mlScore:F2}, AI={aiProbability:F2})", cancellationToken);
-            }
-            else if (aiProbability >= 0.4) // Подозрительно - требует внимания админов
-            {
-                _logger.LogInformation("🤖❓ AI каскадный анализ: подозрительное сообщение (AI={AiScore}), отправляем админам", aiProbability);
-                await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
-            }
-            else // AI считает сообщение безопасным
-            {
-                _logger.LogInformation("🤖✅ AI каскадный анализ: сообщение безопасно (AI={AiScore}), разрешаем", aiProbability);
-                
-                // Засчитываем как хорошее сообщение
-                await _moderationService.IncrementGoodMessageCountAsync(user, chat, messageText);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "❌ Ошибка при AI каскадном анализе для пользователя {UserId}", user.Id);
-            
-            // При ошибке AI отправляем в ручную проверку
-            await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
-        }
+        await _aiCascadeService.HandleAiCascadeAnalysisAsync(message, user, mlScore, isSilentMode, cancellationToken);
     }
 
     #region IMessageHandler Implementation
