@@ -178,6 +178,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         var message = update.EditedMessage ?? update.Message!;
         var chat = message.Chat;
 
+        Console.WriteLine($"[DEBUG] MessageHandler.HandleAsync: получено сообщение '{message.Text}' в чате {chat.Id}");
+
         _logger.LogDebug("MessageHandler получил сообщение {MessageId} в чате {ChatId} от пользователя {UserId}", 
             message.MessageId, chat.Id, message.From?.Id);
 
@@ -208,9 +210,12 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         // Обработка команд
         if (message.Text?.StartsWith("/") == true)
         {
+            Console.WriteLine($"[DEBUG] MessageHandler: обрабатываем команду '{message.Text}'");
             await HandleCommandAsync(message, cancellationToken);
             return;
         }
+
+        Console.WriteLine($"[DEBUG] MessageHandler: не команда, продолжаем обработку");
 
         // Для приватных чатов обрабатываем только команды, остальное игнорируем
         if (chat.Type == ChatType.Private)
@@ -254,8 +259,12 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
 
     public async Task HandleCommandAsync(Message message, CancellationToken cancellationToken)
     {
+        Console.WriteLine($"[DEBUG] MessageHandler.HandleCommandAsync: команда '{message.Text}'");
+        
         // Обрабатываем команду через CommandRouter
         var handled = await _commandRouter.HandleCommandAsync(message, cancellationToken);
+
+        Console.WriteLine($"[DEBUG] MessageHandler.HandleCommandAsync: CommandRouter returned {handled}");
         
         if (handled)
         {

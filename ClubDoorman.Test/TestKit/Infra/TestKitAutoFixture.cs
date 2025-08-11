@@ -134,6 +134,8 @@ public static class TestKitAutoFixture
                 var notificationService = TK.CreateMock<INotificationService>().Object;
                 var forwardingService = TK.CreateMock<ClubDoorman.Services.Notifications.IForwardingService>().Object;
                 var buttonsService = TK.CreateMock<ClubDoorman.Services.Notifications.IButtonsService>().Object;
+                var joinedUserFlags = TK.CreateMock<IJoinedUserFlags>().Object;
+                var userIndex = TK.CreateMock<IUserIndex>().Object;
 
                 return new MessageHandler(
                     bot, moderationService, captchaService, userManager, classifier,
@@ -141,7 +143,7 @@ public static class TestKitAutoFixture
                     userFlowLogger, messageService, chatLinkFormatter,
                     botPermissionsService, appConfig, violationTracker, logger, userBanService,
                     channelModerationService, startCommandHandler, suspiciousCommandHandler, commandRouter, logChatService,
-                    aiCascadeService, notificationService, forwardingService, buttonsService);
+                    joinedUserFlags, userIndex, aiCascadeService, notificationService, forwardingService, buttonsService);
             })
             .OmitAutoProperties());
 

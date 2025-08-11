@@ -334,6 +334,8 @@ public class MessageHandlerBuilder
             _suspiciousCommandHandlerMock.Object,
             _commandRouterMock.Object,
             _logChatServiceMock.Object,
+            Mock.Of<IJoinedUserFlags>(),
+            Mock.Of<IUserIndex>(),
             Mock.Of<IAiCascadeService>(),
             Mock.Of<INotificationService>(),
             Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),

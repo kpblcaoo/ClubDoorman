@@ -153,6 +153,12 @@ namespace ClubDoorman.Test.TestKit
         public static Message CreateHelpCommandMessage() => TestDataFactory.CreateHelpCommandMessage();
 
         /// <summary>
+        /// Создает команду say
+        /// <tags>message, admin, say, command, telegram</tags>
+        /// </summary>
+        public static Message CreateSayCommandMessage(string text = "/say Hello World") => TestDataFactory.CreateSayCommandMessage(text);
+
+        /// <summary>
         /// Создает валидный callback query
         /// <tags>callback, valid, interaction, telegram</tags>
         /// </summary>

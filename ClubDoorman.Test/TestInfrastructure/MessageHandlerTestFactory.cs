@@ -313,8 +313,8 @@ public class MessageHandlerTestFactory
             LoggerMock.Object,
             UserBanServiceMock.Object,
             ChannelModerationServiceMock.Object,
-            StartCommandHandlerMock.Object,
-            SuspiciousCommandHandlerMock.Object,
+            Mock.Of<IStartCommandHandler>(),
+            Mock.Of<ISuspiciousCommandHandler>(),
             CommandRouterMock.Object,
             LogChatServiceMock.Object,
             JoinedUserFlagsMock.Object,
@@ -473,6 +473,12 @@ public class MessageHandlerTestFactory
     public MessageHandlerTestFactory WithSuspiciousCommandHandlerLoggerSetup(Action<Mock<ILogger<SuspiciousCommandHandler>>> setup)
     {
         setup(SuspiciousCommandHandlerLoggerMock);
+        return this;
+    }
+
+    public MessageHandlerTestFactory WithCommandRouterSetup(Action<Mock<ICommandRouter>> setup)
+    {
+        setup(CommandRouterMock);
         return this;
     }
 

@@ -4,6 +4,21 @@ using ClubDoorman.Test.TestKit;
 using NUnit.Framework;
 using System.Runtime.Caching;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Notifications;
+using ClubDoorman.Services.Commands;
+using ClubDoorman.Services;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
@@ -21,14 +36,40 @@ public class MessageHandlerTryFindUserIdTests
     [SetUp]
     public void Setup()
     {
-        // Используем AutoFixture для автоматического создания всех зависимостей
-        _messageHandler = TestKitAutoFixture.CreateMessageHandler();
-        
-        // Очищаем кэш перед каждым тестом
+        var fixture = TestKitAutoFixture.GetFixture();
+        var realUserIndex = new ClubDoorman.Services.UserManagement.UserIndex();
+        _messageHandler = new MessageHandler(
+            TestKitAutoFixture.Create<ITelegramBotClientWrapper>(),
+            TestKitAutoFixture.Create<IModerationService>(),
+            TestKitAutoFixture.Create<ICaptchaService>(),
+            TestKitAutoFixture.Create<IUserManager>(),
+            TestKitAutoFixture.Create<ISpamHamClassifier>(),
+            TestKitAutoFixture.Create<IBadMessageManager>(),
+            TestKitAutoFixture.Create<IAiChecks>(),
+            TestKitAutoFixture.Create<GlobalStatsManager>(),
+            TestKitAutoFixture.Create<IStatisticsService>(),
+            TestKitAutoFixture.Create<IUserFlowLogger>(),
+            TestKitAutoFixture.Create<IMessageService>(),
+            TestKitAutoFixture.Create<IChatLinkFormatter>(),
+            TestKitAutoFixture.Create<IBotPermissionsService>(),
+            TestKitAutoFixture.Create<IAppConfig>(),
+            TestKitAutoFixture.Create<IViolationTracker>(),
+            TestKitAutoFixture.Create<ILogger<MessageHandler>>(),
+            TestKitAutoFixture.Create<IUserBanService>(),
+            TestKitAutoFixture.Create<IChannelModerationService>(),
+            TestKitAutoFixture.Create<IStartCommandHandler>(),
+            TestKitAutoFixture.Create<ISuspiciousCommandHandler>(),
+            TestKitAutoFixture.Create<ICommandRouter>(),
+            TestKitAutoFixture.Create<ILogChatService>(),
+            TestKitAutoFixture.Create<IJoinedUserFlags>(),
+            realUserIndex,
+            TestKitAutoFixture.Create<IAiCascadeService>(),
+            TestKitAutoFixture.Create<ClubDoorman.Services.Messaging.INotificationService>(),
+            TestKitAutoFixture.Create<ClubDoorman.Services.Notifications.IForwardingService>(),
+            TestKitAutoFixture.Create<ClubDoorman.Services.Notifications.IButtonsService>()
+        );
         foreach (var item in MemoryCache.Default.ToList())
-        {
             MemoryCache.Default.Remove(item.Key);
-        }
     }
 
     [TearDown]
@@ -302,4 +343,4 @@ public class MessageHandlerTryFindUserIdTests
         Console.WriteLine($"Результат поиска: {result}");
         Assert.That(result, Is.EqualTo(userId), "Должен найти пользователя в кэше");
     }
-} 
+}

@@ -25,12 +25,12 @@ namespace ClubDoorman.Test.StepDefinitions.Common
     [Category("BDD")]
     public class SuspiciousCommandSteps
     {
-        private Message _testMessage = null!;
-        private Exception? _thrownException;
-        private FakeTelegramClient _fakeBot = null!;
-        private ILoggerFactory _loggerFactory = null!;
-        private MessageHandler _messageHandler = null!;
-        private MessageHandlerTestFactory _factory = null!;
+        protected Message _testMessage = null!;
+        protected Exception? _thrownException;
+        protected FakeTelegramClient _fakeBot = null!;
+        protected ILoggerFactory _loggerFactory = null!;
+        protected MessageHandler _messageHandler = null!;
+        protected MessageHandlerTestFactory _factory = null!;
 
         [BeforeScenario]
         public void BeforeScenario()

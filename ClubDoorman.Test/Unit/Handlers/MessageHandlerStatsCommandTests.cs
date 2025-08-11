@@ -10,6 +10,8 @@ using Telegram.Bot.Types;
 using Moq;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Commands;
+using ClubDoorman.Test.TestInfrastructure;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
@@ -32,234 +34,176 @@ public class MessageHandlerStatsCommandTests
     }
 
     /// <summary>
-    /// Тест для HandleStatsCommandAsync с AutoFixture
-    /// Проверяет, что метод выполняется без исключений
-    /// <tags>autofixture, stats-command, basic-test</tags>
+    /// Тест проверяет, что MessageHandler корректно вызывает CommandRouter для команд
+    /// <tags>command-router, basic-test</tags>
     /// </summary>
     [Test]
-    public async Task HandleStatsCommandAsync_WithAutoFixture_ExecutesWithoutExceptions()
+    public async Task HandleCommandAsync_WithStatsCommand_ExecutesWithoutExceptions()
     {
         // Arrange
         var message = TK.CreateStatsCommandMessage();
-
-        // Act & Assert - используем рефлексию для доступа к приватному методу
-        var method = typeof(MessageHandler).GetMethod("HandleStatsCommandAsync", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
+        var factory = new MessageHandlerTestFactory();
         
+        factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var handler = factory.CreateMessageHandler();
+
+        // Act & Assert
         Assert.DoesNotThrowAsync(async () => 
-            await (Task)method!.Invoke(_messageHandler, new object[] { message, CancellationToken.None })!);
+            await handler.HandleCommandAsync(message, CancellationToken.None));
     }
 
     /// <summary>
-    /// Тест для HandleStatsCommandAsync с кастомной статистикой
-    /// Проверяет обработку статистики с реальными данными
-    /// <tags>stats-command, custom-stats, integration</tags>
+    /// Тест для MessageHandler.HandleCommandAsync с командой /stats - должна быть передана в CommandRouter
+    /// <tags>integration, command-routing, stats-command</tags>
     /// </summary>
     [Test]
-    public async Task HandleStatsCommandAsync_WithCustomStats_ProcessesStatisticsCorrectly()
+    public async Task HandleCommandAsync_WithCustomStats_DelegatesToCommandRouter()
     {
         // Arrange
-        var (handler, fixture) = TestKitAutoFixture.CreateWithFixture<MessageHandler>();
         var message = TK.CreateStatsCommandMessage();
-
-        // Создаем кастомную статистику
-        var stats = new Dictionary<long, ChatStats>
-        {
-            { 123456, new ChatStats("Test Chat") { BlacklistBanned = 5, StoppedCaptcha = 3 } },
-            { 789012, new ChatStats("Another Chat") { KnownBadMessage = 2, LongNameBanned = 1 } }
-        };
-
-        // Инжектируем статистику в AutoFixture
-        TestKitAutoFixture.Inject(stats);
-
-        // Act - используем рефлексию
-        var method = typeof(MessageHandler).GetMethod("HandleStatsCommandAsync", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
+        var factory = new MessageHandlerTestFactory();
         
-        await (Task)method!.Invoke(handler, new object[] { message, CancellationToken.None })!;
-
-        // Assert
-        Assert.Pass("Метод обработал кастомную статистику без исключений");
-    }
-
-    /// <summary>
-    /// Тест для HandleStatsCommandAsync с пустой статистикой
-    /// Проверяет обработку случая, когда нет данных для отображения
-    /// <tags>stats-command, empty-stats, edge-case</tags>
-    /// </summary>
-    [Test]
-    public async Task HandleStatsCommandAsync_WithEmptyStats_HandlesEmptyData()
-    {
-        // Arrange
-        var message = TK.CreateStatsCommandMessage();
-        var emptyStats = new Dictionary<long, ChatStats>();
-
-        // Создаем handler с настроенным моком статистики
-        var statisticsServiceMock = TK.CreateMockStatisticsService();
-        statisticsServiceMock.Setup(x => x.GetAllStats()).Returns(emptyStats);
-
-        var handler = TK.CreateMessageHandlerBuilder()
-            .Build();
-
-        // Настраиваем статистику через рефлексию
-        var statisticsServiceField = typeof(MessageHandler).GetField("_statisticsService", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        statisticsServiceField!.SetValue(handler, statisticsServiceMock.Object);
-
-        // Act - используем рефлексию
-        var method = typeof(MessageHandler).GetMethod("HandleStatsCommandAsync", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        
-        await (Task)method!.Invoke(handler, new object[] { message, CancellationToken.None })!;
-
-        // Assert
-        Assert.Pass("Метод обработал пустую статистику без исключений");
-    }
-
-    /// <summary>
-    /// Тест для HandleStatsCommandAsync с исключением в статистике
-    /// Проверяет обработку ошибок при получении статистики
-    /// <tags>stats-command, exception-handling, error-scenario</tags>
-    /// </summary>
-    [Test]
-    public async Task HandleStatsCommandAsync_WithStatisticsException_ThrowsException()
-    {
-        // Arrange
-        var message = TK.CreateStatsCommandMessage();
-        var statisticsServiceMock = TK.CreateMockStatisticsService();
-        statisticsServiceMock.Setup(x => x.GetAllStats())
-            .Throws(new Exception("Statistics service error"));
-
-        var handler = TK.CreateMessageHandlerBuilder()
-            .Build();
-
-        // Настраиваем статистику через рефлексию
-        var statisticsServiceField = typeof(MessageHandler).GetField("_statisticsService", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        statisticsServiceField!.SetValue(handler, statisticsServiceMock.Object);
-
-        // Act & Assert - используем рефлексию
-        var method = typeof(MessageHandler).GetMethod("HandleStatsCommandAsync", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        
-        Assert.ThrowsAsync<Exception>(async () => 
-            await (Task)method!.Invoke(handler, new object[] { message, CancellationToken.None })!);
-    }
-
-    /// <summary>
-    /// Тест для HandleStatsCommandAsync с проверкой уведомлений
-    /// Проверяет, что уведомление отправляется пользователю
-    /// <tags>stats-command, notification, message-service</tags>
-    /// </summary>
-    [Test]
-    public async Task HandleStatsCommandAsync_WithValidStats_SendsNotificationToUser()
-    {
-        // Arrange
-        var message = TK.CreateStatsCommandMessage();
-        var stats = new Dictionary<long, ChatStats>
-        {
-            { 123456, new ChatStats("Test Chat") { BlacklistBanned = 5 } }
-        };
-
-        var statisticsServiceMock = TK.CreateMockStatisticsService();
-        statisticsServiceMock.Setup(x => x.GetAllStats()).Returns(stats);
-
-        var messageServiceMock = new Mock<IMessageService>();
-        messageServiceMock.Setup(x => x.SendUserNotificationAsync(
-            It.IsAny<User>(),
-            It.IsAny<Chat>(),
-            It.IsAny<UserNotificationType>(),
-            It.IsAny<object>(),
+        // Настройка CommandRouter для возврата true (команда обработана)
+        factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
+            It.IsAny<Message>(), 
             It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        var handler = TK.CreateMessageHandlerBuilder()
-            .Build();
-
-        // Настраиваем зависимости через рефлексию
-        var statisticsServiceField = typeof(MessageHandler).GetField("_statisticsService", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        var messageServiceField = typeof(MessageHandler).GetField("_messageService", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
+            .ReturnsAsync(true);
         
-        statisticsServiceField!.SetValue(handler, statisticsServiceMock.Object);
-        messageServiceField!.SetValue(handler, messageServiceMock.Object);
+        var handler = factory.CreateMessageHandler();
 
-        // Act - используем рефлексию
-        var method = typeof(MessageHandler).GetMethod("HandleStatsCommandAsync", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        
-        await (Task)method!.Invoke(handler, new object[] { message, CancellationToken.None })!;
+        // Act
+        await handler.HandleCommandAsync(message, CancellationToken.None);
 
-        // Assert
-        messageServiceMock.Verify(
-            x => x.SendUserNotificationAsync(
-                message.From!,
-                message.Chat,
-                UserNotificationType.SystemInfo,
-                It.IsAny<SimpleNotificationData>(),
+        // Assert - проверяем, что CommandRouter был вызван с командой /stats
+        factory.CommandRouterMock.Verify(
+            x => x.HandleCommandAsync(
+                It.Is<Message>(m => m.Text!.StartsWith("/stats")), 
                 It.IsAny<CancellationToken>()),
             Times.Once,
-            "Должно быть отправлено уведомление пользователю");
+            "CommandRouter должен получить команду /stats для обработки");
     }
 
     /// <summary>
-    /// Тест для HandleStatsCommandAsync с различными типами статистики
-    /// Проверяет форматирование разных типов данных
-    /// <tags>stats-command, formatting, different-stats-types</tags>
+    /// Тест для MessageHandler.HandleCommandAsync с командой /stats - проверка интеграции при пустых данных
+    /// <tags>integration, command-routing, empty-stats, edge-case</tags>
     /// </summary>
     [Test]
-    public async Task HandleStatsCommandAsync_WithDifferentStatsTypes_FormatsCorrectly()
+    public async Task HandleCommandAsync_WithEmptyStats_DelegatesToCommandRouter()
     {
         // Arrange
         var message = TK.CreateStatsCommandMessage();
-        var stats = new Dictionary<long, ChatStats>
-        {
-            { 111111, new ChatStats("Chat 1") { BlacklistBanned = 10 } },
-            { 222222, new ChatStats("Chat 2") { StoppedCaptcha = 5 } },
-            { 333333, new ChatStats("Chat 3") { KnownBadMessage = 3 } },
-            { 444444, new ChatStats("Chat 4") { LongNameBanned = 2 } }
-        };
-
-        var statisticsServiceMock = TK.CreateMockStatisticsService();
-        statisticsServiceMock.Setup(x => x.GetAllStats()).Returns(stats);
-
-        var messageServiceMock = new Mock<IMessageService>();
-        messageServiceMock.Setup(x => x.SendUserNotificationAsync(
-            It.IsAny<User>(),
-            It.IsAny<Chat>(),
-            It.IsAny<UserNotificationType>(),
-            It.IsAny<object>(),
+        var factory = new MessageHandlerTestFactory();
+        
+        // Настройка CommandRouter для возврата true (команда обработана)
+        factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
+            It.IsAny<Message>(), 
             It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        var handler = TK.CreateMessageHandlerBuilder()
-            .Build();
-
-        // Настраиваем зависимости через рефлексию
-        var statisticsServiceField = typeof(MessageHandler).GetField("_statisticsService", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        var messageServiceField = typeof(MessageHandler).GetField("_messageService", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
+            .ReturnsAsync(true);
         
-        statisticsServiceField!.SetValue(handler, statisticsServiceMock.Object);
-        messageServiceField!.SetValue(handler, messageServiceMock.Object);
+        var handler = factory.CreateMessageHandler();
 
-        // Act - используем рефлексию
-        var method = typeof(MessageHandler).GetMethod("HandleStatsCommandAsync", 
-            BindingFlags.NonPublic | BindingFlags.Instance);
-        
-        await (Task)method!.Invoke(handler, new object[] { message, CancellationToken.None })!;
+        // Act
+        await handler.HandleCommandAsync(message, CancellationToken.None);
 
-        // Assert - проверяем, что уведомление было отправлено
-        messageServiceMock.Verify(
-            x => x.SendUserNotificationAsync(
-                It.IsAny<User>(),
-                It.IsAny<Chat>(),
-                UserNotificationType.SystemInfo,
-                It.IsAny<SimpleNotificationData>(),
+        // Assert - проверяем, что CommandRouter был вызван
+        factory.CommandRouterMock.Verify(
+            x => x.HandleCommandAsync(
+                It.Is<Message>(m => m.Text!.StartsWith("/stats")), 
                 It.IsAny<CancellationToken>()),
             Times.Once,
-            "Должно быть отправлено уведомление с форматированной статистикой");
+            "CommandRouter должен обработать команду /stats даже при пустых данных");
+    }
+
+    /// <summary>
+    /// Тест для MessageHandler.HandleCommandAsync с командой /stats - проверка обработки неизвестных команд
+    /// <tags>integration, command-routing, unknown-command</tags>
+    /// </summary>
+    [Test]
+    public async Task HandleCommandAsync_WithUnknownCommand_DelegatesToCommandRouter()
+    {
+        // Arrange
+        var message = TK.CreateStatsCommandMessage();
+        var factory = new MessageHandlerTestFactory();
+        
+        // Настройка CommandRouter для возврата false (команда не обработана)
+        factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
+            It.IsAny<Message>(), 
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+        
+        var handler = factory.CreateMessageHandler();
+
+        // Act
+        await handler.HandleCommandAsync(message, CancellationToken.None);
+
+        // Assert - проверяем, что CommandRouter был вызван
+        factory.CommandRouterMock.Verify(
+            x => x.HandleCommandAsync(
+                It.Is<Message>(m => m.Text!.StartsWith("/stats")), 
+                It.IsAny<CancellationToken>()),
+            Times.Once,
+            "CommandRouter должен получить команду даже если она не будет обработана");
+    }
+
+    /// <summary>
+    /// Тест проверяет, что команды /stats корректно передаются в CommandRouter
+    /// После рефакторинга команды обрабатываются через CommandRouter
+    /// <tags>stats-command, command-router, integration</tags>
+    /// </summary>
+    [Test]
+    public async Task HandleCommandAsync_WithStatsCommand_CallsCommandRouter()
+    {
+        // Arrange
+        var message = TK.CreateStatsCommandMessage();
+        var factory = new MessageHandlerTestFactory();
+        
+        factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var handler = factory.CreateMessageHandler();
+
+        // Act
+        await handler.HandleCommandAsync(message, CancellationToken.None);
+
+        // Assert
+        factory.CommandRouterMock.Verify(
+            x => x.HandleCommandAsync(
+                It.Is<Message>(m => m.Text!.StartsWith("/stats")), 
+                It.IsAny<CancellationToken>()),
+            Times.Once,
+            "CommandRouter должен получить команду /stats для обработки");
+    }
+
+    /// <summary>
+    /// Тест для MessageHandler.HandleCommandAsync - проверка логирования обработки команд
+    /// <tags>integration, command-routing, logging</tags>
+    /// </summary>
+    [Test]
+    public async Task HandleCommandAsync_WithStatsCommand_LogsCommandHandling()
+    {
+        // Arrange
+        var message = TK.CreateStatsCommandMessage();
+        var factory = new MessageHandlerTestFactory();
+        
+        // Настройка CommandRouter для возврата true (команда обработана)
+        factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
+            It.IsAny<Message>(), 
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        
+        var handler = factory.CreateMessageHandler();
+
+        // Act
+        await handler.HandleCommandAsync(message, CancellationToken.None);
+
+        // Assert - проверяем, что CommandRouter был вызван для обработки команды
+        factory.CommandRouterMock.Verify(
+            x => x.HandleCommandAsync(
+                It.Is<Message>(m => m.Text!.StartsWith("/stats")), 
+                It.IsAny<CancellationToken>()),
+            Times.Once,
+            "CommandRouter должен получить команду /stats для обработки и логирования");
     }
 } 

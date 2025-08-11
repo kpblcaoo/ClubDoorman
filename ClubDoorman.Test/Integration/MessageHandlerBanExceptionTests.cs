@@ -142,6 +142,8 @@ public class MessageHandlerBanExceptionTests
             suspiciousCommandHandlerMock.Object,
             commandRouterMock.Object,
             logChatServiceMock.Object,
+            Mock.Of<IJoinedUserFlags>(),
+            Mock.Of<IUserIndex>(),
             Mock.Of<IAiCascadeService>(),
             Mock.Of<INotificationService>(),
             Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),

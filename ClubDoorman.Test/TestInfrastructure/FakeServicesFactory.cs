@@ -194,6 +194,8 @@ public class FakeServicesFactory
             suspiciousCommandHandler,
             commandRouter,
             new Mock<ILogChatService>().Object,
+            Mock.Of<IJoinedUserFlags>(),
+            Mock.Of<IUserIndex>(),
             Mock.Of<IAiCascadeService>(),
             Mock.Of<INotificationService>(),
             Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
