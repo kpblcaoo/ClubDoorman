@@ -1,40 +1,36 @@
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services.AI;
-using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Telegram;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services.Commands;
+namespace ClubDoorman.Features.AdminOps;
 
 /// <summary>
-/// Обработчик команды /spam для добавления сообщений в базу спама
+/// Обработчик команды /ham для добавления сообщений в базу НЕ-спама
 /// </summary>
-public class SpamCommandHandler : ICommandHandler
+public class HamCommandHandler : ICommandHandler
 {
     private readonly ITelegramBotClientWrapper _bot;
     private readonly ISpamHamClassifier _classifier;
-    private readonly IBadMessageManager _badMessageManager;
     private readonly IMessageService _messageService;
     private readonly IAppConfig _appConfig;
-    private readonly ILogger<SpamCommandHandler> _logger;
+    private readonly ILogger<HamCommandHandler> _logger;
 
-    public string CommandName => "spam";
+    public string CommandName => "ham";
 
-    public SpamCommandHandler(
+    public HamCommandHandler(
         ITelegramBotClientWrapper bot,
         ISpamHamClassifier classifier,
-        IBadMessageManager badMessageManager,
         IMessageService messageService,
         IAppConfig appConfig,
-        ILogger<SpamCommandHandler> logger)
+        ILogger<HamCommandHandler> logger)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _classifier = classifier ?? throw new ArgumentNullException(nameof(classifier));
-        _badMessageManager = badMessageManager ?? throw new ArgumentNullException(nameof(badMessageManager));
         _messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
         _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -46,14 +42,14 @@ public class SpamCommandHandler : ICommandHandler
         var isAdminChat = message.Chat.Id == _appConfig.AdminChatId || message.Chat.Id == _appConfig.LogAdminChatId;
         if (!isAdminChat)
         {
-            _logger.LogDebug("Команда /spam не из админ-чата: {ChatId}", message.Chat.Id);
+            _logger.LogDebug("Команда /ham не из админ-чата: {ChatId}", message.Chat.Id);
             return;
         }
 
         // Проверяем, что есть реплай на сообщение
         if (message.ReplyToMessage == null)
         {
-            _logger.LogDebug("Команда /spam без реплая на сообщение");
+            _logger.LogDebug("Команда /ham без реплая на сообщение");
             return;
         }
 
@@ -69,41 +65,40 @@ public class SpamCommandHandler : ICommandHandler
         }
 
         var text = replyToMessage.Text ?? replyToMessage.Caption;
-        _logger.LogDebug("Команда /spam: извлечен текст='{Text}' (длина={Length})", 
+        _logger.LogDebug("Команда /ham: извлечен текст='{Text}' (длина={Length})", 
             string.IsNullOrWhiteSpace(text) ? "[ПУСТОЙ]" : text.Length > 100 ? text.Substring(0, 100) + "..." : text, 
             text?.Length ?? 0);
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            _logger.LogWarning("❌ Команда /spam не выполнена: текст сообщения пустой или отсутствует");
+            _logger.LogWarning("❌ Команда /ham не выполнена: текст сообщения пустой или отсутствует");
             await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Warning, 
                 new SimpleNotificationData(message.From!, message.Chat, "Сообщение не содержит текста"), 
                 cancellationToken);
             return;
         }
 
-        await HandleSpamCommandAsync(message, text, replyToMessage, cancellationToken);
+        await HandleHamCommandAsync(message, text, replyToMessage, cancellationToken);
     }
 
-    private async Task HandleSpamCommandAsync(Message message, string text, Message replyToMessage, CancellationToken cancellationToken)
+    private async Task HandleHamCommandAsync(Message message, string text, Message replyToMessage, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("🔥 Обрабатываем команду /spam для текста: '{Text}'", text);
-        await _classifier.AddSpam(text);
-        await _badMessageManager.MarkAsBad(text);
+        _logger.LogInformation("✅ Обрабатываем команду /ham для текста: '{Text}'", text);
+        await _classifier.AddHam(text);
         
-        // Уведомление пользователю
+        // Уведомление пользователю (исправляем Markdown ошибку)
         await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Success, 
-            new SimpleNotificationData(message.From!, message.Chat, "Сообщение добавлено как пример спама"), 
+            new SimpleNotificationData(message.From!, message.Chat, "Сообщение добавлено как пример НЕ\\-спама"), 
             cancellationToken);
             
-        // Уведомление в админку о добавлении спам примера
+        // Уведомление в админку о добавлении НЕ-спам примера
         var adminData = new SimpleNotificationData(
             message.From!, 
             message.Chat, 
-            $"Администратор {Utils.FullName(message.From!)} добавил сообщение как пример СПАМА:\n\n`{text.Substring(0, Math.Min(text.Length, 200))}{(text.Length > 200 ? "..." : "")}`"
+            $"Администратор {Utils.FullName(message.From!)} добавил сообщение как пример НЕ-спама:\n\n`{text.Substring(0, Math.Min(text.Length, 200))}{(text.Length > 200 ? "..." : "")}`"
         );
         await _messageService.SendAdminNotificationAsync(AdminNotificationType.SystemInfo, adminData, cancellationToken);
         
-        _logger.LogInformation("✅ Команда /spam успешно выполнена");
+        _logger.LogInformation("✅ Команда /ham успешно выполнена");
     }
 }

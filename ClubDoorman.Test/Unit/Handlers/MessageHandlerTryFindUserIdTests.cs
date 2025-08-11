@@ -17,7 +17,7 @@ using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.ChannelModeration;
 using ClubDoorman.Services.Notifications;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services;
 
 namespace ClubDoorman.Test.Unit.Handlers;

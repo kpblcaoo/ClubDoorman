@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services.Commands;
+namespace ClubDoorman.Features.AdminOps;
 
 /// <summary>
 /// Маршрутизатор команд, который направляет команды соответствующим обработчикам

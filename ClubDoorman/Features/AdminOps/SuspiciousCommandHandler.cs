@@ -9,7 +9,7 @@ using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
 
-namespace ClubDoorman.Services.Commands;
+namespace ClubDoorman.Features.AdminOps;
 
 /// <summary>
 /// Обработчик команд для управления подозрительными пользователями

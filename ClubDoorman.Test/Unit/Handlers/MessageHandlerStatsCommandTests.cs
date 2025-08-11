@@ -10,7 +10,7 @@ using Telegram.Bot.Types;
 using Moq;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Handlers;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Test.TestInfrastructure;
 
 namespace ClubDoorman.Test.Unit.Handlers;

@@ -5,7 +5,7 @@ using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
@@ -25,6 +25,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -128,6 +129,17 @@ public class FakeServicesFactory
         var statisticsServiceMock = new Mock<IStatisticsService>();
         var globalStatsManagerMock = new Mock<GlobalStatsManager>();
         
+        // Настраиваем мок для IAiCascadeService
+        var aiCascadeServiceMock = new Mock<IAiCascadeService>();
+        aiCascadeServiceMock.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true) // AI анализ срабатывает и возвращает true
+            .Callback<Message, User, Chat, CancellationToken>((message, user, chat, token) =>
+            {
+                // Отправляем реальное сообщение через FakeTelegramClient
+                _fakeBot.SendMessageAsync(_appConfig.AdminChatId, 
+                    $"AI анализ профиля пользователя {user.FirstName} {user.LastName} (@{user.Username})");
+            });
+        
         
 
         statisticsServiceMock.Setup(x => x.GetAllStats()).Returns(new Dictionary<long, ChatStats>());
@@ -196,7 +208,7 @@ public class FakeServicesFactory
             new Mock<ILogChatService>().Object,
             Mock.Of<IJoinedUserFlags>(),
             Mock.Of<IUserIndex>(),
-            Mock.Of<IAiCascadeService>(),
+            aiCascadeServiceMock.Object,
             Mock.Of<INotificationService>(),
             Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
             Mock.Of<ClubDoorman.Services.Notifications.IButtonsService>());

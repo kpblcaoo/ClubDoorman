@@ -2,7 +2,7 @@ using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Core.Configuration;

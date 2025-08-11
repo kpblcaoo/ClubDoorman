@@ -5,7 +5,7 @@ using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Handlers;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Handlers;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.TestInfrastructure;
@@ -15,6 +15,7 @@ using Telegram.Bot;
 using Moq;
 using Microsoft.Extensions.Logging;
 using FluentAssertions;
+
 
 namespace ClubDoorman.Test.StepDefinitions.Common
 {
@@ -114,35 +115,50 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                     .Returns(Task.CompletedTask);
             });
 
-            Console.WriteLine("[DEBUG] Настраиваем CommandRouter mock напрямую");
+            Console.WriteLine("[DEBUG] Настраиваем CommandRouter с реальными обработчиками");
             
-            // Настраиваем мок для CommandRouter (важно для обработки команд!)
-            _factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
-                .Returns<Message, CancellationToken>(async (message, cancellationToken) =>
-                {
-                    Console.WriteLine($"[DEBUG] CommandRouter.HandleCommandAsync вызван для сообщения: '{message.Text}' в чате {message.Chat.Id}");
-                    
-                    // Создаем реальный CheckCommandHandler для тестирования
-                    var checkHandler = new CheckCommandHandler(
-                        _fakeBot,
-                        _factory.ClassifierMock.Object,
-                        _factory.MessageServiceMock.Object,
-                        _factory.BotPermissionsServiceMock.Object,
-                        _factory.AppConfigMock.Object,
-                        _loggerFactory.CreateLogger<CheckCommandHandler>());
-
-                    if (message.Text?.StartsWith("/check") == true)
-                    {
-                        Console.WriteLine($"[DEBUG] Вызываем CheckCommandHandler.HandleAsync для команды: {message.Text}");
-                        await checkHandler.HandleAsync(message, cancellationToken);
-                        Console.WriteLine($"[DEBUG] CheckCommandHandler.HandleAsync завершен");
-                        return true;
-                    }
-                    Console.WriteLine($"[DEBUG] Команда не является /check: {message.Text}");
-                    return false;
-                });
+            // Создаем реальный CommandRouter с CheckCommandHandler
+            var checkHandler = new CheckCommandHandler(
+                _fakeBot,
+                _factory.ClassifierMock.Object,
+                _factory.MessageServiceMock.Object,
+                _factory.BotPermissionsServiceMock.Object,
+                _factory.AppConfigMock.Object,
+                _loggerFactory.CreateLogger<CheckCommandHandler>());
+            
+            var commandHandlers = new List<ICommandHandler> { checkHandler };
+            var commandRouter = new CommandRouter(commandHandlers, _loggerFactory.CreateLogger<CommandRouter>());
+            
+            _factory.WithCommandRouterSetup(mock => {
+                mock.Setup(x => x.HandleCommandAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
+                    .Returns<Message, CancellationToken>(async (message, cancellationToken) => {
+                        return await commandRouter.HandleCommandAsync(message, cancellationToken);
+                    });
+            });
                 
             Console.WriteLine("[DEBUG] CommandRouter mock настроен");
+
+            // Настраиваем FakeTelegramClient для возврата пользователя как администратора
+            var adminUser = new ChatMemberAdministrator
+            {
+                User = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
+                IsAnonymous = false,
+                CanManageChat = true,
+                CanDeleteMessages = true,
+                CanManageVideoChats = true,
+                CanRestrictMembers = true,
+                CanPromoteMembers = true,
+                CanChangeInfo = true,
+                CanInviteUsers = true,
+                CanPostMessages = false,
+                CanEditMessages = false,
+                CanPinMessages = false,
+                CanPostStories = false,
+                CanEditStories = false,
+                CanDeleteStories = false,
+                CustomTitle = "Admin"
+            };
+            _fakeBot.SetupChatAdministrators(123456789, adminUser);
 
             // Создаем MessageHandler с настроенным CommandRouter mock
             _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
@@ -153,6 +169,12 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Given(@"I reply to a user's message with check command ""(.*)""")]
         public void GivenIReplyToAUsersMessageWithCheckCommand(string command)
         {
+            // Пересоздаем MessageHandler с CommandRouter mock для CheckCommand
+            Console.WriteLine("[DEBUG] Пересоздаем MessageHandler с CommandRouter mock для CheckCommand");
+            _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
+            ScenarioContext.Current["MessageHandler"] = _messageHandler;
+            Console.WriteLine("[DEBUG] MessageHandler заменен на версию с CheckCommand CommandRouter mock");
+            
             _repliedMessage = new Message
             {
                 From = new User { Id = 123456789, FirstName = "TestUser", Username = "testuser" },
@@ -163,7 +185,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             _testMessage = new Message
             {
-                From = new User { Id = 987654321, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -179,7 +201,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             _testMessage = new Message
             {
-                From = new User { Id = 987654321, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command
@@ -201,7 +223,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             _testMessage = new Message
             {
-                From = new User { Id = 987654321, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -232,7 +254,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             _testMessage = new Message
             {
-                From = new User { Id = 987654321, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -263,7 +285,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             _testMessage = new Message
             {
-                From = new User { Id = 987654321, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -294,7 +316,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             _testMessage = new Message
             {
-                From = new User { Id = 987654321, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -435,7 +457,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             };
             _testMessage = new Message
             {
-                From = new User { Id = 987654321, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -444,7 +466,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             // Пересоздаем MessageHandler с CommandRouter mock для CheckCommand
             Console.WriteLine("[DEBUG] Пересоздаем MessageHandler с CommandRouter mock для CheckCommand");
-            _messageHandler = _factory.CreateMessageHandlerWithFake();
+            _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
+            ScenarioContext.Current["MessageHandler"] = _messageHandler;
             Console.WriteLine("[DEBUG] MessageHandler заменен на версию с CheckCommand CommandRouter mock");
 
             ScenarioContext.Current["TestMessage"] = _testMessage;
@@ -463,7 +486,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             };
             _testMessage = new Message
             {
-                From = new User { Id = 987654321, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -472,7 +495,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             // Пересоздаем MessageHandler с CommandRouter mock для CheckCommand
             Console.WriteLine("[DEBUG] Пересоздаем MessageHandler с CommandRouter mock для CheckCommand");
-            _messageHandler = _factory.CreateMessageHandlerWithFake();
+            _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
+            ScenarioContext.Current["MessageHandler"] = _messageHandler;
             Console.WriteLine("[DEBUG] MessageHandler заменен на версию с CheckCommand CommandRouter mock");
 
             ScenarioContext.Current["TestMessage"] = _testMessage;
@@ -497,7 +521,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             };
             _testMessage = new Message
             {
-                From = new User { Id = 987654321, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -510,6 +534,12 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Given(@"I reply to a message with stop words with check command ""(.*)""")]
         public void GivenIReplyToAMessageWithStopWordsWithCheckCommand(string command)
         {
+            // Пересоздаем MessageHandler с CommandRouter mock для CheckCommand
+            Console.WriteLine("[DEBUG] Пересоздаем MessageHandler с CommandRouter mock для CheckCommand");
+            _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
+            ScenarioContext.Current["MessageHandler"] = _messageHandler;
+            Console.WriteLine("[DEBUG] MessageHandler заменен на версию с CheckCommand CommandRouter mock");
+            
             _repliedMessage = new Message
             {
                 From = new User { Id = 888888888, FirstName = "StopWordUser", Username = "stopworduser" },
@@ -519,7 +549,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             };
             _testMessage = new Message
             {
-                From = new User { Id = 987654321, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,

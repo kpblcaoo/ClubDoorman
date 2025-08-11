@@ -1,4 +1,4 @@
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Test.TestKit;
 using Microsoft.Extensions.Logging;
 using Moq;

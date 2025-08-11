@@ -1,6 +1,6 @@
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Statistics;

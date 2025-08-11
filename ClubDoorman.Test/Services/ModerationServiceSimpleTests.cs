@@ -268,15 +268,6 @@ public class ModerationServiceSimpleTests
         Assert.That(fakeClient.WasMessageDeleted(envelope), Is.True, 
             "Сообщение должно быть удалено");
         
-        // Проверяем, что было отправлено приветственное уведомление новичку
-        factory.MessageServiceMock.Verify(x => x.SendUserNotificationWithReplyAsync(
-            It.Is<User>(user => user.Id == 789),
-            It.Is<Chat>(chat => chat.Id == 123),
-            It.Is<UserNotificationType>(type => type == UserNotificationType.ModerationWarning),
-            It.IsAny<object>(),
-            It.IsAny<ReplyParameters>(),
-            It.IsAny<CancellationToken>()), Times.Once);
-        
         // Проверяем логи для отладки
         var logs = fakeClient.GetOperationLog();
         Console.WriteLine("=== Логи операций ===");

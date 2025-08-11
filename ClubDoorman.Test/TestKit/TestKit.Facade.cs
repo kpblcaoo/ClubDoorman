@@ -155,7 +155,7 @@ namespace ClubDoorman.Test.TestKit
         /// Создает билдер для NotificationService
         /// <tags>builders, notification-service, fluent-api</tags>
         /// </summary>
-        public static NotificationServiceBuilder CreateNotificationServiceBuilder() => new();
+    
         
         /// <summary>
         /// Создает билдер для UserJoinService

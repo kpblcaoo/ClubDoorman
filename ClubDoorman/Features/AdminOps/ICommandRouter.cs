@@ -1,6 +1,6 @@
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services.Commands;
+namespace ClubDoorman.Features.AdminOps;
 
 /// <summary>
 /// Интерфейс для маршрутизации команд к соответствующим обработчикам

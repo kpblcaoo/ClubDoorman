@@ -9,7 +9,7 @@ using ClubDoorman.Services.Telegram;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services.Commands;
+namespace ClubDoorman.Features.AdminOps;
 
 /// <summary>
 /// Обработчик команды /stat и /stats для отображения статистики по группам

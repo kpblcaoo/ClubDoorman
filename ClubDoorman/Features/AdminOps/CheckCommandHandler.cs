@@ -1,5 +1,6 @@
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models.Notifications;
+using ClubDoorman.Services;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Handlers;
@@ -9,7 +10,7 @@ using ClubDoorman.Services.Telegram;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Services.Commands;
+namespace ClubDoorman.Features.AdminOps;
 
 /// <summary>
 /// Обработчик команды /check для проверки сообщений на спам

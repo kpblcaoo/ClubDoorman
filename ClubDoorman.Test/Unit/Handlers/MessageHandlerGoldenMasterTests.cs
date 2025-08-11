@@ -19,6 +19,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Statistics;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
@@ -54,7 +55,20 @@ public class MessageHandlerGoldenMasterTests
             .Returns(_factory.ChannelModerationServiceMock.Object);
         
         _messageHandler = _factory.CreateMessageHandlerWithRealUserBanService();
-        _userBanService = _factory.CreateRealUserBanService();
+        
+        // Создаем UserBanService с моком BotMock вместо реального ITelegramBotClientWrapper
+        _userBanService = new UserBanService(
+            _factory.BotMock.Object, // Используем мок вместо реального клиента
+            _factory.MessageServiceMock.Object,
+            _factory.UserFlowLoggerMock.Object,
+            _factory.UserBanServiceLoggerMock.Object,
+            _factory.ViolationTrackerMock.Object,
+            _factory.AppConfigMock.Object,
+            _factory.StatisticsServiceMock.Object,
+            new GlobalStatsManager(),
+            _factory.UserManagerMock.Object,
+            _factory.UserCleanupServiceMock.Object
+        );
     }
 
     /// <summary>

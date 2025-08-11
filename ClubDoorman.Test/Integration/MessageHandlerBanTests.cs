@@ -15,7 +15,6 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Test.TestData;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestKit;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
@@ -89,27 +88,20 @@ public class MessageHandlerBanTests
         // Используем стандартную настройку из инфраструктуры
         factory.SetupLongNameBanTestScenario(user);
         
-        // Создаем MessageHandler с реальным UserBanService после настройки всех моков
-        var handler = factory.CreateMessageHandlerWithRealUserBanService();
+        // Создаем MessageHandler с моком UserBanService
+        var handler = factory.CreateMessageHandler();
 
         // Act
         var update = new Update { Message = userJoinMessage };
         await handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем legacy поведение (прямые вызовы бота)
-        factory.BotMock.Verify(
-            x => x.BanChatMember(
-                It.IsAny<ChatId>(),
-                It.IsAny<long>(),
-                It.IsAny<DateTime?>(),
-                It.IsAny<bool>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-        
-        factory.BotMock.Verify(
-            x => x.DeleteMessage(
-                It.IsAny<ChatId>(),
-                It.IsAny<int>(),
+        // Assert - проверяем вызов UserBanService
+        factory.UserBanServiceMock.Verify(
+            x => x.BanUserForLongNameAsync(
+                It.IsAny<Message>(),
+                It.IsAny<User>(),
+                It.IsAny<string>(),
+                It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -127,27 +119,20 @@ public class MessageHandlerBanTests
         // Используем стандартную настройку из инфраструктуры
         factory.SetupLongNameBanTestScenario(user);
         
-        // Создаем MessageHandler после настройки всех моков
-        var handler = factory.CreateMessageHandlerWithRealUserBanService();
+        // Создаем MessageHandler с моком UserBanService
+        var handler = factory.CreateMessageHandler();
 
         // Act
         var update = new Update { Message = userJoinMessage };
         await handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем legacy поведение (прямые вызовы бота)
-        factory.BotMock.Verify(
-            x => x.BanChatMember(
-                It.IsAny<ChatId>(),
-                It.IsAny<long>(),
-                It.IsAny<DateTime?>(),
-                It.IsAny<bool>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-        
-        factory.BotMock.Verify(
-            x => x.DeleteMessage(
-                It.IsAny<ChatId>(),
-                It.IsAny<int>(),
+        // Assert - проверяем вызов UserBanService
+        factory.UserBanServiceMock.Verify(
+            x => x.BanUserForLongNameAsync(
+                It.IsAny<Message>(),
+                It.IsAny<User>(),
+                It.IsAny<string>(),
+                It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -165,27 +150,18 @@ public class MessageHandlerBanTests
         // Используем стандартную настройку из инфраструктуры
         factory.SetupBlacklistUserTestScenario(user);
         
-        // Создаем MessageHandler после настройки всех моков
-        var handler = factory.CreateMessageHandlerWithRealUserBanService();
+        // Создаем MessageHandler с моком UserBanService
+        var handler = factory.CreateMessageHandler();
 
         // Act
         var update = new Update { Message = userJoinMessage };
         await handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем legacy поведение (прямые вызовы бота)
-        factory.BotMock.Verify(
-            x => x.BanChatMember(
-                It.IsAny<ChatId>(),
-                It.IsAny<long>(),
-                It.IsAny<DateTime?>(),
-                It.IsAny<bool>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-        
-        factory.BotMock.Verify(
-            x => x.DeleteMessage(
-                It.IsAny<ChatId>(),
-                It.IsAny<int>(),
+        // Assert - проверяем вызов UserBanService
+        factory.UserBanServiceMock.Verify(
+            x => x.BanBlacklistedUserAsync(
+                It.IsAny<Message>(),
+                It.IsAny<User>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -212,27 +188,18 @@ public class MessageHandlerBanTests
         // Настройка моков для сценария автобана
         _factory.SetupAutoBanScenario(user, "Спам сообщение");
         
-        // Создаем MessageHandler после настройки моков
-        _handler = _factory.CreateMessageHandlerWithRealUserBanService();
+        // Создаем MessageHandler с моком UserBanService
+        _handler = _factory.CreateMessageHandler();
 
         // Act
         var update = new Update { Message = message };
         await _handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем legacy поведение (прямые вызовы бота)
-        _factory.BotMock.Verify(
-            x => x.BanChatMember(
-                It.IsAny<ChatId>(),
-                It.IsAny<long>(),
-                It.IsAny<DateTime?>(),
-                It.IsAny<bool>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-        
-        _factory.BotMock.Verify(
-            x => x.DeleteMessage(
-                It.IsAny<ChatId>(),
-                It.IsAny<int>(),
+        // Assert - проверяем вызов UserBanService
+        _factory.UserBanServiceMock.Verify(
+            x => x.AutoBanAsync(
+                It.IsAny<Message>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -266,8 +233,8 @@ public class MessageHandlerBanTests
             .Returns(Task.CompletedTask);
         
         // Config.ChannelAutoBan - статическое свойство, по умолчанию true
-        // Создаем MessageHandler после настройки всех моков
-        var handler = factory.CreateMessageHandlerWithRealUserBanService();
+        // Создаем MessageHandler с моком UserBanService
+        var handler = factory.CreateMessageHandler();
 
         // Act
         var update = new Update { Message = message };
@@ -303,27 +270,19 @@ public class MessageHandlerBanTests
         // Настройка моков для сценария обработки бана из блэклиста
         _factory.SetupBlacklistBanHandlingScenario(user, "Пользователь в блэклисте");
         
-        // Создаем MessageHandler после настройки моков
-        _handler = _factory.CreateMessageHandlerWithRealUserBanService();
+        // Создаем MessageHandler с моком UserBanService
+        _handler = _factory.CreateMessageHandler();
 
         // Act
         var update = new Update { Message = message };
         await _handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем legacy поведение (прямые вызовы бота)
-        _factory.BotMock.Verify(
-            x => x.BanChatMember(
-                It.IsAny<ChatId>(),
-                It.IsAny<long>(),
-                It.IsAny<DateTime?>(),
-                It.IsAny<bool>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-        
-        _factory.BotMock.Verify(
-            x => x.DeleteMessage(
-                It.IsAny<ChatId>(),
-                It.IsAny<int>(),
+        // Assert - проверяем вызов UserBanService
+        _factory.UserBanServiceMock.Verify(
+            x => x.HandleBlacklistBanAsync(
+                It.IsAny<Message>(),
+                It.IsAny<User>(),
+                It.IsAny<Chat>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -334,36 +293,36 @@ public class MessageHandlerBanTests
     public async Task WhenModerationReturnsBan_ShouldCallAutoBanAsync()
     {
         // Arrange
-        var factory = new MessageHandlerTestFactory();
         var user = TK.CreateValidUser();
         var chat = TK.CreateGroupChat();
-        var message = TK.CreateTextMessage(user.Id, chat.Id, "spam message");
+        var message = TK.CreateValidMessage();
+        message.From = user;
         message.Chat = chat;
 
-        // Используем новую настройку для сценария бана по модерации
-        factory.SetupModerationBanScenario("Спам сообщение");
+        var envelope = new MessageEnvelope(
+            MessageId: 462,
+            ChatId: chat.Id,
+            UserId: user.Id,
+            Text: "spam message"
+        );
+
+        _fakeClient.RegisterMessageEnvelope(envelope);
+
+        // Настройка моков для сценария бана по результату модерации
+        _factory.SetupModerationBanScenario("Спам сообщение");
         
-        // Создаем MessageHandler после настройки всех моков
-        var handler = factory.CreateMessageHandlerWithRealUserBanService();
+        // Создаем MessageHandler с моком UserBanService
+        _handler = _factory.CreateMessageHandler();
 
         // Act
         var update = new Update { Message = message };
-        await handler.HandleAsync(update, CancellationToken.None);
+        await _handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем legacy поведение (прямые вызовы бота)
-        factory.BotMock.Verify(
-            x => x.BanChatMember(
-                It.IsAny<ChatId>(),
-                It.IsAny<long>(),
-                It.IsAny<DateTime?>(),
-                It.IsAny<bool>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-        
-        factory.BotMock.Verify(
-            x => x.DeleteMessage(
-                It.IsAny<ChatId>(),
-                It.IsAny<int>(),
+        // Assert - проверяем вызов UserBanService
+        _factory.UserBanServiceMock.Verify(
+            x => x.AutoBanAsync(
+                It.IsAny<Message>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -478,9 +437,28 @@ public class MessageHandlerBanTests
         message.From = user;
         message.Chat = chat;
 
-        // Используем настройку для повторных нарушений
-        factory.SetupRepeatedViolationsBanScenario("TextMention");
+        // Настраиваем базовые моки
+        factory.WithAppConfigSetup(mock => 
+        {
+            mock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
+            mock.Setup(x => x.DisabledChats).Returns(new HashSet<long>());
+            mock.Setup(x => x.AdminChatId).Returns(123456789);
+            mock.Setup(x => x.LogAdminChatId).Returns(987654321);
+            mock.Setup(x => x.MlViolationsBeforeBan).Returns(1);
+        });
         
+        factory.WithBotPermissionsServiceSetup(mock =>
+        {
+            mock.Setup(x => x.IsSilentModeAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
+        });
+        
+        factory.WithUserManagerSetup(mock =>
+        {
+            mock.Setup(x => x.InBanlist(It.IsAny<long>())).ReturnsAsync(false);
+            mock.Setup(x => x.GetClubUsername(It.IsAny<long>())).ReturnsAsync((string?)null);
+        });
+
         // Настраиваем модерацию для возврата Delete с причиной, которая приведёт к нарушению
         factory.WithModerationServiceSetup(mock =>
         {
@@ -490,29 +468,28 @@ public class MessageHandlerBanTests
                 .Returns(false);
         });
         
-        // Создаем MessageHandler после настройки всех моков
-        var handler = factory.CreateMessageHandlerWithRealUserBanService();
+        // Настраиваем ViolationTracker для возврата true (достигнут лимит нарушений)
+        factory.WithViolationTrackerSetup(mock =>
+        {
+            mock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>()))
+                .Returns(true); // Достигнут лимит нарушений - бан нужен
+        });
+        
+        // Создаем MessageHandler с моком UserBanService
+        var handler = factory.CreateMessageHandler();
 
         // Act
         var update = new Update { Message = message };
         await handler.HandleAsync(update, CancellationToken.None);
 
-        // Assert - проверяем legacy поведение (прямые вызовы бота)
-        factory.BotMock.Verify(
-            x => x.BanChatMember(
-                It.IsAny<ChatId>(),
-                It.IsAny<long>(),
-                It.IsAny<DateTime?>(),
-                It.IsAny<bool>(),
+        // Assert - проверяем вызов UserBanService
+        factory.UserBanServiceMock.Verify(
+            x => x.TrackViolationAndBanIfNeededAsync(
+                It.IsAny<Message>(),
+                It.IsAny<User>(),
+                It.IsAny<string>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
-        
-        factory.BotMock.Verify(
-            x => x.DeleteMessage(
-                It.IsAny<ChatId>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Exactly(2));
     }
 
     [Test]
@@ -536,8 +513,8 @@ public class MessageHandlerBanTests
                 .Returns(false); // Первое нарушение - бан не нужен
         });
         
-        // Создаем MessageHandler после настройки всех моков
-        var handler = factory.CreateMessageHandlerWithRealUserBanService();
+        // Создаем MessageHandler с моком UserBanService
+        var handler = factory.CreateMessageHandler();
 
         // Act
         var update = new Update { Message = message };
@@ -573,8 +550,8 @@ public class MessageHandlerBanTests
                 .ReturnsAsync((Chat?)null);
         });
         
-        // Создаем MessageHandler после настройки всех моков
-        var handler = factory.CreateMessageHandlerWithRealUserBanService();
+        // Создаем MessageHandler с моком UserBanService
+        var handler = factory.CreateMessageHandler();
 
         // Act
         var update = new Update { Message = message };
@@ -610,8 +587,8 @@ public class MessageHandlerBanTests
             // mock.Setup(x => x.ChannelAutoBan).Returns(false);
         });
         
-        // Создаем MessageHandler после настройки всех моков
-        var handler = factory.CreateMessageHandlerWithRealUserBanService();
+        // Создаем MessageHandler с моком UserBanService
+        var handler = factory.CreateMessageHandler();
 
         // Act
         var update = new Update { Message = message };

@@ -1,22 +1,22 @@
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestKit;
 using ClubDoorman.TestInfrastructure;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
-using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
@@ -45,7 +45,20 @@ public class MessageHandlerMutationCoverageTests
             .WithLoggerSetup(mock => _loggerMock = mock);
             
         _messageHandler = _factory.CreateMessageHandlerWithRealUserBanService();
-        _userBanService = _factory.CreateRealUserBanService();
+        
+        // Создаем UserBanService с моком BotMock вместо реального ITelegramBotClientWrapper
+        _userBanService = new UserBanService(
+            _botMock.Object, // Используем мок вместо реального клиента
+            _messageServiceMock.Object,
+            _factory.UserFlowLoggerMock.Object,
+            _factory.UserBanServiceLoggerMock.Object,
+            _factory.ViolationTrackerMock.Object,
+            _factory.AppConfigMock.Object,
+            _factory.StatisticsServiceMock.Object,
+            new GlobalStatsManager(),
+            _factory.UserManagerMock.Object,
+            _factory.UserCleanupServiceMock.Object
+        );
     }
 
     /// <summary>

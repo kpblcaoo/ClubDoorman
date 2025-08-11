@@ -5,7 +5,7 @@ using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
 
@@ -32,6 +32,7 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Services.Notifications;
+using ClubDoorman.Models.Notifications;
 
 
 namespace ClubDoorman.Test.TestInfrastructure;
@@ -78,7 +79,7 @@ public class MessageHandlerTestFactory
     public IUserBanService CreateRealUserBanService()
     {
         return new UserBanService(
-            BotMock.Object,
+            FakeBotClient, // Используем FakeTelegramClient вместо BotMock.Object
             MessageServiceMock.Object,
             UserFlowLoggerMock.Object,
             UserBanServiceLoggerMock.Object,
@@ -88,6 +89,14 @@ public class MessageHandlerTestFactory
             new GlobalStatsManager(),
             UserManagerMock.Object,
             UserCleanupServiceMock.Object
+        );
+    }
+
+    public IViolationTracker CreateRealViolationTracker()
+    {
+        return new ViolationTracker(
+            new Mock<ILogger<ViolationTracker>>().Object,
+            AppConfigMock.Object
         );
     }
     
@@ -681,15 +690,32 @@ public class MessageHandlerTestFactory
                 .Returns(ChannelModerationServiceMock.Object);
         }
         
-        // Настраиваем TelegramBotClientWrapperMock для работы с FakeTelegramClient
-        TelegramBotClientWrapperMock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Callback<ChatId, int, CancellationToken>((chatId, messageId, token) =>
+        // Настраиваем NotificationServiceMock для работы с FakeTelegramClient
+        NotificationServiceMock.Setup(x => x.DeleteAndReportMessage(It.IsAny<Message>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Callback<Message, string, bool, CancellationToken>((message, reason, isSilentMode, token) =>
             {
-                fakeClient.DeleteMessage(chatId, messageId, token);
-            });
+                fakeClient.DeleteMessage(message.Chat.Id, message.MessageId, token);
+            })
+            .Returns(Task.CompletedTask);
+
+        NotificationServiceMock.Setup(x => x.DeleteAndReportToLogChat(It.IsAny<Message>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Callback<Message, string, CancellationToken>((message, reason, token) =>
+            {
+                fakeClient.DeleteMessage(message.Chat.Id, message.MessageId, token);
+            })
+            .Returns(Task.CompletedTask);
+
+        // Настраиваем ButtonsServiceMock для обработки fallback уведомлений
+        ButtonsServiceMock.Setup(x => x.SendSuspiciousMessageWithButtons(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<SuspiciousMessageNotificationData>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Callback<Message, User, SuspiciousMessageNotificationData, bool, CancellationToken>((message, user, data, isSilentMode, token) =>
+            {
+                // Отправляем fallback уведомление через MessageService
+                MessageServiceMock.Object.SendAdminNotificationAsync(AdminNotificationType.SuspiciousMessage, data, token);
+            })
+            .Returns(Task.CompletedTask);
 
         return new MessageHandler(
-            TelegramBotClientWrapperMock.Object,
+            fakeClient, // Используем FakeTelegramClient напрямую
             ModerationServiceMock.Object,
             CaptchaServiceMock.Object,
             UserManagerMock.Object,
@@ -703,9 +729,9 @@ public class MessageHandlerTestFactory
             ChatLinkFormatterMock.Object,
             BotPermissionsServiceMock.Object,
             AppConfigMock.Object,
-            ViolationTrackerMock.Object,
+            CreateRealViolationTracker(), // Используем реальный ViolationTracker вместо мока
             LoggerMock.Object,
-            UserBanServiceMock.Object,
+            CreateRealUserBanService(), // Используем реальный UserBanService вместо мока
             ChannelModerationServiceMock.Object,
             StartCommandHandlerMock.Object,
             SuspiciousCommandHandlerMock.Object,

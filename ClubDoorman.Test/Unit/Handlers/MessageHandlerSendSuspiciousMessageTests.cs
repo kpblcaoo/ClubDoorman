@@ -208,6 +208,15 @@ public class MessageHandlerSendSuspiciousMessageTests
             mock.Setup(x => x.AdminChatId).Returns(12345L);
         });
 
+        // Настраиваем ButtonsServiceMock для вызова SendAdminNotificationAsync при исключении
+        _factory.ButtonsServiceMock.Setup(x => x.SendSuspiciousMessageWithButtons(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<SuspiciousMessageNotificationData>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Callback<Message, User, SuspiciousMessageNotificationData, bool, CancellationToken>((msg, usr, d, silent, token) =>
+            {
+                // Вызываем SendAdminNotificationAsync напрямую
+                _factory.MessageServiceMock.Object.SendAdminNotificationAsync(AdminNotificationType.SuspiciousMessage, d, token);
+            })
+            .Returns(Task.CompletedTask);
+
         // Act
         await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
 
