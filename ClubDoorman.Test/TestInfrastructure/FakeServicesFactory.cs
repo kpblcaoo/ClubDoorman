@@ -171,6 +171,7 @@ public class FakeServicesFactory
         // Create mock command handlers
         var startCommandHandler = Mock.Of<IStartCommandHandler>();
         var suspiciousCommandHandler = Mock.Of<ISuspiciousCommandHandler>();
+        var commandRouter = Mock.Of<ICommandRouter>();
         
         return new MessageHandler(
             _fakeBot,
@@ -193,6 +194,7 @@ public class FakeServicesFactory
             new Mock<IChannelModerationService>().Object,
             startCommandHandler,
             suspiciousCommandHandler,
+            commandRouter,
             new Mock<ILogChatService>().Object);
     }
 

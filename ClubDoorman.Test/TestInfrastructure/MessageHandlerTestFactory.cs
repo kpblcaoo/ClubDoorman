@@ -91,6 +91,7 @@ public class MessageHandlerTestFactory
     // Мокаем интерфейсы командных обработчиков
     public Mock<IStartCommandHandler> StartCommandHandlerMock { get; } = TK.CreateMock<IStartCommandHandler>();
     public Mock<ISuspiciousCommandHandler> SuspiciousCommandHandlerMock { get; } = TK.CreateMock<ISuspiciousCommandHandler>();
+    public Mock<ICommandRouter> CommandRouterMock { get; } = TK.CreateMock<ICommandRouter>();
 
 
 
@@ -117,6 +118,7 @@ public class MessageHandlerTestFactory
             ChannelModerationServiceMock.Object,
             StartCommandHandlerMock.Object,
             SuspiciousCommandHandlerMock.Object,
+            CommandRouterMock.Object,
             LogChatServiceMock.Object
         );
     }
@@ -144,6 +146,7 @@ public class MessageHandlerTestFactory
             ChannelModerationServiceMock.Object,
             StartCommandHandlerMock.Object,
             SuspiciousCommandHandlerMock.Object,
+            CommandRouterMock.Object,
             LogChatServiceMock.Object
         );
     }
@@ -491,6 +494,7 @@ public class MessageHandlerTestFactory
             ChannelModerationServiceMock.Object,
             StartCommandHandlerMock.Object,
             SuspiciousCommandHandlerMock.Object,
+            CommandRouterMock.Object,
             LogChatServiceMock.Object
         );
     }

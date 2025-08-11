@@ -63,6 +63,7 @@ public class MessageHandlerBuilder
     // Мокаем интерфейсы командных обработчиков
     private readonly Mock<IStartCommandHandler> _startCommandHandlerMock = TK.CreateMock<IStartCommandHandler>();
     private readonly Mock<ISuspiciousCommandHandler> _suspiciousCommandHandlerMock = TK.CreateMock<ISuspiciousCommandHandler>();
+    private readonly Mock<ICommandRouter> _commandRouterMock = TK.CreateMock<ICommandRouter>();
     
     private readonly Mock<ILogger<MessageHandler>> _loggerMock = TK.CreateLoggerMock<MessageHandler>();
     private readonly Mock<ILogger<SuspiciousCommandHandler>> _suspiciousCommandHandlerLoggerMock = TK.CreateLoggerMock<SuspiciousCommandHandler>();
@@ -332,6 +333,7 @@ public class MessageHandlerBuilder
             _channelModerationServiceMock.Object,
             _startCommandHandlerMock.Object,
             _suspiciousCommandHandlerMock.Object,
+            _commandRouterMock.Object,
             _logChatServiceMock.Object
         );
     }
@@ -403,4 +405,10 @@ public class MessageHandlerBuilder
     /// <tags>builders, message-handler, log-chat-service-mock, verification</tags>
     /// </summary>
     public Mock<ILogChatService> LogChatServiceMock => _logChatServiceMock;
+
+    /// <summary>
+    /// Возвращает мок CommandRouter для верификации
+    /// <tags>builders, message-handler, command-router-mock, verification</tags>
+    /// </summary>
+    public Mock<ICommandRouter> CommandRouterMock => _commandRouterMock;
 } 
