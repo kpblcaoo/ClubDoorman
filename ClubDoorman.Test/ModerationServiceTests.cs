@@ -1,5 +1,6 @@
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
+using ClubDoorman.Features.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
@@ -22,7 +23,7 @@ namespace ClubDoorman.Test;
 public class ModerationServiceTests
 {
     private ModerationServiceTestFactory _factory;
-    private ModerationService _service;
+    private ModerationPolicy _service;
 
     [SetUp]
     public void Setup()

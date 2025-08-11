@@ -13,13 +13,15 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.TextProcessing;
+using ClubDoorman.Services;
 
-namespace ClubDoorman.Services.Moderation;
+namespace ClubDoorman.Features.Moderation;
 
 /// <summary>
-/// Сервис модерации сообщений
+/// Политика модерации сообщений
+/// <tags>moderation, policy, decisions, logic</tags>
 /// </summary>
-public class ModerationService : IModerationService
+public class ModerationPolicy : IModerationPolicy
 {
     private readonly ISpamHamClassifier _classifier;
     private readonly IMimicryClassifier _mimicryClassifier;
@@ -31,7 +33,7 @@ public class ModerationService : IModerationService
     private readonly IMessageService _messageService;
     private readonly IUserBanService _userBanService;
     private readonly IUserCleanupService _userCleanupService;
-    private readonly ILogger<ModerationService> _logger;
+    private readonly ILogger<ModerationPolicy> _logger;
 
     // Счетчики хороших сообщений для новой системы
     private readonly ConcurrentDictionary<long, int> _goodUserMessages = new();
@@ -46,7 +48,7 @@ public class ModerationService : IModerationService
     private readonly ConcurrentDictionary<long, int> _suspiciousUserMessages = new();
     private readonly ConcurrentDictionary<string, int> _groupSuspiciousUserMessages = new();
 
-    public ModerationService(
+    public ModerationPolicy(
         ISpamHamClassifier classifier,
         IMimicryClassifier mimicryClassifier,
         IBadMessageManager badMessageManager,
@@ -57,7 +59,7 @@ public class ModerationService : IModerationService
         IMessageService messageService,
         IUserBanService userBanService,
         IUserCleanupService userCleanupService,
-        ILogger<ModerationService> logger)
+        ILogger<ModerationPolicy> logger)
     {
         _classifier = classifier;
         _mimicryClassifier = mimicryClassifier;

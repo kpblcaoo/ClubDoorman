@@ -1,6 +1,7 @@
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
+using ClubDoorman.Features.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
 using ClubDoorman.Services.UserBan;
@@ -33,11 +34,11 @@ public class ModerationServiceTestFactory
     public Mock<ITelegramBotClient> BotClientMock { get; } = new();
     public Mock<IMessageService> MessageServiceMock { get; } = new();
     public Mock<IUserBanService> UserBanServiceMock { get; } = new();
-    public Mock<ILogger<ModerationService>> LoggerMock { get; } = new();
+    public Mock<ILogger<ModerationPolicy>> LoggerMock { get; } = new();
 
-    public ModerationService CreateModerationService()
+    public ModerationPolicy CreateModerationService()
     {
-        return new ModerationService(
+        return new ModerationPolicy(
             ClassifierMock.Object,
             MimicryClassifierMock.Object,
             BadMessageManagerMock.Object,
@@ -108,7 +109,7 @@ public class ModerationServiceTestFactory
         return this;
     }
 
-    public ModerationServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<ModerationService>>> setup)
+    public ModerationServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<ModerationPolicy>>> setup)
     {
         setup(LoggerMock);
         return this;
@@ -127,7 +128,7 @@ public class ModerationServiceTestFactory
         return new Mock<IUserManager>().Object;
     }
 
-    public async Task<ModerationService> CreateAsync()
+    public async Task<ModerationPolicy> CreateAsync()
     {
         return await Task.FromResult(CreateModerationService());
     }

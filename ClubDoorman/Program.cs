@@ -13,6 +13,7 @@ using ClubDoorman.Services.Dispatcher;
 using ClubDoorman.Services.UserJoin;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Features.UserJoin;
+using ClubDoorman.Features.Moderation;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Logging;
 
@@ -109,6 +110,7 @@ public class Program
                 services.AddUserJoinServices();
                 services.AddUserBanServices();
                 services.AddUserJoinFeature();
+                services.AddModerationFeature();
                 services.AddModerationServices();
                 services.AddChannelModerationServices();
                 services.AddSuspiciousUsersServices();
@@ -213,18 +215,8 @@ public class Program
                 {
                     var logger = provider.GetRequiredService<ILogger<Program>>();
                     logger.LogDebug("[DI] IModerationService factory called");
-                    return new ModerationService(
-                        provider.GetRequiredService<ISpamHamClassifier>(),
-                        provider.GetRequiredService<IMimicryClassifier>(),
-                        provider.GetRequiredService<IBadMessageManager>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<IAiChecks>(),
-                        provider.GetRequiredService<ISuspiciousUsersStorage>(),
-                        provider.GetRequiredService<ITelegramBotClient>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IUserBanService>(),
-                        provider.GetRequiredService<IUserCleanupService>(),
-                        provider.GetRequiredService<ILogger<ModerationService>>());
+                    return new ModerationServiceAdapter(
+                        provider.GetRequiredService<IModerationPolicy>());
                 });
 
 
