@@ -21,6 +21,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Commands;
 using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Integration;
@@ -92,6 +93,12 @@ public class MessageHandlerBanBasicTests
         _moderationServiceMock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
             .Returns(false);
         
+        // Создаем моки для командных обработчиков
+        var startCommandHandlerMock = new Mock<IStartCommandHandler>();
+        var suspiciousCommandHandlerMock = new Mock<ISuspiciousCommandHandler>();
+        var channelModerationServiceMock = new Mock<IChannelModerationService>();
+        var logChatServiceMock = new Mock<ILogChatService>();
+        
         // Создаем MessageHandler с настроенными моками
         _handler = new MessageHandler(
             _botMock.Object,
@@ -103,7 +110,6 @@ public class MessageHandlerBanBasicTests
             aiChecksMock.Object,
             globalStatsManagerMock.Object,
             statisticsServiceMock.Object,
-            serviceProviderMock.Object,
             userFlowLoggerMock.Object,
             messageServiceMock.Object,
             chatLinkFormatterMock.Object,
@@ -111,7 +117,11 @@ public class MessageHandlerBanBasicTests
             appConfigMock.Object,
             violationTrackerMock.Object,
             loggerMock.Object,
-            userBanServiceMock.Object
+            userBanServiceMock.Object,
+            channelModerationServiceMock.Object,
+            startCommandHandlerMock.Object,
+            suspiciousCommandHandlerMock.Object,
+            logChatServiceMock.Object
         );
     }
 

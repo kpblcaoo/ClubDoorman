@@ -12,6 +12,7 @@ using Telegram.Bot;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services;
 using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
@@ -56,7 +57,7 @@ public class CallbackQueryHandlerTestFactory
             MessageServiceMock.Object,
             ViolationTrackerMock.Object,
             UserBanServiceMock.Object,
-            ServiceProviderMock.Object,
+            new Mock<ILogChatService>().Object,
             LoggerMock.Object
         );
     }

@@ -13,7 +13,7 @@ namespace ClubDoorman.Services.Commands;
 /// <summary>
 /// Обработчик команды /start
 /// </summary>
-public class StartCommandHandler : ICommandHandler
+public class StartCommandHandler : IStartCommandHandler
 {
     private readonly ITelegramBotClientWrapper _bot;
     private readonly ILogger<StartCommandHandler> _logger;
