@@ -100,87 +100,106 @@ public class MessageHandler : IUpdateHandler
     /// <exception cref="ArgumentNullException">Если update равен null</exception>
     public async Task HandleAsync(Update update, CancellationToken cancellationToken = default)
     {
-        if (update == null) throw new ArgumentNullException(nameof(update));
-        if (update.Message == null && update.EditedMessage == null) 
-            throw new ArgumentNullException(nameof(update.Message));
-
-        var message = update.EditedMessage ?? update.Message!;
-        var chat = message.Chat;
-
-        Console.WriteLine($"[DEBUG] MessageHandler.HandleAsync: получено сообщение '{message.Text}' в чате {chat.Id}");
-
-        // Проверка whitelist - если активен, работаем только в разрешённых чатах
-        // ИСКЛЮЧЕНИЕ: админ-чаты всегда обрабатываются (для команд /spam, /ham и т.д.)
-        var isAdminChat = chat.Id == _appConfig.AdminChatId || chat.Id == _appConfig.LogAdminChatId;
-        
-        if (!_appConfig.IsChatAllowed(chat.Id) && !isAdminChat)
-        {
-            _logger.LogDebug("Чат {ChatId} ({ChatTitle}) не в whitelist - игнорируем", chat.Id, chat.Title);
-            return;
-        }
-
-        // Игнорировать полностью отключённые чаты
-        if (_appConfig.DisabledChats.Contains(chat.Id))
-            return;
-
-        // Проверяем тихий режим (бот без прав администратора)
-        var isSilentMode = await _botPermissionsService.IsSilentModeAsync(chat.Id, cancellationToken);
-        if (isSilentMode)
-        {
-            _logger.LogInformation("🔇 Тихий режим в чате {ChatId} ({ChatTitle}) - бот без прав администратора", chat.Id, chat.Title);
-        }
-
-        // Автоматически добавляем чат в конфиг
-        ChatSettingsManager.EnsureChatInConfig(chat.Id, chat.Title);
-
-        // Обработка команд
-        if (message.Text?.StartsWith("/") == true)
-        {
-            Console.WriteLine($"[DEBUG] MessageHandler: обрабатываем команду '{message.Text}'");
-            await HandleCommandAsync(message, cancellationToken);
-            return;
-        }
-
-        Console.WriteLine($"[DEBUG] MessageHandler: не команда, продолжаем обработку");
-
-        // Для приватных чатов обрабатываем только команды, остальное игнорируем
-        if (chat.Type == ChatType.Private)
-        {
-            _logger.LogDebug("Приватный чат {ChatId} - обрабатываем только команды", chat.Id);
-            return;
-        }
-
-        // Обработка новых участников
-        if (message.NewChatMembers != null && chat.Id != _appConfig.AdminChatId)
-        {
-            await _userJoinFacade.HandleNewMembersAsync(message, cancellationToken);
-            return;
-        }
-
-        // Удаление сообщений о бане ботом
-        if (message.LeftChatMember != null && message.From?.Id == _bot.BotId)
+        using (_logger.BeginScope(new Dictionary<string, object>{{"opId", Guid.NewGuid()}}))
         {
             try
             {
-                await _bot.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
-                _logger.LogDebug("Удалено сообщение о бане/исключении пользователя");
+                _logger.LogTrace("[TRACE] HandleAsync started");
+                if (update == null) throw new ArgumentNullException(nameof(update));
+                if (update.Message == null && update.EditedMessage == null) 
+                    throw new ArgumentNullException(nameof(update.Message));
+
+                var message = update.EditedMessage ?? update.Message!;
+                var chat = message.Chat;
+
+                _logger.LogTrace("[TRACE] Received message '{MessageText}' in chat {ChatId}", message.Text, chat.Id);
+
+                // Проверка whitelist - если активен, работаем только в разрешённых чатах
+                // ИСКЛЮЧЕНИЕ: админ-чаты всегда обрабатываются (для команд /spam, /ham и т.д.)
+                var isAdminChat = chat.Id == _appConfig.AdminChatId || chat.Id == _appConfig.LogAdminChatId;
+                
+                if (!_appConfig.IsChatAllowed(chat.Id) && !isAdminChat)
+                {
+                    _logger.LogTrace("[TRACE] Chat {ChatId} not in whitelist, skipping", chat.Id);
+                    _logger.LogDebug("Чат {ChatId} ({ChatTitle}) не в whitelist - игнорируем", chat.Id, chat.Title);
+                    return;
+                }
+
+                // Игнорировать полностью отключённые чаты
+                if (_appConfig.DisabledChats.Contains(chat.Id)) {
+                    _logger.LogTrace("[TRACE] Chat {ChatId} is disabled, skipping", chat.Id);
+                    return;
+                }
+
+                // Проверяем тихий режим (бот без прав администратора)
+                var isSilentMode = await _botPermissionsService.IsSilentModeAsync(chat.Id, cancellationToken);
+                if (isSilentMode)
+                {
+                    _logger.LogTrace("[TRACE] Silent mode detected for chat {ChatId}", chat.Id);
+                    _logger.LogInformation("🔇 Тихий режим в чате {ChatId} ({ChatTitle}) - бот без прав администратора", chat.Id, chat.Title);
+                }
+
+                // Автоматически добавляем чат в конфиг
+                _logger.LogTrace("[TRACE] Ensuring chat {ChatId} is in config", chat.Id);
+                ChatSettingsManager.EnsureChatInConfig(chat.Id, chat.Title);
+
+                // Обработка команд
+                if (message.Text?.StartsWith("/") == true)
+                {
+                    _logger.LogTrace("[TRACE] Handling command '{Command}'", message.Text);
+                    await HandleCommandAsync(message, cancellationToken);
+                    return;
+                }
+
+                _logger.LogTrace("[TRACE] Not a command, continuing regular processing");
+
+                // Для приватных чатов обрабатываем только команды, остальное игнорируем
+                if (chat.Type == ChatType.Private)
+                {
+                    _logger.LogTrace("[TRACE] Private chat {ChatId}, only commands processed", chat.Id);
+                    _logger.LogDebug("Приватный чат {ChatId} - обрабатываем только команды", chat.Id);
+                    return;
+                }
+
+                // Обработка новых участников
+                if (message.NewChatMembers != null && chat.Id != _appConfig.AdminChatId)
+                {
+                    _logger.LogTrace("[TRACE] Handling new chat members in chat {ChatId}", chat.Id);
+                    await _userJoinFacade.HandleNewMembersAsync(message, cancellationToken);
+                    return;
+                }
+
+                // Удаление сообщений о бане ботом
+                if (message.LeftChatMember != null && message.From?.Id == _bot.BotId)
+                {
+                    try
+                    {
+                        await _bot.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
+                        _logger.LogDebug("Удалено сообщение о бане/исключении пользователя");
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning(e, "Не удалось удалить сообщение о бане/исключении");
+                    }
+                    return;
+                }
+
+                // Сообщения от каналов
+                if (message.SenderChat != null)
+                {
+                    await HandleChannelMessageAsync(message, cancellationToken);
+                    return;
+                }
+
+                // Обычные сообщения пользователей
+                await HandleUserMessageAsync(message, isSilentMode, cancellationToken);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogWarning(e, "Не удалось удалить сообщение о бане/исключении");
+                _logger.LogCritical(ex, "[CRITICAL] Unhandled exception in MessageHandler.HandleAsync");
+                throw;
             }
-            return;
         }
-
-        // Сообщения от каналов
-        if (message.SenderChat != null)
-        {
-            await HandleChannelMessageAsync(message, cancellationToken);
-            return;
-        }
-
-        // Обычные сообщения пользователей
-        await HandleUserMessageAsync(message, isSilentMode, cancellationToken);
     }
 
     public async Task HandleCommandAsync(Message message, CancellationToken cancellationToken)
