@@ -119,60 +119,16 @@ public class ModerationFacade : IModerationFacade
         bool isSilentMode, 
         CancellationToken cancellationToken)
     {
-        // PRE-CHECK: пересланные сообщения от новичков (точная копия из MessageHandler)
-        if (Config.DeleteForwardedMessages && message.ForwardOrigin != null)
-        {
-            _logger.LogInformation("🔄 Удаление пересланного сообщения от новичка {User} (id={UserId}) в чате '{ChatTitle}' (id={ChatId})",
-                Utils.FullName(user), user.Id, chat.Title ?? "-", chat.Id);
-            Message? notificationMessage = null;
-            try
-            {
-                notificationMessage = await _messageService.SendUserNotificationWithReplyAsync(user, chat, UserNotificationType.MessageDeleted,
-                    new SimpleNotificationData(user, chat, "пересланные сообщения от новичков не разрешены"),
-                    new ReplyParameters { MessageId = message.MessageId },
-                    cancellationToken);
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
-                        await _messageService.DeleteMessage(chat.Id, notificationMessage.MessageId, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Не удалось удалить уведомление пользователю");
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Не удалось отправить предупреждение пользователю");
-            }
-            try
-            {
-                await _messageService.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Не удалось удалить пересланное сообщение от новичка");
-            }
-            return;
-        }
-
         switch (moderationResult.Action)
         {
             case ModerationAction.Allow:
                 _logger.LogDebug("Сообщение разрешено: {Reason}", moderationResult.Reason);
                 var allowedMessageText = message.Text ?? message.Caption ?? "";
-                // AI-профайл-анализ (точная копия из MessageHandler)
-                var profileAnalysisResult = await _aiCascadeService.PerformAiProfileAnalysisAsync(message, user, chat, cancellationToken);
-                if (profileAnalysisResult)
-                {
-                    // Пользователь получил ограничения за подозрительный профиль, возвращаемся
-                    return;
-                }
+
                 // Проверяем AI детект для подозрительных пользователей
                 var aiDetectBlocked = await _moderationPolicy.CheckAiDetectAndNotifyAdminsAsync(user, chat, message);
+
+                // Засчитываем хорошее сообщение только если пользователь не был заблокирован AI детектом
                 if (!aiDetectBlocked)
                 {
                     await _moderationPolicy.IncrementGoodMessageCountAsync(user, chat, allowedMessageText);
@@ -249,11 +205,5 @@ public class ModerationFacade : IModerationFacade
     {
         // WRAP: delegated to AiCascadeService
         await _aiCascadeService.HandleAiCascadeAnalysisAsync(message, user, mlScore, isSilentMode, cancellationToken);
-    }
-
-    // Публичный метод для кнопок (если требуется)
-    public async Task SendSuspiciousMessageWithButtons(Message message, User user, SuspiciousMessageNotificationData data, bool isSilentMode, CancellationToken cancellationToken)
-    {
-        await _messageService.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, cancellationToken);
     }
 }

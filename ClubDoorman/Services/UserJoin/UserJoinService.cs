@@ -1,4 +1,4 @@
-using ClubDoorman.Handlers;
+using ClubDoorman.Features.UserJoin;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 using ClubDoorman.Services.Messaging;
@@ -12,18 +12,18 @@ namespace ClubDoorman.Services.UserJoin;
 /// </summary>
 public class UserJoinService : IUserJoinService
 {
-    private readonly IMessageHandler _messageHandler;
+    private readonly IUserJoinFacade __facade;
     private readonly ILogger<UserJoinService> _logger;
 
     /// <summary>
     /// Создает экземпляр UserJoinService
     /// <tags>user-join, constructor, dependency-injection</tags>
     /// </summary>
-    /// <param name="messageHandler">Обработчик сообщений</param>
+    /// <param name="_facade">Обработчик сообщений</param>
     /// <param name="logger">Логгер</param>
-    public UserJoinService(IMessageHandler messageHandler, ILogger<UserJoinService> logger)
+    public UserJoinService(IUserJoinFacade _facade, ILogger<UserJoinService> logger)
     {
-        _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
+        __facade = _facade ?? throw new ArgumentNullException(nameof(_facade));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -35,8 +35,8 @@ public class UserJoinService : IUserJoinService
     /// <param name="cancellationToken">Токен отмены</param>
     public async Task HandleNewMembersAsync(Message message, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("UserJoinService: Проксируем HandleNewMembersAsync к MessageHandler");
-        await _messageHandler.HandleNewMembersAsync(message, cancellationToken);
+        _logger.LogDebug("UserJoinService: Проксируем HandleNewMembersAsync к UserJoinFacade");
+        await __facade.HandleNewMembersAsync(message, cancellationToken);
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public class UserJoinService : IUserJoinService
     /// <param name="cancellationToken">Токен отмены</param>
     public async Task ProcessNewUserAsync(Message userJoinMessage, User user, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("UserJoinService: Проксируем ProcessNewUserAsync к MessageHandler");
-        await _messageHandler.ProcessNewUserAsync(userJoinMessage, user, cancellationToken);
+        _logger.LogDebug("UserJoinService: Проксируем ProcessNewUserAsync к UserJoinFacade");
+        await __facade.ProcessNewUserAsync(userJoinMessage, user, cancellationToken);
     }
 } 

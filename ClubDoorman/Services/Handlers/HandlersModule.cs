@@ -22,7 +22,7 @@ public static class HandlersModule
         
         // Регистрируем MessageHandler только один раз для каждого интерфейса
         services.AddSingleton<IUpdateHandler, MessageHandler>();
-        services.AddSingleton<IMessageHandler, MessageHandler>();
+     //   services.AddSingleton<IMessageHandler, MessageHandler>();
         
         services.AddSingleton<IUpdateHandler, CallbackQueryHandler>();
         services.AddSingleton<CallbackQueryHandler>();

@@ -1,6 +1,7 @@
-using ClubDoorman.Handlers;
+using ClubDoorman.Services.Handlers;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
+
 
 namespace ClubDoorman.Features.AdminOps;
 
@@ -10,18 +11,18 @@ namespace ClubDoorman.Features.AdminOps;
 /// </summary>
 public class CommandProcessingService : ICommandProcessingService
 {
-    private readonly IMessageHandler _messageHandler;
+    private readonly ICommandRouter _commandRouter;
     private readonly ILogger<CommandProcessingService> _logger;
 
     /// <summary>
     /// Создает экземпляр CommandProcessingService
     /// <tags>commands, constructor, dependency-injection</tags>
     /// </summary>
-    /// <param name="messageHandler">Обработчик сообщений</param>
+    /// <param name="commandRouter">Обработчик сообщений</param>
     /// <param name="logger">Логгер</param>
-    public CommandProcessingService(IMessageHandler messageHandler, ILogger<CommandProcessingService> logger)
+    public CommandProcessingService(ICommandRouter commandRouter, ILogger<CommandProcessingService> logger)
     {
-        _messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
+        _commandRouter = commandRouter ?? throw new ArgumentNullException(nameof(commandRouter));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -33,7 +34,8 @@ public class CommandProcessingService : ICommandProcessingService
     /// <param name="cancellationToken">Токен отмены</param>
     public async Task HandleCommandAsync(Message message, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("CommandProcessingService: Проксируем HandleCommandAsync к MessageHandler");
-        await _messageHandler.HandleCommandAsync(message, cancellationToken);
+        var handled = await _commandRouter.HandleCommandAsync(message, cancellationToken);
+
+        Console.WriteLine($"[DEBUG] MessageHandler.HandleCommandAsync: CommandRouter returned {handled}");
     }
 } 

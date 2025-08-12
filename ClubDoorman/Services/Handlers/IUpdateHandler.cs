@@ -1,6 +1,6 @@
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Handlers;
+namespace ClubDoorman.Services.Handlers;
 
 /// <summary>
 /// Базовый интерфейс для обработки обновлений Telegram
