@@ -1,30 +1,15 @@
 using ClubDoorman.Services.ChannelModeration;
-using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.UserFlow;
-using ClubDoorman.Services.BadMessage;
-using ClubDoorman.Services.Moderation;
-using System.Collections.Concurrent;
-using System.Runtime.Caching;
-using System.Text;
-using Microsoft.Extensions.Logging;
 using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;
-using ClubDoorman.Models.Notifications;
-using ClubDoorman.Models.Requests;
-using ClubDoorman.Services;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.UserBan;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
-using Telegram.Bot.Extensions;
 using ClubDoorman.Services.Telegram;
-using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
-using ClubDoorman.Services.TextProcessing; // restored
 using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Features.Moderation;
 using ClubDoorman.Services.Notifications;
@@ -221,17 +206,10 @@ public class MessageHandler : IUpdateHandler
 
     // Удалить метод TryFindUserIdByUsername и все обращения к _userIndex
 
-    public async Task HandleNewMembersAsync(Message message, CancellationToken cancellationToken)
-    {
-        // WRAP: delegated to UserJoinFacade
-        await _userJoinFacade.HandleNewMembersAsync(message, cancellationToken);
-    }
+ //   public async Task HandleNewMembersAsync delegated to UserJoinFacade
 
-    public async Task ProcessNewUserAsync(Message userJoinMessage, User user, CancellationToken cancellationToken)
-    {
-        // WRAP: delegated to UserJoinFacade
-        await _userJoinFacade.ProcessNewUserAsync(userJoinMessage, user, cancellationToken);
-    }
+
+ //   public async Task ProcessNewUserAsync delegated to UserJoinFacade
 
     public async Task HandleChannelMessageAsync(Message message, CancellationToken cancellationToken)
     {
@@ -302,7 +280,7 @@ public class MessageHandler : IUpdateHandler
         _userFlowLogger.LogFirstMessage(user, chat, messageText);
 
         // Определяем тип пользователя
-        var isChannelDiscussion = await IsChannelDiscussion(chat, message);
+        var isChannelDiscussion = await _forwardingService.IsChannelDiscussion(chat, message);
         var userType = isChannelDiscussion ? "из обсуждения канала" : "новый участник";
         
         _logger.LogInformation("==================== СООБЩЕНИЕ ОТ НЕОДОБРЕННОГО ====================\n" +
@@ -335,12 +313,6 @@ public class MessageHandler : IUpdateHandler
 
         await _moderationFacade.HandleUserMessageAsync(message, user, chat, moderationResult, isSilentMode, cancellationToken);
         return;
-    }
-
-    private async Task<bool> IsChannelDiscussion(Chat chat, Message message)
-    {
-        // WRAP: delegated to ForwardingService
-        return await _forwardingService.IsChannelDiscussion(chat, message);
     }
 
 

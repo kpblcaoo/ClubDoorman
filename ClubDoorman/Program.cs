@@ -242,7 +242,7 @@ public class Program
                 provider.GetRequiredService<IUserBanService>(),
                 provider.GetRequiredService<ILogger<ChannelModerationService>>());
         });
-                services.AddSingleton<IUserJoinService, UserJoinService>();
+             //disabled   services.AddSingleton<IUserJoinService, UserJoinService>();
 
                 // Регистрация сервиса лог-чата (перенесено в MessagingModule)
 
