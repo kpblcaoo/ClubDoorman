@@ -10,24 +10,6 @@ namespace ClubDoorman.Handlers;
 public interface IMessageHandler
 {
     /// <summary>
-    /// Удаляет сообщение и отправляет уведомление
-    /// <tags>delete-message, notification</tags>
-    /// </summary>
-    Task DeleteAndReportMessage(Message message, string reason, bool isSilentMode, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Удаляет сообщение и отправляет в лог-чат
-    /// <tags>delete-message, log-chat</tags>
-    /// </summary>
-    Task DeleteAndReportToLogChat(Message message, string reason, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Отправляет уведомление без удаления сообщения
-    /// <tags>notification, no-delete</tags>
-    /// </summary>
-    Task DontDeleteButReportMessage(Message message, User user, bool isSilentMode, CancellationToken cancellationToken);
-
-    /// <summary>
     /// Отправляет подозрительное сообщение с кнопками
     /// <tags>suspicious-message, buttons</tags>
     /// </summary>
@@ -68,4 +50,4 @@ public interface IMessageHandler
     /// <tags>channel, moderation</tags>
     /// </summary>
     Task HandleChannelMessageAsync(Message message, CancellationToken cancellationToken);
-} 
+}

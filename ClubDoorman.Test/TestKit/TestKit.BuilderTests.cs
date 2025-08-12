@@ -58,15 +58,13 @@ public class TestKitBuilderTests
     }
 
     [Test]
-    public void MessageHandlerBuilder_WithModerationService_CreatesHandlerWithCustomModeration()
+    public void MessageHandlerBuilder_WithModerationServiceMock_CreatesHandlerWithCustomModeration()
     {
         // Arrange & Act
-        var handler = TK.CreateMessageHandlerBuilder()
-            .WithModerationService(builder => builder
-                .ThatBansUsers("Custom reason")
-                .WithConfidence(0.9))
-            .WithStandardMocks()
-            .Build();
+        var builder = TK.CreateMessageHandlerBuilder()
+            .WithStandardMocks();
+        
+        var handler = builder.Build();
 
         // Assert
         Assert.That(handler, Is.Not.Null);
@@ -171,9 +169,6 @@ public class TestKitBuilderTests
     {
         // Arrange & Act
         var handler = TK.CreateMessageHandlerBuilder()
-            .WithModerationService(builder => builder
-                .ThatDeletesMessages("Spam detected")
-                .WithConfidence(0.8))
             .WithUserManager(builder => builder
                 .ThatRejectsUser(12345)
                 .ThatIsInBanlist(12345))

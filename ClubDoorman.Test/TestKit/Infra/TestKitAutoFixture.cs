@@ -9,6 +9,7 @@ using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
+using ClubDoorman.Features.Moderation;
 
 using ClubDoorman.Services;
 using ClubDoorman.Infrastructure;
@@ -71,8 +72,8 @@ public static class TestKitAutoFixture
         fixture.Customize<ILogger<MessageHandler>>(composer => composer
             .FromFactory(() => NullLogger<MessageHandler>.Instance));
 
-        fixture.Customize<ILogger<ModerationService>>(composer => composer
-            .FromFactory(() => NullLogger<ModerationService>.Instance));
+        fixture.Customize<ILogger<IModerationService>>(composer => composer
+            .FromFactory(() => NullLogger<IModerationService>.Instance));
 
         fixture.Customize<ILogger<CaptchaService>>(composer => composer
             .FromFactory(() => NullLogger<CaptchaService>.Instance));
@@ -144,7 +145,7 @@ public static class TestKitAutoFixture
                     userFlowLogger, messageService, chatLinkFormatter,
                     botPermissionsService, appConfig, violationTracker, logger, userBanService,
                     channelModerationService, startCommandHandler, suspiciousCommandHandler, commandRouter, logChatService,
-                    joinedUserFlags, userIndex, aiCascadeService, notificationService, forwardingService, buttonsService, TK.CreateMock<IUserJoinFacade>().Object);
+                    joinedUserFlags, userIndex, aiCascadeService, notificationService, forwardingService, buttonsService, TK.CreateMock<IUserJoinFacade>().Object, TK.CreateMock<IModerationFacade>().Object);
             })
             .OmitAutoProperties());
 
@@ -188,15 +189,6 @@ public static class TestKitAutoFixture
     public static MessageHandler CreateMessageHandler()
     {
         return _fixture.Create<MessageHandler>();
-    }
-
-    /// <summary>
-    /// Создает ModerationService с автозависимостями
-    /// <tags>autofixture, moderation-service, dependencies, test-infrastructure</tags>
-    /// </summary>
-    public static ModerationService CreateModerationService()
-    {
-        return _fixture.Create<ModerationService>();
     }
 
     /// <summary>

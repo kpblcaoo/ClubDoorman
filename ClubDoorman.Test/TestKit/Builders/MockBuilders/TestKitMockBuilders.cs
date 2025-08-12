@@ -49,10 +49,4 @@ public static class TestKitMockBuilders
     /// <tags>builders, message-service, mocks, fluent-api</tags>
     /// </summary>
     public static MessageServiceMockBuilder CreateMessageServiceMock() => new();
-    
-    /// <summary>
-    /// Создает билдер для мока MessageHandler
-    /// <tags>builders, message-handler, mocks, fluent-api</tags>
-    /// </summary>
-    public static MessageHandlerMockBuilder CreateMessageHandlerMock() => new();
 } 

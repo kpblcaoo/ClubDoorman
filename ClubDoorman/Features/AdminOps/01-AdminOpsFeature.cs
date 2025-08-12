@@ -35,7 +35,7 @@ public static class AdminOpsFeature
         services.AddSingleton<ICommandProcessingService, CommandProcessingService>();
 
         // Регистрируем фасад
-        services.AddScoped<IAdminOpsFacade, AdminOpsFacade>();
+        services.AddSingleton<IAdminOpsFacade, AdminOpsFacade>();
 
         return services;
     }

@@ -15,8 +15,8 @@ public static class UserJoinFeature
     /// <param name="services">Коллекция сервисов</param>
     public static IServiceCollection AddUserJoinFeature(this IServiceCollection services)
     {
-        services.AddScoped<IUserJoinPolicy, UserJoinPolicy>();
-        services.AddScoped<IUserJoinFacade, UserJoinFacade>();
+        services.AddSingleton<IUserJoinPolicy, UserJoinPolicy>();
+        services.AddSingleton<IUserJoinFacade, UserJoinFacade>();
         return services;
     }
 }

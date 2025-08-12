@@ -1,3 +1,4 @@
+using ClubDoorman.Features.Moderation;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
@@ -17,7 +18,7 @@ namespace ClubDoorman.Features.AdminOps;
 public class SuspiciousCommandHandler : ISuspiciousCommandHandler
 {
     private readonly ITelegramBotClientWrapper _bot;
-    private readonly IModerationService _moderationService;
+    private readonly IModerationFacade _moderationService;
     private readonly IMessageService _messageService;
     private readonly ILogger<SuspiciousCommandHandler> _logger;
     private readonly IAppConfig _appConfig;
@@ -26,7 +27,7 @@ public class SuspiciousCommandHandler : ISuspiciousCommandHandler
 
     public SuspiciousCommandHandler(
         ITelegramBotClientWrapper bot, 
-        IModerationService moderationService,
+        IModerationFacade moderationService,
         IMessageService messageService,
         ILogger<SuspiciousCommandHandler> logger,
         IAppConfig appConfig)
@@ -174,4 +175,4 @@ public class SuspiciousCommandHandler : ISuspiciousCommandHandler
             cancellationToken
         );
     }
-} 
+}

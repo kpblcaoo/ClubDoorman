@@ -111,6 +111,24 @@ public interface IModerationFacade
     /// <param name="message">Сообщение</param>
     /// <param name="result">Результат модерации</param>
     Task ExecuteModerationActionAsync(Message message, ModerationResult result);
+
+    /// <summary>
+    /// Обрабатывает сообщение пользователя на основе результата модерации
+    /// <tags>moderation, message-handling, action-execution</tags>
+    /// </summary>
+    /// <param name="message">Сообщение для обработки</param>
+    /// <param name="user">Пользователь</param>
+    /// <param name="chat">Чат</param>
+    /// <param name="moderationResult">Результат модерации</param>
+    /// <param name="isSilentMode">Тихий режим</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    Task HandleUserMessageAsync(
+        Message message, 
+        User user, 
+        Chat chat, 
+        ModerationResult moderationResult, 
+        bool isSilentMode, 
+        CancellationToken cancellationToken);
 }
 
 /// <summary>

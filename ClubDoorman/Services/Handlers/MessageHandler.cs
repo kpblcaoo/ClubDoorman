@@ -29,6 +29,8 @@ using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services.TextProcessing; // restored
 using ClubDoorman.Features.UserJoin;
+using ClubDoorman.Features.Moderation;
+using ClubDoorman.Services.Notifications;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -38,123 +40,76 @@ namespace ClubDoorman.Services.Handlers;
 public class MessageHandler : IUpdateHandler, IMessageHandler
 {
     private readonly ITelegramBotClientWrapper _bot;
-    private readonly IModerationService _moderationService;
-    private readonly ICaptchaService _captchaService;
     private readonly IUserManager _userManager;
-    private readonly ISpamHamClassifier _classifier;
-    private readonly IBadMessageManager _badMessageManager;
-    private readonly IAiChecks _aiChecks;
-    private readonly GlobalStatsManager _globalStatsManager;
-    private readonly IStatisticsService _statisticsService;
-    private readonly ILogger<MessageHandler> _logger;
-    private readonly IUserFlowLogger _userFlowLogger;
-    private readonly IMessageService _messageService;
-    private readonly IChatLinkFormatter _chatLinkFormatter;
-    private readonly IBotPermissionsService _botPermissionsService;
     private readonly IAppConfig _appConfig;
-    private readonly IViolationTracker _violationTracker;
     private readonly IUserBanService _userBanService;
     private readonly IChannelModerationService _channelModerationService;
-    private readonly IStartCommandHandler _startCommandHandler;
-    private readonly ISuspiciousCommandHandler _suspiciousCommandHandler;
     private readonly ICommandRouter _commandRouter;
-    private readonly ILogChatService _logChatService;
-    private readonly IJoinedUserFlags _joinedUserFlags;
-    private readonly IUserIndex _userIndex;
-
     private readonly IAiCascadeService _aiCascadeService; // injected service
-    private readonly ClubDoorman.Services.Messaging.INotificationService _notificationService; // injected service (fully-qualified)
-    private readonly ClubDoorman.Services.Notifications.IForwardingService _forwardingService; // injected service
-    private readonly ClubDoorman.Services.Notifications.IButtonsService _buttonsService; // injected service
     private readonly IUserJoinFacade _userJoinFacade; // injected service
+    private readonly IModerationFacade _moderationFacade; // injected service
+    private readonly ILogger<MessageHandler> _logger;
+    private readonly IBotPermissionsService _botPermissionsService;
+    private readonly ICaptchaService _captchaService;
+    private readonly IUserFlowLogger _userFlowLogger;
+    private readonly IForwardingService _forwardingService;
+    private readonly IMessageService _messageService;
+    private readonly IButtonsService _buttonsService;
 
     /// <summary>
     /// Создает экземпляр обработчика сообщений.
     /// </summary>
     /// <param name="bot">Клиент Telegram бота</param>
-    /// <param name="moderationService">Сервис модерации</param>
-    /// <param name="captchaService">Сервис капчи</param>
     /// <param name="userManager">Менеджер пользователей</param>
-    /// <param name="classifier">Классификатор спама</param>
-    /// <param name="badMessageManager">Менеджер плохих сообщений</param>
-    /// <param name="aiChecks">AI проверки</param>
-    /// <param name="globalStatsManager">Менеджер глобальной статистики</param>
-    /// <param name="statisticsService">Сервис статистики</param>
-    /// <param name="userFlowLogger">Логгер пользовательского флоу</param>
-    /// <param name="messageService">Сервис уведомлений</param>
-    /// <param name="chatLinkFormatter">Форматтер ссылок на чаты</param>
-    /// <param name="botPermissionsService">Сервис проверки прав бота</param>
     /// <param name="appConfig">Конфигурация приложения</param>
-    /// <param name="violationTracker">Трекер нарушений</param>
-    /// <param name="logger">Логгер</param>
     /// <param name="userBanService">Сервис управления банами пользователей</param>
     /// <param name="channelModerationService">Сервис модерации каналов</param>
-    /// <param name="startCommandHandler">Обработчик команды /start</param>
     /// <param name="commandRouter">Маршрутизатор команд</param>
-    /// <param name="logChatService">Сервис лог-чата</param>
-    /// <param name="joinedUserFlags">Сервис управления флагами присоединившихся пользователей</param>
-    /// <param name="userIndex">Сервис индексации пользователей</param>
+    /// <param name="aiCascadeService">Сервис каскадного AI</param>
+    /// <param name="userJoinFacade">Фасад для управления присоединением пользователей</param>
+    /// <param name="moderationFacade">Фасад для модерации</param>
+    /// <param name="logger">Логгер</param>
+    /// <param name="botPermissionsService">Сервис проверки прав бота</param>
+    /// <param name="captchaService">Сервис капчи</param>
+    /// <param name="userFlowLogger">Логгер потока пользователей</param>
+    /// <param name="forwardingService">Сервис пересылки</param>
+    /// <param name="messageService">Сервис сообщений</param>
+    /// <param name="buttonsService">Сервис кнопок</param>
     /// <exception cref="ArgumentNullException">Если любой из параметров равен null</exception>
     public MessageHandler(
         ITelegramBotClientWrapper bot,
-        IModerationService moderationService,
-        ICaptchaService captchaService,
         IUserManager userManager,
-        ISpamHamClassifier classifier,
-        IBadMessageManager badMessageManager,
-        IAiChecks aiChecks,
-        GlobalStatsManager globalStatsManager,
-        IStatisticsService statisticsService,
-        IUserFlowLogger userFlowLogger,
-        IMessageService messageService,
-        IChatLinkFormatter chatLinkFormatter,
-        IBotPermissionsService botPermissionsService,
         IAppConfig appConfig,
-        IViolationTracker violationTracker,
-        ILogger<MessageHandler> logger,
         IUserBanService userBanService,
         IChannelModerationService channelModerationService,
-        IStartCommandHandler startCommandHandler,
-        ISuspiciousCommandHandler suspiciousCommandHandler,
         ICommandRouter commandRouter,
-        ILogChatService logChatService,
-        IJoinedUserFlags joinedUserFlags,
-        IUserIndex userIndex,
         IAiCascadeService aiCascadeService,
-        ClubDoorman.Services.Messaging.INotificationService notificationService,
-        ClubDoorman.Services.Notifications.IForwardingService forwardingService,
-        ClubDoorman.Services.Notifications.IButtonsService buttonsService,
-        IUserJoinFacade userJoinFacade)
+        IUserJoinFacade userJoinFacade,
+        IModerationFacade moderationFacade,
+        ILogger<MessageHandler> logger,
+        IBotPermissionsService botPermissionsService,
+        ICaptchaService captchaService,
+        IUserFlowLogger userFlowLogger,
+        IForwardingService forwardingService,
+        IMessageService messageService,
+        IButtonsService buttonsService)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
-        _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
-        _captchaService = captchaService ?? throw new ArgumentNullException(nameof(captchaService));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-        _classifier = classifier ?? throw new ArgumentNullException(nameof(classifier));
-        _badMessageManager = badMessageManager ?? throw new ArgumentNullException(nameof(badMessageManager));
-        _aiChecks = aiChecks ?? throw new ArgumentNullException(nameof(aiChecks));
-        _globalStatsManager = globalStatsManager ?? throw new ArgumentNullException(nameof(globalStatsManager));
-        _statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
-        _userFlowLogger = userFlowLogger ?? throw new ArgumentNullException(nameof(userFlowLogger));
-        _messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
-        _chatLinkFormatter = chatLinkFormatter ?? throw new ArgumentNullException(nameof(chatLinkFormatter));
-        _botPermissionsService = botPermissionsService ?? throw new ArgumentNullException(nameof(botPermissionsService));
         _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
-        _violationTracker = violationTracker ?? throw new ArgumentNullException(nameof(violationTracker));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
         _channelModerationService = channelModerationService ?? throw new ArgumentNullException(nameof(channelModerationService));
-        _startCommandHandler = startCommandHandler ?? throw new ArgumentNullException(nameof(startCommandHandler));
-        _suspiciousCommandHandler = suspiciousCommandHandler ?? throw new ArgumentNullException(nameof(suspiciousCommandHandler));
         _commandRouter = commandRouter ?? throw new ArgumentNullException(nameof(commandRouter));
-        _logChatService = logChatService ?? throw new ArgumentNullException(nameof(logChatService));
-        _joinedUserFlags = joinedUserFlags ?? throw new ArgumentNullException(nameof(joinedUserFlags));
-        _userIndex = userIndex ?? throw new ArgumentNullException(nameof(userIndex));
         _aiCascadeService = aiCascadeService ?? throw new ArgumentNullException(nameof(aiCascadeService));
-        _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
-        _forwardingService = forwardingService ?? throw new ArgumentNullException(nameof(forwardingService));
-        _buttonsService = buttonsService ?? throw new ArgumentNullException(nameof(buttonsService));
         _userJoinFacade = userJoinFacade ?? throw new ArgumentNullException(nameof(userJoinFacade));
+        _moderationFacade = moderationFacade ?? throw new ArgumentNullException(nameof(moderationFacade));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _botPermissionsService = botPermissionsService ?? throw new ArgumentNullException(nameof(botPermissionsService));
+        _captchaService = captchaService ?? throw new ArgumentNullException(nameof(captchaService));
+        _userFlowLogger = userFlowLogger ?? throw new ArgumentNullException(nameof(userFlowLogger));
+        _forwardingService = forwardingService ?? throw new ArgumentNullException(nameof(forwardingService));
+        _messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
+        _buttonsService = buttonsService ?? throw new ArgumentNullException(nameof(buttonsService));
     }
 
     /// <summary>
@@ -183,9 +138,6 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         var chat = message.Chat;
 
         Console.WriteLine($"[DEBUG] MessageHandler.HandleAsync: получено сообщение '{message.Text}' в чате {chat.Id}");
-
-        _logger.LogDebug("MessageHandler получил сообщение {MessageId} в чате {ChatId} от пользователя {UserId}", 
-            message.MessageId, chat.Id, message.From?.Id);
 
         // Проверка whitelist - если активен, работаем только в разрешённых чатах
         // ИСКЛЮЧЕНИЕ: админ-чаты всегда обрабатываются (для команд /spam, /ham и т.д.)
@@ -282,11 +234,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         }
     }
 
-    // Вспомогательная функция для поиска userId по username среди недавних пользователей (по кэшу)
-    internal long? TryFindUserIdByUsername(string username)
-    {
-        return _userIndex.TryFindUserIdByUsername(username);
-    }
+    // Удалить метод TryFindUserIdByUsername и все обращения к _userIndex
 
     public async Task HandleNewMembersAsync(Message message, CancellationToken cancellationToken)
     {
@@ -358,7 +306,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         _logger.LogDebug("✅ Пользователь {UserId} не найден в блэклисте", user.Id);
 
         // Проверяем, одобрен ли пользователь
-        if (_moderationService.IsUserApproved(user.Id, chat.Id))
+        if (_moderationFacade.IsUserApproved(user.Id, chat.Id))
         {
             _logger.LogDebug("✅ Пользователь {UserId} уже одобрен в чате {ChatId}, пропускаем модерацию", user.Id, chat.Id);
             return;
@@ -439,7 +387,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         ModerationResult moderationResult;
         try
         {
-            moderationResult = await _moderationService.CheckMessageAsync(message);
+            moderationResult = await _moderationFacade.CheckMessageAsync(message);
         }
         catch (Exception ex)
         {
@@ -463,66 +411,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
             }
         }
         
-        switch (moderationResult.Action)
-        {
-            case ModerationAction.Allow:
-                _logger.LogDebug("Сообщение разрешено: {Reason}", moderationResult.Reason);
-                var allowedMessageText = message.Text ?? message.Caption ?? "";
-                
-                // Проверяем AI детект для подозрительных пользователей
-                var aiDetectBlocked = await _moderationService.CheckAiDetectAndNotifyAdminsAsync(user, chat, message);
-                
-                // Засчитываем хорошее сообщение только если пользователь не был заблокирован AI детектом
-                if (!aiDetectBlocked)
-                {
-                    await _moderationService.IncrementGoodMessageCountAsync(user, chat, allowedMessageText);
-                }
-                break;
-            
-            case ModerationAction.Ban:
-                _userFlowLogger.LogUserBanned(user, chat, moderationResult.Reason);
-                await _userBanService.AutoBanAsync(message, moderationResult.Reason, cancellationToken);
-                break;
-            
-            case ModerationAction.Delete:
-                _logger.LogInformation("Удаление сообщения: {Reason}", moderationResult.Reason);
-                try
-                {
-                    // Специальная обработка для ссылок и банальных приветствий - отправляем в лог-чат без предупреждения пользователю
-                    if (moderationResult.Reason.Contains("Ссылки запрещены") || moderationResult.Reason.Contains("Банальное приветствие"))
-                    {
-                        await DeleteAndReportToLogChat(message, moderationResult.Reason, cancellationToken);
-                    }
-                    else
-                    {
-                        await DeleteAndReportMessage(message, moderationResult.Reason, isSilentMode, cancellationToken);
-                    }
-                    _logger.LogInformation("Сообщение успешно обработано для удаления");
-                    
-                    // Отслеживаем нарушения для повторных банов
-                    await _userBanService.TrackViolationAndBanIfNeededAsync(message, user, moderationResult.Reason, cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Ошибка при удалении сообщения: {Reason}", moderationResult.Reason);
-                }
-                break;
-            
-            case ModerationAction.Report:
-                _logger.LogInformation("Отправка в админ-чат: {Reason}", moderationResult.Reason);
-                await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
-                break;
-            
-            case ModerationAction.RequireManualReview:
-                _logger.LogInformation("Требует ручной проверки: {Reason}", moderationResult.Reason);
-                await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
-                break;
-            
-            case ModerationAction.RequireAiAnalysis:
-                _logger.LogInformation("ML не уверен, запускаем AI анализ: {Reason}", moderationResult.Reason);
-                await HandleAiCascadeAnalysis(message, user, moderationResult.Confidence ?? 0, isSilentMode, cancellationToken);
-                break;
-        }
+        await _moderationFacade.HandleUserMessageAsync(message, user, chat, moderationResult, isSilentMode, cancellationToken);
+        return;
     }
 
     private async Task<bool> IsChannelDiscussion(Chat chat, Message message)
@@ -531,23 +421,8 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         return await _forwardingService.IsChannelDiscussion(chat, message);
     }
 
-    public async Task DeleteAndReportToLogChat(Message message, string reason, CancellationToken cancellationToken)
-    {
-        // WRAP: delegated to NotificationService
-        await _notificationService.DeleteAndReportToLogChat(message, reason, cancellationToken);
-    }
 
-    public async Task DeleteAndReportMessage(Message message, string reason, bool isSilentMode, CancellationToken cancellationToken)
-    {
-        // WRAP: delegated to NotificationService
-        await _notificationService.DeleteAndReportMessage(message, reason, isSilentMode, cancellationToken);
-    }
 
-    public async Task DontDeleteButReportMessage(Message message, User user, bool isSilentMode, CancellationToken cancellationToken)
-    {
-        // WRAP: delegated to NotificationService
-        await _notificationService.DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
-    }
 
     public async Task SendSuspiciousMessageWithButtons(Message message, User user, SuspiciousMessageNotificationData data, bool isSilentMode, CancellationToken cancellationToken)
     {
@@ -561,11 +436,7 @@ public class MessageHandler : IUpdateHandler, IMessageHandler
         return await _aiCascadeService.PerformAiProfileAnalysisAsync(message, user, chat, cancellationToken);
     }
 
-    internal async Task HandleAiCascadeAnalysis(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken)
-    {
-        // WRAP: delegated to AiCascadeService
-        await _aiCascadeService.HandleAiCascadeAnalysisAsync(message, user, mlScore, isSilentMode, cancellationToken);
-    }
+
 
     #region IMessageHandler Implementation
 
