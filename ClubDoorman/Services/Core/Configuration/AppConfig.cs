@@ -1,6 +1,7 @@
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Messaging;
+using Microsoft.Extensions.Options;
 
 /// <summary>
 /// Реализация конфигурации приложения
@@ -8,6 +9,23 @@ using ClubDoorman.Services.Messaging;
 /// </summary>
 public class AppConfig : IAppConfig
 {
+    private readonly IOptions<AutoBanOptions> _autoBanOptions;
+    private readonly IOptions<ViolationThresholdOptions> _violationThresholdOptions;
+    private readonly IOptions<FeatureToggleOptions> _featureToggleOptions;
+    private readonly IOptions<ChatFilteringOptions> _chatFilteringOptions;
+
+    public AppConfig(
+        IOptions<AutoBanOptions> autoBanOptions,
+        IOptions<ViolationThresholdOptions> violationThresholdOptions,
+        IOptions<FeatureToggleOptions> featureToggleOptions,
+        IOptions<ChatFilteringOptions> chatFilteringOptions)
+    {
+        _autoBanOptions = autoBanOptions;
+        _violationThresholdOptions = violationThresholdOptions;
+        _featureToggleOptions = featureToggleOptions;
+        _chatFilteringOptions = chatFilteringOptions;
+    }
+
     /// <summary>
     /// API токен для OpenRouter
     /// </summary>
@@ -133,9 +151,83 @@ public class AppConfig : IAppConfig
     /// </summary>
     public int CaptchaViolationsBeforeBan => Config.CaptchaViolationsBeforeBan;
     
-            /// <summary>
-        /// Отправлять уведомления о банах за повторные нарушения в админ-чат вместо лог-чата
-        /// </summary>
-        public bool RepeatedViolationsBanToAdminChat => Config.RepeatedViolationsBanToAdminChat;
+    /// <summary>
+    /// Отправлять уведомления о банах за повторные нарушения в админ-чат вместо лог-чата
+    /// </summary>
+    public bool RepeatedViolationsBanToAdminChat => Config.RepeatedViolationsBanToAdminChat;
     
+    // === НОВЫЕ СВОЙСТВА ИЗ STRONGLY-TYPED OPTIONS ===
+    
+    /// <summary>
+    /// Автоматически банить пользователей из черного списка
+    /// </summary>
+    public bool BlacklistAutoBan => _autoBanOptions.Value.BlacklistAutoBan;
+    
+    /// <summary>
+    /// Автоматически банить каналы
+    /// </summary>
+    public bool ChannelAutoBan => _autoBanOptions.Value.ChannelAutoBan;
+    
+    /// <summary>
+    /// Автоматически банить пользователей с похожими именами
+    /// </summary>
+    public bool LookAlikeAutoBan => _autoBanOptions.Value.LookAlikeAutoBan;
+    
+    /// <summary>
+    /// Автоматически банить по кнопкам
+    /// </summary>
+    public bool ButtonAutoBan => _autoBanOptions.Value.ButtonAutoBan;
+    
+    /// <summary>
+    /// Автоматически банить при высокой уверенности
+    /// </summary>
+    public bool HighConfidenceAutoBan => _autoBanOptions.Value.HighConfidenceAutoBan;
+    
+    /// <summary>
+    /// Пересылать сообщения с низкой уверенностью в ham
+    /// </summary>
+    public bool LowConfidenceHamForward => _featureToggleOptions.Value.LowConfidenceHamForward;
+    
+    /// <summary>
+    /// Включить кнопку одобрения
+    /// </summary>
+    public bool ApproveButtonEnabled => _featureToggleOptions.Value.ApproveButtonEnabled;
+    
+    /// <summary>
+    /// Удаление пересланных сообщений от новичков
+    /// </summary>
+    public bool DeleteForwardedMessages => _featureToggleOptions.Value.DeleteForwardedMessages;
+    
+    /// <summary>
+    /// Отключить приветственные сообщения
+    /// </summary>
+    public bool DisableWelcome => _featureToggleOptions.Value.DisableWelcome;
+    
+    /// <summary>
+    /// Отключить фильтрацию картинок/видео/документов глобально
+    /// </summary>
+    public bool DisableMediaFiltering => _featureToggleOptions.Value.DisableMediaFiltering;
+    
+    /// <summary>
+    /// Режим автоодобрения пользователей (true = глобальный, false = групповой)
+    /// </summary>
+    public bool GlobalApprovalMode => _featureToggleOptions.Value.GlobalApprovalMode;
+    
+    /// <summary>
+    /// Группы где фильтрация медиа отключена
+    /// </summary>
+    public HashSet<long> MediaFilteringDisabledChats => _chatFilteringOptions.Value.MediaFilteringDisabledChats;
+    
+    /// <summary>
+    /// Проверяет, отключена ли фильтрация медиа для данного чата
+    /// </summary>
+    public bool IsMediaFilteringDisabledForChat(long chatId)
+    {
+        // Если глобально отключено - фильтрация отключена везде
+        if (DisableMediaFiltering)
+            return true;
+
+        // Если чат в списке исключений - фильтрация отключена
+        return MediaFilteringDisabledChats.Contains(chatId);
+    }
 } 
