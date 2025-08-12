@@ -1,36 +1,226 @@
-# TestKit - Тестовая инфраструктура ClubDoorman
+# TestKit v0 - Тестовая инфраструктура ClubDoorman
+
+## 🎯 TestKit v0 - Новая архитектура тестирования
+
+TestKit v0 - это комплексная система автоматизированного тестирования с поддержкой golden master тестов, фейковых реализаций и DI-харнесса для фиксации текущего поведения ClubDoorman.
+
+### 🚀 Ключевые возможности TestKit v0:
+- **Фейковые реализации** всех внешних зависимостей с транскриптами
+- **DI-харнесс** для замены реализаций в тестах
+- **Golden Master тесты** для фиксации поведения ключевых сценариев
+- **Расширенные билдеры** для создания типовых тестовых сценариев
+- **Детерминированные провайдеры** времени и случайных чисел
+
+## 📦 Компоненты TestKit
+
+### Core (Существующие)
+- **TestKit.cs** - Основной класс с единым интерфейсом (674 строки)
+- **TestCategories.cs** - Категории тестов для оптимизации CI/CD
+
+### TestKit v0 (Новые компоненты)
+- **Infrastructure/TestHostFactory.cs** - DI-харнесс для замены зависимостей фейками
+- **Fakes/** - Фейковые реализации для детерминированных тестов
+- **Builders/EnhancedBuilders.cs** - Билдеры для типовых сценариев
+- **GoldenMaster/GoldenMasterTests.cs** - Golden master тесты ключевых сценариев
+
+### Data Generation (Существующие)
+- **TestKit.Bogus.cs** - Генерация реалистичных тестовых данных с помощью Bogus
+- **TestKit.Builders.cs** - Fluent API для создания тестовых объектов (Test Data Builders pattern)
+
+### Automation (Существующие)
+- **TestKit.AutoFixture.cs** - Автоматическое создание объектов и моков с помощью AutoFixture
+- **TestKit.Telegram.cs** - Улучшенная работа с Telegram объектами и решение проблемы MessageId
+- **TestKit.Mocks.cs** - Централизованные моки для всех сервисов и компонентов
+
+## 🚀 Быстрый старт TestKit v0
+
+### Простой Golden Master тест
+```csharp
+[Test]
+public async Task MyScenario_TestName_ExpectedBehavior()
+{
+    // Arrange - создаем тестовый хост с фейками
+    var testHost = TestHostFactory.Create()
+        .ConfigureAppConfig(config => config.WithAiEnabled(-1001234567890));
+
+    // Создаем тестовые данные с помощью билдеров
+    var message = EnhancedBuilders.CreateScenarioMessage()
+        .AsSpam()
+        .InGroupChat()
+        .FromUser(EnhancedBuilders.CreateScenarioUser().AsFirstTimeUser())
+        .Build();
+
+    // Act - выполняем сценарий
+    var result = await testHost.ExecuteMessageScenarioAsync(message);
+
+    // Assert - проверяем результат
+    Assert.That(result.Success, Is.True);
+    Assert.That(testHost.BotClient.WasMessageDeleted(message.Chat, message.MessageId), Is.True);
+    Assert.That(testHost.BotClient.WasUserBanned(message.Chat, message.From.Id), Is.True);
+}
+```
+
+### Фейковые реализации
+```csharp
+// AppConfig фейк для управления флагами
+var appConfig = new AppConfigFake()
+    .WithAiEnabled(-1001234567890)
+    .WithMimicrySettings(enabled: true, threshold: 0.8)
+    .WithNoCaptcha(-1009876543210);
+
+// BotClient фейк с транскриптом действий
+var botClient = new BotClientFake();
+await botClient.SendMessage(chatId, "Test message");
+await botClient.BanChatMember(chatId, userId);
+
+// Проверка транскрипта
+Assert.That(botClient.WasMessageSent("Test message"), Is.True);
+Assert.That(botClient.WasUserBanned(chatId, userId), Is.True);
+var transcript = botClient.GetTranscript();
+
+// Детерминированное время
+var timeProvider = new TimeProviderFake();
+timeProvider.SetTime(new DateTime(2024, 1, 1, 12, 0, 0));
+timeProvider.AdvanceMinutes(30);
+
+// Предсказуемая генерация случайных чисел
+var randomProvider = new RandomProviderFake()
+    .WithNextValues(1, 2, 3)
+    .WithDoubleValues(0.5, 0.7, 0.9);
+```
+
+### Расширенные билдеры для типовых сценариев
+```csharp
+// Пользователи
+var bannedUser = EnhancedBuilders.CreateScenarioUser().AsBannedUser().Build();
+var firstTimeUser = EnhancedBuilders.CreateScenarioUser().AsFirstTimeUser().Build();
+var suspiciousUser = EnhancedBuilders.CreateScenarioUser().AsSuspiciousUser().Build();
+
+// Сообщения
+var spamMessage = EnhancedBuilders.CreateScenarioMessage()
+    .AsSpam()
+    .InGroupChat()
+    .FromUser(suspiciousUser)
+    .Build();
+
+var commandMessage = EnhancedBuilders.CreateScenarioMessage()
+    .AsCommand("/help")
+    .InPrivateChat()
+    .Build();
+
+var forwardedMessage = EnhancedBuilders.CreateScenarioMessage()
+    .ForwardedFromChannel()
+    .WithText("Forwarded content")
+    .Build();
+
+// Update объекты
+var messageUpdate = EnhancedBuilders.CreateUpdate()
+    .WithMessage(spamMessage)
+    .Build();
+
+var callbackUpdate = EnhancedBuilders.CreateUpdate()
+    .WithCallbackQuery(
+        EnhancedBuilders.CreateCallbackQuery()
+            .AsAdminApprove()
+            .FromUser(adminUser)
+            .Build()
+    )
+    .Build();
+```
+
+### TestHostFactory - DI харнесс
+```csharp
+// Создание с автоматической регистрацией всех сервисов
+var testHost = TestHostFactory.Create()
+    .ConfigureAppConfig(config => 
+    {
+        config.AdminChatId = 123456789;
+        config.SuspiciousDetectionEnabled = true;
+        config.WithAiEnabled(-1001234567890);
+    })
+    .ConfigureBotClient(bot => 
+    {
+        bot.SetResponse("GetMe", new User { Id = 987654321, FirstName = "TestBot" });
+    })
+    .ConfigureTimeProvider(time => 
+    {
+        time.SetTime(new DateTime(2024, 1, 1));
+    });
+
+// Выполнение сценариев
+var result = await testHost.ExecuteMessageScenarioAsync(message);
+var callbackResult = await testHost.ExecuteCallbackScenarioAsync(callbackQuery);
+
+// Доступ к фейкам для проверки
+Assert.That(testHost.BotClient.GetTranscript().Count, Is.GreaterThan(0));
+Assert.That(testHost.ApprovedUsersStorage.IsApproved(userId), Is.True);
+```
 
 ## 📚 Документация
 - **[INDEX.md](INDEX.md)** - Тегированный индекс всех генераторов и моков
 - **[TestCategories.cs](TestCategories.cs)** - Категории тестов для CI/CD
 
-## 📦 Компоненты TestKit
+## 🎭 Golden Master тесты
 
-### Core
-- **TestKit.cs** - Основной класс с единым интерфейсом (674 строки)
-- **TestCategories.cs** - Категории тестов для оптимизации CI/CD
+Golden Master тесты фиксируют текущее поведение системы для предотвращения регрессий при рефакторинге.
 
-### Data Generation
-- **TestKit.Bogus.cs** - Генерация реалистичных тестовых данных с помощью Bogus
-- **TestKit.Builders.cs** - Fluent API для создания тестовых объектов (Test Data Builders pattern)
+### Поддерживаемые сценарии:
 
-### Automation
-- **TestKit.AutoFixture.cs** - Автоматическое создание объектов и моков с помощью AutoFixture
-- **TestKit.Telegram.cs** - Улучшенная работа с Telegram объектами и решение проблемы MessageId
-- **TestKit.Mocks.cs** - Централизованные моки для всех сервисов и компонентов
+1. **Ban-list сценарии**:
+   - `BanList_UserInGroupChat` - участник из банлиста в группе → бан + уведомления
+   - `BanList_UserInPrivateChat` - участник из банлиста в личке → логирование + уведомления
 
-## Быстрый старт
+2. **Новые пользователи**:
+   - `UnapprovedFirstUser_NewMessage` - первое сообщение → капча + блокировка
+   - `NewUserJoin_FirstTimeJoin` - присоединение → процедура одобрения
 
+3. **Режимы работы**:
+   - `SilentMode_SpamMessage` - тихий режим → модерация без сообщений в чат
+
+4. **Пересылки и команды**:
+   - `ChannelForwarding_SuspiciousMessage` - пересылка с канала → проверка + удаление
+   - `CommandVsMessage_Command` - команда → CommandRouter
+   - `CommandVsMessage_RegularMessage` - обычное сообщение → модератор
+
+### Структура снапшота:
+```json
+{
+  "Success": true,
+  "BotActionsCount": 3,
+  "BotActionTypes": ["DeleteMessage", "BanChatMember", "SendMessage"],
+  "BotActionsSummary": [
+    "DeleteMessage(CHAT_ID,MESSAGE_ID)",
+    "BanChatMember(CHAT_ID,USER_ID,TIMESTAMP)",
+    "SendMessage(CHAT_ID,Admin notification)"
+  ],
+  "ErrorMessages": [],
+  "LogMessagesCount": 2,
+  "AdminNotificationsCount": 1,
+  "ExecutionTimeMs": 150
+}
+```
+
+### Обновление снапшотов:
+1. При изменении поведения создается файл `*_updated.json`
+2. Сравните изменения в файлах
+3. Если изменения ожидаемы - замените оригинальный снапшот
+4. Зафиксируйте изменения в git
+
+### Добавление новых Golden Master тестов:
 ```csharp
-// Базовые объекты
-var user = TK.CreateValidUser();
-var chat = TK.CreateGroupChat();
-var message = TK.CreateValidMessage();
+[Test]
+public async Task MyNewScenario_Description_ExpectedBehavior()
+{
+    // Arrange
+    var testHost = TestHostFactory.CreateForCustomScenario();
+    var input = EnhancedBuilders.CreateScenarioMessage().AsCustomScenario().Build();
 
-// Специализированные сценарии
-var captcha = TK.Specialized.Captcha.Bait();
-var result = TK.Specialized.Moderation.Ban();
-var callback = TK.Specialized.Admin.ApproveCallback();
+    // Act
+    var result = await testHost.ExecuteMessageScenarioAsync(input);
+
+    // Assert & Record
+    await AssertAndRecordGoldenMaster("MyNewScenario_Description", result);
+}
 ```
 
 ## Основные методы
