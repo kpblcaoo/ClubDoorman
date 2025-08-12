@@ -1,4 +1,4 @@
-using ClubDoorman.Handlers;
+using ClubDoorman.Services.Handlers;
 using Telegram.Bot.Types;
 using ClubDoorman.Services.Messaging;
 

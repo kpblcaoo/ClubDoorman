@@ -3,7 +3,6 @@ using ClubDoorman.Services.UserBan;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Handlers;
 using ClubDoorman.Infrastructure;
@@ -57,12 +56,6 @@ public static class TestKitAutoFixture
     /// <tags>autofixture, message-handler, dependencies, test-infrastructure</tags>
     /// </summary>
     public static MessageHandler CreateMessageHandler() => Infra.TestKitAutoFixture.CreateMessageHandler();
-
-    /// <summary>
-    /// Создает ModerationService с автозависимостями
-    /// <tags>autofixture, moderation-service, dependencies, test-infrastructure</tags>
-    /// </summary>
-    public static ModerationService CreateModerationService() => Infra.TestKitAutoFixture.CreateModerationService();
 
     /// <summary>
     /// Создает список реалистичных пользователей
@@ -170,4 +163,4 @@ public static class TestKitAutoFixture
     public static (T sut, IFixture fixture) CreateWithFixture<T>() => Infra.TestKitAutoFixture.CreateWithFixture<T>();
 
     #endregion
-} 
+}

@@ -81,7 +81,6 @@ public class UserJoinServiceBuilder
         // Создаем MessageHandler с моками для успешного сценария
         var messageHandlerMock = TK.CreateMessageHandlerBuilder()
             .WithStandardMocks()
-            .WithModerationService(builder => builder.ThatAllowsMessages())
             .WithUserManager(builder => builder.ThatIsNotInBanlist(It.IsAny<long>()))
             .WithCaptchaService(builder => builder.ThatSucceeds())
             .WithTelegramBot(builder => builder.ThatSendsMessageSuccessfully())
@@ -119,7 +118,6 @@ public class UserJoinServiceBuilder
         // Создаем MessageHandler с моками для создания капчи
         var messageHandlerMock = TK.CreateMessageHandlerBuilder()
             .WithStandardMocks()
-            .WithModerationService(builder => builder.ThatAllowsMessages())
             .WithUserManager(builder => builder.ThatIsNotInBanlist(It.IsAny<long>()))
             .WithCaptchaService(builder => builder.ThatSucceeds())
             .WithTelegramBot(builder => builder.ThatSendsMessageSuccessfully())
@@ -139,7 +137,6 @@ public class UserJoinServiceBuilder
         // Создаем MessageHandler с моками для длинного имени
         var messageHandlerMock = TK.CreateMessageHandlerBuilder()
             .WithStandardMocks()
-            .WithModerationService(builder => builder.ThatBansUsers())
             .WithTelegramBot(builder => builder.ThatSendsMessageSuccessfully())
             .BuildMock();
             
@@ -175,7 +172,6 @@ public class UserJoinServiceBuilder
         // Создаем MessageHandler с моками, которые выбрасывают исключения
         var messageHandlerMock = TK.CreateMessageHandlerBuilder()
             .WithStandardMocks()
-            .WithModerationService(builder => builder.ThatBansUsers("Error occurred"))
             .WithTelegramBot(builder => builder.ThatSendsMessageSuccessfully())
             .BuildMock();
             

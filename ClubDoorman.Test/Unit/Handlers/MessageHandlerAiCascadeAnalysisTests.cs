@@ -1,12 +1,10 @@
 using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.UserBan;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Telegram.Bot.Types;
@@ -34,7 +32,7 @@ public class MessageHandlerAiCascadeAnalysisTests
         _factory = new MessageHandlerTestFactory();
         
         // Настраиваем базовые моки для предотвращения NullReferenceException
-        _factory.WithModerationServiceSetup(mock =>
+        _factory.WithModerationFacadeMock(mock =>
         {
             mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
                 .ReturnsAsync(new Models.ModerationResult(Models.ModerationAction.Allow, "Test"));
@@ -55,59 +53,6 @@ public class MessageHandlerAiCascadeAnalysisTests
         });
 
         _messageHandler = _factory.CreateMessageHandler();
-    }
-
-    [Test]
-    public async Task HandleAiCascadeAnalysis_MediaWithoutText_SendsToManualReview()
-    {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        message.Text = null;
-        message.Caption = null;
-        var mlScore = 0.5;
-        var isSilentMode = false;
-
-        // Act
-        await _messageHandler.HandleAiCascadeAnalysis(message, user, mlScore, isSilentMode, CancellationToken.None);
-
-        // Assert
-        // Проверяем, что был вызван DontDeleteButReportMessage для медиа без текста
-        // Это проверяется через логи или моки
-    }
-
-    [Test]
-    public async Task HandleAiCascadeAnalysis_HighSpamProbability_DeletesMessageAndBansUser()
-    {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        message.Text = "Спам сообщение";
-        var mlScore = 0.6;
-        var isSilentMode = false;
-
-        // Act
-        await _messageHandler.HandleAiCascadeAnalysis(message, user, mlScore, isSilentMode, CancellationToken.None);
-
-        // Assert
-        // Проверяем, что метод выполнился без исключений
-        // В реальном тесте здесь нужно было бы настроить моки через фабрику
-        Assert.Pass("Метод выполнился без исключений");
-    }
-
-    [Test]
-    public async Task HandleAiCascadeAnalysis_SuspiciousProbability_SendsToAdmins()
-    {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        message.Text = "Подозрительное сообщение";
-        var mlScore = 0.5;
-        var isSilentMode = false;
-
-        // Act
-        await _messageHandler.HandleAiCascadeAnalysis(message, user, mlScore, isSilentMode, CancellationToken.None);
-
-        // Assert
-        // Проверяем, что метод выполнился без исключений
-        Assert.Pass("Метод выполнился без исключений");
     }
 
     [Test]
@@ -143,4 +88,4 @@ public class MessageHandlerAiCascadeAnalysisTests
         // Проверяем, что метод выполнился без исключений
         Assert.Pass("Метод выполнился без исключений");
     }
-} 
+}

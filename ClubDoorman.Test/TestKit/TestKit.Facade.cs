@@ -146,16 +146,10 @@ namespace ClubDoorman.Test.TestKit
         public static Builders.MockBuilders.MessageServiceMockBuilder CreateMessageServiceMock() => Builders.MockBuilders.TestKitMockBuilders.CreateMessageServiceMock();
         
         /// <summary>
-        /// Создает билдер для мока MessageHandler
-        /// <tags>builders, message-handler, mocks, fluent-api</tags>
-        /// </summary>
-        public static Builders.MockBuilders.MessageHandlerMockBuilder CreateMessageHandlerMock() => Builders.MockBuilders.TestKitMockBuilders.CreateMessageHandlerMock();
-        
-        /// <summary>
         /// Создает билдер для NotificationService
         /// <tags>builders, notification-service, fluent-api</tags>
         /// </summary>
-        public static NotificationServiceBuilder CreateNotificationServiceBuilder() => new();
+    
         
         /// <summary>
         /// Создает билдер для UserJoinService

@@ -480,6 +480,17 @@ public static class TestDataFactory
         };
     }
 
+    public static Message CreateSayCommandMessage(string text = "/say Hello World")
+    {
+        return new Message
+        {
+            Date = DateTime.UtcNow,
+            Text = text,
+            From = CreateValidUser(),
+            Chat = CreateGroupChat()
+        };
+    }
+
     public static CaptchaInfo CreateBaitCaptchaInfo()
     {
         var user = CreateValidUser();

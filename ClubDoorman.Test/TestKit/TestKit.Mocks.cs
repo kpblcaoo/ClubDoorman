@@ -2,7 +2,6 @@ using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Infrastructure;
 using Telegram.Bot;
@@ -509,4 +508,4 @@ namespace ClubDoorman.Test.TestKit
             return mock;
         }
     }
-} 
+}

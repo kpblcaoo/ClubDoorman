@@ -11,8 +11,9 @@ using ClubDoorman.Services;
 using ClubDoorman.Services.LinkFormatting;
 using ClubDoorman.Services.Dispatcher;
 using ClubDoorman.Services.UserJoin;
-using ClubDoorman.Services.Notification;
 using ClubDoorman.Services.UserBan;
+using ClubDoorman.Features.UserJoin;
+using ClubDoorman.Features.Moderation;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Logging;
 
@@ -22,7 +23,7 @@ using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Handlers;
 using Telegram.Bot;
 using DotNetEnv;
@@ -107,8 +108,9 @@ public class Program
                 services.AddLinkFormattingServices();
                 services.AddDispatcherServices();
                 services.AddUserJoinServices();
-                services.AddNotificationServices();
                 services.AddUserBanServices();
+                services.AddUserJoinFeature();
+                services.AddModerationFeature();
                 services.AddModerationServices();
                 services.AddChannelModerationServices();
                 services.AddSuspiciousUsersServices();
@@ -213,18 +215,8 @@ public class Program
                 {
                     var logger = provider.GetRequiredService<ILogger<Program>>();
                     logger.LogDebug("[DI] IModerationService factory called");
-                    return new ModerationService(
-                        provider.GetRequiredService<ISpamHamClassifier>(),
-                        provider.GetRequiredService<IMimicryClassifier>(),
-                        provider.GetRequiredService<IBadMessageManager>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<IAiChecks>(),
-                        provider.GetRequiredService<ISuspiciousUsersStorage>(),
-                        provider.GetRequiredService<ITelegramBotClient>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IUserBanService>(),
-                        provider.GetRequiredService<IUserCleanupService>(),
-                        provider.GetRequiredService<ILogger<ModerationService>>());
+                    return new ModerationServiceAdapter(
+                        provider.GetRequiredService<IModerationPolicy>());
                 });
 
 
@@ -250,7 +242,7 @@ public class Program
                 provider.GetRequiredService<IUserBanService>(),
                 provider.GetRequiredService<ILogger<ChannelModerationService>>());
         });
-                services.AddSingleton<IUserJoinService, UserJoinService>();
+             //disabled   services.AddSingleton<IUserJoinService, UserJoinService>();
 
                 // Регистрация сервиса лог-чата (перенесено в MessagingModule)
 

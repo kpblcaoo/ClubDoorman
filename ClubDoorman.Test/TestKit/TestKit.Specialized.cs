@@ -4,7 +4,6 @@ using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Test.TestData;
 using ClubDoorman.Test.TestInfrastructure;
@@ -566,7 +565,7 @@ namespace ClubDoorman.Test.TestKit
                 /// </summary>
                 public class ModerationSetup
                 {
-                    public ModerationService Service { get; init; } = null!;
+                    public IModerationService Service { get; init; } = null!;
                     public SpamHamClassifier SpamClassifier { get; init; } = null!;
                     public MimicryClassifier MimicryClassifier { get; init; } = null!;
                     public BadMessageManager BadMessageManager { get; init; } = null!;
@@ -575,10 +574,9 @@ namespace ClubDoorman.Test.TestKit
                     
                     // Моки для управления поведением
                     public Mock<IUserManager> UserManagerMock { get; init; } = null!;
-                    public Mock<ITelegramBotClient> BotClientMock { get; init; } = null!;
+                    public Mock<ITelegramBotClientWrapper> BotClientMock { get; init; } = null!;
                     public Mock<IMessageService> MessageServiceMock { get; init; } = null!;
-                    public Mock<ILogger<ModerationService>> LoggerMock { get; init; } = null!;
-                    
+                    public Mock<ILogger<IModerationService>> LoggerMock { get; init; } = null!;
                     // Логгеры для отдельных компонентов
                     public Mock<ILogger<SpamHamClassifier>> SpamLoggerMock { get; init; } = null!;
                     public Mock<ILogger<MimicryClassifier>> MimicryLoggerMock { get; init; } = null!;
@@ -587,10 +585,9 @@ namespace ClubDoorman.Test.TestKit
                 }
 
                 /// <summary>
-                /// Создает полный setup ModerationService со всеми реальными и мокированными зависимостями
-                /// Заменяет ~45 строк дублированного кода в SetUp методах
+                /// Создает полный setup IModerationService со всеми реальными и мокированными зависимостями
                 /// </summary>
-                /// <returns>Полностью настроенный ModerationService и все его зависимости</returns>
+                /// <returns>Полностью настроенный IModerationService и все его зависимости</returns>
                 public static ModerationSetup CompleteSetup()
                 {
                     // Создаем моки логгеров
@@ -598,7 +595,6 @@ namespace ClubDoorman.Test.TestKit
                     var mimicryLoggerMock = CreateLoggerMock<MimicryClassifier>();
                     var suspiciousLoggerMock = CreateLoggerMock<SuspiciousUsersStorage>();
                     var aiLoggerMock = CreateLoggerMock<AiChecks>();
-                    var moderationLoggerMock = CreateLoggerMock<ModerationService>();
 
                     // Создаем реальные компоненты
                     var spamClassifier = new SpamHamClassifier(spamLoggerMock.Object);
@@ -616,19 +612,18 @@ namespace ClubDoorman.Test.TestKit
                     var testConfig = CreateAppConfig();
                     var aiChecks = new AiChecks(new TelegramBotClientWrapper(testBotClient), aiLoggerMock.Object, testConfig);
 
-                    // Создаем ModerationService
-                    var moderationService = new ModerationService(
+                    // Используем FakeModerationService для тестов
+                    var botClientWrapperMock = CreateMockBotClientWrapper();
+                    var moderationService = new ClubDoorman.TestInfrastructure.FakeModerationService(
                         spamClassifier,
                         mimicryClassifier,
                         badMessageManager,
                         userManagerMock.Object,
                         aiChecks,
                         suspiciousUsersStorage,
-                        botClientMock.Object,
+                        botClientWrapperMock.Object,
                         messageServiceMock.Object,
-                        CreateMockUserBanService().Object,
-                        new Mock<IUserCleanupService>().Object,
-                        moderationLoggerMock.Object
+                        CreateLoggerMock<ClubDoorman.TestInfrastructure.FakeModerationService>().Object
                     );
 
                     return new ModerationSetup
@@ -640,9 +635,9 @@ namespace ClubDoorman.Test.TestKit
                         SuspiciousUsersStorage = suspiciousUsersStorage,
                         AiChecks = aiChecks,
                         UserManagerMock = userManagerMock,
-                        BotClientMock = botClientMock,
+                        BotClientMock = botClientWrapperMock,
                         MessageServiceMock = messageServiceMock,
-                        LoggerMock = moderationLoggerMock,
+                        LoggerMock = CreateLoggerMock<IModerationService>(),
                         SpamLoggerMock = spamLoggerMock,
                         MimicryLoggerMock = mimicryLoggerMock,
                         SuspiciousLoggerMock = suspiciousLoggerMock,
@@ -654,12 +649,11 @@ namespace ClubDoorman.Test.TestKit
                 /// Создает минимальный setup только с необходимыми компонентами
                 /// Для простых unit тестов где не нужны все зависимости
                 /// </summary>
-                /// <returns>Минимальный setup ModerationService</returns>
+                /// <returns>Минимальный setup IModerationService</returns>
                 public static ModerationSetup MinimalSetup()
                 {
                     var spamLoggerMock = CreateLoggerMock<SpamHamClassifier>();
                     var mimicryLoggerMock = CreateLoggerMock<MimicryClassifier>();
-                    var moderationLoggerMock = CreateLoggerMock<ModerationService>();
 
                     var spamClassifier = new SpamHamClassifier(spamLoggerMock.Object);
                     var mimicryClassifier = new MimicryClassifier(mimicryLoggerMock.Object);
@@ -667,24 +661,22 @@ namespace ClubDoorman.Test.TestKit
 
                     // Создаем минимальные моки и реальные объекты
                     var userManagerMock = CreateMockUserManager();
-                    var botClientMock = CreateMockBotClient();
+                    var botClientWrapperMock = CreateMockBotClientWrapper();
                     var messageServiceMock = CreateMockMessageService();
                     var suspiciousLoggerMock = CreateLoggerMock<SuspiciousUsersStorage>();
                     var suspiciousUsersStorage = new SuspiciousUsersStorage(suspiciousLoggerMock.Object); // Реальный объект
                     var aiChecksMock = CreateMockAiChecks();
 
-                    var moderationService = new ModerationService(
+                    var moderationService = new ClubDoorman.TestInfrastructure.FakeModerationService(
                         spamClassifier,
                         mimicryClassifier,
                         badMessageManager,
                         userManagerMock.Object,
                         aiChecksMock.Object,
                         suspiciousUsersStorage,
-                        botClientMock.Object,
+                        botClientWrapperMock.Object,
                         messageServiceMock.Object,
-                        CreateMockUserBanService().Object,
-                        new Mock<IUserCleanupService>().Object,
-                        moderationLoggerMock.Object
+                        CreateLoggerMock<ClubDoorman.TestInfrastructure.FakeModerationService>().Object
                     );
 
                     return new ModerationSetup
@@ -696,13 +688,13 @@ namespace ClubDoorman.Test.TestKit
                         SuspiciousUsersStorage = suspiciousUsersStorage,
                         AiChecks = aiChecksMock.Object,
                         UserManagerMock = userManagerMock,
-                        BotClientMock = botClientMock,
+                        BotClientMock = botClientWrapperMock,
                         MessageServiceMock = messageServiceMock,
-                        LoggerMock = moderationLoggerMock,
+                        LoggerMock = CreateLoggerMock<IModerationService>(),
                         SpamLoggerMock = spamLoggerMock,
                         MimicryLoggerMock = mimicryLoggerMock,
-                        SuspiciousLoggerMock = CreateMock<ILogger<SuspiciousUsersStorage>>(),
-                        AiLoggerMock = CreateMock<ILogger<AiChecks>>()
+                        SuspiciousLoggerMock = suspiciousLoggerMock,
+                        AiLoggerMock = CreateLoggerMock<AiChecks>()
                     };
                 }
 
@@ -711,7 +703,7 @@ namespace ClubDoorman.Test.TestKit
                 /// Использует реальные объекты для sealed классов и моки для интерфейсов
                 /// </summary>
                 /// <returns>Setup с мокированными компонентами</returns>
-                public static (ModerationService service, Dictionary<string, Mock> mocks) MockedSetup()
+                public static (IModerationService service, Dictionary<string, Mock> mocks) MockedSetup()
                 {
                     var mocks = new Dictionary<string, Mock>();
 
@@ -727,31 +719,29 @@ namespace ClubDoorman.Test.TestKit
                     var aiChecksMock = CreateMockAiChecks();
                     var suspiciousLoggerMock = CreateLoggerMock<SuspiciousUsersStorage>();
                     var suspiciousUsersStorage = new SuspiciousUsersStorage(suspiciousLoggerMock.Object); // Реальный объект
-                    var botClientMock = CreateMockBotClient();
+                    var botClientWrapperMock = CreateMockBotClientWrapper();
                     var messageServiceMock = CreateMockMessageService();
-                    var loggerMock = CreateLoggerMock<ModerationService>();
+                    var loggerMock = CreateLoggerMock<ClubDoorman.TestInfrastructure.FakeModerationService>();
 
                     // Добавляем в словарь для удобного доступа (только моки)
                     mocks["UserManager"] = userManagerMock;
                     mocks["AiChecks"] = aiChecksMock;
-                    mocks["BotClient"] = botClientMock;
+                    mocks["BotClient"] = botClientWrapperMock;
                     mocks["MessageService"] = messageServiceMock;
                     mocks["Logger"] = loggerMock;
                     mocks["SpamLogger"] = spamLoggerMock;
                     mocks["MimicryLogger"] = mimicryLoggerMock;
                     mocks["SuspiciousLogger"] = suspiciousLoggerMock;
 
-                    var moderationService = new ModerationService(
+                    var moderationService = new ClubDoorman.TestInfrastructure.FakeModerationService(
                         spamClassifier,
                         mimicryClassifier,
                         badMessageManager,
                         userManagerMock.Object,
                         aiChecksMock.Object,
                         suspiciousUsersStorage,
-                        botClientMock.Object,
+                        botClientWrapperMock.Object,
                         messageServiceMock.Object,
-                        CreateMockUserBanService().Object,
-                        new Mock<IUserCleanupService>().Object,
                         loggerMock.Object
                     );
 
@@ -760,4 +750,4 @@ namespace ClubDoorman.Test.TestKit
             }
         }
     }
-} 
+}
