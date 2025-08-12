@@ -13,6 +13,7 @@ using ClubDoorman.Services.Captcha;
 using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Features.Moderation;
 using ClubDoorman.Services.Notifications;
+using ClubDoorman.Services.AI;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -34,6 +35,7 @@ public class MessageHandler : IUpdateHandler
     private readonly ICaptchaService _captchaService;
     private readonly IUserFlowLogger _userFlowLogger;
     private readonly IForwardingService _forwardingService;
+    private readonly IAiCascadeService _aiCascadeService;
 
     /// <summary>
     /// Создает экземпляр обработчика сообщений.
@@ -51,6 +53,7 @@ public class MessageHandler : IUpdateHandler
     /// <param name="captchaService">Сервис капчи</param>
     /// <param name="userFlowLogger">Логгер потока пользователей</param>
     /// <param name="forwardingService">Сервис пересылки</param>
+    /// <param name="aiCascadeService">Сервис AI-профиль-анализа</param>
     /// <exception cref="ArgumentNullException">Если любой из параметров равен null</exception>
     public MessageHandler(
         ITelegramBotClientWrapper bot,
@@ -65,7 +68,8 @@ public class MessageHandler : IUpdateHandler
         IBotPermissionsService botPermissionsService,
         ICaptchaService captchaService,
         IUserFlowLogger userFlowLogger,
-        IForwardingService forwardingService)
+        IForwardingService forwardingService,
+        IAiCascadeService aiCascadeService)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
@@ -80,6 +84,7 @@ public class MessageHandler : IUpdateHandler
         _captchaService = captchaService ?? throw new ArgumentNullException(nameof(captchaService));
         _userFlowLogger = userFlowLogger ?? throw new ArgumentNullException(nameof(userFlowLogger));
         _forwardingService = forwardingService ?? throw new ArgumentNullException(nameof(forwardingService));
+        _aiCascadeService = aiCascadeService ?? throw new ArgumentNullException(nameof(aiCascadeService));
     }
 
     /// <summary>
@@ -329,6 +334,17 @@ public class MessageHandler : IUpdateHandler
             moderationResult = new ModerationResult(ModerationAction.RequireManualReview, "Ошибка модерации - требуется ручной анализ", 0);
         }
         _userFlowLogger.LogModerationResult(user, chat, moderationResult.Action.ToString(), moderationResult.Reason, moderationResult.Confidence);
+
+        // AI анализ профиля для новых/неодобренных пользователей после успешной базовой модерации
+        if (moderationResult.Action == ModerationAction.Allow)
+        {
+            var profileAnalysisResult = await _aiCascadeService.PerformAiProfileAnalysisAsync(message, user, chat, cancellationToken);
+            if (profileAnalysisResult)
+            {
+                // Пользователь получил ограничения за подозрительный профиль, прекращаем обработку
+                return;
+            }
+        }
 
         await _moderationFacade.HandleUserMessageAsync(message, user, chat, moderationResult, isSilentMode, cancellationToken);
         return;
