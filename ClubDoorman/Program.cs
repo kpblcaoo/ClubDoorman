@@ -120,24 +120,24 @@ public class Program
         Console.WriteLine($"   • DOORMAN_SUSPICIOUS_DETECTION_ENABLE: {appConfig.SuspiciousDetectionEnabled}");
         Console.WriteLine($"   • DOORMAN_MIMICRY_THRESHOLD: {appConfig.MimicryThreshold:F1}");
         Console.WriteLine($"   • DOORMAN_SUSPICIOUS_TO_APPROVED_COUNT: {appConfig.SuspiciousToApprovedMessageCount}");
-        // Остальные свойства пока остаются в Config, будут перенесены в следующих группах
-        Console.WriteLine($"   • DOORMAN_GLOBAL_APPROVAL_MODE: {Config.GlobalApprovalMode}");
-        Console.WriteLine($"   • DOORMAN_BLACKLIST_AUTOBAN_DISABLE: {!Config.BlacklistAutoBan}");
-        Console.WriteLine($"   • DOORMAN_CHANNELS_AUTOBAN_DISABLE: {!Config.ChannelAutoBan}");
-        Console.WriteLine($"   • DOORMAN_BAN_FOLDER_INVITE_USERS: {Config.BanFolderInviteUsers}");
-        Console.WriteLine($"   • DOORMAN_BUTTON_AUTOBAN_DISABLE: {!Config.ButtonAutoBan}");
-        Console.WriteLine($"   • DOORMAN_HIGH_CONFIDENCE_AUTOBAN_DISABLE: {!Config.HighConfidenceAutoBan}");
-        Console.WriteLine($"   • DOORMAN_LOW_CONFIDENCE_HAM_ENABLE: {Config.LowConfidenceHamForward}");
-        Console.WriteLine($"   • DOORMAN_APPROVE_BUTTON: {Config.ApproveButtonEnabled}");
-        Console.WriteLine($"   • DOORMAN_DISABLE_MEDIA_FILTERING: {Config.DisableMediaFiltering}");
-        Console.WriteLine($"   • DOORMAN_DELETE_FORWARDED_MESSAGES: {Config.DeleteForwardedMessages}");
+        // Остальные свойства теперь доступны через IAppConfig
+        Console.WriteLine($"   • DOORMAN_GLOBAL_APPROVAL_MODE: {appConfig.GlobalApprovalMode}");
+        Console.WriteLine($"   • DOORMAN_BLACKLIST_AUTOBAN_DISABLE: {!appConfig.BlacklistAutoBan}");
+        Console.WriteLine($"   • DOORMAN_CHANNELS_AUTOBAN_DISABLE: {!appConfig.ChannelAutoBan}");
+        Console.WriteLine($"   • DOORMAN_BAN_FOLDER_INVITE_USERS: {appConfig.BanFolderInviteUsers}");
+        Console.WriteLine($"   • DOORMAN_BUTTON_AUTOBAN_DISABLE: {!appConfig.ButtonAutoBan}");
+        Console.WriteLine($"   • DOORMAN_HIGH_CONFIDENCE_AUTOBAN_DISABLE: {!appConfig.HighConfidenceAutoBan}");
+        Console.WriteLine($"   • DOORMAN_LOW_CONFIDENCE_HAM_ENABLE: {appConfig.LowConfidenceHamForward}");
+        Console.WriteLine($"   • DOORMAN_APPROVE_BUTTON: {appConfig.ApproveButtonEnabled}");
+        Console.WriteLine($"   • DOORMAN_DISABLE_MEDIA_FILTERING: {appConfig.DisableMediaFiltering}");
+        Console.WriteLine($"   • DOORMAN_DELETE_FORWARDED_MESSAGES: {appConfig.DeleteForwardedMessages}");
         Console.WriteLine($"   • DOORMAN_PRIVATE_START_DISABLE: {!appConfig.IsPrivateStartAllowed()}");
         Console.WriteLine($"   • Отключенные чаты: {appConfig.DisabledChats.Count}");
         Console.WriteLine($"   • Белый список чатов: {appConfig.WhitelistChats.Count}");
         Console.WriteLine($"   • AI-включенные чаты: {appConfig.AiEnabledChats.Count}");
         Console.WriteLine($"   • Группы без VPN-рекламы: {appConfig.NoVpnAdGroups.Count}");
         Console.WriteLine($"   • Группы с отключенной капчей: {appConfig.NoCaptchaGroups.Count}");
-        Console.WriteLine($"   • Чаты с отключенной фильтрацией медиа: {Config.MediaFilteringDisabledChats.Count}");
+        Console.WriteLine($"   • Чаты с отключенной фильтрацией медиа: {appConfig.MediaFilteringDisabledChats.Count}");
 
         await host.RunAsync();
     }
