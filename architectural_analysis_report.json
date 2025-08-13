@@ -1,0 +1,1935 @@
+{
+  "summary": {
+    "total_files": 362,
+    "total_issues": 227,
+    "critical_issues": 17,
+    "high_issues": 117,
+    "medium_issues": 93,
+    "average_file_size": 186.91988950276243,
+    "average_complexity": 4.733425414364641
+  },
+  "issues_by_severity": {
+    "HIGH": [
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 27 (should be <15)",
+        "file_path": "ClubDoorman.Test/TestBase.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 28 (should be <15)",
+        "file_path": "docs/scenarios/MessageModeration.en.feature.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 633 lines (should be <300)",
+        "file_path": "docs/scenarios/UserApproval.feature.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 591 lines (should be <300)",
+        "file_path": "docs/scenarios/MessageModeration.feature.cs",
+        "line_number": 1,
+        "recommendation": "Split into 2 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 542 lines (should be <300)",
+        "file_path": "docs/scenarios/ErrorHandling.feature.cs",
+        "line_number": 1,
+        "recommendation": "Split into 2 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 591 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/Integration/MessageHandlerBanTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 2 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 24 (should be <15)",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/ModerationServiceTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 53 (should be <15)",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/MessageHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 28 (should be <15)",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/CallbackQueryHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 588 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/TestData/TestDataFactory.Generated.cs",
+        "line_number": 1,
+        "recommendation": "Split into 2 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 46 (should be <15)",
+        "file_path": "ClubDoorman.Test/TestData/TestDataFactory.Generated.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 38 (should be <15)",
+        "file_path": "ClubDoorman.Test/Unit/Handlers/MessageHandlerExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 591 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/MessageHandlerBanTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 2 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 532 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/UserJoinServiceIntegrationTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 2 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 24 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/ModerationServiceTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 53 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/MessageHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 766 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/FakeTelegramClient.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 59 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/FakeTelegramClient.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 28 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/CallbackQueryHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 546 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/SuspiciousUsersStorageTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 2 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 22 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/SuspiciousUsersStorageTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 34 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/CaptchaServiceExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 712 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/UserManagerExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 37 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/UserManagerExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 23 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/ServiceChatDispatcherTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 502 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/AiChecksExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 2 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 26 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/AiChecksExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 621 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/UserBanServiceTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 38 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 23 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Moderation/ModerationServiceExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 26 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/AiAnalysisSteps.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 562 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/CheckCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Split into 2 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 21 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/CheckCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 31 (should be <15)",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/SuspiciousCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 562 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/StepDefinitions/Common/CheckCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Split into 2 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 21 (should be <15)",
+        "file_path": "ClubDoorman.Test/StepDefinitions/Common/CheckCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 31 (should be <15)",
+        "file_path": "ClubDoorman.Test/StepDefinitions/Common/SuspiciousCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 31 (should be <15)",
+        "file_path": "ClubDoorman/Infrastructure/Config.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 693 lines (should be <300)",
+        "file_path": "ClubDoorman/Services/Handlers/CallbackQueryHandler.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 23 (should be <15)",
+        "file_path": "ClubDoorman/Services/UserFlow/UserFlowLogger.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "Too many methods: 24 (should be <15)",
+        "file_path": "ClubDoorman/Services/Telegram/TelegramBotClientWrapper.cs",
+        "line_number": 1,
+        "recommendation": "Extract related methods into separate classes or use composition"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 583 lines (should be <300)",
+        "file_path": "ClubDoorman/Services/UserBan/UserBanService.cs",
+        "line_number": 1,
+        "recommendation": "Split into 2 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 679 lines (should be <300)",
+        "file_path": "ClubDoorman/Services/AI/AiChecks.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 18 using statements",
+        "file_path": "ClubDoorman.Test/ModerationServiceSimpleTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 18 using statements",
+        "file_path": "ClubDoorman.Test/GlobalUsings.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 24 using statements",
+        "file_path": "ClubDoorman/Worker.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 20 using statements",
+        "file_path": "ClubDoorman.Test/Services/ModerationServiceSimpleTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 19 using statements",
+        "file_path": "ClubDoorman.Test/Integration/MessageHandlerBanTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 28 using statements",
+        "file_path": "ClubDoorman.Test/Integration/MessageHandlerBanExceptionTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 19 using statements",
+        "file_path": "ClubDoorman.Test/Integration/InfrastructureE2ETests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 26 using statements",
+        "file_path": "ClubDoorman.Test/Integration/AiAnalysisTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 34 using statements",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/MessageHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 27 using statements",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/FakeServicesFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 18 using statements",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/StatisticsServiceTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 17 using statements",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/CaptchaServiceTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 22 using statements",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/CallbackQueryHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 21 using statements",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/ChatMemberHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 18 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/ModerationServiceSimpleTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 20 using statements",
+        "file_path": "ClubDoorman.Test/Unit/Services/UserBanServiceTests.Modern.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 16 using statements",
+        "file_path": "ClubDoorman.Test/Unit/Handlers/MessageHandlerHandleSayCommandTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 21 using statements",
+        "file_path": "ClubDoorman.Test/Unit/Handlers/CallbackQueryHandlerTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 23 using statements",
+        "file_path": "ClubDoorman.Test/Unit/Handlers/MessageHandlerExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 22 using statements",
+        "file_path": "ClubDoorman.Test/Unit/Handlers/MessageHandlerTryFindUserIdTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 20 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Services/ModerationServiceSimpleTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 19 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/MessageHandlerBanTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 17 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/MessageHandlerBanAdvancedTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 28 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/MessageHandlerBanExceptionTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 19 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/InfrastructureE2ETests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 26 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/AiAnalysisTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 25 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/MessageHandlerBanBasicTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 34 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/MessageHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 27 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/FakeServicesFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 18 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/StatisticsServiceTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 17 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/CaptchaServiceTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 22 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/CallbackQueryHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 21 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/ChatMemberHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 21 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/CaptchaServiceExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 20 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/UserBanServiceTests.Modern.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 18 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/CaptchaServiceFakeTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 23 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/UserBanServiceTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 23 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerFakeTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 16 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerHandleSayCommandTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 21 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/CallbackQueryHandlerTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 19 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerMutationCoverageTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 22 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerGoldenMasterTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 17 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerSendSuspiciousMessageTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 23 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 22 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerTryFindUserIdTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 16 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Moderation/ModerationServiceExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 16 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/Commands/CommandsModuleTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 18 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/Commands/CommandRouterIntegrationTests.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 17 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/UserManagementSteps.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 19 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/AiAnalysisSteps.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 17 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/CheckCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 18 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/SpamHamCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 21 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/CaptchaSteps.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 18 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/SayCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 20 using statements",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/SuspiciousCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 17 using statements",
+        "file_path": "ClubDoorman.Test/StepDefinitions/Common/CheckCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 20 using statements",
+        "file_path": "ClubDoorman.Test/StepDefinitions/Common/SuspiciousCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 28 using statements",
+        "file_path": "ClubDoorman/Infrastructure/ServiceCollectionExtensions.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 18 using statements",
+        "file_path": "ClubDoorman/Services/Handlers/IntroFlowService.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 16 using statements",
+        "file_path": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 16 using statements",
+        "file_path": "ClubDoorman/Services/Handlers/ChatMemberHandler.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 20 using statements",
+        "file_path": "ClubDoorman/Services/Handlers/CallbackQueryHandler.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 16 using statements",
+        "file_path": "ClubDoorman/Services/UserBan/UserBanService.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 16 using statements",
+        "file_path": "ClubDoorman/Services/AI/AiCascadeService.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 16 using statements",
+        "file_path": "ClubDoorman/Features/Moderation/03-Policies.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 16 using statements",
+        "file_path": "ClubDoorman/Features/UserJoin/02-UserJoinFacade.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COUPLING",
+        "description": "Too many dependencies: 16 using statements",
+        "file_path": "ClubDoorman/Features/UserJoin/03-Policies.cs",
+        "line_number": 1,
+        "recommendation": "Reduce dependencies by using interfaces and dependency injection"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COMPLEXITY",
+        "description": "High complexity score: 52.0",
+        "file_path": "ClubDoorman/Worker.cs",
+        "line_number": 1,
+        "recommendation": "Break down complex methods, reduce nesting, use guard clauses"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COMPLEXITY",
+        "description": "High complexity score: 84.0",
+        "file_path": "ClubDoorman/Services/Handlers/CallbackQueryHandler.cs",
+        "line_number": 1,
+        "recommendation": "Break down complex methods, reduce nesting, use guard clauses"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COMPLEXITY",
+        "description": "High complexity score: 58.0",
+        "file_path": "ClubDoorman/Services/UserBan/UserBanService.cs",
+        "line_number": 1,
+        "recommendation": "Break down complex methods, reduce nesting, use guard clauses"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COMPLEXITY",
+        "description": "High complexity score: 60.0",
+        "file_path": "ClubDoorman/Services/AI/AiChecks.cs",
+        "line_number": 1,
+        "recommendation": "Break down complex methods, reduce nesting, use guard clauses"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COMPLEXITY",
+        "description": "High complexity score: 51.0",
+        "file_path": "ClubDoorman/Services/UserManagement/ApprovedUsersStorage.cs",
+        "line_number": 1,
+        "recommendation": "Break down complex methods, reduce nesting, use guard clauses"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COMPLEXITY",
+        "description": "High complexity score: 53.0",
+        "file_path": "ClubDoorman/Services/Messaging/MessageService.cs",
+        "line_number": 1,
+        "recommendation": "Break down complex methods, reduce nesting, use guard clauses"
+      },
+      {
+        "severity": "HIGH",
+        "category": "HIGH_COMPLEXITY",
+        "description": "High complexity score: 82.0",
+        "file_path": "ClubDoorman/Features/Moderation/03-Policies.cs",
+        "line_number": 1,
+        "recommendation": "Break down complex methods, reduce nesting, use guard clauses"
+      }
+    ],
+    "CRITICAL": [
+      {
+        "severity": "CRITICAL",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 893 lines (should be <300)",
+        "file_path": "docs/scenarios/MessageModeration.en.feature.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 813 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/Integration/AiAnalysisTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 1063 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/MessageHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Split into 4 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 830 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/Unit/Handlers/MessageHandlerExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 813 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/AiAnalysisTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 1063 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/MessageHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Split into 4 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 822 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/CaptchaServiceExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 850 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerGoldenMasterTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 830 lines (should be <300)",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Split into 3 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "SRP_VIOLATION",
+        "description": "File too large: 900 lines (should be <300)",
+        "file_path": "ClubDoorman/Features/Moderation/03-Policies.cs",
+        "line_number": 1,
+        "recommendation": "Split into 4 smaller classes with single responsibilities"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "GOD_CLASS",
+        "description": "God class detected: 1063 lines, 53 methods, 34 dependencies",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/MessageHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Extract responsibilities into separate classes using Single Responsibility Principle"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "GOD_CLASS",
+        "description": "God class detected: 830 lines, 38 methods, 23 dependencies",
+        "file_path": "ClubDoorman.Test/Unit/Handlers/MessageHandlerExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract responsibilities into separate classes using Single Responsibility Principle"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "GOD_CLASS",
+        "description": "God class detected: 1063 lines, 53 methods, 34 dependencies",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/MessageHandlerTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Extract responsibilities into separate classes using Single Responsibility Principle"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "GOD_CLASS",
+        "description": "God class detected: 822 lines, 34 methods, 21 dependencies",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/CaptchaServiceExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract responsibilities into separate classes using Single Responsibility Principle"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "GOD_CLASS",
+        "description": "God class detected: 621 lines, 19 methods, 23 dependencies",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/UserBanServiceTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract responsibilities into separate classes using Single Responsibility Principle"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "GOD_CLASS",
+        "description": "God class detected: 850 lines, 16 methods, 22 dependencies",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerGoldenMasterTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract responsibilities into separate classes using Single Responsibility Principle"
+      },
+      {
+        "severity": "CRITICAL",
+        "category": "GOD_CLASS",
+        "description": "God class detected: 830 lines, 38 methods, 23 dependencies",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Extract responsibilities into separate classes using Single Responsibility Principle"
+      }
+    ],
+    "MEDIUM": [
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method MessageEnvelope has 11 parameters (should be \u22645)",
+        "file_path": "ClubDoorman.Test/TestData/MessageEnvelope.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method SendMessageAsync has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/FakeTelegramClient.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method SendMessage has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/FakeTelegramClient.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method SendPhoto has 7 parameters (should be \u22645)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/FakeTelegramClient.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method AnswerCallbackQuery has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/FakeTelegramClient.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method EditMessageText has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/FakeTelegramClient.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method SentPhoto has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/FakeTelegramClient.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method CreateMockAiChecks has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/MockAiChecksFactory.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method MockAiChecks has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/MockAiChecksFactory.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method CompareBehaviorAsync has 8 parameters (should be \u22645)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/BehaviorComparisonTestRunner.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method CreateCustom has 10 parameters (should be \u22645)",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/AppConfigTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method CaptchaInfo has 9 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Models/CaptchaInfo.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method IntroFlowService has 11 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Handlers/IntroFlowService.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method MessageHandler has 14 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method ChatMemberHandler has 8 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Handlers/ChatMemberHandler.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method CallbackQueryHandler has 12 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Handlers/CallbackQueryHandler.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method SendMessageAsync has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Telegram/TelegramBotClientWrapper.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method SendMessage has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Telegram/TelegramBotClientWrapper.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method SendPhoto has 7 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Telegram/TelegramBotClientWrapper.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method AnswerCallbackQuery has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Telegram/TelegramBotClientWrapper.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method EditMessageText has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Telegram/TelegramBotClientWrapper.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method SendMessageAsync has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Telegram/ITelegramBotClientWrapper.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method UserBanService has 10 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/UserBan/UserBanService.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method BanUserAsync has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/UserBan/UserBanService.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method BanUserAsync has 7 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/UserBan/UserBanService.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method AiCascadeService has 10 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/AI/AiCascadeService.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method MessageService has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Messaging/MessageService.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method SendUserNotificationWithReplyAsync has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Services/Messaging/MessageService.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method ModerationFacade has 7 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Features/Moderation/02-ModerationFacade.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method HandleUserMessageAsync has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Features/Moderation/02-ModerationFacade.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method UserJoinPolicy has 12 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Features/UserJoin/03-Policies.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method SpamCommandHandler has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Features/AdminOps/SpamCommandHandler.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method CheckCommandHandler has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Features/AdminOps/CheckCommandHandler.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method StatsCommandHandler has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Features/AdminOps/StatsCommandHandler.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method AutoBanNotificationData has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Models/Notifications/NotificationData.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method AiProfileAnalysisData has 9 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Models/Notifications/NotificationData.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method AiDetectNotificationData has 10 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Models/Notifications/NotificationData.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method UserRestrictedNotificationData has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Models/Notifications/NotificationData.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "LONG_PARAMETER_LIST",
+        "description": "Method CaptchaWelcomeNotificationData has 6 parameters (should be \u22645)",
+        "file_path": "ClubDoorman/Models/Notifications/NotificationData.cs",
+        "line_number": 1,
+        "recommendation": "Use parameter objects or builder pattern"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 47",
+        "file_path": "archived/UserManager_legacy.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 45",
+        "file_path": "ClubDoorman.Test/ModerationServiceTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 33",
+        "file_path": "ClubDoorman.Test/TestBase.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 32",
+        "file_path": "ClubDoorman.Test/ModerationServiceSimpleTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 34",
+        "file_path": "ClubDoorman.Test/ErrorHandlingTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 64",
+        "file_path": "ClubDoorman/Program.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 66",
+        "file_path": "docs/scenarios/UserNameModeration.feature.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 38",
+        "file_path": "ClubDoorman.Test/Services/ModerationServiceTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 72",
+        "file_path": "ClubDoorman.Test/Integration/InfrastructureE2ETests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 36",
+        "file_path": "ClubDoorman.Test/TestInfrastructure/FakeServicesFactory.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 45",
+        "file_path": "ClubDoorman.Test/LegacyTests/ModerationServiceTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 32",
+        "file_path": "ClubDoorman.Test/LegacyTests/ModerationServiceSimpleTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 34",
+        "file_path": "ClubDoorman.Test/LegacyTests/ErrorHandlingTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 46",
+        "file_path": "ClubDoorman.Test/Unit/Services/UserBanServiceTests.Modern.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 31",
+        "file_path": "ClubDoorman.Test/Unit/Handlers/MessageHandlerStatsCommandTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 39",
+        "file_path": "ClubDoorman.Test/Unit/Commands/CommandRouterTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 40",
+        "file_path": "ClubDoorman.Test/Unit/Moderation/ModerationServiceTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 38",
+        "file_path": "ClubDoorman.Test/LegacyTests/Services/ModerationServiceTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 67",
+        "file_path": "ClubDoorman.Test/LegacyTests/Features/PermissionsAndQuietMode.feature.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 128",
+        "file_path": "ClubDoorman.Test/LegacyTests/Features/SuspiciousCommand.feature.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 32",
+        "file_path": "ClubDoorman.Test/LegacyTests/Features/AiChecksPhotoLoggingTest.feature.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 84",
+        "file_path": "ClubDoorman.Test/LegacyTests/Features/ModerationFlow.feature.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 119",
+        "file_path": "ClubDoorman.Test/LegacyTests/Features/CheckCommand.feature.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 84",
+        "file_path": "ClubDoorman.Test/LegacyTests/Features/CaptchaSystem.feature.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 84",
+        "file_path": "ClubDoorman.Test/LegacyTests/Features/AiAnalysis.feature.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 83",
+        "file_path": "ClubDoorman.Test/LegacyTests/Features/SpamHamCommands.feature.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 70",
+        "file_path": "ClubDoorman.Test/LegacyTests/Features/StatisticsAndCommands.feature.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 40",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/AiChecksPhotoLoggingTest.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 72",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/InfrastructureE2ETests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 48",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/SimpleE2ETests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 39",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/EnvironmentTest.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 78",
+        "file_path": "ClubDoorman.Test/LegacyTests/Integration/FakeTelegramClientExtendedTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 36",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/FakeServicesFactory.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 51",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/MockAiChecksFactoryTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 51",
+        "file_path": "ClubDoorman.Test/LegacyTests/TestInfrastructure/AppConfigTestFactory.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 52",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/AiChecksTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 46",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/UserBanServiceTests.Modern.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 38",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/UserCleanupServiceTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 54",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/CaptchaServiceFakeTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 45",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerDeleteMessageLaterTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 38",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerMutationCoverageTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 31",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerStatsCommandTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 39",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Commands/CommandRouterTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 40",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Moderation/ModerationServiceTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 34",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/Commands/CommandsModuleTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 42",
+        "file_path": "ClubDoorman.Test/LegacyTests/Unit/Services/Commands/CommandRouterIntegrationTests.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 60",
+        "file_path": "ClubDoorman.Test/LegacyTests/StepDefinitions/Common/SayCommandSteps.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 31",
+        "file_path": "ClubDoorman/Infrastructure/ServiceCollectionExtensions.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 32",
+        "file_path": "ClubDoorman/Services/Statistics/GlobalStatsManager.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 54",
+        "file_path": "ClubDoorman/Services/UserFlow/UserFlowLogger.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 38",
+        "file_path": "ClubDoorman/Services/AI/AiCascadeService.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 46",
+        "file_path": "ClubDoorman/Services/AI/SpamHamClassifier.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 33",
+        "file_path": "ClubDoorman/Services/ChannelModeration/ChannelModerationService.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      },
+      {
+        "severity": "MEDIUM",
+        "category": "FEATURE_ENVY",
+        "description": "High number of external method calls: 37",
+        "file_path": "ClubDoorman/Features/AdminOps/CheckCommandHandler.cs",
+        "line_number": 1,
+        "recommendation": "Consider moving methods closer to the data they use"
+      }
+    ]
+  },
+  "issues_by_category": {
+    "SRP_VIOLATION": 53,
+    "HIGH_COUPLING": 67,
+    "HIGH_COMPLEXITY": 7,
+    "LONG_PARAMETER_LIST": 39,
+    "GOD_CLASS": 7,
+    "FEATURE_ENVY": 54
+  },
+  "largest_files": [
+    [
+      "ClubDoorman.Test/TestInfrastructure/MessageHandlerTestFactory.cs",
+      1063
+    ],
+    [
+      "ClubDoorman.Test/LegacyTests/TestInfrastructure/MessageHandlerTestFactory.cs",
+      1063
+    ],
+    [
+      "ClubDoorman/Features/Moderation/03-Policies.cs",
+      900
+    ],
+    [
+      "docs/scenarios/MessageModeration.en.feature.cs",
+      893
+    ],
+    [
+      "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerGoldenMasterTests.cs",
+      850
+    ],
+    [
+      "ClubDoorman.Test/Unit/Handlers/MessageHandlerExtendedTests.cs",
+      830
+    ],
+    [
+      "ClubDoorman.Test/LegacyTests/Unit/Handlers/MessageHandlerExtendedTests.cs",
+      830
+    ],
+    [
+      "ClubDoorman.Test/LegacyTests/Unit/Services/CaptchaServiceExtendedTests.cs",
+      822
+    ],
+    [
+      "ClubDoorman.Test/Integration/AiAnalysisTests.cs",
+      813
+    ],
+    [
+      "ClubDoorman.Test/LegacyTests/Integration/AiAnalysisTests.cs",
+      813
+    ]
+  ],
+  "most_complex_files": [
+    [
+      "ClubDoorman/Services/Handlers/CallbackQueryHandler.cs",
+      84.0
+    ],
+    [
+      "ClubDoorman/Features/Moderation/03-Policies.cs",
+      82.0
+    ],
+    [
+      "ClubDoorman/Services/AI/AiChecks.cs",
+      60.0
+    ],
+    [
+      "ClubDoorman/Services/UserBan/UserBanService.cs",
+      58.0
+    ],
+    [
+      "ClubDoorman/Services/Messaging/MessageService.cs",
+      53.0
+    ],
+    [
+      "ClubDoorman/Worker.cs",
+      52.0
+    ],
+    [
+      "ClubDoorman/Services/UserManagement/ApprovedUsersStorage.cs",
+      51.0
+    ],
+    [
+      "ClubDoorman/Services/Notifications/NotificationService.cs",
+      50.0
+    ],
+    [
+      "ClubDoorman/Services/Captcha/CaptchaService.cs",
+      43.0
+    ],
+    [
+      "docs/scenarios/MessageModeration.en.feature.cs",
+      40.0
+    ]
+  ],
+  "recommendations": [
+    "\ud83d\udea8 CRITICAL: Break down God Classes using Extract Class refactoring",
+    "\ud83d\udd34 HIGH: Address Single Responsibility Principle violations",
+    "\ud83d\udd36 HIGH: Reduce coupling through dependency injection and interfaces",
+    "\ud83d\udd36 HIGH: Simplify complex methods using Extract Method refactoring",
+    "\ud83d\udd37 MEDIUM: Use parameter objects for methods with many parameters",
+    "\ud83d\udd37 MEDIUM: Move methods closer to the data they use"
+  ]
+}
