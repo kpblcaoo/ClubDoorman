@@ -23,7 +23,7 @@ public class StatsCommandHandler : ICommandHandler
     private readonly IAppConfig _appConfig;
     private readonly ILogger<StatsCommandHandler> _logger;
 
-    public string CommandName => "stat"; // Также обрабатывает "stats"
+    public string CommandName => "stats"; // Основная команда, также обрабатывает "stat"
 
     public StatsCommandHandler(
         ITelegramBotClientWrapper bot,
@@ -47,7 +47,7 @@ public class StatsCommandHandler : ICommandHandler
         var isAdminChat = message.Chat.Id == _appConfig.AdminChatId || message.Chat.Id == _appConfig.LogAdminChatId;
         if (!isAdminChat)
         {
-            _logger.LogDebug("Команда /stat не из админ-чата: {ChatId}", message.Chat.Id);
+            _logger.LogDebug("Команда /stats не из админ-чата: {ChatId}", message.Chat.Id);
             return;
         }
 
@@ -98,14 +98,12 @@ public class StatsCommandHandler : ICommandHandler
             if (stats.BlacklistBanned > 0)
                 sb.AppendLine($"▫️ По блеклистам: *{stats.BlacklistBanned}*");
             if (stats.StoppedCaptcha > 0)
-                sb.AppendLine($"▫️ Не прошли капчу: *{stats.StoppedCaptcha}*");
-            if (stats.KnownBadMessage > 0)
-                sb.AppendLine($"▫️ Известные спам-сообщения: *{stats.KnownBadMessage}*");
+                sb.AppendLine($"▫️ Остановлено капчей: *{stats.StoppedCaptcha}*");
             if (stats.LongNameBanned > 0)
                 sb.AppendLine($"▫️ За длинные имена: *{stats.LongNameBanned}*");
+            if (stats.KnownBadMessage > 0)
+                sb.AppendLine($"▫️ Известные спам-сообщения: *{stats.KnownBadMessage}*");
         }
-        if (sb.Length <= 35)
-            sb.AppendLine("\nНичего интересного не произошло 🎉");
         
         await _messageService.SendUserNotificationAsync(
             message.From!,

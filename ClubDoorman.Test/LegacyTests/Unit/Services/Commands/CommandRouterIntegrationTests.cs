@@ -104,7 +104,6 @@ public class CommandRouterIntegrationTests
         Assert.That(commandNames, Contains.Item("check"));
         Assert.That(commandNames, Contains.Item("spam"));
         Assert.That(commandNames, Contains.Item("ham"));
-        Assert.That(commandNames, Contains.Item("stat"));
         Assert.That(commandNames, Contains.Item("stats"));
         Assert.That(commandNames, Contains.Item("say"));
     }

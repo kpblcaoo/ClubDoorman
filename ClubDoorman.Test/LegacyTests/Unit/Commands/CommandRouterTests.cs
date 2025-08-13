@@ -28,7 +28,7 @@ public class CommandRouterTests
         _statsHandlerMock = new Mock<ICommandHandler>();
         _sayHandlerMock = new Mock<ICommandHandler>();
 
-        _statsHandlerMock.Setup(x => x.CommandName).Returns("stat");
+        _statsHandlerMock.Setup(x => x.CommandName).Returns("stats");
         _sayHandlerMock.Setup(x => x.CommandName).Returns("say");
 
         var handlers = new List<ICommandHandler> { _statsHandlerMock.Object, _sayHandlerMock.Object };
@@ -75,7 +75,7 @@ public class CommandRouterTests
         var result = await _router.HandleCommandAsync(message, CancellationToken.None);
 
         // Assert
-        Assert.That(result, Is.False, "Команда /stats НЕ должна быть обработана CommandRouter (обработчик зарегистрирован с именем 'stat')");
+        Assert.That(result, Is.False, "Команда /stats НЕ должна быть обработана CommandRouter (обработчик зарегистрирован с именем 'stats')");
         _statsHandlerMock.Verify(
             x => x.HandleAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()),
             Times.Never,
