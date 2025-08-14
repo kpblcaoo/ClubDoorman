@@ -23,7 +23,28 @@ public class CommandRouter : ICommandRouter
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         
         // Создаем словарь для быстрого поиска обработчиков по имени команды
-        _handlersByCommand = _commandHandlers.ToDictionary(h => h.CommandName, h => h);
+        // Обрабатываем дублирующиеся ключи, используя последний зарегистрированный обработчик
+        _handlersByCommand = new Dictionary<string, ICommandHandler>();
+        var duplicateCommands = new List<string>();
+        
+        foreach (var handler in _commandHandlers)
+        {
+            if (_handlersByCommand.ContainsKey(handler.CommandName))
+            {
+                duplicateCommands.Add(handler.CommandName);
+                _logger.LogWarning("Обнаружен дублирующийся обработчик команды '{Command}': {ExistingHandler} -> {NewHandler}", 
+                    handler.CommandName, 
+                    _handlersByCommand[handler.CommandName].GetType().Name, 
+                    handler.GetType().Name);
+            }
+            _handlersByCommand[handler.CommandName] = handler;
+        }
+        
+        if (duplicateCommands.Any())
+        {
+            _logger.LogWarning("Обнаружены дублирующиеся команды: {DuplicateCommands}. Используются последние зарегистрированные обработчики.", 
+                string.Join(", ", duplicateCommands.Distinct()));
+        }
         
         _logger.LogDebug("CommandRouter создан с {Count} обработчиками команд: {Commands}", 
             _handlersByCommand.Count, string.Join(", ", _handlersByCommand.Keys));

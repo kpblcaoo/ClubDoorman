@@ -131,9 +131,75 @@ public interface IAppConfig
     /// </summary>
     int CaptchaViolationsBeforeBan { get; }
     
-                /// <summary>
+    /// <summary>
     /// Отправлять уведомления о банах за повторные нарушения в админ-чат вместо лог-чата
     /// </summary>
     bool RepeatedViolationsBanToAdminChat { get; }
     
+    // === НОВЫЕ СВОЙСТВА ИЗ STRONGLY-TYPED OPTIONS ===
+    
+    /// <summary>
+    /// Автоматически банить пользователей из черного списка
+    /// </summary>
+    bool BlacklistAutoBan { get; }
+    
+    /// <summary>
+    /// Автоматически банить каналы
+    /// </summary>
+    bool ChannelAutoBan { get; }
+    
+    /// <summary>
+    /// Автоматически банить пользователей с похожими именами
+    /// </summary>
+    bool LookAlikeAutoBan { get; }
+    
+    /// <summary>
+    /// Автоматически банить по кнопкам
+    /// </summary>
+    bool ButtonAutoBan { get; }
+    
+    /// <summary>
+    /// Автоматически банить при высокой уверенности
+    /// </summary>
+    bool HighConfidenceAutoBan { get; }
+    
+    /// <summary>
+    /// Пересылать сообщения с низкой уверенностью в ham
+    /// </summary>
+    bool LowConfidenceHamForward { get; }
+    
+    /// <summary>
+    /// Включить кнопку одобрения
+    /// </summary>
+    bool ApproveButtonEnabled { get; }
+    
+    /// <summary>
+    /// Удаление пересланных сообщений от новичков
+    /// </summary>
+    bool DeleteForwardedMessages { get; }
+    
+    /// <summary>
+    /// Отключить приветственные сообщения
+    /// </summary>
+    bool DisableWelcome { get; }
+    
+    /// <summary>
+    /// Отключить фильтрацию картинок/видео/документов глобально
+    /// </summary>
+    bool DisableMediaFiltering { get; }
+    
+    /// <summary>
+    /// Режим автоодобрения пользователей (true = глобальный, false = групповой)
+    /// </summary>
+    bool GlobalApprovalMode { get; }
+    
+    /// <summary>
+    /// Группы где фильтрация медиа отключена
+    /// </summary>
+    HashSet<long> MediaFilteringDisabledChats { get; }
+    
+    /// <summary>
+    /// Проверяет, отключена ли фильтрация медиа для данного чата
+    /// </summary>
+    bool IsMediaFilteringDisabledForChat(long chatId);
 } 

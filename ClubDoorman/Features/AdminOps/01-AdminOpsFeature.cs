@@ -19,14 +19,14 @@ public static class AdminOpsFeature
         services.AddSingleton<ICommandHandler, CheckCommandHandler>();
         services.AddSingleton<ICommandHandler, StatsCommandHandler>();
         services.AddSingleton<ICommandHandler, SayCommandHandler>();
-        services.AddSingleton<ICommandHandler, StatsAliasCommandHandler>();
+        // Убираем StatsAliasCommandHandler - StatsCommandHandler уже обрабатывает и "stat", и "stats"
         services.AddSingleton<ICommandHandler, SuspiciousCommandHandler>();
         services.AddSingleton<ICommandHandler, StartCommandHandler>();
 
         // Регистрируем дополнительные интерфейсы для обратной совместимости
         services.AddSingleton<IStartCommandHandler, StartCommandHandler>();
         services.AddSingleton<ISuspiciousCommandHandler, SuspiciousCommandHandler>();
-        services.AddSingleton<StatsCommandHandler>(); // Для StatsAliasCommandHandler
+        services.AddSingleton<StatsCommandHandler>(); // Для обратной совместимости
 
         // Регистрируем CommandRouter
         services.AddSingleton<ICommandRouter, CommandRouter>();
