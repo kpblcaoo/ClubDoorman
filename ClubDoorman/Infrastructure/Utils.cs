@@ -18,7 +18,7 @@ internal static class Utils
         var firstName = user.FirstName ?? "Unknown";
         return string.IsNullOrEmpty(user.LastName) ? firstName : $"{firstName} {user.LastName}";
     }
-    
+
     /// <summary>
     /// Формирует полное имя из имени и фамилии.
     /// </summary>
@@ -31,7 +31,7 @@ internal static class Utils
         if (firstName == null) throw new ArgumentNullException(nameof(firstName));
         return string.IsNullOrEmpty(lastName) ? firstName : $"{firstName} {lastName}";
     }
-    
+
     /// <summary>
     /// Создает ссылку на сообщение в чате.
     /// </summary>
@@ -53,7 +53,7 @@ internal static class Utils
     /// <param name="chat">Чат</param>
     /// <param name="messageId">ID сообщения</param>
     /// <returns>Ссылка на сообщение в супергруппе</returns>
-    private static string LinkToSuperGroupMessage(Chat chat, long messageId) => 
+    private static string LinkToSuperGroupMessage(Chat chat, long messageId) =>
         $"https://t.me/c/{chat.Id.ToString()[4..]}/{messageId}";
 
     /// <summary>
@@ -62,6 +62,6 @@ internal static class Utils
     /// <param name="chat">Чат</param>
     /// <param name="messageId">ID сообщения</param>
     /// <returns>Ссылка на сообщение в группе</returns>
-    private static string LinkToGroupWithNameMessage(Chat chat, long messageId) => 
+    private static string LinkToGroupWithNameMessage(Chat chat, long messageId) =>
         $"https://t.me/{chat.Username}/{messageId}";
-} 
+}

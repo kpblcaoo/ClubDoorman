@@ -76,7 +76,7 @@ public class BotPermissionsService : IBotPermissionsService
     public async Task<ChatMember?> GetBotChatMemberAsync(long chatId, CancellationToken cancellationToken = default)
     {
         var cacheKey = $"{CachePrefix}{chatId}";
-        
+
         // Проверяем кэш
         if (_cache.Get(cacheKey) is ChatMember cachedMember)
         {
@@ -87,29 +87,29 @@ public class BotPermissionsService : IBotPermissionsService
         {
             var botId = _bot.BotId;
             var chatMember = await _bot.GetChatMember(chatId, botId, cancellationToken);
-            
+
             // Кэшируем результат
             var cachePolicy = new CacheItemPolicy
             {
                 AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(CacheMinutes)
             };
             _cache.Set(cacheKey, chatMember, cachePolicy);
-            
+
             _logger.LogDebug("Получена информация о правах бота в чате {ChatId}: {Status}", chatId, chatMember.Status);
             return chatMember;
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Не удалось получить информацию о правах бота в чате {ChatId}", chatId);
-            
+
             // Кэшируем ошибку на короткое время, чтобы не спамить API
             var cachePolicy = new CacheItemPolicy
             {
                 AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(5)
             };
             _cache.Set(cacheKey, (ChatMember?)null, cachePolicy);
-            
+
             return null;
         }
     }
-} 
+}

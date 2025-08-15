@@ -11,22 +11,22 @@ public abstract class NotificationData
     /// Пользователь
     /// </summary>
     public User User { get; set; }
-    
+
     /// <summary>
     /// Чат
     /// </summary>
     public Chat Chat { get; set; }
-    
+
     /// <summary>
     /// Причина
     /// </summary>
     public string? Reason { get; set; }
-    
+
     /// <summary>
     /// ID сообщения
     /// </summary>
     public long? MessageId { get; set; }
-    
+
     protected NotificationData(User user, Chat chat, string? reason = null, long? messageId = null)
     {
         User = user;
@@ -45,13 +45,13 @@ public class AutoBanNotificationData : NotificationData
     /// Тип автобана
     /// </summary>
     public string BanType { get; set; }
-    
+
     /// <summary>
     /// Ссылка на сообщение
     /// </summary>
     public string? MessageLink { get; set; }
-    
-    public AutoBanNotificationData(User user, Chat chat, string banType, string? reason = null, long? messageId = null, string? messageLink = null) 
+
+    public AutoBanNotificationData(User user, Chat chat, string banType, string? reason = null, long? messageId = null, string? messageLink = null)
         : base(user, chat, reason, messageId)
     {
         BanType = banType;
@@ -64,7 +64,7 @@ public class AutoBanNotificationData : NotificationData
 /// </summary>
 public class PrivateChatBanAttemptData : NotificationData
 {
-    public PrivateChatBanAttemptData(User user, Chat chat, string reason) 
+    public PrivateChatBanAttemptData(User user, Chat chat, string reason)
         : base(user, chat, reason)
     {
     }
@@ -79,18 +79,18 @@ public class SuspiciousUserNotificationData : NotificationData
     /// Оценка мимикрии
     /// </summary>
     public double MimicryScore { get; set; }
-    
+
     /// <summary>
     /// Первые сообщения
     /// </summary>
     public List<string> FirstMessages { get; set; }
-    
+
     /// <summary>
     /// Время пометки как подозрительный
     /// </summary>
     public DateTime SuspiciousAt { get; set; }
-    
-    public SuspiciousUserNotificationData(User user, Chat chat, double mimicryScore, List<string> firstMessages, DateTime suspiciousAt) 
+
+    public SuspiciousUserNotificationData(User user, Chat chat, double mimicryScore, List<string> firstMessages, DateTime suspiciousAt)
         : base(user, chat)
     {
         MimicryScore = mimicryScore;
@@ -108,33 +108,33 @@ public class AiProfileAnalysisData : NotificationData
     /// Вероятность спама
     /// </summary>
     public double SpamProbability { get; set; }
-    
+
     /// <summary>
     /// Причина от AI
     /// </summary>
     public string Reason { get; set; }
-    
+
     /// <summary>
     /// Байты фото профиля
     /// </summary>
     public byte[]? PhotoBytes { get; set; }
-    
+
     /// <summary>
     /// Имя и био
     /// </summary>
     public string NameBio { get; set; }
-    
+
     /// <summary>
     /// Текст сообщения
     /// </summary>
     public string MessageText { get; set; }
-    
+
     /// <summary>
     /// Автоматическое действие, предпринятое ботом (если есть)
     /// </summary>
     public string? AutomaticAction { get; set; }
-    
-    public AiProfileAnalysisData(User user, Chat chat, double spamProbability, string reason, string nameBio, string messageText, byte[]? photoBytes = null, long? messageId = null, string? automaticAction = null) 
+
+    public AiProfileAnalysisData(User user, Chat chat, double spamProbability, string reason, string nameBio, string messageText, byte[]? photoBytes = null, long? messageId = null, string? automaticAction = null)
         : base(user, chat, reason, messageId)
     {
         SpamProbability = spamProbability;
@@ -155,13 +155,13 @@ public class ErrorNotificationData : NotificationData
     /// Исключение
     /// </summary>
     public Exception Exception { get; set; }
-    
+
     /// <summary>
     /// Контекст ошибки
     /// </summary>
     public string Context { get; set; }
-    
-    public ErrorNotificationData(Exception exception, string context, User? user = null, Chat? chat = null) 
+
+    public ErrorNotificationData(Exception exception, string context, User? user = null, Chat? chat = null)
         : base(user ?? new User(), chat ?? new Chat())
     {
         Exception = exception;
@@ -178,13 +178,13 @@ public class ChannelMessageNotificationData : NotificationData
     /// Отправитель (канал)
     /// </summary>
     public Chat SenderChat { get; set; }
-    
+
     /// <summary>
     /// Текст сообщения
     /// </summary>
     public string MessageText { get; set; }
-    
-    public ChannelMessageNotificationData(Chat senderChat, Chat targetChat, string messageText) 
+
+    public ChannelMessageNotificationData(Chat senderChat, Chat targetChat, string messageText)
         : base(new User { Id = senderChat.Id, FirstName = senderChat.Title ?? "Канал" }, targetChat)
     {
         SenderChat = senderChat;
@@ -201,13 +201,13 @@ public class SuspiciousMessageNotificationData : NotificationData
     /// Текст сообщения
     /// </summary>
     public string MessageText { get; set; }
-    
+
     /// <summary>
     /// Ссылка на сообщение
     /// </summary>
     public string? MessageLink { get; set; }
-    
-    public SuspiciousMessageNotificationData(User user, Chat chat, string messageText, long? messageId = null, string? messageLink = null) 
+
+    public SuspiciousMessageNotificationData(User user, Chat chat, string messageText, long? messageId = null, string? messageLink = null)
         : base(user, chat, messageId: messageId)
     {
         MessageText = messageText;
@@ -224,8 +224,8 @@ public class UserCleanupNotificationData : NotificationData
     /// Причина очистки
     /// </summary>
     public string CleanupReason { get; set; }
-    
-    public UserCleanupNotificationData(User user, Chat chat, string cleanupReason) 
+
+    public UserCleanupNotificationData(User user, Chat chat, string cleanupReason)
         : base(user, chat, cleanupReason)
     {
         CleanupReason = cleanupReason;
@@ -237,7 +237,7 @@ public class UserCleanupNotificationData : NotificationData
 /// </summary>
 public class SimpleNotificationData : NotificationData
 {
-    public SimpleNotificationData(User user, Chat chat, string? reason = null, long? messageId = null) 
+    public SimpleNotificationData(User user, Chat chat, string? reason = null, long? messageId = null)
         : base(user, chat, reason, messageId)
     {
     }
@@ -257,8 +257,8 @@ public class AiDetectNotificationData : NotificationData
     public long MessageId { get; }
 
     public AiDetectNotificationData(
-        User user, 
-        Chat chat, 
+        User user,
+        Chat chat,
         string reason,
         double mimicryScore,
         double aiScore,
@@ -276,7 +276,7 @@ public class AiDetectNotificationData : NotificationData
         IsAutoDelete = isAutoDelete;
         MessageId = messageId;
     }
-} 
+}
 
 /// <summary>
 /// Данные для уведомления о пользователе с ограничениями
@@ -315,7 +315,7 @@ public class UserRemovedFromApprovedNotificationData : NotificationData
     {
         ChatTitle = chatTitle;
     }
-} 
+}
 
 /// <summary>
 /// Данные для приветственного сообщения после капчи
@@ -336,4 +336,4 @@ public class CaptchaWelcomeNotificationData : NotificationData
         MediaWarning = mediaWarning;
         VpnAd = vpnAd;
     }
-} 
+}

@@ -11,22 +11,22 @@ public class SendWelcomeMessageRequest
     /// Пользователь, которому отправляется приветствие
     /// </summary>
     public User User { get; }
-    
+
     /// <summary>
     /// Чат, в который отправляется приветствие
     /// </summary>
     public Chat Chat { get; }
-    
+
     /// <summary>
     /// Причина приветствия (по умолчанию "приветствие")
     /// </summary>
     public string Reason { get; }
-    
+
     /// <summary>
     /// Токен отмены операции
     /// </summary>
     public CancellationToken CancellationToken { get; }
-    
+
     /// <summary>
     /// Создает новый запрос на отправку приветственного сообщения
     /// </summary>
@@ -35,9 +35,9 @@ public class SendWelcomeMessageRequest
     /// <param name="reason">Причина приветствия (по умолчанию "приветствие")</param>
     /// <param name="cancellationToken">Токен отмены операции</param>
     public SendWelcomeMessageRequest(
-        User user, 
-        Chat chat, 
-        string reason = "приветствие", 
+        User user,
+        Chat chat,
+        string reason = "приветствие",
         CancellationToken cancellationToken = default)
     {
         User = user ?? throw new ArgumentNullException(nameof(user));
@@ -45,4 +45,4 @@ public class SendWelcomeMessageRequest
         Reason = reason ?? throw new ArgumentNullException(nameof(reason));
         CancellationToken = cancellationToken;
     }
-} 
+}

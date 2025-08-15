@@ -112,11 +112,11 @@ public class ModerationFacade : IModerationFacade
     /// <param name="isSilentMode">Тихий режим</param>
     /// <param name="cancellationToken">Токен отмены</param>
     public async Task HandleUserMessageAsync(
-        Message message, 
-        User user, 
-        Chat chat, 
-        ModerationResult moderationResult, 
-        bool isSilentMode, 
+        Message message,
+        User user,
+        Chat chat,
+        ModerationResult moderationResult,
+        bool isSilentMode,
         CancellationToken cancellationToken)
     {
         switch (moderationResult.Action)

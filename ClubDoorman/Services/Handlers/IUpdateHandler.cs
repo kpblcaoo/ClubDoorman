@@ -16,4 +16,4 @@ public interface IUpdateHandler
     /// Обрабатывает обновление
     /// </summary>
     Task HandleAsync(Update update, CancellationToken cancellationToken = default);
-} 
+}

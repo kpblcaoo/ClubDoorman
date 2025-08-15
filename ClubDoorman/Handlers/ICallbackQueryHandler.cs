@@ -16,4 +16,4 @@ public interface ICallbackQueryHandler
     /// Обрабатывает callback запрос
     /// </summary>
     Task HandleAsync(CallbackQuery callbackQuery, CancellationToken cancellationToken = default);
-} 
+}

@@ -39,11 +39,11 @@ public class ModerationPolicy : IModerationPolicy
     private readonly ConcurrentDictionary<long, int> _goodUserMessages = new();
     private readonly ConcurrentDictionary<string, int> _groupGoodUserMessages = new();
     private readonly ConcurrentDictionary<long, DateTime> _warnedUsers = new();
-    
+
     // Хранение первых сообщений пользователей для анализа мимикрии
     private readonly ConcurrentDictionary<long, List<string>> _userFirstMessages = new();
     private readonly ConcurrentDictionary<string, List<string>> _groupUserFirstMessages = new();
-    
+
     // Счетчики сообщений для подозрительных пользователей
     private readonly ConcurrentDictionary<long, int> _suspiciousUserMessages = new();
     private readonly ConcurrentDictionary<string, int> _groupSuspiciousUserMessages = new();
@@ -72,11 +72,11 @@ public class ModerationPolicy : IModerationPolicy
         _userBanService = userBanService;
         _userCleanupService = userCleanupService;
         _logger = logger;
-        
+
         // Логируем статус системы мимикрии
         if (Config.SuspiciousDetectionEnabled)
         {
-            _logger.LogInformation("🎭 Система мимикрии ВКЛЮЧЕНА: порог={Threshold:F1}, сообщений для одобрения={Count}", 
+            _logger.LogInformation("🎭 Система мимикрии ВКЛЮЧЕНА: порог={Threshold:F1}, сообщений для одобрения={Count}",
                 Config.MimicryThreshold, Config.SuspiciousToApprovedMessageCount);
         }
         else
@@ -135,7 +135,7 @@ public class ModerationPolicy : IModerationPolicy
         if (string.IsNullOrWhiteSpace(text))
         {
             _logger.LogDebug("Empty text/caption");
-            
+
             // Проверяем медиа
             var mediaResult = CheckMediaContent(message, chat.Id);
             if (mediaResult != null)
@@ -146,9 +146,9 @@ public class ModerationPolicy : IModerationPolicy
 
         // 5. Проверка известных плохих сообщений
         var isKnownBad = _badMessageManager.KnownBadMessage(text);
-        _logger.LogDebug("Проверка известных плохих сообщений: текст='{Text}', известное={IsKnownBad}", 
+        _logger.LogDebug("Проверка известных плохих сообщений: текст='{Text}', известное={IsKnownBad}",
             text.Length > 50 ? text.Substring(0, 50) + "..." : text, isKnownBad);
-            
+
         if (isKnownBad)
         {
             _logger.LogInformation("Найдено известное спам-сообщение: '{Text}'", text);
@@ -175,13 +175,13 @@ public class ModerationPolicy : IModerationPolicy
             throw new ModerationException("Имя пользователя не может быть пустым");
 
         var fullName = Utils.FullName(user);
-        
+
         // Проверяем длину имени
         if (fullName.Length > 75)
         {
             return new ModerationResult(ModerationAction.Ban, $"Экстремально длинное имя ({fullName.Length} символов)");
         }
-        
+
         if (fullName.Length > 40)
         {
             return new ModerationResult(ModerationAction.Report, $"Подозрительно длинное имя ({fullName.Length} символов)");
@@ -228,7 +228,7 @@ public class ModerationPolicy : IModerationPolicy
             return;
         }
 
-        _logger.LogDebug("📊 Система одобрения: GlobalMode={GlobalMode}, User={User}", 
+        _logger.LogDebug("📊 Система одобрения: GlobalMode={GlobalMode}, User={User}",
             Config.GlobalApprovalMode, Utils.FullName(user));
 
         if (!Config.GlobalApprovalMode)
@@ -249,10 +249,10 @@ public class ModerationPolicy : IModerationPolicy
     {
         var groupUserKey = $"{chat.Id}_{user.Id}";
         var suspiciousCount = _groupSuspiciousUserMessages.AddOrUpdate(groupUserKey, 1, (_, oldValue) => oldValue + 1);
-        
+
         // Обновляем счетчик в storage
         _suspiciousUsersStorage.UpdateMessageCount(user.Id, chat.Id, suspiciousCount);
-        
+
         if (suspiciousCount >= Config.SuspiciousToApprovedMessageCount)
         {
             _logger.LogInformation(
@@ -261,7 +261,7 @@ public class ModerationPolicy : IModerationPolicy
                 suspiciousCount,
                 chat.Title ?? chat.Id.ToString()
             );
-            
+
             // Переводим из подозрительных в одобренные
             _suspiciousUsersStorage.RemoveSuspicious(user.Id, chat.Id);
             await _userManager.Approve(user.Id, chat.Id);
@@ -273,7 +273,7 @@ public class ModerationPolicy : IModerationPolicy
     private async Task HandleGroupModeMessage(User user, Chat chat, string messageText)
     {
         var groupUserKey = $"{chat.Id}_{user.Id}";
-        
+
         // Сохраняем сообщение для анализа мимикрии
         if (!string.IsNullOrWhiteSpace(messageText))
         {
@@ -283,15 +283,15 @@ public class ModerationPolicy : IModerationPolicy
                 messages.Add(messageText.Trim());
             }
         }
-        
+
         var goodInteractions = _groupGoodUserMessages.AddOrUpdate(groupUserKey, 1, (_, oldValue) => oldValue + 1);
-        
+
         if (goodInteractions >= 3)
         {
             // Анализируем подозрительность, если система включена
-            _logger.LogDebug("🔍 Анализ подозрительности: система включена={SuspiciousEnabled}, пользователь={User}", 
+            _logger.LogDebug("🔍 Анализ подозрительности: система включена={SuspiciousEnabled}, пользователь={User}",
                 Config.SuspiciousDetectionEnabled, Utils.FullName(user));
-                
+
             if (Config.SuspiciousDetectionEnabled && await AnalyzeMimicryAndMarkSuspicious(user, chat, groupUserKey))
             {
                 // Пользователь помечен как подозрительный
@@ -299,7 +299,7 @@ public class ModerationPolicy : IModerationPolicy
                 _groupUserFirstMessages.TryRemove(groupUserKey, out _);
                 return;
             }
-            
+
             // Обычное одобрение
             _logger.LogInformation(
                 "User {FullName} behaved well for the last {Count} messages in group {GroupTitle}, approving in this group",
@@ -307,7 +307,7 @@ public class ModerationPolicy : IModerationPolicy
                 goodInteractions,
                 chat.Title ?? chat.Id.ToString()
             );
-            
+
             await _userManager.Approve(user.Id, chat.Id);
             _groupGoodUserMessages.TryRemove(groupUserKey, out _);
             _groupUserFirstMessages.TryRemove(groupUserKey, out _);
@@ -326,15 +326,15 @@ public class ModerationPolicy : IModerationPolicy
                 messages.Add(messageText.Trim());
             }
         }
-        
+
         var goodInteractions = _goodUserMessages.AddOrUpdate(user.Id, 1, (_, oldValue) => oldValue + 1);
-        
+
         if (goodInteractions >= 3)
         {
             // Анализируем подозрительность, если система включена
-            _logger.LogDebug("🔍 Анализ подозрительности (глобальный): система включена={SuspiciousEnabled}, пользователь={User}", 
+            _logger.LogDebug("🔍 Анализ подозрительности (глобальный): система включена={SuspiciousEnabled}, пользователь={User}",
                 Config.SuspiciousDetectionEnabled, Utils.FullName(user));
-                
+
             if (Config.SuspiciousDetectionEnabled && await AnalyzeMimicryAndMarkSuspicious(user, chat, user.Id.ToString()))
             {
                 // Пользователь помечен как подозрительный
@@ -342,7 +342,7 @@ public class ModerationPolicy : IModerationPolicy
                 _userFirstMessages.TryRemove(user.Id, out _);
                 return;
             }
-            
+
             // Обычное одобрение
             _logger.LogInformation(
                 "User {FullName} behaved well for the last {Count} messages, approving {Mode}",
@@ -350,7 +350,7 @@ public class ModerationPolicy : IModerationPolicy
                 goodInteractions,
                 Config.GlobalApprovalMode ? "globally" : "in old system"
             );
-            
+
             await _userManager.Approve(user.Id, Config.GlobalApprovalMode ? null : chat.Id);
             _goodUserMessages.TryRemove(user.Id, out _);
             _userFirstMessages.TryRemove(user.Id, out _);
@@ -367,10 +367,10 @@ public class ModerationPolicy : IModerationPolicy
         {
             // Удаляем из подозрительных
             _suspiciousUsersStorage.RemoveSuspicious(userId, chatId);
-            
+
             // Удаляем из одобренных
             _userCleanupService.RemoveUserFromGroupApproval(userId, chatId, "Очистка из ModerationService");
-            
+
             // Очищаем кэши сообщений
             var groupUserKey = $"{chatId}_{userId}";
             _goodUserMessages.TryRemove(userId, out _);
@@ -378,11 +378,11 @@ public class ModerationPolicy : IModerationPolicy
             _suspiciousUserMessages.TryRemove(userId, out _);
             _groupSuspiciousUserMessages.TryRemove(groupUserKey, out _);
             _warnedUsers.TryRemove(userId, out _);
-            
+
             // Очищаем кэши первых сообщений
             _userFirstMessages.TryRemove(userId, out _);
             _groupUserFirstMessages.TryRemove(groupUserKey, out _);
-            
+
             _logger.LogInformation("🧹 Пользователь {UserId} полностью очищен из всех списков для чата {ChatId}", userId, chatId);
         }
         catch (Exception ex)
@@ -401,10 +401,10 @@ public class ModerationPolicy : IModerationPolicy
             // Создаем объекты для UserBanService
             var user = new User { Id = userId };
             var chat = new Chat { Id = chatId };
-            
+
             // Используем UserBanService для централизованного бана
             await _userBanService.BanUserAsync(chat, user, BanTypeEnum.AutoBan, "Автобан", null, CancellationToken.None);
-            
+
             // Удаляем сообщение если указано (используем перегрузку с messageId)
             if (messageIdToDelete.HasValue)
             {
@@ -418,7 +418,7 @@ public class ModerationPolicy : IModerationPolicy
                     _logger.LogWarning(ex, "Не удалось удалить сообщение {MessageId} из чата {ChatId}", messageIdToDelete.Value, chatId);
                 }
             }
-            
+
             _logger.LogInformation("🚫 Пользователь {UserId} забанен и очищен из всех списков для чата {ChatId}", userId, chatId);
             return true;
         }
@@ -462,7 +462,7 @@ public class ModerationPolicy : IModerationPolicy
 
             // Полностью очищаем из всех списков
             CleanupUserFromAllLists(userId, chatId);
-            
+
             // Одобряем пользователя (после очистки)
             await _userManager.Approve(userId, chatId);
 
@@ -492,23 +492,23 @@ public class ModerationPolicy : IModerationPolicy
                 // Глобальный режим
                 firstMessages = _userFirstMessages.GetValueOrDefault(user.Id, new List<string>());
             }
-            
-            _logger.LogDebug("🎭 Анализ мимикрии для {User}: собрано {Count} сообщений", 
+
+            _logger.LogDebug("🎭 Анализ мимикрии для {User}: собрано {Count} сообщений",
                 Utils.FullName(user), firstMessages.Count);
-            
+
             if (firstMessages.Count < 3)
             {
-                _logger.LogDebug("🎭 Недостаточно сообщений для анализа мимикрии: {Count}/3 для {User}", 
+                _logger.LogDebug("🎭 Недостаточно сообщений для анализа мимикрии: {Count}/3 для {User}",
                     firstMessages.Count, Utils.FullName(user));
                 return false;
             }
-            
+
             // Анализируем мимикрию
             var mimicryScore = _mimicryClassifier.AnalyzeMessages(firstMessages);
-            
-            _logger.LogDebug("🎭 Результат анализа мимикрии для {User}: скор={Score:F2}, порог={Threshold:F2}", 
+
+            _logger.LogDebug("🎭 Результат анализа мимикрии для {User}: скор={Score:F2}, порог={Threshold:F2}",
                 Utils.FullName(user), mimicryScore, Config.MimicryThreshold);
-            
+
             if (mimicryScore >= Config.MimicryThreshold)
             {
                 // Помечаем как подозрительного
@@ -519,9 +519,9 @@ public class ModerationPolicy : IModerationPolicy
                     AiDetectEnabled: false,
                     MessagesSinceSuspicious: 0
                 );
-                
+
                 _suspiciousUsersStorage.AddSuspicious(user.Id, chat.Id, suspiciousInfo);
-                
+
                 _logger.LogWarning(
                     "🎭🚨 User {FullName} marked as suspicious in chat {ChatTitle} with mimicry score {Score:F2}. First messages: [{Messages}]",
                     Utils.FullName(user),
@@ -529,16 +529,16 @@ public class ModerationPolicy : IModerationPolicy
                     mimicryScore,
                     string.Join(", ", firstMessages.Select(m => $"\"{m}\""))
                 );
-                
+
                 // Уведомляем админов (будет реализовано позже)
                 await NotifyAdminsAboutSuspiciousUser(user, chat, suspiciousInfo);
-                
+
                 return true;
             }
-            
-            _logger.LogDebug("🎭✅ Пользователь {User} прошел проверку мимикрии: скор={Score:F2} < порог={Threshold:F2}", 
+
+            _logger.LogDebug("🎭✅ Пользователь {User} прошел проверку мимикрии: скор={Score:F2} < порог={Threshold:F2}",
                 Utils.FullName(user), mimicryScore, Config.MimicryThreshold);
-            
+
             return false;
         }
         catch (Exception ex)
@@ -555,7 +555,7 @@ public class ModerationPolicy : IModerationPolicy
             var userName = Utils.FullName(user);
             var chatName = chat.Title ?? chat.Id.ToString();
             var score = info.MimicryScore.ToString("F2");
-            
+
             var messageText = $"🔍 *Подозрительный пользователь обнаружен*\n\n" +
                              $"👤 Пользователь: [{userName}](tg://user?id={user.Id})\n" +
                              $"🏠 Чат: *{chatName}*\n" +
@@ -563,26 +563,26 @@ public class ModerationPolicy : IModerationPolicy
                              $"🕐 Помечен как подозрительный: {info.SuspiciousAt:yyyy-MM-dd HH:mm}\n\n" +
                              $"📝 Первые сообщения:\n";
 
-                         for (int i = 0; i < info.FirstMessages.Count; i++)
-             {
-                 var msg = info.FirstMessages[i];
-                 if (msg.Length > 50)
-                     msg = msg.Substring(0, 50) + "...";
-                 messageText += $"{i + 1}. `{msg}`\n";
-             }
+            for (int i = 0; i < info.FirstMessages.Count; i++)
+            {
+                var msg = info.FirstMessages[i];
+                if (msg.Length > 50)
+                    msg = msg.Substring(0, 50) + "...";
+                messageText += $"{i + 1}. `{msg}`\n";
+            }
 
-             messageText += $"\n✅ Для одобрения нужно ещё {Config.SuspiciousToApprovedMessageCount} хороших сообщений";
+            messageText += $"\n✅ Для одобрения нужно ещё {Config.SuspiciousToApprovedMessageCount} хороших сообщений";
 
-             // Создаем кнопки управления
-             var approveCallback = $"suspicious_approve_{user.Id}_{chat.Id}";
-             var banCallback = $"suspicious_ban_{user.Id}_{chat.Id}";
-             var aiCallback = $"suspicious_ai_{user.Id}_{chat.Id}";
-             
-             _logger.LogDebug("🎛️ Создаем кнопки: одобрить={Approve}, забанить={Ban}, AI={Ai}", 
-                 approveCallback, banCallback, aiCallback);
-             
-             var keyboard = new global::Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(new[]
-             {
+            // Создаем кнопки управления
+            var approveCallback = $"suspicious_approve_{user.Id}_{chat.Id}";
+            var banCallback = $"suspicious_ban_{user.Id}_{chat.Id}";
+            var aiCallback = $"suspicious_ai_{user.Id}_{chat.Id}";
+
+            _logger.LogDebug("🎛️ Создаем кнопки: одобрить={Approve}, забанить={Ban}, AI={Ai}",
+                approveCallback, banCallback, aiCallback);
+
+            var keyboard = new global::Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(new[]
+            {
                  new[]
                  {
                      global::Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithCallbackData("✅ Одобрить", approveCallback),
@@ -594,15 +594,15 @@ public class ModerationPolicy : IModerationPolicy
                  }
              });
 
-             await _botClient.SendMessage(
-                 chatId: Config.LogAdminChatId,
-                 text: messageText,
-                 parseMode: global::Telegram.Bot.Types.Enums.ParseMode.Markdown,
-                 replyMarkup: keyboard,
-                 cancellationToken: default
-             );
+            await _botClient.SendMessage(
+                chatId: Config.LogAdminChatId,
+                text: messageText,
+                parseMode: global::Telegram.Bot.Types.Enums.ParseMode.Markdown,
+                replyMarkup: keyboard,
+                cancellationToken: default
+            );
 
-            _logger.LogInformation("Отправлено уведомление админам о подозрительном пользователе {UserId} в чате {ChatId}", 
+            _logger.LogInformation("Отправлено уведомление админам о подозрительном пользователе {UserId} в чате {ChatId}",
                 user.Id, chat.Id);
         }
         catch (Exception ex)
@@ -646,22 +646,22 @@ public class ModerationPolicy : IModerationPolicy
         if (Config.TextMentionFilterEnabled)
         {
             var hasLinks = SimpleFilters.HasLinks(text);
-            _logger.LogDebug("Проверка ссылок: текст='{Text}', найдены={HasLinks}", 
+            _logger.LogDebug("Проверка ссылок: текст='{Text}', найдены={HasLinks}",
                 text.Length > 50 ? text.Substring(0, 50) + "..." : text, hasLinks);
-                
+
             if (hasLinks)
             {
                 _logger.LogInformation("Найдены ссылки в тексте: '{Text}'", text);
                 return new ModerationResult(ModerationAction.Delete, "Ссылки запрещены");
             }
-            
+
             // Проверяем наличие ссылок в превью сообщения
             if (message.Entities != null)
             {
-                var hasUrlEntities = message.Entities.Any(e => 
+                var hasUrlEntities = message.Entities.Any(e =>
                     e.Type == global::Telegram.Bot.Types.Enums.MessageEntityType.Url ||
                     e.Type == global::Telegram.Bot.Types.Enums.MessageEntityType.TextLink);
-                
+
                 if (hasUrlEntities)
                 {
                     _logger.LogInformation("Найдены URL-сущности или TextLink в сообщении");
@@ -672,9 +672,9 @@ public class ModerationPolicy : IModerationPolicy
 
         // 7. Проверка эмодзи
         var tooManyEmojis = SimpleFilters.TooManyEmojis(text);
-        _logger.LogDebug("Проверка эмодзи: текст='{Text}', многовато={TooMany}, объявление={IsAnnouncement}", 
+        _logger.LogDebug("Проверка эмодзи: текст='{Text}', многовато={TooMany}, объявление={IsAnnouncement}",
             text.Length > 50 ? text.Substring(0, 50) + "..." : text, tooManyEmojis, isAnnouncement);
-            
+
         if (!isAnnouncement && tooManyEmojis)
         {
             _logger.LogInformation("Слишком много эмодзи в тексте: '{Text}'", text);
@@ -689,19 +689,19 @@ public class ModerationPolicy : IModerationPolicy
         {
             var tailMessage = lookalike.Count > 5 ? ", и другие" : "";
             var reason = $"Были найдены слова маскирующиеся под русские: {string.Join(", ", lookalike.Take(5))}{tailMessage}";
-            
+
             if (Config.LookAlikeAutoBan)
             {
                 return new ModerationResult(ModerationAction.Ban, reason);
             }
-            
+
             return new ModerationResult(ModerationAction.Delete, reason);
         }
 
         // 8. Проверка стоп-слов
         var hasStopWords = SimpleFilters.HasStopWords(normalized);
         _logger.LogDebug("Проверка стоп-слов: текст='{Text}', найдены={HasStopWords}", normalized, hasStopWords);
-        
+
         if (hasStopWords)
         {
             _logger.LogInformation("Найдены стоп-слова в тексте: '{Text}'", normalized);
@@ -710,9 +710,9 @@ public class ModerationPolicy : IModerationPolicy
 
         // 8.5. Проверка банальных приветствий
         var isBoringGreeting = SimpleFilters.IsBoringGreeting(text);
-        _logger.LogDebug("Проверка банальных приветствий: текст='{Text}', банальное={IsBoringGreeting}", 
+        _logger.LogDebug("Проверка банальных приветствий: текст='{Text}', банальное={IsBoringGreeting}",
             text.Length > 50 ? text.Substring(0, 50) + "..." : text, isBoringGreeting);
-        
+
         if (isBoringGreeting)
         {
             _logger.LogInformation("Обнаружено банальное приветствие: '{Text}'", text);
@@ -722,7 +722,7 @@ public class ModerationPolicy : IModerationPolicy
         // 9. ML классификация спама
         var (spam, score) = await _classifier.IsSpam(normalized).WaitAsync(TimeSpan.FromSeconds(15));
         _logger.LogDebug("ML анализ: текст='{Text}', спам={Spam}, скор={Score}", normalized, spam, score);
-        
+
         if (spam)
         {
             _logger.LogInformation("ML классификатор определил спам: '{Text}', скор={Score}", normalized, score);
@@ -732,7 +732,7 @@ public class ModerationPolicy : IModerationPolicy
         // 10. Проверка низкой уверенности в ham - каскадная проверка ML -> AI
         if (score > -0.6 && Config.LowConfidenceHamForward)
         {
-            return new ModerationResult(ModerationAction.RequireAiAnalysis, 
+            return new ModerationResult(ModerationAction.RequireAiAnalysis,
                 $"ML не уверен (скор {score}) - требуется AI анализ", score);
         }
 
@@ -787,7 +787,7 @@ public class ModerationPolicy : IModerationPolicy
                 useIndependentChatPermissions: true
             );
 
-            _logger.LogInformation("🔒 Пользователь {User} ограничен на readonly до {Until}", 
+            _logger.LogInformation("🔒 Пользователь {User} ограничен на readonly до {Until}",
                 Utils.FullName(user), until);
             return true;
         }
@@ -803,7 +803,7 @@ public class ModerationPolicy : IModerationPolicy
         // Проверяем, включен ли AI детект для этого пользователя
         var suspiciousUsers = _suspiciousUsersStorage.GetAiDetectUsers();
         var userHasAiDetect = suspiciousUsers.Any(u => u.UserId == user.Id && u.ChatId == chat.Id);
-        
+
         if (!userHasAiDetect)
             return false;
 
@@ -812,14 +812,14 @@ public class ModerationPolicy : IModerationPolicy
             var userName = Utils.FullName(user);
             var chatName = chat.Title ?? chat.Id.ToString();
             var messageText = message.Text ?? message.Caption ?? "";
-            
+
             if (string.IsNullOrWhiteSpace(messageText))
             {
                 _logger.LogDebug("🔍 AI детект: пропускаем медиа/стикер сообщение от {User}", userName);
                 return false;
             }
 
-            _logger.LogInformation("🔍🤖 Запускаем СПЕЦИАЛЬНЫЙ AI анализ для подозрительного пользователя {User}: '{Text}'", 
+            _logger.LogInformation("🔍🤖 Запускаем СПЕЦИАЛЬНЫЙ AI анализ для подозрительного пользователя {User}: '{Text}'",
                 userName, messageText.Substring(0, Math.Min(messageText.Length, 100)));
 
             // Получаем данные подозрительного пользователя для контекстного анализа
@@ -835,7 +835,7 @@ public class ModerationPolicy : IModerationPolicy
                 .AsTask().WaitAsync(TimeSpan.FromSeconds(30));
             var (isSpamByMl, mlScore) = await _classifier.IsSpam(messageText).WaitAsync(TimeSpan.FromSeconds(15));
             var spamProbability = aiResult.Probability; // получаем double из SpamProbability
-            
+
             var aiReason = aiResult.Reason ?? "Нет объяснения";
             var isDefiniteSpam = spamProbability > 0.8 || mlScore > 1.5; // Высокая уверенность в спаме
             var isUncertain = spamProbability > 0.4 || mlScore > -0.3;   // Подозрительно - требует внимания
@@ -845,7 +845,7 @@ public class ModerationPolicy : IModerationPolicy
                 // Автоматическое удаление + ограничение на 2 часа + уведомление
                 await _botClient.DeleteMessage(chat.Id, message.MessageId);
                 await RestrictUserToReadOnly(user, chat, TimeSpan.FromHours(2));
-                
+
                 var aiDetectData = new AiDetectNotificationData(
                     user, chat, "Автоудаление спама", mimicryScore, spamProbability, mlScore, aiReason, messageText, true, message.MessageId);
 
@@ -855,16 +855,16 @@ public class ModerationPolicy : IModerationPolicy
                     default
                 );
 
-                _logger.LogInformation("🔍🤖🚫 Специальный AI детект: автоудаление спама от {User}, мимикрия={MimicryScore}, AI={AiScore}, ML={MlScore}", 
+                _logger.LogInformation("🔍🤖🚫 Специальный AI детект: автоудаление спама от {User}, мимикрия={MimicryScore}, AI={AiScore}, ML={MlScore}",
                     userName, mimicryScore, spamProbability, mlScore);
-                
+
                 return true; // Пользователь заблокирован
             }
             else if (isUncertain)
             {
                 // Ограничение пользователя на 2 часа + уведомление с кнопками
                 await RestrictUserToReadOnly(user, chat, TimeSpan.FromHours(2));
-                
+
                 var aiDetectData = new AiDetectNotificationData(
                     user, chat, "Подозрительное сообщение", mimicryScore, spamProbability, mlScore, aiReason, messageText, false, message.MessageId);
 
@@ -874,27 +874,27 @@ public class ModerationPolicy : IModerationPolicy
                     default
                 );
 
-                _logger.LogInformation("🔍🤖❓ Специальный AI детект: ограничение пользователя {User}, мимикрия={MimicryScore}, AI={AiScore}, ML={MlScore}", 
+                _logger.LogInformation("🔍🤖❓ Специальный AI детект: ограничение пользователя {User}, мимикрия={MimicryScore}, AI={AiScore}, ML={MlScore}",
                     userName, mimicryScore, spamProbability, mlScore);
-                
+
                 return true; // Пользователь ограничен
             }
             else
             {
                 // Сообщение чистое - разрешаем нормальную обработку
-                _logger.LogInformation("🔍🤖✅ Специальный AI детект: сообщение от {User} признано чистым, мимикрия={MimicryScore}, AI={AiScore}, ML={MlScore}", 
+                _logger.LogInformation("🔍🤖✅ Специальный AI детект: сообщение от {User} признано чистым, мимикрия={MimicryScore}, AI={AiScore}, ML={MlScore}",
                     userName, mimicryScore, spamProbability, mlScore);
-                
+
                 return false; // Можно продолжать нормальную обработку
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Ошибка при AI анализе сообщения от пользователя {UserId}", user.Id);
-            
+
             // В случае ошибки выключаем AI детект
             _suspiciousUsersStorage.SetAiDetectEnabled(user.Id, chat.Id, false);
             return false; // В случае ошибки разрешаем нормальную обработку
         }
     }
-} 
+}

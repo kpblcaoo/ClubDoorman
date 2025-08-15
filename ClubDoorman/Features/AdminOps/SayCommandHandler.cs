@@ -59,7 +59,7 @@ public class SayCommandHandler : ICommandHandler
             );
             return;
         }
-        
+
         var parts = message.Text.Split(' ', 3);
         if (parts.Length < 3)
         {
@@ -72,11 +72,11 @@ public class SayCommandHandler : ICommandHandler
             );
             return;
         }
-        
+
         var target = parts[1];
         var textToSend = parts[2];
         long? userId = null;
-        
+
         if (target.StartsWith("@"))
         {
             // Пробуем найти userId по username среди недавних пользователей (по кэшу)
@@ -86,7 +86,7 @@ public class SayCommandHandler : ICommandHandler
         {
             userId = id;
         }
-        
+
         if (userId == null)
         {
             await _messageService.SendUserNotificationAsync(
@@ -127,7 +127,7 @@ public class SayCommandHandler : ICommandHandler
     {
         if (string.IsNullOrEmpty(username))
             return null;
-            
+
         // Можно использовать MemoryCache или другой кэш, если он есть
         // Здесь пример с MemoryCache: ищем по значениям, где username встречался
         foreach (var item in MemoryCache.Default)
@@ -141,7 +141,7 @@ public class SayCommandHandler : ICommandHandler
                     return uid;
             }
         }
-        
+
         return null;
     }
 }

@@ -40,7 +40,7 @@ public class LogChatService : ILogChatService
     public async Task SendLogNotificationAsync(Message message, string reason, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Начинаем отправку уведомления в лог-чат для сообщения {MessageId} в чате {ChatId}", message.MessageId, message.Chat.Id);
-        
+
         var user = message.From;
 
         try
@@ -48,7 +48,7 @@ public class LogChatService : ILogChatService
             // Создаем кнопки реакции для лог-чата (без добавления в автобан)
             var callbackDataBan = $"logban_{message.Chat.Id}_{user.Id}";
             MemoryCache.Default.Add(callbackDataBan, message, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(12) });
-            
+
             var keyboard = new InlineKeyboardMarkup(new[]
             {
                 new[]
@@ -66,16 +66,16 @@ public class LogChatService : ILogChatService
                 var r when r.Contains("Банальное приветствие") => "Удаление банального приветствия",
                 _ => $"Удаление: {reason}"
             };
-            
+
             var deletionData = new AutoBanNotificationData(
-                user, 
-                message.Chat, 
-                actionDescription, 
-                reason, 
-                message.MessageId, 
+                user,
+                message.Chat,
+                actionDescription,
+                reason,
+                message.MessageId,
                 LinkToMessage(message.Chat, message.MessageId)
             );
-            
+
             // ФИКС: Пытаемся переслать сообщение, но если не получается - отправляем без пересылки
             Message? forwardedMessage = null;
             try
@@ -87,7 +87,7 @@ public class LogChatService : ILogChatService
                     message.MessageId,
                     cancellationToken: cancellationToken
                 );
-                
+
                 // Используем правильный шаблон в зависимости от причины
                 string messageText;
                 if (reason.Contains("Ссылки запрещены"))
@@ -104,16 +104,16 @@ public class LogChatService : ILogChatService
                         ChatTitle = deletionData.Chat.Title ?? deletionData.Chat.Username ?? "Неизвестный чат",
                         MessageLink = deletionData.MessageLink
                     };
-                    
+
                     var template = reason switch
                     {
                         var r when r.Contains("Банальное приветствие") => "🚫 Удаление банального приветствия\nЮзер {UserFullName} из чата {ChatTitle}\n{MessageLink}",
                         _ => $"🚫 {actionDescription}\nЮзер {{UserFullName}} из чата {{ChatTitle}}\n{{MessageLink}}"
                     };
-                    
+
                     messageText = _messageService.GetTemplates().FormatTemplate(template, templateData);
                 }
-                
+
                 await _bot.SendMessage(
                     _appConfig.LogAdminChatId,
                     messageText + "\n\n" + "Действия:",
@@ -126,10 +126,10 @@ public class LogChatService : ILogChatService
             catch (Exception forwardEx) when (forwardEx.Message.Contains("protected content") || forwardEx.Message.Contains("can't be forwarded"))
             {
                 _logger.LogWarning("Сообщение имеет защищенный контент, отправляем уведомление без пересылки: {Error}", forwardEx.Message);
-                
+
                 // Получаем содержимое сообщения для отображения
                 var messageContent = message.Text ?? message.Caption ?? "Писать в лс";
-                
+
                 // Используем правильный шаблон в зависимости от причины
                 var template = reason switch
                 {
@@ -137,7 +137,7 @@ public class LogChatService : ILogChatService
                     var r when r.Contains("Банальное приветствие") => "🚫 Удаление банального приветствия\nЮзер {UserFullName} из чата {ChatTitle}\n{MessageLink}\n\nСодержимое:\n{MessageContent}",
                     _ => $"🚫 {actionDescription}\nЮзер {{UserFullName}} из чата {{ChatTitle}}\n{{MessageLink}}\n\nСодержимое:\n{{MessageContent}}"
                 };
-                
+
                 // Создаем данные с содержимым сообщения
                 var deletionDataWithContent = new
                 {
@@ -146,9 +146,9 @@ public class LogChatService : ILogChatService
                     MessageLink = deletionData.MessageLink,
                     MessageContent = messageContent
                 };
-                
+
                 var messageText = _messageService.GetTemplates().FormatTemplate(template, deletionDataWithContent);
-                
+
                 // Отправляем уведомление без пересылки (просто как обычное сообщение)
                 await _bot.SendMessage(
                     _appConfig.LogAdminChatId,
@@ -158,7 +158,7 @@ public class LogChatService : ILogChatService
                     cancellationToken: cancellationToken
                 );
             }
-            
+
             _logger.LogDebug("Уведомление с кнопками успешно отправлено в лог-чат");
         }
         catch (Exception e)
@@ -171,7 +171,7 @@ public class LogChatService : ILogChatService
     {
         var callbackDataBan = $"logban_{chatId}_{userId}";
         var userMessage = MemoryCache.Default.Remove(callbackDataBan) as Message;
-        
+
         // В лог-чате НЕ добавляем сообщение в автобан - это просто бан пользователя
         _logger.LogInformation("🚫📝 Бан из лог-чата - сообщение НЕ добавляется в автобан для пользователя {UserId}", userId);
 
@@ -180,11 +180,11 @@ public class LogChatService : ILogChatService
             // Создаем объекты для UserBanService
             var user = new User { Id = userId };
             var chat = new Chat { Id = chatId };
-            
+
             // Используем UserBanService для централизованного бана
             // Передаем null для messageToDelete, так как сообщение уже было удалено ранее
             await _userBanService.BanUserAsync(chat, user, BanTypeEnum.ManualBan, "Ручной бан из лог-чата", null, cancellationToken);
-            
+
             _logger.LogInformation("Пользователь {UserId} забанен из лог-чата администратором {AdminName}", userId, adminName);
         }
         catch (Exception e)
@@ -202,4 +202,4 @@ public class LogChatService : ILogChatService
     private static string LinkToSuperGroupMessage(Chat chat, long messageId) => $"https://t.me/c/{chat.Id.ToString()[4..]}/{messageId}";
 
     private static string LinkToGroupWithNameMessage(Chat chat, long messageId) => $"https://t.me/{chat.Username}/{messageId}";
-} 
+}

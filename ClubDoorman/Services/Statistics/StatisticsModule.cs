@@ -16,7 +16,7 @@ public static class StatisticsModule
     {
         services.AddSingleton<IStatisticsService, StatisticsService>();
         services.AddSingleton<GlobalStatsManager>();
-        
+
         return services;
     }
-} 
+}

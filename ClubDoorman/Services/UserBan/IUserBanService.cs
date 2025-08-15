@@ -51,4 +51,4 @@ public interface IUserBanService
     /// Удаляет сообщение по ID в указанном чате
     /// </summary>
     Task DeleteMessageByIdAsync(long chatId, int messageId);
-} 
+}

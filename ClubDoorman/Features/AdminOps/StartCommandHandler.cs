@@ -44,10 +44,10 @@ public class StartCommandHandler : IStartCommandHandler
 
         var about = GetStartMessage();
         await _messageService.SendUserNotificationAsync(
-            message.From!, 
-            message.Chat, 
-            UserNotificationType.Welcome, 
-            new SimpleNotificationData(message.From!, message.Chat, about), 
+            message.From!,
+            message.Chat,
+            UserNotificationType.Welcome,
+            new SimpleNotificationData(message.From!, message.Chat, about),
             cancellationToken
         );
     }
@@ -145,4 +145,4 @@ AI-анализ профилей (фото + описание) — никаки�
 <b>🧼 Пусть ваш чат будет чистым и уютным!</b>
 """;
     }
-} 
+}

@@ -59,48 +59,48 @@ public class ChatMemberHandler : IUpdateHandler
         Debug.Assert(chatMember != null);
         var newChatMember = chatMember.NewChatMember;
         ChatSettingsManager.EnsureChatInConfig(chatMember.Chat.Id, chatMember.Chat.Title);
-        
+
         // Проверка whitelist - если активен, работаем только в разрешённых чатах
         if (!_appConfig.IsChatAllowed(chatMember.Chat.Id))
         {
             _logger.LogDebug("Чат {ChatId} ({ChatTitle}) не в whitelist - игнорируем изменение участника", chatMember.Chat.Id, chatMember.Chat.Title);
             return;
         }
-        
+
         // Игнорируем изменения, сделанные самим ботом
         if (chatMember.From?.Id == _bot.BotId)
         {
             _logger.LogDebug("Игнорируем изменение статуса участника, сделанное самим ботом");
             return;
         }
-        
+
         switch (newChatMember.Status)
         {
             case ChatMemberStatus.Member:
-            {
-                _logger.LogDebug("New chat member new {@New} old {@Old}", newChatMember, chatMember.OldChatMember);
-                if (chatMember.OldChatMember.Status == ChatMemberStatus.Left)
                 {
-                    var u = newChatMember.User;
-                    _logger.LogInformation("==================== НОВЫЙ УЧАСТНИК ====================\nПользователь {User} (id={UserId}, username={Username}) зашел в группу '{ChatTitle}' (id={ChatId})\n========================================================", 
-                        (u.FirstName + (string.IsNullOrEmpty(u.LastName) ? "" : " " + u.LastName)), u.Id, u.Username ?? "-", chatMember.Chat.Title ?? "-", chatMember.Chat.Id);
-                    
-                    // Проверяем вход через папку
-                    var wasBannedForFolderInvite = await _folderInviteService.HandleFolderInviteAsync(chatMember, cancellationToken);
-                    
-                    // Если пользователь не был забанен за вход через папку, запускаем обычный IntroFlow
-                    if (!wasBannedForFolderInvite)
+                    _logger.LogDebug("New chat member new {@New} old {@Old}", newChatMember, chatMember.OldChatMember);
+                    if (chatMember.OldChatMember.Status == ChatMemberStatus.Left)
                     {
-                        // Запускаем IntroFlow через сервис
-                        _ = Task.Run(async () =>
+                        var u = newChatMember.User;
+                        _logger.LogInformation("==================== НОВЫЙ УЧАСТНИК ====================\nПользователь {User} (id={UserId}, username={Username}) зашел в группу '{ChatTitle}' (id={ChatId})\n========================================================",
+                            (u.FirstName + (string.IsNullOrEmpty(u.LastName) ? "" : " " + u.LastName)), u.Id, u.Username ?? "-", chatMember.Chat.Title ?? "-", chatMember.Chat.Id);
+
+                        // Проверяем вход через папку
+                        var wasBannedForFolderInvite = await _folderInviteService.HandleFolderInviteAsync(chatMember, cancellationToken);
+
+                        // Если пользователь не был забанен за вход через папку, запускаем обычный IntroFlow
+                        if (!wasBannedForFolderInvite)
                         {
-                            await Task.Delay(TimeSpan.FromSeconds(2));
-                            await _introFlowService.ProcessNewUserAsync(null, newChatMember.User, chatMember.Chat);
-                        });
+                            // Запускаем IntroFlow через сервис
+                            _ = Task.Run(async () =>
+                            {
+                                await Task.Delay(TimeSpan.FromSeconds(2));
+                                await _introFlowService.ProcessNewUserAsync(null, newChatMember.User, chatMember.Chat);
+                            });
+                        }
                     }
+                    break;
                 }
-                break;
-            }
             case ChatMemberStatus.Kicked
             or ChatMemberStatus.Restricted:
                 var user = newChatMember.User;
@@ -109,7 +109,7 @@ public class ChatMemberHandler : IUpdateHandler
                 var tailMessage = string.IsNullOrWhiteSpace(lastMessage)
                     ? ""
                     : $" Его/её последним сообщением было:\n```\n{lastMessage}\n```";
-                
+
                 // Удаляем из списка доверенных
                 if (_userCleanupService.RemoveUserFromAllApprovals(user.Id, "Получение ограничений"))
                 {
@@ -121,7 +121,7 @@ public class ChatMemberHandler : IUpdateHandler
                         cancellationToken
                     );
                 }
-                
+
                 var restrictedData = new UserRestrictedNotificationData(
                     user, chatMember.Chat, "пользователь получил ограничения", 0, lastMessage, chatMember.Chat.Title ?? "");
                 await _messageService.SendAdminNotificationAsync(
@@ -135,4 +135,4 @@ public class ChatMemberHandler : IUpdateHandler
 
     private static string FullName(string firstName, string? lastName) =>
         string.IsNullOrEmpty(lastName) ? firstName : $"{firstName} {lastName}";
-} 
+}

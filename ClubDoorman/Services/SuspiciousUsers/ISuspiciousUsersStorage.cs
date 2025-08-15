@@ -79,4 +79,4 @@ public interface ISuspiciousUsersStorage
     /// </summary>
     /// <returns>Кортеж (Всего подозрительных, С AI детекцией, Количество групп)</returns>
     (int TotalSuspicious, int WithAiDetect, int GroupsCount) GetStats();
-} 
+}

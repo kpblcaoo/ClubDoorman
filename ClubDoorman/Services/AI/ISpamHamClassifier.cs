@@ -28,4 +28,4 @@ public interface ISpamHamClassifier
     /// Метод для инициализации/проверки состояния классификатора
     /// </summary>
     void Touch();
-} 
+}

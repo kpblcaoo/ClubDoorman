@@ -1,5 +1,5 @@
 using ClubDoorman.Services.TextProcessing;
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 namespace ClubDoorman.Services;
 
@@ -52,7 +52,7 @@ public static class SimpleFilters
         c == 'i' || c == 'і' || c == 'ћ' || c == 'є' || c == 'љ' || c == 'њ' || (c >= '0' && c <= '9');
 
     private static bool IsCyrillicLowercase(char c) => c is >= 'а' and <= 'я';
-    
+
     /// <summary>
     /// Проверяет наличие любых ссылок в тексте
     /// </summary>
@@ -61,33 +61,33 @@ public static class SimpleFilters
     public static bool HasLinks(string message)
     {
         if (message == null) throw new ArgumentNullException(nameof(message));
-        
+
         // Проверяем наличие любых URL-адресов
         // Паттерн для http/https/ftp/www и других протоколов
         var urlPattern = @"(https?://|www\.|ftp://|t\.me/|telegram\.me/)[^\s]+";
         var hasUrls = Regex.IsMatch(message, urlPattern, RegexOptions.IgnoreCase);
-        
+
         // Проверяем наличие HTML-гиперссылок
         // Формат: <a href="...">текст</a>
         var htmlLinkPattern = @"<a\s+href=""[^""]+"">[^<]+</a>";
         var hasHtmlLinks = Regex.IsMatch(message, htmlLinkPattern, RegexOptions.IgnoreCase);
-        
+
         // Подробное логирование для отладки
         if (hasUrls)
         {
             var matches = Regex.Matches(message, urlPattern, RegexOptions.IgnoreCase);
             Console.WriteLine($"[DEBUG] HasLinks: найдены URL в тексте '{message}': {string.Join(", ", matches.Cast<Match>().Select(m => m.Value))}");
         }
-        
+
         if (hasHtmlLinks)
         {
             var matches = Regex.Matches(message, htmlLinkPattern, RegexOptions.IgnoreCase);
             Console.WriteLine($"[DEBUG] HasLinks: найдены HTML-ссылки в тексте '{message}': {string.Join(", ", matches.Cast<Match>().Select(m => m.Value))}");
         }
-        
+
         return hasUrls || hasHtmlLinks;
     }
-    
+
     /// <summary>
     /// Проверяет, является ли сообщение банальным приветствием
     /// </summary>
@@ -96,13 +96,13 @@ public static class SimpleFilters
     public static bool IsBoringGreeting(string message)
     {
         if (message == null) throw new ArgumentNullException(nameof(message));
-        
+
         var normalizedMessage = message.Trim().ToLowerInvariant();
-        
+
         // Убираем знаки препинания и лишние пробелы
         var cleanMessage = Regex.Replace(normalizedMessage, @"[^\w\s]", "").Trim();
         cleanMessage = Regex.Replace(cleanMessage, @"\s+", " ");
-        
+
         // Банальные приветствия
         var boringGreetings = new[]
         {
@@ -118,11 +118,11 @@ public static class SimpleFilters
             "салам", "салом", "салют",
             "дратути", "драсте", "драсти"
         };
-        
+
         // Проверяем точные совпадения
         if (boringGreetings.Contains(cleanMessage))
             return true;
-            
+
         // Проверяем если сообщение состоит только из одного-двух слов и одно из них - приветствие
         var words = cleanMessage.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (words.Length <= 2)
@@ -133,7 +133,7 @@ public static class SimpleFilters
                     return true;
             }
         }
-        
+
         // Проверяем банальные фразы с приветствиями (до 5 слов)
         if (words.Length <= 5 && words.Length >= 2)
         {
@@ -142,14 +142,14 @@ public static class SimpleFilters
             {
                 var boringPhrases = new[]
                 {
-                    "как дела", "как у кого дела", "как жизнь", "как сам", "как сама", 
+                    "как дела", "как у кого дела", "как жизнь", "как сам", "как сама",
                     "что делаешь", "что делаете", "как поживаешь", "как поживаете",
                     "как настроение", "как дечки", "как делишки",
                     "что нового", "что как", "ну как", "как ты", "как вы",
                     "все хорошо", "все нормально", "все ок", "все окей",
                     "доброго времени суток", "хорошего дня", "приятного вечера"
                 };
-                
+
                 // Исключения для осмысленных вопросов - не считаем банальными
                 var meaningfulQuestions = new[]
                 {
@@ -163,23 +163,23 @@ public static class SimpleFilters
                     "вопрос", "вопросы", "спросить", "узнать", "информация",
                     "нужно", "нужна", "требуется", "хочу", "хочется", "интересует"
                 };
-                
+
                 var messageWithoutGreeting = string.Join(" ", words.Where(w => !boringGreetings.Contains(w)));
-                
+
                 // Если есть осмысленные слова - не считаем банальным
                 if (meaningfulQuestions.Any(question => messageWithoutGreeting.Contains(question)))
                 {
                     return false;
                 }
-                
-                if (boringPhrases.Any(phrase => messageWithoutGreeting.Contains(phrase)) || 
+
+                if (boringPhrases.Any(phrase => messageWithoutGreeting.Contains(phrase)) ||
                     messageWithoutGreeting.Trim().Length <= 12) // Короткая банальная добавка
                 {
                     return true;
                 }
             }
         }
-        
+
         // Проверяем только эмодзи (включая несколько подряд)
         var emojiOnlyPattern = @"^[\s\p{So}\p{Sk}\u200d\ufe0f\u2600-\u27bf\ud800-\udfff]+$";
         if (Regex.IsMatch(normalizedMessage, emojiOnlyPattern) && normalizedMessage.Trim().Length > 0)
@@ -188,17 +188,17 @@ public static class SimpleFilters
             if (normalizedMessage.Trim().Length <= 20)
                 return true;
         }
-        
+
         // Проверяем комбинации типа "привет 🙂" или "👋 привет"
         if (words.Length <= 3)
         {
             var hasGreeting = words.Any(word => boringGreetings.Contains(word));
             var hasEmoji = Regex.IsMatch(normalizedMessage, @"[\p{So}\p{Sk}\u2600-\u27bf\ud800-\udfff]");
-            
+
             if (hasGreeting && hasEmoji)
                 return true;
         }
-        
+
         return false;
     }
 }

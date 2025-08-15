@@ -183,4 +183,4 @@ public interface ITelegramBotClientWrapper
     /// Получает информацию о чате (альтернативный метод)
     /// </summary>
     Task<Chat> GetChatAsync(ChatId chatId, CancellationToken cancellationToken = default);
-} 
+}

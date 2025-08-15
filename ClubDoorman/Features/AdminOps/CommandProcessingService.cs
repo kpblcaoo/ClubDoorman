@@ -38,4 +38,4 @@ public class CommandProcessingService : ICommandProcessingService
 
         Console.WriteLine($"[DEBUG] MessageHandler.HandleCommandAsync: CommandRouter returned {handled}");
     }
-} 
+}

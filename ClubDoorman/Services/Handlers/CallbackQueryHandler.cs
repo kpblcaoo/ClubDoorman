@@ -76,10 +76,10 @@ public class CallbackQueryHandler : IUpdateHandler
     {
         var callbackQuery = update.CallbackQuery!;
         var cbData = callbackQuery.Data;
-        
-        _logger.LogDebug("📞 Получен callback: {Data} от пользователя {User} в чате {Chat}", 
+
+        _logger.LogDebug("📞 Получен callback: {Data} от пользователя {User} в чате {Chat}",
             cbData, callbackQuery.From.Username ?? callbackQuery.From.FirstName, callbackQuery.Message?.Chat.Id);
-        
+
         if (string.IsNullOrEmpty(cbData))
         {
             _logger.LogWarning("❌ Пустой callback data");
@@ -136,7 +136,7 @@ public class CallbackQueryHandler : IUpdateHandler
 
         var key = _captchaService.GenerateKey(chat.Id, userId);
         var captchaInfo = _captchaService.GetCaptchaInfo(key);
-        
+
         if (captchaInfo == null)
         {
             _logger.LogWarning("Капча {Key} не найдена в словаре", key);
@@ -149,7 +149,7 @@ public class CallbackQueryHandler : IUpdateHandler
 
         // Проверяем правильность ответа
         var isCorrect = await _captchaService.ValidateCaptchaAsync(key, chosen);
-        
+
         if (!isCorrect)
         {
             await HandleFailedCaptcha(captchaInfo, cancellationToken);
@@ -164,17 +164,17 @@ public class CallbackQueryHandler : IUpdateHandler
     {
         _logger.LogInformation("==================== КАПЧА НЕ ПРОЙДЕНА ====================\n" +
             "Пользователь {User} (id={UserId}) не прошёл капчу в группе '{ChatTitle}' (id={ChatId})\n" +
-            "===========================================================", 
+            "===========================================================",
             Utils.FullName(captchaInfo.User), captchaInfo.User.Id, captchaInfo.ChatTitle ?? "-", captchaInfo.ChatId);
 
         _statisticsService.IncrementCaptcha(captchaInfo.ChatId);
 
         // Регистрируем нарушение за непройденную капчу
         var shouldBan = _violationTracker.RegisterViolation(captchaInfo.User.Id, captchaInfo.ChatId, ViolationType.CaptchaFailed);
-        
+
         if (shouldBan)
         {
-            _logger.LogWarning("Пользователь {User} (id={UserId}) достиг лимита непройденных капч в группе '{ChatTitle}' (id={ChatId}) - бан навсегда", 
+            _logger.LogWarning("Пользователь {User} (id={UserId}) достиг лимита непройденных капч в группе '{ChatTitle}' (id={ChatId}) - бан навсегда",
                 Utils.FullName(captchaInfo.User), captchaInfo.User.Id, captchaInfo.ChatTitle ?? "-", captchaInfo.ChatId);
         }
 
@@ -182,16 +182,16 @@ public class CallbackQueryHandler : IUpdateHandler
         {
             // Если достигнут лимит нарушений - бан навсегда, иначе временный бан на 20 минут
             var banUntilDate = shouldBan ? null : (DateTime?)DateTime.UtcNow.AddMinutes(20);
-            
+
             await _bot.BanChatMember(
-                captchaInfo.ChatId, 
-                captchaInfo.User.Id, 
-                banUntilDate, 
+                captchaInfo.ChatId,
+                captchaInfo.User.Id,
+                banUntilDate,
                 revokeMessages: false,
                 cancellationToken: cancellationToken
             );
 
-                        // Удаляем сообщение о входе
+            // Удаляем сообщение о входе
             if (captchaInfo.UserJoinedMessage != null)
             {
                 await _bot.DeleteMessage(captchaInfo.ChatId, captchaInfo.UserJoinedMessage.MessageId, cancellationToken);
@@ -230,7 +230,7 @@ public class CallbackQueryHandler : IUpdateHandler
     {
         _logger.LogInformation("==================== КАПЧА ПРОЙДЕНА ====================\n" +
             "Пользователь {User} (id={UserId}) успешно прошёл капчу в группе '{ChatTitle}' (id={ChatId})\n" +
-            "========================================================", 
+            "========================================================",
             Utils.FullName(user), user.Id, chat.Title ?? "-", chat.Id);
 
         // Отправляем приветствие если они не отключены
@@ -276,18 +276,18 @@ public class CallbackQueryHandler : IUpdateHandler
                 await HandleSuspiciousUserCallback(callbackQuery, split, cancellationToken);
             }
             else if (split.Count > 1 && split[0] == "aiOk")
-        {
-            if (split.Count == 2 && long.TryParse(split[1], out var aiOkUserIdOld))
             {
-                // Старый формат aiOk_{userId} - только кеширование
-                await HandleAiOkUser(callbackQuery, null, aiOkUserIdOld, cancellationToken);
+                if (split.Count == 2 && long.TryParse(split[1], out var aiOkUserIdOld))
+                {
+                    // Старый формат aiOk_{userId} - только кеширование
+                    await HandleAiOkUser(callbackQuery, null, aiOkUserIdOld, cancellationToken);
+                }
+                else if (split.Count == 3 && long.TryParse(split[1], out var aiOkChatId) && long.TryParse(split[2], out var aiOkUserId))
+                {
+                    // Новый формат aiOk_{chatId}_{userId} - снятие ограничений + кеширование
+                    await HandleAiOkUser(callbackQuery, aiOkChatId, aiOkUserId, cancellationToken);
+                }
             }
-            else if (split.Count == 3 && long.TryParse(split[1], out var aiOkChatId) && long.TryParse(split[2], out var aiOkUserId))
-            {
-                // Новый формат aiOk_{chatId}_{userId} - снятие ограничений + кеширование
-                await HandleAiOkUser(callbackQuery, aiOkChatId, aiOkUserId, cancellationToken);
-            }
-        }
             else if (cbData == "noop")
             {
                 // Ничего не делаем, просто убираем кнопки
@@ -308,19 +308,19 @@ public class CallbackQueryHandler : IUpdateHandler
     {
         // Админ одобряет пользователя - всегда глобально
         await _userManager.Approve(userId);
-        
+
         var adminName = GetAdminDisplayName(callbackQuery.From);
-        
+
         // Обновляем сообщение с результатом действия
         var approveMessage = $"{callbackQuery.Message.Text}\n\n✅ Одобрен администратором {adminName}\n👤 Пользователь добавлен в список доверенных";
-        
+
         await _bot.EditMessageText(
             callbackQuery.Message!.Chat.Id,
             callbackQuery.Message.MessageId,
             approveMessage,
             cancellationToken: cancellationToken
         );
-        
+
         _logger.LogInformation("Пользователь {UserId} одобрен администратором {AdminName}", userId, adminName);
     }
 
@@ -329,7 +329,7 @@ public class CallbackQueryHandler : IUpdateHandler
         var callbackDataBan = $"ban_{chatId}_{userId}";
         var userMessage = MemoryCache.Default.Remove(callbackDataBan) as Message;
         var adminName = GetAdminDisplayName(callbackQuery.From);
-        
+
         // Добавляем текст в список плохих сообщений
         var text = userMessage?.Caption ?? userMessage?.Text;
         if (!string.IsNullOrWhiteSpace(text))
@@ -342,29 +342,29 @@ public class CallbackQueryHandler : IUpdateHandler
             // Создаем объекты для UserBanService
             var user = new User { Id = userId };
             var chat = new Chat { Id = chatId };
-            
+
             // Используем UserBanService для централизованного бана
             await _userBanService.BanUserAsync(chat, user, BanTypeEnum.ManualBan, "Ручной бан", userMessage, cancellationToken);
-            
+
             // Обновляем сообщение с результатом действия
             var banMessage = $"{callbackQuery.Message.Text}\n\n🚫 Забанен администратором {adminName}\n🧹 Пользователь очищен из всех списков\n📝 Сообщение добавлено в список авто-бана";
-            
+
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
                 callbackQuery.Message.MessageId,
                 banMessage,
                 cancellationToken: cancellationToken
             );
-            
+
             _logger.LogInformation("Пользователь {UserId} забанен администратором {AdminName}", userId, adminName);
         }
         catch (Exception e)
         {
             _logger.LogWarning(e, "Не удалось забанить пользователя через админский callback");
-            
+
             // Обновляем сообщение с ошибкой
             var errorMessage = $"{callbackQuery.Message.Text}\n\n❌ Ошибка при бане администратором {adminName}\nНе могу забанить. Не хватает могущества? Сходите забаньте руками";
-            
+
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
                 callbackQuery.Message.MessageId,
@@ -377,31 +377,31 @@ public class CallbackQueryHandler : IUpdateHandler
     private async Task HandleLogBanUser(CallbackQuery callbackQuery, long chatId, long userId, CancellationToken cancellationToken)
     {
         var adminName = GetAdminDisplayName(callbackQuery.From);
-        
+
         try
         {
             // Используем сервис лог-чата для обработки бана
             await _logChatService.HandleLogBanAsync(chatId, userId, adminName, cancellationToken);
-            
+
             // Обновляем сообщение с результатом действия (без упоминания автобана)
             var banMessage = $"{callbackQuery.Message.Text}\n\n🚫 Забанен администратором {adminName}\n🧹 Пользователь очищен из всех списков";
-            
+
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
                 callbackQuery.Message.MessageId,
                 banMessage,
                 cancellationToken: cancellationToken
             );
-            
+
             _logger.LogInformation("Пользователь {UserId} забанен из лог-чата администратором {AdminName}", userId, adminName);
         }
         catch (Exception e)
         {
             _logger.LogWarning(e, "Не удалось забанить пользователя через лог-чат callback");
-            
+
             // Обновляем сообщение с ошибкой
             var errorMessage = $"{callbackQuery.Message.Text}\n\n❌ Ошибка при бане администратором {adminName}\nНе могу забанить. Не хватает могущества? Сходите забаньте руками";
-            
+
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
                 callbackQuery.Message.MessageId,
@@ -416,7 +416,7 @@ public class CallbackQueryHandler : IUpdateHandler
         var callbackDataBan = $"banprofile_{chatId}_{userId}";
         var aiProfileData = MemoryCache.Default.Remove(callbackDataBan) as AiProfileAnalysisData;
         var adminName = GetAdminDisplayName(callbackQuery.From);
-        
+
         // При бане по профилю НЕ добавляем сообщение в автобан - проблема в профиле, а не в сообщении
         _logger.LogInformation("🚫👤 Бан по профилю - сообщение НЕ добавляется в автобан для пользователя {UserId}", userId);
 
@@ -425,18 +425,18 @@ public class CallbackQueryHandler : IUpdateHandler
             // Создаем объекты для UserBanService
             var user = new User { Id = userId };
             var chat = new Chat { Id = chatId };
-            
+
             // Используем UserBanService для централизованного бана по профилю с удалением сообщения по ID
             await _userBanService.BanUserAsync(
-                chat, 
-                user, 
-                BanTypeEnum.ProfileBan, 
-                "Бан по профилю", 
-                aiProfileData?.MessageId, 
-                aiProfileData?.Chat.Id, 
+                chat,
+                user,
+                BanTypeEnum.ProfileBan,
+                "Бан по профилю",
+                aiProfileData?.MessageId,
+                aiProfileData?.Chat.Id,
                 cancellationToken
             );
-            
+
             // ФИКС: ВСЕГДА пытаемся переслать сообщение при ручном бане
             // Проверка на удаление происходит в try-catch - если удалено, получим ошибку
             if (aiProfileData?.MessageId != null)
@@ -460,26 +460,26 @@ public class CallbackQueryHandler : IUpdateHandler
             {
                 _logger.LogDebug("🤖 При ручном бане сообщение пользователя {UserId} не пересылается - MessageId отсутствует", userId);
             }
-            
+
             // Обновляем сообщение с результатом действия
             var banMessage = $"{callbackQuery.Message.Text}\n\n🚫 Забанен за спам-профиль администратором {adminName}\n🧹 Пользователь очищен из всех списков\n⚠️ Сообщение НЕ добавлено в автобан (проблема в профиле)";
-            
+
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
                 callbackQuery.Message.MessageId,
                 banMessage,
                 cancellationToken: cancellationToken
             );
-            
+
             _logger.LogInformation("Пользователь {UserId} забанен за спам-профиль администратором {AdminName}", userId, adminName);
         }
         catch (Exception e)
         {
             _logger.LogWarning(e, "Не удалось забанить пользователя через админский callback (бан по профилю)");
-            
+
             // Обновляем сообщение с ошибкой
             var errorMessage = $"{callbackQuery.Message.Text}\n\n❌ Ошибка при бане администратором {adminName}\nНе могу забанить. Не хватает могущества? Сходите забаньте руками";
-            
+
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
                 callbackQuery.Message.MessageId,
@@ -493,10 +493,10 @@ public class CallbackQueryHandler : IUpdateHandler
     {
         // Помечаем AI проверку как безопасную
         _aiChecks.MarkUserOkay(userId);
-        
+
         var adminName = GetAdminDisplayName(callbackQuery.From);
         var message = $"✅ {adminName} отметил профиль как безопасный - AI проверки отключены для этого пользователя";
-        
+
         // Если передан chatId - пытаемся снять ограничения с пользователя
         if (chatId.HasValue)
         {
@@ -525,9 +525,9 @@ public class CallbackQueryHandler : IUpdateHandler
                     },
                     cancellationToken: cancellationToken
                 );
-                
+
                 message += " + ограничения сняты";
-                _logger.LogInformation("Ограничения сняты с пользователя {UserId} в чате {ChatId} администратором {AdminName}", 
+                _logger.LogInformation("Ограничения сняты с пользователя {UserId} в чате {ChatId} администратором {AdminName}",
                     userId, chatId.Value, adminName);
             }
             catch (Exception ex)
@@ -536,7 +536,7 @@ public class CallbackQueryHandler : IUpdateHandler
                 message += " (не удалось снять ограничения - возможно, недостаточно прав)";
             }
         }
-        
+
         // Редактируем сообщение с результатом вместо отправки нового
         try
         {
@@ -551,7 +551,7 @@ public class CallbackQueryHandler : IUpdateHandler
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Не удалось отредактировать сообщение с результатом AI анализа");
-            
+
             // Если не получилось отредактировать - отправляем новое и убираем кнопки
             await _messageService.SendAdminNotificationAsync(
                 AdminNotificationType.UserApproved,
@@ -572,7 +572,7 @@ public class CallbackQueryHandler : IUpdateHandler
             return;
 
         var adminName = GetAdminDisplayName(callbackQuery.From);
-        
+
         try
         {
             switch (action)
@@ -580,11 +580,11 @@ public class CallbackQueryHandler : IUpdateHandler
                 case "approve":
                     // Снимаем ограничения и одобряем пользователя
                     var success = await _moderationService.UnrestrictAndApproveUserAsync(userId, chatId);
-                    
-                    var statusMessage = success 
+
+                    var statusMessage = success
                         ? $"{callbackQuery.Message.Text}\n\n✅ *Разблокирован и одобрен администратором {adminName}*"
                         : $"{callbackQuery.Message.Text}\n\n⚠️ *Одобрен администратором {adminName}* (возможны проблемы с разблокировкой)";
-                    
+
                     await _bot.EditMessageText(
                         callbackQuery.Message!.Chat.Id,
                         callbackQuery.Message.MessageId,
@@ -592,7 +592,7 @@ public class CallbackQueryHandler : IUpdateHandler
                         parseMode: ParseMode.Markdown,
                         cancellationToken: cancellationToken
                     );
-                    
+
                     _logger.LogInformation("Подозрительный пользователь {UserId} разблокирован и одобрен администратором {AdminName}", userId, adminName);
                     break;
 
@@ -601,7 +601,7 @@ public class CallbackQueryHandler : IUpdateHandler
                     {
                         // Банируем пользователя и очищаем из всех списков
                         var banSuccess = await _moderationService.BanAndCleanupUserAsync(userId, chatId);
-                        
+
                         // Удаляем пересланное сообщение пользователя (если есть)
                         var replyToMessage = callbackQuery.Message!.ReplyToMessage;
                         if (replyToMessage != null)
@@ -616,7 +616,7 @@ public class CallbackQueryHandler : IUpdateHandler
                                 _logger.LogWarning(ex, "Не удалось удалить пересланное сообщение пользователя {UserId} из чата {ChatId}", userId, chatId);
                             }
                         }
-                        
+
                         // Удаляем оригинальное сообщение из чата пользователя
                         try
                         {
@@ -627,13 +627,13 @@ public class CallbackQueryHandler : IUpdateHandler
                         {
                             _logger.LogWarning(ex, "Не удалось удалить оригинальное сообщение пользователя {UserId} из чата {ChatId}", userId, chatId);
                         }
-                        
-                        var banMessage = banSuccess 
+
+                        var banMessage = banSuccess
                             ? $"{callbackQuery.Message.Text}\n\n🚫 Забанен и очищен администратором {adminName}"
                             : $"{callbackQuery.Message.Text}\n\n⚠️ Обработан администратором {adminName} (возможны проблемы с баном)";
-                        
+
                         _logger.LogInformation("Подозрительный пользователь {UserId} забанен и очищен администратором {AdminName}", userId, adminName);
-                        
+
                         await _bot.EditMessageText(
                             callbackQuery.Message!.Chat.Id,
                             callbackQuery.Message.MessageId,
@@ -654,18 +654,18 @@ public class CallbackQueryHandler : IUpdateHandler
                     var aiDetectUsers = _moderationService.GetAiDetectUsers();
                     var isCurrentlyEnabled = aiDetectUsers.Any(u => u.UserId == userId && u.ChatId == chatId);
                     var newStatus = _moderationService.SetAiDetectForSuspiciousUser(userId, chatId, !isCurrentlyEnabled);
-                    
+
                     var statusText = newStatus ? "включен" : "выключен";
                     var statusEmoji = newStatus ? "🔍✅" : "🔍❌";
-                    
+
                     await _bot.EditMessageText(
                         callbackQuery.Message!.Chat.Id,
                         callbackQuery.Message.MessageId,
                         $"{callbackQuery.Message.Text}\n\n{statusEmoji} AI детект {statusText} администратором {adminName}",
                         cancellationToken: cancellationToken
                     );
-                    
-                    _logger.LogInformation("AI детект для подозрительного пользователя {UserId} {Status} администратором {AdminName}", 
+
+                    _logger.LogInformation("AI детект для подозрительного пользователя {UserId} {Status} администратором {AdminName}",
                         userId, statusText, adminName);
                     break;
 
@@ -690,4 +690,4 @@ public class CallbackQueryHandler : IUpdateHandler
     }
 
 
-} 
+}

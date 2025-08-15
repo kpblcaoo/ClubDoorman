@@ -9,12 +9,12 @@ public record ModerationResult(
     /// Действие, которое нужно выполнить с сообщением
     /// </summary>
     ModerationAction Action,
-    
+
     /// <summary>
     /// Причина принятого решения
     /// </summary>
     string Reason,
-    
+
     /// <summary>
     /// Уровень уверенности в решении (0.0 - 1.0)
     /// </summary>
@@ -30,29 +30,29 @@ public enum ModerationAction
     /// Разрешить сообщение
     /// </summary>
     Allow,
-    
+
     /// <summary>
     /// Удалить сообщение
     /// </summary>
     Delete,
-    
+
     /// <summary>
     /// Забанить пользователя
     /// </summary>
     Ban,
-    
+
     /// <summary>
     /// Отправить жалобу администраторам
     /// </summary>
     Report,
-    
+
     /// <summary>
     /// Требуется ручная проверка
     /// </summary>
     RequireManualReview,
-    
+
     /// <summary>
     /// Требуется AI анализ (каскадная проверка ML -> AI)
     /// </summary>
     RequireAiAnalysis
-} 
+}

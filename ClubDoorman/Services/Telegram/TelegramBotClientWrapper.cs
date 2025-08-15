@@ -343,4 +343,4 @@ public class TelegramBotClientWrapper : ITelegramBotClientWrapper
     {
         return await _bot.GetChat(chatId, cancellationToken);
     }
-} 
+}

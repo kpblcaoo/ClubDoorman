@@ -56,54 +56,54 @@ public class AiCascadeService : IAiCascadeService
 
     public async Task<bool> PerformAiProfileAnalysisAsync(Message message, User user, Chat chat, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("🤖 Запускаем AI анализ профиля пользователя {UserId} ({UserName})", 
+        _logger.LogDebug("🤖 Запускаем AI анализ профиля пользователя {UserId} ({UserName})",
             user.Id, Utils.FullName(user.FirstName, user.LastName));
         _logger.LogDebug("🔍 TRACE: PerformAiProfileAnalysis начат для пользователя {UserId}", user.Id);
-        
+
         try
         {
             // ФИКС: Передаем первое сообщение в AI анализ
             var messageText = message.Text ?? message.Caption ?? "";
             var result = await _aiChecks.GetAttentionBaitProbability(user, messageText);
             _logger.LogDebug("🔍 TRACE: AiChecks.GetAttentionBaitProbability завершен для пользователя {UserId}", user.Id);
-            _logger.LogInformation("🤖 AI анализ профиля: пользователь {UserId}, вероятность={Probability}, причина={Reason}", 
+            _logger.LogInformation("🤖 AI анализ профиля: пользователь {UserId}, вероятность={Probability}, причина={Reason}",
                 user.Id, result.SpamProbability.Probability, result.SpamProbability.Reason);
 
             // ФИКС: Восстанавливаем проверку на банальность приветствия
             var isBoringGreeting = AiChecks.IsBoringGreeting(messageText);
-            
+
             // ИСПРАВЛЕННАЯ ЛОГИКА: высокий спам (>=0.9) действует всегда, средний (>=0.75) только с банальным приветствием
             var isHighSpam = result.SpamProbability.Probability >= Consts.LlmHighProbability; // >= 0.9
             var isMediumSpamWithBoringGreeting = result.SpamProbability.Probability >= Consts.LlmLowProbability && isBoringGreeting; // >= 0.75 + банальное
             var shouldTriggerAction = isHighSpam || isMediumSpamWithBoringGreeting;
-            
-            _logger.LogDebug("🤖 AI анализ: вероятность={Probability}, банальное приветствие={IsBoringGreeting}, высокий спам={IsHighSpam}, действие={ShouldTrigger}", 
+
+            _logger.LogDebug("🤖 AI анализ: вероятность={Probability}, банальное приветствие={IsBoringGreeting}, высокий спам={IsHighSpam}, действие={ShouldTrigger}",
                 result.SpamProbability.Probability, isBoringGreeting, isHighSpam, shouldTriggerAction);
 
             // Проверяем пороги вероятности спама + банальность приветствия
             if (shouldTriggerAction) // >= 0.75 + банальное приветствие
             {
-                _logger.LogWarning("🚫 AI определил подозрительный профиль: пользователь {UserId}, вероятность={Probability}, банальное приветствие={IsBoringGreeting}", 
+                _logger.LogWarning("🚫 AI определил подозрительный профиль: пользователь {UserId}, вероятность={Probability}, банальное приветствие={IsBoringGreeting}",
                     user.Id, result.SpamProbability.Probability, isBoringGreeting);
 
                 // ФИКС: Сначала отправляем уведомление в админ-чат, потом удаляем сообщение
                 var shouldDeleteMessage = result.SpamProbability.Probability >= Consts.LlmHighProbability; // >= 0.9
-                var automaticAction = shouldDeleteMessage 
-                    ? "🗑️ Сообщение удалено + 🔇 Read-Only на 10 минут" 
+                var automaticAction = shouldDeleteMessage
+                    ? "🗑️ Сообщение удалено + 🔇 Read-Only на 10 минут"
                     : "🔇 Read-Only на 10 минут (сообщение оставлено)";
-                    
+
                 var aiProfileData = new AiProfileAnalysisData(
-                    user, 
-                    chat, 
-                    result.SpamProbability.Probability, 
-                    result.SpamProbability.Reason, 
-                    result.NameBio, 
-                    messageText, 
-                    result.Photo, 
+                    user,
+                    chat,
+                    result.SpamProbability.Probability,
+                    result.SpamProbability.Reason,
+                    result.NameBio,
+                    messageText,
+                    result.Photo,
                     message.MessageId,
                     automaticAction
                 );
-                
+
                 // Отправляем уведомление ПЕРЕД удалением сообщения (включая пересылку)
                 await _messageService.SendAiProfileAnalysisAsync(aiProfileData, cancellationToken);
 
@@ -130,8 +130,8 @@ public class AiCascadeService : IAiCascadeService
                 {
                     var untilDate = DateTime.UtcNow.AddMinutes(10);
                     await _bot.RestrictChatMember(
-                        chat.Id, 
-                        user.Id, 
+                        chat.Id,
+                        user.Id,
                         new ChatPermissions
                         {
                             CanSendMessages = false,
@@ -166,7 +166,7 @@ public class AiCascadeService : IAiCascadeService
             }
             else
             {
-                _logger.LogDebug("✅ AI анализ: профиль пользователя {UserId} выглядит безопасно (вероятность={Probability}, банальное приветствие={IsBoringGreeting})", 
+                _logger.LogDebug("✅ AI анализ: профиль пользователя {UserId} выглядит безопасно (вероятность={Probability}, банальное приветствие={IsBoringGreeting})",
                     user.Id, result.SpamProbability.Probability, isBoringGreeting);
             }
         }
@@ -182,7 +182,7 @@ public class AiCascadeService : IAiCascadeService
     {
         var messageText = message.Text ?? message.Caption ?? "";
         var chat = message.Chat;
-        
+
         if (string.IsNullOrWhiteSpace(messageText))
         {
             _logger.LogWarning("🤖 AI каскадный анализ: пропускаем медиа без текста от {User}", Utils.FullName(user));
@@ -193,7 +193,7 @@ public class AiCascadeService : IAiCascadeService
 
         try
         {
-            _logger.LogInformation("🤖🔗 КАСКАДНЫЙ АНАЛИЗ: ML дал скор {MlScore}, запускаем AI для пользователя {User}: '{Text}'", 
+            _logger.LogInformation("🤖🔗 КАСКАДНЫЙ АНАЛИЗ: ML дал скор {MlScore}, запускаем AI для пользователя {User}: '{Text}'",
                 mlScore, Utils.FullName(user), messageText.Substring(0, Math.Min(messageText.Length, 100)));
 
             // Запускаем комплексный AI анализ (профиль + сообщение + ML данные)
@@ -201,7 +201,7 @@ public class AiCascadeService : IAiCascadeService
             var aiProbability = aiResult.Probability;
             var aiReason = aiResult.Reason ?? "Нет объяснения";
 
-            _logger.LogInformation("🤖✅ AI каскадный анализ завершен: пользователь {User}, ML={MlScore}, AI={AiScore}, причина: {AiReason}", 
+            _logger.LogInformation("🤖✅ AI каскадный анализ завершен: пользователь {User}, ML={MlScore}, AI={AiScore}, причина: {AiReason}",
                 Utils.FullName(user), mlScore, aiProbability, aiReason);
 
             // Принимаем решение на основе AI анализа
@@ -209,7 +209,7 @@ public class AiCascadeService : IAiCascadeService
             {
                 _logger.LogWarning("🤖🚫 AI каскадный анализ: определен спам (AI={AiScore}), удаляем сообщение", aiProbability);
                 await _notificationService.DeleteAndReportMessage(message, $"AI каскадный анализ: спам (ML={mlScore:F2}, AI={aiProbability:F2})", isSilentMode, cancellationToken);
-                
+
                 // Отслеживаем нарушения для повторных банов
                 await _userBanService.TrackViolationAndBanIfNeededAsync(message, user, $"AI каскадный анализ: спам (ML={mlScore:F2}, AI={aiProbability:F2})", cancellationToken);
             }
@@ -221,7 +221,7 @@ public class AiCascadeService : IAiCascadeService
             else // AI считает сообщение безопасным
             {
                 _logger.LogInformation("🤖✅ AI каскадный анализ: сообщение безопасно (AI={AiScore}), разрешаем", aiProbability);
-                
+
                 // Засчитываем как хорошее сообщение
                 await _moderationService.IncrementGoodMessageCountAsync(user, chat, messageText);
             }
@@ -229,7 +229,7 @@ public class AiCascadeService : IAiCascadeService
         catch (Exception ex)
         {
             _logger.LogError(ex, "❌ Ошибка при AI каскадном анализе для пользователя {UserId}", user.Id);
-            
+
             // При ошибке AI отправляем в ручную проверку
             await _notificationService.DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
         }

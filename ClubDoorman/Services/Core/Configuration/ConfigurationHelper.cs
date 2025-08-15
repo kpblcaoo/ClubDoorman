@@ -41,7 +41,7 @@ public static class ConfigurationHelper
         var chatsStr = Environment.GetEnvironmentVariable(envName);
         if (string.IsNullOrEmpty(chatsStr))
             return new HashSet<long>();
-        
+
         return chatsStr
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(x => long.TryParse(x.Trim(), out var id) ? id : (long?)null)

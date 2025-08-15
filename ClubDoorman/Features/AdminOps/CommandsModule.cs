@@ -20,4 +20,4 @@ public static class CommandsModule
         // Используем новую структуру AdminOps
         return services.AddAdminOpsFeature();
     }
-} 
+}

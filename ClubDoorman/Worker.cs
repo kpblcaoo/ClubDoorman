@@ -61,28 +61,28 @@ internal sealed class Worker(
     private readonly IUserBanService _userBanService = userBanService;
     private readonly GlobalStatsManager _globalStatsManager = new();
     private User _me = default!;
-    
-            // Группы, где не показывать рекламу (из .env NO_VPN_AD_GROUPS)
-        private static readonly HashSet<long> NoVpnAdGroups = 
-        (Environment.GetEnvironmentVariable("NO_VPN_AD_GROUPS") ?? "")
-        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-        .Select(id => long.TryParse(id.Trim(), out var val) ? val : (long?)null)
-        .Where(id => id.HasValue)
-        .Select(id => id.Value)
-        .ToHashSet();
+
+    // Группы, где не показывать рекламу (из .env NO_VPN_AD_GROUPS)
+    private static readonly HashSet<long> NoVpnAdGroups =
+    (Environment.GetEnvironmentVariable("NO_VPN_AD_GROUPS") ?? "")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+    .Select(id => long.TryParse(id.Trim(), out var val) ? val : (long?)null)
+    .Where(id => id.HasValue)
+    .Select(id => id.Value)
+    .ToHashSet();
 
     static Worker()
     {
         var envVar = Environment.GetEnvironmentVariable("NO_VPN_AD_GROUPS");
         Console.WriteLine($"[DEBUG] NO_VPN_AD_GROUPS env var: '{envVar}'");
         Console.WriteLine($"[DEBUG] Loaded {NoVpnAdGroups.Count} groups without ads: [{string.Join(", ", NoVpnAdGroups)}]");
-        
+
         var whitelistVar = Environment.GetEnvironmentVariable("DOORMAN_WHITELIST");
         Console.WriteLine($"[DEBUG] DOORMAN_WHITELIST env var: '{whitelistVar}'");
-        
+
         var logChatVar = Environment.GetEnvironmentVariable("DOORMAN_LOG_ADMIN_CHAT");
         Console.WriteLine($"[DEBUG] DOORMAN_LOG_ADMIN_CHAT env var: '{logChatVar}'");
-        
+
         var testBlacklistVar = Environment.GetEnvironmentVariable("DOORMAN_TEST_BLACKLIST_IDS");
         Console.WriteLine($"[DEBUG] DOORMAN_TEST_BLACKLIST_IDS env var: '{testBlacklistVar}'");
     }
@@ -99,7 +99,7 @@ internal sealed class Worker(
     private async Task RefreshBanlistLoop(CancellationToken token)
     {
         // Обновляем банлист сразу после запуска бота
-        try 
+        try
         {
             _logger.LogInformation("Начальное обновление банлиста из lols.bot при старте бота");
             await _userManager.RefreshBanlist();
@@ -157,13 +157,17 @@ internal sealed class Worker(
         }
 
         _me = await _bot.GetMe(cancellationToken: stoppingToken);
-        
-        _ = Task.Run(async () => {
-            try {
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
                 await _globalStatsManager.UpdateAllMembersAsync(_bot);
                 await _globalStatsManager.UpdateZeroMemberChatsAsync(_bot);
                 _logger.LogInformation("Первичное обновление количества участников во всех чатах для статистики");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 _logger.LogWarning(ex, "Ошибка при первичном обновлении количества участников");
             }
         });
@@ -223,7 +227,7 @@ internal sealed class Worker(
     private async Task AutoBanAsync(Message message, string reason, CancellationToken stoppingToken)
     {
         var user = message.From;
-        
+
         // Используем UserBanService для централизованного бана
         await _userBanService.BanUserAsync(message.Chat, user, BanTypeEnum.AutoBan, reason, message, stoppingToken);
     }
@@ -231,7 +235,7 @@ internal sealed class Worker(
     private async Task AutoBanWithLogging(Message message, string reason, CancellationToken stoppingToken)
     {
         var user = message.From;
-        
+
         // Используем UserBanService для централизованного бана из блэклиста
         await _userBanService.BanUserAsync(message.Chat, user, BanTypeEnum.Blacklist, reason, message, stoppingToken);
     }
@@ -242,7 +246,7 @@ internal sealed class Worker(
         {
             var chat = message.Chat;
             _statisticsService.IncrementKnownBadMessage(chat.Id);
-            
+
             // Используем UserBanService для централизованного бана
             await _userBanService.BanUserAsync(chat, user, BanTypeEnum.AutoBan, "Известное спам-сообщение", message, stoppingToken);
         }
@@ -263,7 +267,7 @@ internal sealed class Worker(
 
     // УДАЛЕН: BanUserForLongName - логика перенесена в IntroFlowService
 
-        // УДАЛЕН: IntroFlow - логика перенесена в IntroFlowService
+    // УДАЛЕН: IntroFlow - логика перенесена в IntroFlowService
 
 
 
@@ -278,7 +282,7 @@ internal sealed class Worker(
             {
                 var report = await _statisticsService.GenerateReportAsync();
                 _statisticsService.ClearStats();
-                
+
                 await _messageService.SendAdminNotificationAsync(
                     AdminNotificationType.SystemInfo,
                     new SimpleNotificationData(new User { Id = 0, FirstName = "System" }, new Chat { Id = Config.AdminChatId, Title = "Admin" }, report),
@@ -335,7 +339,7 @@ internal sealed class Worker(
     }
 
     private static string UserToKey(long chatId, User user) => $"{chatId}_{user.Id}";
-    
+
     /// <summary>
     /// Проверяет, одобрен ли пользователь
     /// </summary>
@@ -368,18 +372,18 @@ internal sealed class Worker(
                 // Если не удалось получить полную информацию, считаем что связанного канала нет
                 hasLinkedChannel = false;
             }
-            
+
             // Обсуждение канала если:
             // 1. Есть связанный канал И сообщение автоматически переслано
             // 2. ИЛИ просто есть связанный канал (пользователи пишут в обсуждении)
             var isDiscussion = hasLinkedChannel && (message.IsAutomaticForward || true);
-            
+
             if (isDiscussion)
             {
-                _logger.LogDebug("Обнаружено обсуждение канала: chat={ChatId}, hasLinkedChannel={HasLinked}, autoForward={AutoForward}", 
+                _logger.LogDebug("Обнаружено обсуждение канала: chat={ChatId}, hasLinkedChannel={HasLinked}, autoForward={AutoForward}",
                     chat.Id, hasLinkedChannel, message.IsAutomaticForward);
             }
-            
+
             return isDiscussion;
         }
         catch (Exception e)

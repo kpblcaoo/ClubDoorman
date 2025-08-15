@@ -13,27 +13,27 @@ public class SendCaptchaMessageRequest
     /// Чат, в который отправляется капча
     /// </summary>
     public Chat Chat { get; }
-    
+
     /// <summary>
     /// Текст сообщения капчи
     /// </summary>
     public string Message { get; }
-    
+
     /// <summary>
     /// Параметры ответа (опционально)
     /// </summary>
     public ReplyParameters? ReplyParameters { get; }
-    
+
     /// <summary>
     /// Клавиатура с кнопками капчи
     /// </summary>
     public InlineKeyboardMarkup ReplyMarkup { get; }
-    
+
     /// <summary>
     /// Токен отмены операции
     /// </summary>
     public CancellationToken CancellationToken { get; }
-    
+
     /// <summary>
     /// Создает новый запрос на отправку сообщения капчи
     /// </summary>
@@ -55,4 +55,4 @@ public class SendCaptchaMessageRequest
         ReplyMarkup = replyMarkup ?? throw new ArgumentNullException(nameof(replyMarkup));
         CancellationToken = cancellationToken;
     }
-} 
+}

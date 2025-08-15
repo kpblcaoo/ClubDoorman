@@ -36,7 +36,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
         try
         {
             _logger.LogDebug("🤖 ServiceChatDispatcher: отправляем уведомление типа {NotificationType}", notification.GetType().Name);
-            
+
             // Специальная обработка для AI анализа профиля с фото
             if (notification is AiProfileAnalysisData aiProfileData)
             {
@@ -44,7 +44,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
                 await SendAiProfileAnalysisWithPhoto(aiProfileData, cancellationToken);
                 return;
             }
-            
+
             _logger.LogDebug("🤖 ServiceChatDispatcher: используем обычную обработку для типа {NotificationType}", notification.GetType().Name);
 
             var message = FormatNotificationForAdminChat(notification);
@@ -73,7 +73,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
         {
             var message = FormatNotificationForLogChat(notification);
             var chatId = Config.LogAdminChatId != Config.AdminChatId ? Config.LogAdminChatId : Config.AdminChatId;
-            
+
             await _bot.SendMessageAsync(
                 chatId,
                 message,
@@ -101,16 +101,16 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
             SuspiciousUserNotificationData => true,
             AiDetectNotificationData aiDetect => !aiDetect.IsAutoDelete, // Если не автоудаление - требует проверки
             AiProfileAnalysisData => true, // AI анализ профиля требует реакции
-            
+
             // Редкие уведомления, полезные даже без реакции - админ-чат
             PrivateChatBanAttemptData => true,
             ChannelMessageNotificationData => true,
             UserRestrictedNotificationData => true,
             UserRemovedFromApprovedNotificationData => true,
-            
+
             // Ошибки, требующие внимания - админ-чат
             ErrorNotificationData => true,
-            
+
             // Всё остальное - лог-чат
             _ => false
         };
@@ -214,63 +214,63 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
 
     private string FormatAiProfileAnalysis(AiProfileAnalysisData notification)
     {
-        var reasonText = notification.Reason.Length > 350 ? 
-            notification.Reason.Substring(0, 347) + "..." : 
+        var reasonText = notification.Reason.Length > 350 ?
+            notification.Reason.Substring(0, 347) + "..." :
             notification.Reason;
-            
-        var messageText = notification.MessageText.Length > 120 ? 
-            notification.MessageText.Substring(0, 117) + "..." : 
+
+        var messageText = notification.MessageText.Length > 120 ?
+            notification.MessageText.Substring(0, 117) + "..." :
             notification.MessageText;
-            
+
         // Экранируем HTML символы
         var escapedUser = System.Net.WebUtility.HtmlEncode(FormatUser(notification.User));
         var escapedChat = System.Net.WebUtility.HtmlEncode(FormatChat(notification.Chat));
         var escapedReason = System.Net.WebUtility.HtmlEncode(reasonText);
         var escapedNameBio = System.Net.WebUtility.HtmlEncode(notification.NameBio);
         var escapedMessageText = System.Net.WebUtility.HtmlEncode(messageText);
-            
+
         // РЕФАКТОРИНГ: Убираем информацию о пользователе, чате и профиле - она уже в фото
         var result = $"🤖 <b>AI анализ профиля</b>\n\n" +
                      $"📊 <b>Вероятность спама</b>: {notification.SpamProbability * 100:F1}%\n\n" +
                      $"🔍 <b>Причина</b>:\n<i>{escapedReason}</i>\n\n";
-                     
+
         if (!string.IsNullOrEmpty(notification.AutomaticAction))
         {
             // Автоматическое действие не экранируем - мы его формируем сами и знаем что там безопасно
             result += $"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
                       $"⚡ <b>Автоматическое действие</b>:\n<b>{notification.AutomaticAction}</b>\n\n";
         }
-        
+
         result += $"🔗 <b>Ссылка</b>: {FormatMessageLink(notification.Chat, notification.MessageId)}";
-        
+
         return result;
     }
 
     private async Task SendAiProfileAnalysisWithPhoto(AiProfileAnalysisData data, CancellationToken cancellationToken)
     {
         _logger.LogDebug("🤖 SendAiProfileAnalysisWithPhoto: начало обработки для пользователя {UserId}", data.User.Id);
-        
+
         // Кэшируем данные для кнопок
         var callbackDataBan = $"banprofile_{data.Chat.Id}_{data.User.Id}";
         MemoryCache.Default.Add(callbackDataBan, data, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(12) });
-        
+
         ReplyParameters? replyParams = null;
-        
+
         // 1. Если есть фото - отправляем его отдельно с краткой подписью
-        _logger.LogDebug("🤖 AI анализ профиля: проверяем фото для пользователя {UserId}, PhotoBytes: {PhotoBytesLength}", 
+        _logger.LogDebug("🤖 AI анализ профиля: проверяем фото для пользователя {UserId}, PhotoBytes: {PhotoBytesLength}",
             data.User.Id, data.PhotoBytes?.Length ?? 0);
-            
+
         if (data.PhotoBytes?.Length > 0)
         {
             _logger.LogDebug("🤖 AI анализ профиля: отправляем фото для пользователя {UserId}", data.User.Id);
-            
+
             // РЕФАКТОРИНГ: Новый формат caption - добавляем информацию о чате, убираем лишнее
             var escapedUser = System.Net.WebUtility.HtmlEncode(FormatUser(data.User));
-            var escapedChat = System.Net.WebUtility.HtmlEncode(FormatChat(data.Chat)); 
+            var escapedChat = System.Net.WebUtility.HtmlEncode(FormatChat(data.Chat));
             var escapedNameBio = System.Net.WebUtility.HtmlEncode(data.NameBio);
             var escapedMessageText = System.Net.WebUtility.HtmlEncode(data.MessageText.Length > 120 ?
                 data.MessageText.Substring(0, 117) + "..." : data.MessageText);
-            
+
             var photoCaption = $"<b>👤 Пользователь:</b> {escapedUser}\n" +
                               $"<b>💬 Чат:</b> {escapedChat}\n\n" +
                               $"<b>📋 Профиль:</b>\n{escapedNameBio}\n\n" +
@@ -283,7 +283,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
                 var channelUsername = channelLinkMatch.Groups[1].Value;
                 var channelLink = $"https://t.me/{channelUsername}";
                 photoCaption += $"\n\n<b>🔗 Канал:</b> <a href=\"{channelLink}\">@{channelUsername}</a>";
-                _logger.LogDebug("🤖 AI анализ профиля: добавлена ссылка на канал @{ChannelUsername} для пользователя {UserId}", 
+                _logger.LogDebug("🤖 AI анализ профиля: добавлена ссылка на канал @{ChannelUsername} для пользователя {UserId}",
                     channelUsername, data.User.Id);
             }
             else
@@ -295,16 +295,16 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
                     _logger.LogDebug("🤖 AI анализ профиля: найден привязанный канал без username для пользователя {UserId}", data.User.Id);
                 }
             }
-            
+
             // Обрезаем caption если слишком длинный (лимит Telegram 1024 символа)
             if (photoCaption.Length > 1024)
             {
                 photoCaption = photoCaption.Substring(0, 1021) + "...";
             }
-            
+
             await using var stream = new MemoryStream(data.PhotoBytes);
             var inputFile = InputFile.FromStream(stream, "profile.jpg");
-            
+
             var photoMsg = await _bot.SendPhoto(
                 Config.AdminChatId,
                 inputFile,
@@ -313,14 +313,14 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
                 cancellationToken: cancellationToken
             );
             replyParams = new ReplyParameters { MessageId = photoMsg.MessageId };
-            
+
             _logger.LogDebug("🤖 AI анализ профиля: фото отправлено для пользователя {UserId}", data.User.Id);
         }
         else
         {
             _logger.LogDebug("🤖 AI анализ профиля: фото отсутствует для пользователя {UserId}", data.User.Id);
         }
-        
+
         // 2. Пересылаем подозрительное сообщение после AI анализа
         try
         {
@@ -336,10 +336,10 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
         {
             _logger.LogWarning(ex, "Не удалось переслать подозрительное сообщение для пользователя {UserId}", data.User.Id);
         }
-        
+
         // 3. Основное сообщение с анализом
         var message = FormatAiProfileAnalysis(data);
-        
+
         var mainMessage = await _bot.SendMessageAsync(
             Config.AdminChatId,
             message,
@@ -348,7 +348,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
             replyParameters: replyParams,
             cancellationToken: cancellationToken
         );
-        
+
 
     }
 
@@ -454,7 +454,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
     private string FormatMessageLink(Chat chat, long? messageId)
     {
         if (!messageId.HasValue) return "Нет";
-        
+
         return chat.Type switch
         {
             global::Telegram.Bot.Types.Enums.ChatType.Supergroup => $"https://t.me/c/{chat.Id.ToString()[4..]}/{messageId}",
@@ -462,4 +462,4 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
             _ => $"ID: {messageId}"
         };
     }
-} 
+}

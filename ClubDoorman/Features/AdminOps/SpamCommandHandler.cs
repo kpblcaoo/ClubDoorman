@@ -58,26 +58,26 @@ public class SpamCommandHandler : ICommandHandler
         }
 
         var replyToMessage = message.ReplyToMessage;
-        
+
         // Проверяем, что реплай не на сообщение бота (кроме форвардов)
         if (replyToMessage.From?.Id == _bot.BotId && replyToMessage.ForwardDate == null)
         {
-            await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Warning, 
-                new SimpleNotificationData(message.From!, message.Chat, "Реплай на сообщение бота"), 
+            await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Warning,
+                new SimpleNotificationData(message.From!, message.Chat, "Реплай на сообщение бота"),
                 cancellationToken);
             return;
         }
 
         var text = replyToMessage.Text ?? replyToMessage.Caption;
-        _logger.LogDebug("Команда /spam: извлечен текст='{Text}' (длина={Length})", 
-            string.IsNullOrWhiteSpace(text) ? "[ПУСТОЙ]" : text.Length > 100 ? text.Substring(0, 100) + "..." : text, 
+        _logger.LogDebug("Команда /spam: извлечен текст='{Text}' (длина={Length})",
+            string.IsNullOrWhiteSpace(text) ? "[ПУСТОЙ]" : text.Length > 100 ? text.Substring(0, 100) + "..." : text,
             text?.Length ?? 0);
 
         if (string.IsNullOrWhiteSpace(text))
         {
             _logger.LogWarning("❌ Команда /spam не выполнена: текст сообщения пустой или отсутствует");
-            await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Warning, 
-                new SimpleNotificationData(message.From!, message.Chat, "Сообщение не содержит текста"), 
+            await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Warning,
+                new SimpleNotificationData(message.From!, message.Chat, "Сообщение не содержит текста"),
                 cancellationToken);
             return;
         }
@@ -90,20 +90,20 @@ public class SpamCommandHandler : ICommandHandler
         _logger.LogInformation("🔥 Обрабатываем команду /spam для текста: '{Text}'", text);
         await _classifier.AddSpam(text);
         await _badMessageManager.MarkAsBad(text);
-        
+
         // Уведомление пользователю
-        await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Success, 
-            new SimpleNotificationData(message.From!, message.Chat, "Сообщение добавлено как пример спама"), 
+        await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Success,
+            new SimpleNotificationData(message.From!, message.Chat, "Сообщение добавлено как пример спама"),
             cancellationToken);
-            
+
         // Уведомление в админку о добавлении спам примера
         var adminData = new SimpleNotificationData(
-            message.From!, 
-            message.Chat, 
+            message.From!,
+            message.Chat,
             $"Администратор {Utils.FullName(message.From!)} добавил сообщение как пример СПАМА:\n\n`{text.Substring(0, Math.Min(text.Length, 200))}{(text.Length > 200 ? "..." : "")}`"
         );
         await _messageService.SendAdminNotificationAsync(AdminNotificationType.SystemInfo, adminData, cancellationToken);
-        
+
         _logger.LogInformation("✅ Команда /spam успешно выполнена");
     }
 }

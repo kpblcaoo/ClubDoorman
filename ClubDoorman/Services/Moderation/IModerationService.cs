@@ -68,4 +68,4 @@ public interface IModerationService
     /// Банит пользователя и удаляет его из всех списков
     /// </summary>
     Task<bool> BanAndCleanupUserAsync(long userId, long chatId, int? messageIdToDelete = null);
-} 
+}

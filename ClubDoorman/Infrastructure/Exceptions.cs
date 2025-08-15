@@ -113,4 +113,4 @@ public class ConfigurationException : ClubDoormanException
     /// <param name="message">Сообщение об ошибке</param>
     /// <param name="innerException">Внутреннее исключение</param>
     public ConfigurationException(string message, Exception innerException) : base(message, innerException) { }
-} 
+}

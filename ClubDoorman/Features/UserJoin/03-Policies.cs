@@ -84,7 +84,7 @@ public class UserJoinPolicy : IUserJoinPolicy
             {
                 _logger.LogInformation("==================== НОВЫЙ УЧАСТНИК ====================\n" +
                     "Пользователь {User} (id={UserId}, username={Username}) зашел в группу '{ChatTitle}' (id={ChatId})\n" +
-                    "========================================================", 
+                    "========================================================",
                     Utils.FullName(newUser), newUser.Id, newUser.Username ?? "-", message.Chat.Title ?? "-", message.Chat.Id);
 
                 _joinedUserFlags.MarkUserAsJoined(message.Chat.Id, newUser.Id);

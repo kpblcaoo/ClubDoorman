@@ -37,17 +37,17 @@ public class ButtonsService : IButtonsService
         {
             var template = _messageService.GetTemplates().GetAdminTemplate(AdminNotificationType.SuspiciousMessage);
             var messageText = _messageService.GetTemplates().FormatNotificationTemplate(template, data);
-            
+
             // Добавляем префикс тихого режима если нужно
             if (isSilentMode)
             {
                 messageText = $"🔇 **Тихий режим**\n\n{messageText}";
             }
-            
+
             // Создаем кнопки реакции для админ-чата (стандартные кнопки: бан, пропуск, свой)
             var callbackDataBan = $"ban_{message.Chat.Id}_{user.Id}";
             MemoryCache.Default.Add(callbackDataBan, message, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(12) });
-            
+
             var keyboard = new InlineKeyboardMarkup(new[]
             {
                 new[]
@@ -57,7 +57,7 @@ public class ButtonsService : IButtonsService
                     new InlineKeyboardButton("🥰 свой") { CallbackData = $"approve_{user.Id}" }
                 }
             });
-            
+
             // ФИКС: Пытаемся переслать сообщение, но если не получается - отправляем без пересылки
             Message? forward = null;
             try
@@ -69,7 +69,7 @@ public class ButtonsService : IButtonsService
                     message.MessageId,
                     cancellationToken: cancellationToken
                 );
-                
+
                 // Отправляем уведомление с кнопками как ответ на форвард
                 await _bot.SendMessage(
                     _appConfig.AdminChatId,
@@ -83,7 +83,7 @@ public class ButtonsService : IButtonsService
             catch (Exception forwardEx) when (forwardEx.Message.Contains("protected content") || forwardEx.Message.Contains("can't be forwarded"))
             {
                 _logger.LogWarning("Сообщение имеет защищенный контент, отправляем уведомление без пересылки: {Error}", forwardEx.Message);
-                
+
                 // Отправляем уведомление без пересылки (просто как обычное сообщение)
                 await _bot.SendMessage(
                     _appConfig.AdminChatId,
@@ -93,8 +93,8 @@ public class ButtonsService : IButtonsService
                     cancellationToken: cancellationToken
                 );
             }
-            
-            _logger.LogDebug("Отправлено подозрительное сообщение с кнопками для пользователя {User} в чате {Chat}", 
+
+            _logger.LogDebug("Отправлено подозрительное сообщение с кнопками для пользователя {User} в чате {Chat}",
                 Utils.FullName(user), message.Chat.Title);
         }
         catch (Exception ex)
