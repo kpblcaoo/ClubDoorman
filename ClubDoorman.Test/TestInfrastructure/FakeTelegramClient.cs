@@ -517,27 +517,12 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
         return Task.FromResult(chatMember);
     }
 
-    // Для настройки администраторов в тестах
-    private Dictionary<long, List<ChatMember>> _chatAdministrators = new();
-
-    public void SetupChatAdministrators(long chatId, params ChatMember[] administrators)
-    {
-        _chatAdministrators[chatId] = administrators.ToList();
-    }
-
     public Task<ChatMember[]> GetChatAdministratorsAsync(ChatId chatId, CancellationToken cancellationToken = default)
     {
         if (ShouldThrowException)
             throw ExceptionToThrow ?? new Exception("Fake exception");
 
-        // Если настроены администраторы для этого чата, возвращаем их
-        if (_chatAdministrators.TryGetValue(chatId.Identifier ?? 0, out var customAdministrators))
-        {
-            OperationLog.Add($"GetChatAdministratorsAsync: chatId={chatId.Identifier} (custom)");
-            return Task.FromResult(customAdministrators.ToArray());
-        }
-
-        // Возвращаем фейковых администраторов чата по умолчанию
+        // Возвращаем фейковых администраторов чата
         var administrators = new ChatMember[]
         {
             new ChatMemberOwner
@@ -567,7 +552,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
             }
         };
 
-        OperationLog.Add($"GetChatAdministratorsAsync: chatId={chatId.Identifier} (default)");
+        OperationLog.Add($"GetChatAdministratorsAsync: chatId={chatId.Identifier}");
         return Task.FromResult(administrators);
     }
 
@@ -604,7 +589,6 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
         SentPhotos.Clear();
         RestrictedUsers.Clear();
         OperationLog.Clear();
-        _chatAdministrators.Clear();
         ShouldThrowException = false;
         ExceptionToThrow = null;
     }

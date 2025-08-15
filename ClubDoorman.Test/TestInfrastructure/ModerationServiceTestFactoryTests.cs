@@ -3,6 +3,7 @@ using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -30,6 +31,7 @@ public class ModerationServiceTestFactoryTests
 
         // Assert
         Assert.That(instance, Is.Not.Null);
+        Assert.That(instance, Is.InstanceOf<ModerationService>());
     }
 
     [Test]

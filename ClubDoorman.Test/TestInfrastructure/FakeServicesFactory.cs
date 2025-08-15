@@ -5,14 +5,13 @@ using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
-using ClubDoorman.Features.AdminOps;
-using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Requests;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -23,9 +22,8 @@ using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
-using ClubDoorman.Features.UserJoin;
-using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -129,17 +127,6 @@ public class FakeServicesFactory
         var statisticsServiceMock = new Mock<IStatisticsService>();
         var globalStatsManagerMock = new Mock<GlobalStatsManager>();
         
-        // Настраиваем мок для IAiCascadeService
-        var aiCascadeServiceMock = new Mock<IAiCascadeService>();
-        aiCascadeServiceMock.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true) // AI анализ срабатывает и возвращает true
-            .Callback<Message, User, Chat, CancellationToken>((message, user, chat, token) =>
-            {
-                // Отправляем реальное сообщение через FakeTelegramClient
-                _fakeBot.SendMessageAsync(_appConfig.AdminChatId, 
-                    $"AI анализ профиля пользователя {user.FirstName} {user.LastName} (@{user.Username})");
-            });
-        
         
 
         statisticsServiceMock.Setup(x => x.GetAllStats()).Returns(new Dictionary<long, ChatStats>());
@@ -178,11 +165,6 @@ public class FakeServicesFactory
         
         var logger = _loggerFactory.CreateLogger<MessageHandler>();
 
-        // Create mock command handlers
-        var startCommandHandler = Mock.Of<IStartCommandHandler>();
-        var suspiciousCommandHandler = Mock.Of<ISuspiciousCommandHandler>();
-        var commandRouter = Mock.Of<ICommandRouter>();
-        
         return new MessageHandler(
             _fakeBot,
             moderationService ?? moderationServiceMock.Object,
@@ -193,6 +175,7 @@ public class FakeServicesFactory
             aiChecksMock.Object,
             globalStatsManager,
             statisticsServiceMock.Object,
+            serviceProviderMock.Object,
             userFlowLoggerMock.Object,
             messageServiceMock.Object,
             chatLinkFormatterMock.Object,
@@ -200,20 +183,7 @@ public class FakeServicesFactory
             _appConfig,
             new ViolationTracker(_loggerFactory.CreateLogger<ViolationTracker>(), _appConfig),
             logger,
-            new Mock<IUserBanService>().Object,
-            new Mock<IChannelModerationService>().Object,
-            startCommandHandler,
-            suspiciousCommandHandler,
-            commandRouter,
-            new Mock<ILogChatService>().Object,
-            Mock.Of<IJoinedUserFlags>(),
-            Mock.Of<IUserIndex>(),
-            aiCascadeServiceMock.Object,
-            Mock.Of<INotificationService>(),
-            Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
-            Mock.Of<ClubDoorman.Services.Notifications.IButtonsService>(),
-            Mock.Of<IUserJoinFacade>(),
-            Mock.Of<ClubDoorman.Features.Moderation.IModerationFacade>());
+            new Mock<IUserBanService>().Object);
     }
 
     /// <summary>
@@ -294,4 +264,4 @@ public class FakeServicesFactory
                 .SetResult(new ModerationResult(ModerationAction.Report, "Обнаружена мимикрия", 0.8));
         }
     }
-}
+} 

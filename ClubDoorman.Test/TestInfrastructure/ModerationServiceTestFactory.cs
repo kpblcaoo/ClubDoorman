@@ -1,9 +1,9 @@
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
-using ClubDoorman.Features.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -33,11 +33,23 @@ public class ModerationServiceTestFactory
     public Mock<ITelegramBotClient> BotClientMock { get; } = new();
     public Mock<IMessageService> MessageServiceMock { get; } = new();
     public Mock<IUserBanService> UserBanServiceMock { get; } = new();
-    public Mock<ILogger<ModerationPolicy>> LoggerMock { get; } = new();
+    public Mock<ILogger<ModerationService>> LoggerMock { get; } = new();
 
-    public IModerationService CreateModerationService()
+    public ModerationService CreateModerationService()
     {
-        return new Mock<IModerationService>().Object;
+        return new ModerationService(
+            ClassifierMock.Object,
+            MimicryClassifierMock.Object,
+            BadMessageManagerMock.Object,
+            UserManagerMock.Object,
+            AiChecksMock.Object,
+            SuspiciousUsersStorageMock.Object,
+            BotClientMock.Object,
+            MessageServiceMock.Object,
+            UserBanServiceMock.Object,
+            new Mock<IUserCleanupService>().Object,
+            LoggerMock.Object
+        );
     }
 
     #region Configuration Methods
@@ -96,7 +108,7 @@ public class ModerationServiceTestFactory
         return this;
     }
 
-    public ModerationServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<ModerationPolicy>>> setup)
+    public ModerationServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<ModerationService>>> setup)
     {
         setup(LoggerMock);
         return this;
@@ -115,7 +127,7 @@ public class ModerationServiceTestFactory
         return new Mock<IUserManager>().Object;
     }
 
-    public async Task<IModerationService> CreateAsync()
+    public async Task<ModerationService> CreateAsync()
     {
         return await Task.FromResult(CreateModerationService());
     }
