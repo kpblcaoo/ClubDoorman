@@ -52,9 +52,9 @@ public class UserJoinServiceBuilder
     private readonly Mock<IViolationTracker> _violationTrackerMock = new();
     private readonly Mock<ILogger<MessageHandler>> _messageHandlerLoggerMock = new();
     private readonly Mock<IUserBanService> _userBanServiceMock = new();
-    private readonly Mock<ILogger<UserJoinService>> _loggerMock = new();
+    private readonly Mock<ILogger<UserJoinFacade>> _loggerMock = new();
     
-    private Mock<IMessageHandler> _messageHandlerMock = new();
+    private Mock<IUpdateHandler> _messageHandlerMock = new();
 
     /// <summary>
     /// Настраивает стандартные моки для базового сценария
@@ -62,7 +62,7 @@ public class UserJoinServiceBuilder
     /// </summary>
     public UserJoinServiceBuilder WithStandardMocks()
     {
-        // Используем BilboBuilder для создания Mock<IMessageHandler>
+        // Используем BilboBuilder для создания Mock<IUpdateHandler>
         var messageHandlerMock = TK.CreateMessageHandlerBuilder()
             .WithStandardMocks()
             .BuildMock();
@@ -184,7 +184,7 @@ public class UserJoinServiceBuilder
     /// Настраивает моки для сценария с кастомными настройками
     /// <tags>builders, user-join-service, custom-scenario, fluent-api</tags>
     /// </summary>
-    public UserJoinServiceBuilder WithCustomScenario(Action<Mock<IMessageHandler>> customSetup)
+    public UserJoinServiceBuilder WithCustomScenario(Action<Mock<IUpdateHandler>> customSetup)
     {
         var messageHandlerMock = TK.CreateMessageHandlerBuilder()
             .WithStandardMocks()
@@ -197,23 +197,23 @@ public class UserJoinServiceBuilder
     }
 
     /// <summary>
-    /// Создает UserJoinService с настроенными зависимостями
-    /// <tags>builders, user-join-service, build, fluent-api</tags>
-    /// </summary>
-    public UserJoinService Build()
-    {
-        return new UserJoinService(_messageHandlerMock.Object, _loggerMock.Object);
-    }
+    /// Создает UserJoinFacade с настроенными зависимостями
+/// <tags>builders, user-join-service, build, fluent-api</tags>
+/// </summary>
+public UserJoinFacade Build()
+{
+return new UserJoinFacade(_messageHandlerMock.Object, _loggerMock.Object);
+}
 
     /// <summary>
-    /// Возвращает мок IMessageHandler для дополнительной настройки
-    /// <tags>builders, user-join-service, message-handler-mock, fluent-api</tags>
-    /// </summary>
-    public Mock<IMessageHandler> MessageHandlerMock => _messageHandlerMock;
+    /// Возвращает мок IUpdateHandler для дополнительной настройки
+/// <tags>builders, user-join-service, message-handler-mock, fluent-api</tags>
+/// </summary>
+public Mock<IUpdateHandler> MessageHandlerMock => _messageHandlerMock;
 
     /// <summary>
     /// Возвращает мок логгера для дополнительной настройки
-    /// <tags>builders, user-join-service, logger-mock, fluent-api</tags>
-    /// </summary>
-    public Mock<ILogger<UserJoinService>> LoggerMock => _loggerMock;
+/// <tags>builders, user-join-service, logger-mock, fluent-api</tags>
+/// </summary>
+public Mock<ILogger<UserJoinFacade>> LoggerMock => _loggerMock;
 } 

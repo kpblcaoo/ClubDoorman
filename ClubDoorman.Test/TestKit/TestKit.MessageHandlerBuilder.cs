@@ -68,7 +68,7 @@ public class MessageHandlerBuilder
     private readonly Mock<ILogger<MessageHandler>> _loggerMock = TK.CreateLoggerMock<MessageHandler>();
     private readonly Mock<ILogger<SuspiciousCommandHandler>> _suspiciousCommandHandlerLoggerMock = TK.CreateLoggerMock<SuspiciousCommandHandler>();
     private readonly Mock<ISuspiciousUsersStorage> _suspiciousUsersStorageMock = TK.CreateMock<ISuspiciousUsersStorage>();
-    private readonly Mock<IMessageHandler> _messageHandlerMock = new();
+    private readonly Mock<IUpdateHandler> _messageHandlerMock = new();
     private readonly Mock<IModerationService> _moderationServiceMock = new Mock<IModerationService>();
     private readonly Mock<IModerationFacade> _moderationFacadeMock = new Mock<IModerationFacade>();
 
@@ -340,10 +340,10 @@ public class MessageHandlerBuilder
     }
 
     /// <summary>
-    /// Создает Mock<IMessageHandler> для прокси-сервисов
-    /// <tags>builders, message-handler, proxy-services, fluent-api</tags>
-    /// </summary>
-    public Mock<IMessageHandler> BuildMock()
+    /// Создает Mock<IUpdateHandler> для прокси-сервисов
+/// <tags>builders, message-handler, proxy-services, fluent-api</tags>
+/// </summary>
+public Mock<IUpdateHandler> BuildMock()
     {
         // Настраиваем мок IMessageHandler на основе реального MessageHandler
         var realHandler = Build();

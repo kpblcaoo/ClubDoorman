@@ -33,11 +33,11 @@ public class ModerationServiceTestFactory
     public Mock<ITelegramBotClient> BotClientMock { get; } = new();
     public Mock<IMessageService> MessageServiceMock { get; } = new();
     public Mock<IUserBanService> UserBanServiceMock { get; } = new();
-    public Mock<ILogger<ModerationService>> LoggerMock { get; } = new();
+    public Mock<ILogger<ModerationServiceAdapter>> LoggerMock { get; } = new();
 
-    public ModerationService CreateModerationService()
+    public ModerationServiceAdapter CreateModerationService()
     {
-        return new ModerationService(
+        return new ModerationServiceAdapter(
             ClassifierMock.Object,
             MimicryClassifierMock.Object,
             BadMessageManagerMock.Object,
@@ -108,7 +108,7 @@ public class ModerationServiceTestFactory
         return this;
     }
 
-    public ModerationServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<ModerationService>>> setup)
+    public ModerationServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<ModerationServiceAdapter>>> setup)
     {
         setup(LoggerMock);
         return this;
@@ -127,7 +127,7 @@ public class ModerationServiceTestFactory
         return new Mock<IUserManager>().Object;
     }
 
-    public async Task<ModerationService> CreateAsync()
+    public async Task<ModerationServiceAdapter> CreateAsync()
     {
         return await Task.FromResult(CreateModerationService());
     }

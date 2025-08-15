@@ -29,7 +29,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Handlers;
 
 
@@ -394,9 +394,9 @@ public class MessageHandlerTestFactory
 
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock { get; } = new();
 
-    public ModerationService CreateModerationServiceWithFake()
+    public ModerationServiceAdapter CreateModerationServiceWithFake()
     {
-        var mockLogger = new Mock<ILogger<ModerationService>>();
+        var mockLogger = new Mock<ILogger<ModerationServiceAdapter>>();
         var mockClassifier = new Mock<ISpamHamClassifier>();
         var mockMimicryClassifier = new Mock<IMimicryClassifier>();
         var mockBadMessageManager = new Mock<IBadMessageManager>();
@@ -405,7 +405,7 @@ public class MessageHandlerTestFactory
         var mockSuspiciousUsersStorage = new Mock<ISuspiciousUsersStorage>();
         var mockMessageService = new Mock<IMessageService>();
 
-        return new ModerationService(
+        return new ModerationServiceAdapter(
             mockClassifier.Object,
             mockMimicryClassifier.Object,
             mockBadMessageManager.Object,

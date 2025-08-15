@@ -131,9 +131,9 @@ public class CallbackQueryHandlerTestFactory
     
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
-    public ModerationService CreateModerationServiceWithFake()
+    public ModerationServiceAdapter CreateModerationServiceWithFake()
     {
-        return new ModerationService(
+        return new ModerationServiceAdapter(
             new Mock<ISpamHamClassifier>().Object,
             new Mock<IMimicryClassifier>().Object,
             new Mock<IBadMessageManager>().Object,

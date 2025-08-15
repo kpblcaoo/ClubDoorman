@@ -85,9 +85,9 @@ public class CaptchaServiceTestFactory
     
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
-    public ModerationService CreateModerationServiceWithFake()
+    public ModerationServiceAdapter CreateModerationServiceWithFake()
     {
-        return new ModerationService(
+        return new ModerationServiceAdapter(
             new Mock<ISpamHamClassifier>().Object,
             new Mock<IMimicryClassifier>().Object,
             new Mock<IBadMessageManager>().Object,
@@ -98,7 +98,7 @@ public class CaptchaServiceTestFactory
             new Mock<IMessageService>().Object,
             new Mock<IUserBanService>().Object,
             new Mock<IUserCleanupService>().Object,
-            new Mock<ILogger<ModerationService>>().Object
+            new Mock<ILogger<ModerationServiceAdapter>>().Object
         );
     }
 

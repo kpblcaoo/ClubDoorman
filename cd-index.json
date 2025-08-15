@@ -1,0 +1,4574 @@
+{
+  "Meta": {
+    "Version": "1.0",
+    "SchemaVersion": "1.2",
+    "GeneratedAt": "2025-08-15T23:30:04.4408368Z",
+    "Sections": [
+      "DI",
+      "Entrypoints",
+      "Tree"
+    ]
+  },
+  "Project": [
+    {
+      "Name": "ClubDoorman",
+      "Path": "ClubDoorman/ClubDoorman.csproj",
+      "Language": "C#"
+    }
+  ],
+  "Tree": [
+    {
+      "Files": [
+        {
+          "Path": ".config/dotnet-tools.json",
+          "Kind": "json",
+          "Loc": 20,
+          "Sha256": "648038e66bbf6d6a324866f9fe65bf0ec13061ce45ce2d4b14480c695f51833e"
+        },
+        {
+          "Path": ".cursor/mcp.json",
+          "Kind": "json",
+          "Loc": 19,
+          "Sha256": "75a9bd68ba89790f628d4e5b59efc1e36e8150aba0feac5f793c679f61c2edd8"
+        },
+        {
+          "Path": ".devcontainer/devcontainer.json",
+          "Kind": "json",
+          "Loc": 19,
+          "Sha256": "8e9f17cb211523d79cca44b90b25e0ae38c13dbce5bddcfb64aed58b13f6b976"
+        },
+        {
+          "Path": ".github/workflows/ci.yml",
+          "Kind": "yml",
+          "Loc": 26,
+          "Sha256": "3f807b4d75cb161e6995678bb927068e843794d515c7e48621cf474be536b183"
+        },
+        {
+          "Path": ".github/workflows/deploy.yml",
+          "Kind": "yml",
+          "Loc": 95,
+          "Sha256": "9151c4fa59b5c61c2bd66060fd5605c39e947278d4829e5c71f2d0af38160971"
+        },
+        {
+          "Path": ".github/workflows/e2e-tests.yml",
+          "Kind": "yml",
+          "Loc": 88,
+          "Sha256": "a5ad59cdaf486fbc3582ddf96766e122554ad8da5a28ad9db0111904f770f667"
+        },
+        {
+          "Path": ".gitleaks.baseline.json",
+          "Kind": "json",
+          "Loc": 842,
+          "Sha256": "26cb2b05b31624655f17480bda868bd11faf0a78841789834351b644f817245d"
+        },
+        {
+          "Path": "ClubDoorman.sln",
+          "Kind": "sln",
+          "Loc": 36,
+          "Sha256": "d7491434032613d0fc43afced19e4bdfc33167c13f04d0ace63ee8b9e5ac13e0"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/appsettings.Development.json",
+          "Kind": "json",
+          "Loc": 8,
+          "Sha256": "93ad1e10cea3e4ceb9d81081b69cd69e54eeea86fc6120f6dfb6377814fceae0"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/appsettings.json",
+          "Kind": "json",
+          "Loc": 83,
+          "Sha256": "e1585baae59bca0f044cb50aed0d70b9580ba43c1757dd702b0c39b4c6cf1bec"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/ClubDoorman.deps.json",
+          "Kind": "json",
+          "Loc": 2376,
+          "Sha256": "92fe43c4712700a92751055d758e70a58af4dc2da2bbfb5507d2e9cdd895c48b"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/ClubDoorman.runtimeconfig.json",
+          "Kind": "json",
+          "Loc": 19,
+          "Sha256": "1697149659f6f8a80581ec61f2b509436e824a49e638dee4368806b51da9e8a8"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/ClubDoorman.Test.deps.json",
+          "Kind": "json",
+          "Loc": 3333,
+          "Sha256": "97e98717af6c702e9b93e6e4cad02c249f94c3f6e0b7c8a4c798f5ae435655a1"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/ClubDoorman.Test.runtimeconfig.json",
+          "Kind": "json",
+          "Loc": 19,
+          "Sha256": "1697149659f6f8a80581ec61f2b509436e824a49e638dee4368806b51da9e8a8"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/data/approved_users_groups.json",
+          "Kind": "json",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/data/approved_users.json",
+          "Kind": "json",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/data/chat_settings.json",
+          "Kind": "json",
+          "Loc": 37,
+          "Sha256": "909443fa9ec93ef02f44c24e888b9c88d8c04be7072ae80c78cd5a3ae9f5d0d5"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/data/global_stats.json",
+          "Kind": "json",
+          "Loc": 11,
+          "Sha256": "06b7212b773d2773cf4ecbb5bd2a294a3466c4e3bfd9d3587b3638335d2bd3c1"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/data/stats_global.json",
+          "Kind": "json",
+          "Loc": 7,
+          "Sha256": "394f1386ba2314c52ff6cd8d915db57a947cd8fcba3da01a76f94a9bc5d8c948"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/data/suspicious_users.json",
+          "Kind": "json",
+          "Loc": 1,
+          "Sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/specflow.json",
+          "Kind": "json",
+          "Loc": 27,
+          "Sha256": "75e9fd943f41f5b1d278ae1869ed7bc03b4ed1ae7504bfb7eae49d933c7494fe"
+        },
+        {
+          "Path": "ClubDoorman.Test/bin/Debug/net9.0/test-timeouts.json",
+          "Kind": "json",
+          "Loc": 35,
+          "Sha256": "2e29be71c53f1a50ca429744f4e04cb018d005f70c4763f6863c5d7ffe29d32d"
+        },
+        {
+          "Path": "ClubDoorman.Test/ClubDoorman.Test.csproj",
+          "Kind": "csproj",
+          "Loc": 85,
+          "Sha256": "b06b41b9cbb5add0c8dac02a314f0ad0afeb833a0ce49b21ae9972d8352f2b29"
+        },
+        {
+          "Path": "ClubDoorman.Test/CriticalFunctionalityTests.cs",
+          "Kind": "cs",
+          "Loc": 155,
+          "Sha256": "10ade465e15058f6d36bddcbfa9bdabec68c6ace98d9783c36dd52f331ce88b5"
+        },
+        {
+          "Path": "ClubDoorman.Test/ErrorHandlingTests.cs",
+          "Kind": "cs",
+          "Loc": 235,
+          "Sha256": "4d7a561453cfb06d3d2ac290bf9d48a82e18fb382ba8d7ce55352b1af44d2880"
+        },
+        {
+          "Path": "ClubDoorman.Test/GlobalUsings.cs",
+          "Kind": "cs",
+          "Loc": 27,
+          "Sha256": "2138d3c02febbc2c60d25207950f2e7db1d82fb4dc739eff9ec53e41af891657"
+        },
+        {
+          "Path": "ClubDoorman.Test/ModerationServiceSimpleTests.cs",
+          "Kind": "cs",
+          "Loc": 151,
+          "Sha256": "2028e8f13f582220647cfee94ad35f95797fcb0750bbfb6363b669cc746ff21f"
+        },
+        {
+          "Path": "ClubDoorman.Test/ModerationServiceTests.cs",
+          "Kind": "cs",
+          "Loc": 238,
+          "Sha256": "3cc0a68c601fa3c9352650a29f91534e59cbcfb21460966d487abe0aedbffb00"
+        },
+        {
+          "Path": "ClubDoorman.Test/obj/ClubDoorman.Test.csproj.nuget.dgspec.json",
+          "Kind": "json",
+          "Loc": 277,
+          "Sha256": "c8a9d70f8064df310932ab62303cc0469cb785a39ac2ccb538c9fd9d3c30c34d"
+        },
+        {
+          "Path": "ClubDoorman.Test/obj/Debug/net9.0/.NETCoreApp,Version=v9.0.AssemblyAttributes.cs",
+          "Kind": "cs",
+          "Loc": 4,
+          "Sha256": "0be1a8399fbefa553e3202c44c7fb653cf774b73b6633960d3f702df47a494b2"
+        },
+        {
+          "Path": "ClubDoorman.Test/obj/Debug/net9.0/ClubDoorman.Test.AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 22,
+          "Sha256": "e0456ee8ccbc1bf26c0259e609e5a87937c4f0793a07b5187cfd1c1f389b48fc"
+        },
+        {
+          "Path": "ClubDoorman.Test/obj/Debug/net9.0/ClubDoorman.Test.GlobalUsings.g.cs",
+          "Kind": "cs",
+          "Loc": 13,
+          "Sha256": "76d2a380c44d247e1614cd8d40ca416588d29a9323a39fa022bf6534e95357c7"
+        },
+        {
+          "Path": "ClubDoorman.Test/obj/Debug/net9.0/ClubDoorman.Test.sourcelink.json",
+          "Kind": "json",
+          "Loc": 1,
+          "Sha256": "95dff99486731263d8b0ccbf147f70eee3cad6da526856d4be6a75abd70dafc0"
+        },
+        {
+          "Path": "ClubDoorman.Test/obj/Debug/net9.0/NUnit.AssemblyHooks.cs",
+          "Kind": "cs",
+          "Loc": 32,
+          "Sha256": "3de386ad4a86bf72af5e59717803f896e88d456feeb64673101acb5caab668ff"
+        },
+        {
+          "Path": "ClubDoorman.Test/obj/Debug/net9.0/Verify.Attributes.cs",
+          "Kind": "cs",
+          "Loc": 18,
+          "Sha256": "0fdf239ff61d70fe550f2f4a75530c5675625e1c611002c415cf753ae9f592e6"
+        },
+        {
+          "Path": "ClubDoorman.Test/obj/project.assets.json",
+          "Kind": "json",
+          "Loc": 10394,
+          "Sha256": "2b79abaabcdbe38b4be0c854d611451b8077d06fe6284653f5a57bf972956f28"
+        },
+        {
+          "Path": "ClubDoorman.Test/Properties/launchSettings.json",
+          "Kind": "json",
+          "Loc": 10,
+          "Sha256": "f3e9801cffd57f82de98cc679df01089c9c09b5b9e499e0d12f5f6dfa41275c9"
+        },
+        {
+          "Path": "ClubDoorman.Test/SimpleFiltersNullTests.cs",
+          "Kind": "cs",
+          "Loc": 100,
+          "Sha256": "e57b7f1fd3c7a48edd486ee6460a153d556a2982faa85640be1b568ba16ab72b"
+        },
+        {
+          "Path": "ClubDoorman.Test/SimpleFiltersTests.cs",
+          "Kind": "cs",
+          "Loc": 53,
+          "Sha256": "d787eba19ff04739864cc831179aa816d07780a10a0b5eeb59e066577fa84c09"
+        },
+        {
+          "Path": "ClubDoorman.Test/specflow.json",
+          "Kind": "json",
+          "Loc": 27,
+          "Sha256": "75e9fd943f41f5b1d278ae1869ed7bc03b4ed1ae7504bfb7eae49d933c7494fe"
+        },
+        {
+          "Path": "ClubDoorman.Test/test-timeouts.json",
+          "Kind": "json",
+          "Loc": 35,
+          "Sha256": "2e29be71c53f1a50ca429744f4e04cb018d005f70c4763f6863c5d7ffe29d32d"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestBase.cs",
+          "Kind": "cs",
+          "Loc": 136,
+          "Sha256": "7f0a7609291cb9bc50de1015f2e2fe6e92f7cde6430cc165ba02c0abdc2f525c"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestData/MessageEnvelope.cs",
+          "Kind": "cs",
+          "Loc": 107,
+          "Sha256": "25c00f794be7494541e04ce8a2a93e0a82a7f6b109db4047d23c2d31003f7f15"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestData/TestDataFactory.Generated.cs",
+          "Kind": "cs",
+          "Loc": 577,
+          "Sha256": "4a52cb7489193bc4f4d6be97f4250ec7e362f3665da904c915846aab910bfff6"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/AiChecksTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 77,
+          "Sha256": "f24560313e1d5f603e704157880f24d0a7771ea55ececd38eb00f95985f3f66f"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/AiChecksTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 84,
+          "Sha256": "3a19a33dd8c5b08659956fd14ab6c7122472626f22da190bbb7bb18c4b9a0a78"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/AiServiceExceptionTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 31,
+          "Sha256": "2ffd724ada46925b4b0cd293058f36b87c9c8adc40bc263aa6e99178d4d21fbe"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/AiServiceExceptionTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 61,
+          "Sha256": "382bd919a2bf93142ff83f3f139f474e6293721e5aab046601084d2969d6248c"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/AppConfigTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 120,
+          "Sha256": "bceb1763e88e3130dfba03487639ed4812a1e870ff46470ec29521ded8bcf611"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/ApprovedUsersStorageTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 46,
+          "Sha256": "43f9a6aaba3af9241839d950fb44ac46974a7f8105edeb16700f44246cf5ad2f"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/ApprovedUsersStorageTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 72,
+          "Sha256": "14b0083b1fc00d3a347a8862fec3c9ab9954be6485534cb68e9ed7371bf44eab"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/BehaviorComparisonTestRunner.cs",
+          "Kind": "cs",
+          "Loc": 250,
+          "Sha256": "e6d8f54193850e3aea4b4c0361d48169fcf0c05e3967b619af4a67c66492eb53"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/CallbackQueryHandlerTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 180,
+          "Sha256": "704ff89b0edbb79dc2b2116cc05922086c29ed7b61588cbba34f0ed9513fd537"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/CallbackQueryHandlerTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 154,
+          "Sha256": "9d087e6dc78d7708882b5a3a222cba70dfaafd10e85484d732b07da6072fd02b"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/CaptchaServiceTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 145,
+          "Sha256": "957100d2268f919bb6472d9249cc64a1a134230303f2c72b8219063a02ec1622"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/CaptchaServiceTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 84,
+          "Sha256": "fb8c5d762fdfa6f1db0df2cc07b2ee5fea2ee36ecaeb09720cd88fefabde52f9"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/ChatMemberHandlerTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 123,
+          "Sha256": "a77ae6c075894ddbf15fc1c4521de202184ed7f04ed6b34a0c58608e87b71118"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/ChatMemberHandlerTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 96,
+          "Sha256": "4983908aea9731877bd1f3b07cb21b3facfe5d7bb99ae92148faa8baeeb951f1"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/ConfigurationExceptionTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 29,
+          "Sha256": "446dc14f0da8425ec596794e15caa77aa0b3539fc2d77652e964ba6878de5f16"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/ConfigurationExceptionTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 59,
+          "Sha256": "f359ff2caf3588d3cbb5039cc9f5df221d2a741835401416eb1d4780d9d1f898"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/FakeCallbackQueryHandler.cs",
+          "Kind": "cs",
+          "Loc": 209,
+          "Sha256": "6eed0c6bbf30d93e93e0143e9109c5bae355c9dbc521ab7f545c37923c6707c6"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/FakeCaptchaService.cs",
+          "Kind": "cs",
+          "Loc": 189,
+          "Sha256": "e72649bb26fde540f9aa814cf37cc930dd4379c152c5e90af73fe4f2e78a9980"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/FakeModerationService.cs",
+          "Kind": "cs",
+          "Loc": 262,
+          "Sha256": "796ff59ee7db2663c8163710b472150057b79f457dc338a368d43375bd4b9ace"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/FakeServicesFactory.cs",
+          "Kind": "cs",
+          "Loc": 267,
+          "Sha256": "ec1dcbfa269fdfae72c7e6c4de9ea1b47ef6078548b86069167ca4b0b219cffa"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/FakeTelegramClient.cs",
+          "Kind": "cs",
+          "Loc": 750,
+          "Sha256": "ee3dd4baad332a453865985c811484dbd18c03e54f4a83796311d11dcc186635"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/FakeTelegramClientFactory.cs",
+          "Kind": "cs",
+          "Loc": 50,
+          "Sha256": "ac3e5c856fe4afb97763e49edb17f96266bcbde073cad59644433eeaa4042f68"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/GlobalStatsManagerTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 69,
+          "Sha256": "e7e50a3cf2bbc2da21f4221bcdfd81c4e44ecd15f42821df630420779a762568"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/MessageHandlerTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 783,
+          "Sha256": "10a515b51d1960fa1f3b1431e9aecca1f458fac7b5839d42a69804f612128df6"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/MessageHandlerTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 176,
+          "Sha256": "301c43ed79d637e5fbba72c252f15abb70625e98b98a8561a5446404783cce9b"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/MimicryClassifierTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 38,
+          "Sha256": "6a668520a5b794934f202a34a33bee90c489ec9a39abf8f325914f1c82ed387e"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/MimicryClassifierTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 72,
+          "Sha256": "1e5c38f7b37cce20c00d62d4a607dd993374556a69a6bfd506c16d8e416888cc"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/MockAiChecksFactory.cs",
+          "Kind": "cs",
+          "Loc": 211,
+          "Sha256": "be53215f26f02880ca9daa34d78a7762767831c7f35215e80ee838f6cdb59332"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/MockAiChecksFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 230,
+          "Sha256": "1ba02e291adb48b7cb3176013690d4e82b4b8a1ae71c15184ce7dd073a217f64"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/ModerationExceptionTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 29,
+          "Sha256": "35e39b0eed246492bb942cffcf342c3206491cad0baa61ed65318ec1495c3bbf"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/ModerationExceptionTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 59,
+          "Sha256": "0514b1d4bb83582d687c52995c1e9b7b97bdf7f34ca8a744ac1ac8254e26b263"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/ModerationServiceTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 142,
+          "Sha256": "ade164ee7864539f24930ce226fd1342c557f77f6ccf267a4afd15adfde422d5"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/ModerationServiceTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 152,
+          "Sha256": "267cc96f8b74fbd76a8965ca7e887de7ed7a1185cdb03d67d38d2cafd7a4945f"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/ServiceChatDispatcherTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 164,
+          "Sha256": "af233b492d3a5476995b9a2873e354942bbcc6c2e60a76f25c6bf105d28bf078"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/SpamHamClassifierTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 51,
+          "Sha256": "9df1e8136f397c0f1ee97dc62f8aed44503fbe4da354ede0e375197b256015f2"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/SpamHamClassifierTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 72,
+          "Sha256": "54bbed237d05eeb3d896b8642d91f24247e53882505d7f703e2736eb7eccc378"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/StatisticsServiceTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 113,
+          "Sha256": "3f66b00d017a4ffdf9fd2d54b7e839a7a91256a9704bdd3a5df578dc2508f389"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/StatisticsServiceTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 95,
+          "Sha256": "0e24fd84f04fa571862299caf770128fc106741ddd2b2defbf9041d57fb8d67d"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/SuspiciousUsersStorageTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 48,
+          "Sha256": "ecb256c0716a7db84310a2410d8e4cf2d1d1ac6a3f867827b0aee462cdf3ac4b"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/SuspiciousUsersStorageTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 73,
+          "Sha256": "41dfc9286614eab2c478c92aca85ee02cc33c4a9b4d524fedf3578294b5f538c"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/TelegramApiExceptionTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 29,
+          "Sha256": "6e2c5ae0d71d8c29d1782a4d9a4dd85b0d27a51580e749e0d82ff81876cdbebb"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/TelegramApiExceptionTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 59,
+          "Sha256": "186c735fdb98df410f6076e02c1ddce7e2f120ff4d2105a6a0dc1b794daa493d"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/TelegramBotClientWrapperTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 72,
+          "Sha256": "99e49aef8522329a5cf554578e56a0554be813ecb7b0ca4379e4d649d4197e87"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/TelegramBotClientWrapperTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 62,
+          "Sha256": "2872b1a7103f9aa07ba20ccd05adaf1204be7a1e3d7287fa85e3f2348839828c"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/TestMarkers.cs",
+          "Kind": "cs",
+          "Loc": 83,
+          "Sha256": "013a409a980d1071043038a7d73b0c3261457c86c44da782bf83145bb87e0651"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/UpdateDispatcherTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 62,
+          "Sha256": "07f81a54c882ac27249646b71995813c02a366d7c36526f9d6e50b7a430763ad"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/UpdateDispatcherTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 85,
+          "Sha256": "852d64b8be026d45061182554273330d224517967f4008f0a5b5412932648666"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/UserCleanupServiceTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 35,
+          "Sha256": "f21aa63c58786a9f6a1cd4eb960a99fe09e48708496806bb1f54c0935b8ec012"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/UserCleanupServiceTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 95,
+          "Sha256": "04650e4ae14c87bf91dacee830d7250aeb2fc0f0db4d270d3989d6f96c97a3d1"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/UserManagementExceptionTestFactory.cs",
+          "Kind": "cs",
+          "Loc": 29,
+          "Sha256": "486a5257caa7829d60e72ac640651b3bc0977d7d36bc667e6db32f6f2d362da8"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestInfrastructure/UserManagementExceptionTestFactoryTests.cs",
+          "Kind": "cs",
+          "Loc": 59,
+          "Sha256": "13df5ffaee193fd64e54979d57ec1aebb1f0c23550f531f9395a9560f093df73"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/ChatBuilder.cs",
+          "Kind": "cs",
+          "Loc": 110,
+          "Sha256": "d7a92fc0c3aadd4d338ef016ece065975f404e061d519e5b3fea0b12dcb50482"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/ChatFullInfoBuilder.cs",
+          "Kind": "cs",
+          "Loc": 124,
+          "Sha256": "c9fe201cea20489b5a4161f3fcc789cc3b2d0cb61ce726317c1dc72e5c6c5dcd"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/MessageBuilder.cs",
+          "Kind": "cs",
+          "Loc": 142,
+          "Sha256": "aa3c5ea08afe0e2aba38ab322028b609e13fe256ce680b3b2470869d95ed80a7"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/MockBuilders/AiChecksMockBuilder.cs",
+          "Kind": "cs",
+          "Loc": 60,
+          "Sha256": "14c86040ac3bc394c1fd5ff528a8e15ef1cadd727297bc350b5544f4f5e097b2"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/MockBuilders/CaptchaServiceMockBuilder.cs",
+          "Kind": "cs",
+          "Loc": 53,
+          "Sha256": "c8d5fa28674e62f1d3995326c7c0918db0ac587020f99740602bbb061125a913"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/MockBuilders/MessageServiceMockBuilder.cs",
+          "Kind": "cs",
+          "Loc": 102,
+          "Sha256": "80c1ca8540e6a468c52f0ff41964249b2e0974fb2a5cbab6104e3b55a4d3f3d3"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/MockBuilders/ModerationServiceMockBuilder.cs",
+          "Kind": "cs",
+          "Loc": 100,
+          "Sha256": "60e92233da9fbe0b00190c01f9cbcc42cf838688f7288575ed3b93d261901557"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/MockBuilders/TelegramBotMockBuilder.cs",
+          "Kind": "cs",
+          "Loc": 113,
+          "Sha256": "861548350578a3ceeda390a13581410f5aee2540b0d9978d3d06fe07af78ee3f"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/MockBuilders/TestKitMockBuilders.cs",
+          "Kind": "cs",
+          "Loc": 52,
+          "Sha256": "f9fe2e3def41b5fe9e2b626e510d723ca3eaccf3ab141e174623dea1f2296928"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/MockBuilders/UserManagerMockBuilder.cs",
+          "Kind": "cs",
+          "Loc": 72,
+          "Sha256": "9c6e462c3286c37adfc4cb003ee7114096e7f07c57e9931906969fed0bab8547"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/ModerationResultBuilder.cs",
+          "Kind": "cs",
+          "Loc": 90,
+          "Sha256": "7232cc66ec1da2d1678607b48c8c6ea704a849deeb7fea0e2acee29c49981f82"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/ScenarioBuilder.cs",
+          "Kind": "cs",
+          "Loc": 148,
+          "Sha256": "d75b6badc47fe133ba73c8243f959f9b77c5d7f012e32a008b4cc9df88aa070a"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/TestKitBuilders.cs",
+          "Kind": "cs",
+          "Loc": 43,
+          "Sha256": "d62d88e6101f6bf9f7f0812a40d852af8c34d7b44e3082979248e67b1a10c3be"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Builders/UserBuilder.cs",
+          "Kind": "cs",
+          "Loc": 126,
+          "Sha256": "0805905b936781cd35f4d9546d510c7d4e44d64e54045290b464752138807eca"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/index.json",
+          "Kind": "json",
+          "Loc": 5613,
+          "Sha256": "977ecb7fa6b7aed171e45cc1c9ff6f265118c9fb241607614ed9bf428ff16179"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Infra/TestKitAutoFixture.cs",
+          "Kind": "cs",
+          "Loc": 366,
+          "Sha256": "4906c0c45d1d9dc0af4242160058fd11861962c9efd94b041e0f6aa3debfee22"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/Infra/TestKitBogus.cs",
+          "Kind": "cs",
+          "Loc": 379,
+          "Sha256": "a1f038da6c0c546a036b02cf23287ad29f687893613c45a546d274152aa0eae8"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestCategories.cs",
+          "Kind": "cs",
+          "Loc": 165,
+          "Sha256": "a995ed7d42415299f44a90a453a12d0e98ba959db10ee7fafaa62c31b94018d1"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.AutoFixture.cs",
+          "Kind": "cs",
+          "Loc": 166,
+          "Sha256": "ba63ad6fb735ce2b5567e7c9cd28c8803768822ebf4dcdbb44d7c41b37a93464"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.Bogus.cs",
+          "Kind": "cs",
+          "Loc": 148,
+          "Sha256": "0ed6518e38bf8dfb17ffb57e2e69d487fd9d56a503144c12489b5461ea55b146"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.Builders.cs",
+          "Kind": "cs",
+          "Loc": 352,
+          "Sha256": "2a7a30d20d5b7f406b1f20c31a73be214ca8857491043944413138e5fbd2e91d"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.BuilderTests.cs",
+          "Kind": "cs",
+          "Loc": 281,
+          "Sha256": "d7fbbe3aba8324f7f93e1708210ad72f6571e72ba2543daaacf67067509d3797"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.Facade.cs",
+          "Kind": "cs",
+          "Loc": 334,
+          "Sha256": "a39d7aeb801d5441f54201f4860cb8e2cdab155d594e02c196f437ee69377da1"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.GoldenMaster.cs",
+          "Kind": "cs",
+          "Loc": 442,
+          "Sha256": "47e8385765cc9b09184f5350bff44260feda59a8036e9ff120701ae0419a649c"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.Main.cs",
+          "Kind": "cs",
+          "Loc": 305,
+          "Sha256": "1c0139929a6c89d5da85c7ace7ad730fed54b494ae9edc877979cf00b1c808f1"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.MessageHandlerBuilder.cs",
+          "Kind": "cs",
+          "Loc": 403,
+          "Sha256": "d15ab165f2e5dfaebb4094488ff78c8e255c01184f22e97bdcc6ca697085e62e"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.Mocks.cs",
+          "Kind": "cs",
+          "Loc": 511,
+          "Sha256": "e38592bce71ffb0194b43dd226454a9089f62fa965ddffe4d263223c547765b7"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.Specialized.cs",
+          "Kind": "cs",
+          "Loc": 753,
+          "Sha256": "89a0f121ce9f88cbb6724815861a6c81302d47cccf0c13b2cb1c8e614958086b"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.Telegram.cs",
+          "Kind": "cs",
+          "Loc": 277,
+          "Sha256": "819d4c378c1fec20ad8996d94b7ab0dd15c8ef42f92bee59e1f64174226bca27"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestKit/TestKit.UserJoinServiceBuilder.cs",
+          "Kind": "cs",
+          "Loc": 219,
+          "Sha256": "8aa85c2741dc98e0c35cb0e51c64060e120d8e4f38ee68996d20e9a30752f518"
+        },
+        {
+          "Path": "ClubDoorman.Test/TestTimeoutHelper.cs",
+          "Kind": "cs",
+          "Loc": 112,
+          "Sha256": "edad93a32260ffb00f94e36681678e9c213cac3f378abd9b9aedfd54706c8028"
+        },
+        {
+          "Path": "ClubDoorman.Test/TextProcessorNullTests.cs",
+          "Kind": "cs",
+          "Loc": 83,
+          "Sha256": "9a965395e29d7bf1587ad853ed1e2bd5761a86f51fb06baa11f9d815c6f877d6"
+        },
+        {
+          "Path": "ClubDoorman/appsettings.Development.json",
+          "Kind": "json",
+          "Loc": 8,
+          "Sha256": "93ad1e10cea3e4ceb9d81081b69cd69e54eeea86fc6120f6dfb6377814fceae0"
+        },
+        {
+          "Path": "ClubDoorman/appsettings.json",
+          "Kind": "json",
+          "Loc": 83,
+          "Sha256": "e1585baae59bca0f044cb50aed0d70b9580ba43c1757dd702b0c39b4c6cf1bec"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net8.0/appsettings.Development.json",
+          "Kind": "json",
+          "Loc": 8,
+          "Sha256": "93ad1e10cea3e4ceb9d81081b69cd69e54eeea86fc6120f6dfb6377814fceae0"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net8.0/appsettings.json",
+          "Kind": "json",
+          "Loc": 8,
+          "Sha256": "93ad1e10cea3e4ceb9d81081b69cd69e54eeea86fc6120f6dfb6377814fceae0"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net8.0/ClubDoorman.deps.json",
+          "Kind": "json",
+          "Loc": 1190,
+          "Sha256": "11c5cdf9c4bbb85abe16da7eaf1cf969b020014e3e45d07d3d6f596029effece"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net8.0/ClubDoorman.runtimeconfig.json",
+          "Kind": "json",
+          "Loc": 19,
+          "Sha256": "4c7435f8d0b1d0e2fc9278203c4e179efbb081216f7527c8dec3c5784ce4708e"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net8.0/data/chat_settings.json",
+          "Kind": "json",
+          "Loc": 4,
+          "Sha256": "203aa3bf91bdfe3416ee88d788dcf70dc4d6eea484cf1f6c5f9108ea77340e95"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net9.0/appsettings.Development.json",
+          "Kind": "json",
+          "Loc": 8,
+          "Sha256": "93ad1e10cea3e4ceb9d81081b69cd69e54eeea86fc6120f6dfb6377814fceae0"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net9.0/appsettings.json",
+          "Kind": "json",
+          "Loc": 83,
+          "Sha256": "e1585baae59bca0f044cb50aed0d70b9580ba43c1757dd702b0c39b4c6cf1bec"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net9.0/ClubDoorman.deps.json",
+          "Kind": "json",
+          "Loc": 2376,
+          "Sha256": "92fe43c4712700a92751055d758e70a58af4dc2da2bbfb5507d2e9cdd895c48b"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net9.0/ClubDoorman.runtimeconfig.json",
+          "Kind": "json",
+          "Loc": 19,
+          "Sha256": "1697149659f6f8a80581ec61f2b509436e824a49e638dee4368806b51da9e8a8"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net9.0/data/approved_users_groups.json",
+          "Kind": "json",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net9.0/data/approved_users.json",
+          "Kind": "json",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net9.0/data/chat_settings.json",
+          "Kind": "json",
+          "Loc": 36,
+          "Sha256": "3ec8abfa777ebc17143a0158adcb41a1c4810ed1aba9e11a47ece060ebc90f28"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net9.0/data/global_stats.json",
+          "Kind": "json",
+          "Loc": 11,
+          "Sha256": "06b7212b773d2773cf4ecbb5bd2a294a3466c4e3bfd9d3587b3638335d2bd3c1"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net9.0/data/stats_global.json",
+          "Kind": "json",
+          "Loc": 7,
+          "Sha256": "394f1386ba2314c52ff6cd8d915db57a947cd8fcba3da01a76f94a9bc5d8c948"
+        },
+        {
+          "Path": "ClubDoorman/bin/Debug/net9.0/data/suspicious_users.json",
+          "Kind": "json",
+          "Loc": 1,
+          "Sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        {
+          "Path": "ClubDoorman/bin/Release/net9.0/appsettings.Development.json",
+          "Kind": "json",
+          "Loc": 8,
+          "Sha256": "93ad1e10cea3e4ceb9d81081b69cd69e54eeea86fc6120f6dfb6377814fceae0"
+        },
+        {
+          "Path": "ClubDoorman/bin/Release/net9.0/appsettings.json",
+          "Kind": "json",
+          "Loc": 83,
+          "Sha256": "e1585baae59bca0f044cb50aed0d70b9580ba43c1757dd702b0c39b4c6cf1bec"
+        },
+        {
+          "Path": "ClubDoorman/bin/Release/net9.0/ClubDoorman.deps.json",
+          "Kind": "json",
+          "Loc": 2376,
+          "Sha256": "92fe43c4712700a92751055d758e70a58af4dc2da2bbfb5507d2e9cdd895c48b"
+        },
+        {
+          "Path": "ClubDoorman/bin/Release/net9.0/ClubDoorman.runtimeconfig.json",
+          "Kind": "json",
+          "Loc": 20,
+          "Sha256": "34184e2a7ef48475dacfce5f8c16ffd260401f0aaf1981c48b2fdc88200620e4"
+        },
+        {
+          "Path": "ClubDoorman/bin/Release/net9.0/data/approved_users_groups.json",
+          "Kind": "json",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "ClubDoorman/bin/Release/net9.0/data/approved_users.json",
+          "Kind": "json",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "ClubDoorman/bin/Release/net9.0/data/chat_settings.json",
+          "Kind": "json",
+          "Loc": 36,
+          "Sha256": "3ec8abfa777ebc17143a0158adcb41a1c4810ed1aba9e11a47ece060ebc90f28"
+        },
+        {
+          "Path": "ClubDoorman/bin/Release/net9.0/data/global_stats.json",
+          "Kind": "json",
+          "Loc": 11,
+          "Sha256": "06b7212b773d2773cf4ecbb5bd2a294a3466c4e3bfd9d3587b3638335d2bd3c1"
+        },
+        {
+          "Path": "ClubDoorman/bin/Release/net9.0/data/stats_global.json",
+          "Kind": "json",
+          "Loc": 7,
+          "Sha256": "394f1386ba2314c52ff6cd8d915db57a947cd8fcba3da01a76f94a9bc5d8c948"
+        },
+        {
+          "Path": "ClubDoorman/bin/Release/net9.0/data/suspicious_users.json",
+          "Kind": "json",
+          "Loc": 1,
+          "Sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        {
+          "Path": "ClubDoorman/ClubDoorman.csproj",
+          "Kind": "csproj",
+          "Loc": 46,
+          "Sha256": "7b7d6ce10ae2535bc43d8a1051a4e616784cfdf73598e633e103791c7cecc008"
+        },
+        {
+          "Path": "ClubDoorman/data/approved_users_groups.json",
+          "Kind": "json",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "ClubDoorman/data/approved_users.json",
+          "Kind": "json",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "ClubDoorman/data/chat_settings.json",
+          "Kind": "json",
+          "Loc": 36,
+          "Sha256": "3ec8abfa777ebc17143a0158adcb41a1c4810ed1aba9e11a47ece060ebc90f28"
+        },
+        {
+          "Path": "ClubDoorman/data/global_stats.json",
+          "Kind": "json",
+          "Loc": 11,
+          "Sha256": "06b7212b773d2773cf4ecbb5bd2a294a3466c4e3bfd9d3587b3638335d2bd3c1"
+        },
+        {
+          "Path": "ClubDoorman/data/stats_global.json",
+          "Kind": "json",
+          "Loc": 7,
+          "Sha256": "394f1386ba2314c52ff6cd8d915db57a947cd8fcba3da01a76f94a9bc5d8c948"
+        },
+        {
+          "Path": "ClubDoorman/data/suspicious_users.json",
+          "Kind": "json",
+          "Loc": 1,
+          "Sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Kind": "cs",
+          "Loc": 42,
+          "Sha256": "0729476632597556b9671fa6a955435651d895e58af955ee6be0d0d3dab21f88"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/02-AdminOpsFacade.cs",
+          "Kind": "cs",
+          "Loc": 48,
+          "Sha256": "e3228ecde07b51ca87c0a93d11d9a0a0e11bcfb17edd93717c2caa6da18b169d"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/05-Contracts.cs",
+          "Kind": "cs",
+          "Loc": 17,
+          "Sha256": "dc04fa7266be012d075c0885de1e06dc91d20ee4309caf4ef46ad136e40f98d3"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/CheckCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 156,
+          "Sha256": "28fa61f1c42d9bca0f0ce2d8e797faab63adf493f455ed6f9a987a0b7c24ed34"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/CommandProcessingService.cs",
+          "Kind": "cs",
+          "Loc": 41,
+          "Sha256": "b968fe03bd65185d0867aff9288d529020333709b4d02beafb7ef59517ffb34d"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/CommandRouter.cs",
+          "Kind": "cs",
+          "Loc": 87,
+          "Sha256": "7b1ac15c548fc9077d38634b9a3f73fd905338f70b706413a66a24c72addc50f"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/CommandsModule.cs",
+          "Kind": "cs",
+          "Loc": 23,
+          "Sha256": "c199cad12dd2cfe31ca641651b489f083b581fa88fa423168fbd599a241089ba"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/HamCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 104,
+          "Sha256": "348f6c43e3aacde9f4a0559ed5471016d7baa5dafc263ec130e1fda4d0d6ec2c"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/ICommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 19,
+          "Sha256": "d18ced5643c987550ddd9290f52a2ac7cbb9b7e46bd01f64154b1d47e3f18ddd"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/ICommandProcessingService.cs",
+          "Kind": "cs",
+          "Loc": 18,
+          "Sha256": "01a1faee6d7d6dbe9a2f7613aeadbee60faca97384509ee96ddcadf79cf67824"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/ICommandRouter.cs",
+          "Kind": "cs",
+          "Loc": 17,
+          "Sha256": "fdb0573604e17c26c2d443ee9b459a2ca729373038c6cf7bd8c7727597a1d27e"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/IStartCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 10,
+          "Sha256": "e7ee116ab9f1cbc34a3605f2fd74cf0e06cb15aaf82c0fa50caa59fc0bd3e278"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/ISuspiciousCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 10,
+          "Sha256": "c8a64be312ca0cefcf4de6420b0114c2195b17237a1cd6e26842d7a0b6a321ed"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/SayCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 147,
+          "Sha256": "b0f4a98e71fc65979f4006cf549d65b214ba466ac8ab8d9e674f74ee78a0d63d"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/SpamCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 109,
+          "Sha256": "345e908d6d292d4a2f3b7f841bb8d3629f72cd7f684e4c7e00b08df9e5bd3ede"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/StartCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 148,
+          "Sha256": "233da5f9f068e6123b66619cb246679825d715e722d0a5298158896227dc9d8b"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/StatsAliasCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 32,
+          "Sha256": "c32f083c8c94a7c716e236374256b370eef37b1624afc977aa3a741df15d8733"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/StatsCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 116,
+          "Sha256": "2a94fe6baa63c0e01f732955f4d9487cf6f8e049a65ac43861b2d3ef7c3e00cb"
+        },
+        {
+          "Path": "ClubDoorman/Features/AdminOps/SuspiciousCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 178,
+          "Sha256": "fd2da2a444028dab293f282fed15563ab86fff7666cb2ad61886b99ac8f3b175"
+        },
+        {
+          "Path": "ClubDoorman/Features/Moderation/01-ModerationFeature.cs",
+          "Kind": "cs",
+          "Loc": 22,
+          "Sha256": "78700455d0f44df59225a43b35fac20f186a93a5027d28fb17ffecc6cada7bda"
+        },
+        {
+          "Path": "ClubDoorman/Features/Moderation/02-ModerationFacade.cs",
+          "Kind": "cs",
+          "Loc": 209,
+          "Sha256": "ba7d40435dc374f8a7023cc75ac9ee66f1784bf88d1a6cb24f5cd4597dd9eeb2"
+        },
+        {
+          "Path": "ClubDoorman/Features/Moderation/03-Policies.cs",
+          "Kind": "cs",
+          "Loc": 900,
+          "Sha256": "e24fcaa6e5d017f39da42a3b916759b69253eec14e8a09db76e8a2a787cd3c7b"
+        },
+        {
+          "Path": "ClubDoorman/Features/Moderation/04-Services.cs",
+          "Kind": "cs",
+          "Loc": 79,
+          "Sha256": "7e3211e733f444d9efa785daa0655d4579cff69d2ea04546735e52a65bc5c4e6"
+        },
+        {
+          "Path": "ClubDoorman/Features/Moderation/05-Contracts.cs",
+          "Kind": "cs",
+          "Loc": 242,
+          "Sha256": "49a27cb83bcde5250d0ee2800a5b66424e9f7287ff0734eea4d5d6965a4ead99"
+        },
+        {
+          "Path": "ClubDoorman/Features/UserJoin/01-UserJoinFeature.cs",
+          "Kind": "cs",
+          "Loc": 22,
+          "Sha256": "31f39a00c96cf1c4ef1cd4ffd5ee62a932841c9712cf9649615cf3afb935cdfc"
+        },
+        {
+          "Path": "ClubDoorman/Features/UserJoin/02-UserJoinFacade.cs",
+          "Kind": "cs",
+          "Loc": 61,
+          "Sha256": "60f83fd57ebf96fbc993d9cc1dc9c644cfdbfa266e2d1cdc6ed40291c37b1b10"
+        },
+        {
+          "Path": "ClubDoorman/Features/UserJoin/03-Policies.cs",
+          "Kind": "cs",
+          "Loc": 171,
+          "Sha256": "fca5fa9e33fb5f7118cdda33ba57fc28628309056616c5c7b18c7c687be93bbb"
+        },
+        {
+          "Path": "ClubDoorman/Features/UserJoin/04-Services.cs",
+          "Kind": "cs",
+          "Loc": 13,
+          "Sha256": "2c9a299abf582aaf4eeda840ecb08b9d9441d11a62a005aea19f7bdf917fe6b2"
+        },
+        {
+          "Path": "ClubDoorman/Features/UserJoin/05-Contracts.cs",
+          "Kind": "cs",
+          "Loc": 51,
+          "Sha256": "b90973aaf80e8dc04097888c7c223929404220bbf4547dd02e787b3eec6074b7"
+        },
+        {
+          "Path": "ClubDoorman/Handlers/ICallbackQueryHandler.cs",
+          "Kind": "cs",
+          "Loc": 19,
+          "Sha256": "2fc6259d708017eaa58a084b080ad59b9ecbbac90b7af38e9a96ab5e28234fc1"
+        },
+        {
+          "Path": "ClubDoorman/Infrastructure/Captcha.cs",
+          "Kind": "cs",
+          "Loc": 39,
+          "Sha256": "28a74fb3f276f8bc36ce5abd3a34a5b53624e1ba7be27609881e303323b5db4a"
+        },
+        {
+          "Path": "ClubDoorman/Infrastructure/Config.cs",
+          "Kind": "cs",
+          "Loc": 496,
+          "Sha256": "4366e645416b2b20fc725f2b46e3974be3f961c56f69d967f1e32d71b1e1989c"
+        },
+        {
+          "Path": "ClubDoorman/Infrastructure/Consts.cs",
+          "Kind": "cs",
+          "Loc": 16,
+          "Sha256": "892c61d5f650f98cb3a050998a1eaeba2100b5e63357044f80108a7413d23835"
+        },
+        {
+          "Path": "ClubDoorman/Infrastructure/Exceptions.cs",
+          "Kind": "cs",
+          "Loc": 116,
+          "Sha256": "932d18e22d2700c98a1e828b02bc34f6c0dd57b98342ca07c9b8a16820258dc8"
+        },
+        {
+          "Path": "ClubDoorman/Infrastructure/OpenAiExtensions.cs",
+          "Kind": "cs",
+          "Loc": 31,
+          "Sha256": "4582428cebd7e0352a9a743bb14f0b6b59428c68a2295c67c54af7b54178ca81"
+        },
+        {
+          "Path": "ClubDoorman/Infrastructure/SemaphoreHelper.cs",
+          "Kind": "cs",
+          "Loc": 19,
+          "Sha256": "e65ec6ebc95f4c372a3c76d94f02c08819c037e16d2a4063167b2b77b33a3580"
+        },
+        {
+          "Path": "ClubDoorman/Infrastructure/ServiceCollectionExtensions.cs",
+          "Kind": "cs",
+          "Loc": 134,
+          "Sha256": "a8d627991288e18f799db66001618ce3cc9879c2414f1b0843312082a2a2fdb0"
+        },
+        {
+          "Path": "ClubDoorman/Infrastructure/Utils.cs",
+          "Kind": "cs",
+          "Loc": 67,
+          "Sha256": "b1f65cdfbdd8543215f873c3eb61b580d4b2a9a81148bc75c41c59aadc70364d"
+        },
+        {
+          "Path": "ClubDoorman/Models/CaptchaInfo.cs",
+          "Kind": "cs",
+          "Loc": 44,
+          "Sha256": "10761d7488bc4c2e2ae0e9aac2cf41fa817c4eeb41e0bf30b469c14908fa94aa"
+        },
+        {
+          "Path": "ClubDoorman/Models/CaptchaResult.cs",
+          "Kind": "cs",
+          "Loc": 29,
+          "Sha256": "79b2f9d7840adce2b685382e91d4aaf68531fc5e79bb1e968475c88ee7aeb0a8"
+        },
+        {
+          "Path": "ClubDoorman/Models/ChatStats.cs",
+          "Kind": "cs",
+          "Loc": 33,
+          "Sha256": "5bcf9c2838f95ebacc18bcfdd264b9de30fd19f42a737408b683c88a423672ec"
+        },
+        {
+          "Path": "ClubDoorman/Models/Logging/LoggingConfiguration.cs",
+          "Kind": "cs",
+          "Loc": 250,
+          "Sha256": "32c758a9f8cd552f819f3e384169fd3dc44c3243d43baceca0bd032dff8fcb3c"
+        },
+        {
+          "Path": "ClubDoorman/Models/ModerationResult.cs",
+          "Kind": "cs",
+          "Loc": 58,
+          "Sha256": "b90d1fe1329e98246041d9fc07b074c4d5bb611ff36dc1045215da1fd356b9e4"
+        },
+        {
+          "Path": "ClubDoorman/Models/Notifications/AdminNotificationType.cs",
+          "Kind": "cs",
+          "Loc": 128,
+          "Sha256": "4a648423f3bcf3fc1fbfec5f1170042b9c73dc350cb97e2d1ca2dd4ea1dd2314"
+        },
+        {
+          "Path": "ClubDoorman/Models/Notifications/LogNotificationType.cs",
+          "Kind": "cs",
+          "Loc": 98,
+          "Sha256": "c86b8f1dfa20d202633b1bd241b7b4d1b571d1e9aebdc56e9849e5d1e151c0d1"
+        },
+        {
+          "Path": "ClubDoorman/Models/Notifications/NotificationData.cs",
+          "Kind": "cs",
+          "Loc": 339,
+          "Sha256": "3b06ef9092081545e2bd1ba77471f162127ba60515b5174295817f1e252ca8e2"
+        },
+        {
+          "Path": "ClubDoorman/Models/Notifications/UserNotificationType.cs",
+          "Kind": "cs",
+          "Loc": 57,
+          "Sha256": "7787c3f04f1b7979e1ed7e115b7ee3b23f60dc26e832370626ebaed3da8c35b3"
+        },
+        {
+          "Path": "ClubDoorman/Models/Requests/CreateCaptchaRequest.cs",
+          "Kind": "cs",
+          "Loc": 41,
+          "Sha256": "d0f662ba4514302bae54738dad7eca0d902dd77d9124cb470cb8de9c4729f92b"
+        },
+        {
+          "Path": "ClubDoorman/Models/Requests/SendCaptchaMessageRequest.cs",
+          "Kind": "cs",
+          "Loc": 58,
+          "Sha256": "c11a5a54ae232adb3b154ecb4990ddd99af4ecc074fbc5634badcb634a82d08a"
+        },
+        {
+          "Path": "ClubDoorman/Models/Requests/SendErrorNotificationRequest.cs",
+          "Kind": "cs",
+          "Loc": 57,
+          "Sha256": "c47956d942db5700d5a46839efa774f788a5cfcc313cff284625080117bf8de1"
+        },
+        {
+          "Path": "ClubDoorman/Models/Requests/SendWelcomeMessageRequest.cs",
+          "Kind": "cs",
+          "Loc": 48,
+          "Sha256": "c295bd876b12dbf40637b0fba00049692e4e3f5409090e7d4c1ce10c18926e82"
+        },
+        {
+          "Path": "ClubDoorman/Models/SuspiciousUserInfo.cs",
+          "Kind": "cs",
+          "Loc": 32,
+          "Sha256": "f212cfeae68d34671bb7e1483d7ae96d100e3bdcf45039d25c737ebb33ee409b"
+        },
+        {
+          "Path": "ClubDoorman/obj/ClubDoorman.csproj.nuget.dgspec.json",
+          "Kind": "json",
+          "Loc": 141,
+          "Sha256": "d9551f7fb3fd38ef19e2c543cc3bef3477c6d3acf4eaa430697c94ff0e47a8ef"
+        },
+        {
+          "Path": "ClubDoorman/obj/Debug/net8.0/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs",
+          "Kind": "cs",
+          "Loc": 4,
+          "Sha256": "ae41ca1e67556e4b0622d82a2122a04f17722c0c19d3b2f1fbcab8a2aaf16d2e"
+        },
+        {
+          "Path": "ClubDoorman/obj/Debug/net8.0/ClubDoorman.AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 23,
+          "Sha256": "0ab94c2c486a8f7ddad693bcbd2d6d82fa40f142f88fb60f289fe2383385e947"
+        },
+        {
+          "Path": "ClubDoorman/obj/Debug/net8.0/ClubDoorman.GlobalUsings.g.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "3d98c790028ddbb34cebb5ed3e30412ec3dcd34d96f74716da6d2d13cdf15d8e"
+        },
+        {
+          "Path": "ClubDoorman/obj/Debug/net8.0/ClubDoorman.sourcelink.json",
+          "Kind": "json",
+          "Loc": 1,
+          "Sha256": "9e6fcf389c2594b1e7d66435e533ad211eb4c308530b250365777eccf882d902"
+        },
+        {
+          "Path": "ClubDoorman/obj/Debug/net9.0/.NETCoreApp,Version=v9.0.AssemblyAttributes.cs",
+          "Kind": "cs",
+          "Loc": 4,
+          "Sha256": "0be1a8399fbefa553e3202c44c7fb653cf774b73b6633960d3f702df47a494b2"
+        },
+        {
+          "Path": "ClubDoorman/obj/Debug/net9.0/ClubDoorman.AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "2e4603d329c3898ef31a4a0d2dd16e1b53e0186b1e755bf087e221f15ebd26de"
+        },
+        {
+          "Path": "ClubDoorman/obj/Debug/net9.0/ClubDoorman.GlobalUsings.g.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "3d98c790028ddbb34cebb5ed3e30412ec3dcd34d96f74716da6d2d13cdf15d8e"
+        },
+        {
+          "Path": "ClubDoorman/obj/Debug/net9.0/ClubDoorman.sourcelink.json",
+          "Kind": "json",
+          "Loc": 1,
+          "Sha256": "95dff99486731263d8b0ccbf147f70eee3cad6da526856d4be6a75abd70dafc0"
+        },
+        {
+          "Path": "ClubDoorman/obj/project.assets.json",
+          "Kind": "json",
+          "Loc": 8105,
+          "Sha256": "683247e7a8a40d97f459e6a1ad13005dd805969d8f0b89cd5fea6b089ea47e1e"
+        },
+        {
+          "Path": "ClubDoorman/obj/Release/net9.0/.NETCoreApp,Version=v9.0.AssemblyAttributes.cs",
+          "Kind": "cs",
+          "Loc": 4,
+          "Sha256": "0be1a8399fbefa553e3202c44c7fb653cf774b73b6633960d3f702df47a494b2"
+        },
+        {
+          "Path": "ClubDoorman/obj/Release/net9.0/ClubDoorman.AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "871959cc9ec3e2f699fdba8cec46f18ede8ced6ff36d7c662ec3480c1e3018fa"
+        },
+        {
+          "Path": "ClubDoorman/obj/Release/net9.0/ClubDoorman.GlobalUsings.g.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "3d98c790028ddbb34cebb5ed3e30412ec3dcd34d96f74716da6d2d13cdf15d8e"
+        },
+        {
+          "Path": "ClubDoorman/obj/Release/net9.0/ClubDoorman.sourcelink.json",
+          "Kind": "json",
+          "Loc": 1,
+          "Sha256": "c98c7767c99839e0958e925703e4731c7328b8d927945990c20d58131524df56"
+        },
+        {
+          "Path": "ClubDoorman/Program.cs",
+          "Kind": "cs",
+          "Loc": 163,
+          "Sha256": "58b8c4b5bf7b32f93a02c290eef6df6ba843178c66a4311bd82207bd226af065"
+        },
+        {
+          "Path": "ClubDoorman/Properties/launchSettings.json",
+          "Kind": "json",
+          "Loc": 15,
+          "Sha256": "b5b6638d99d7f11f3a8cc906a586bdcbcbc141b93c4241fd2cc53d972d25b1cb"
+        },
+        {
+          "Path": "ClubDoorman/Services/AI/AiCascadeService.cs",
+          "Kind": "cs",
+          "Loc": 237,
+          "Sha256": "6bef3a67a10960ee835949dfa16cb7a02ceba622a1c2827e96bd2f7dfd85ca65"
+        },
+        {
+          "Path": "ClubDoorman/Services/AI/AiChecks.cs",
+          "Kind": "cs",
+          "Loc": 679,
+          "Sha256": "d5b30a33803fc323abd408e66d001ad4f4ec89a6502981f2d4a60812d8b5e5de"
+        },
+        {
+          "Path": "ClubDoorman/Services/AI/AIModule.cs",
+          "Kind": "cs",
+          "Loc": 32,
+          "Sha256": "adc4394ad522858720b63ddba476b77d6def1215665a912f3584aaed002c5b0f"
+        },
+        {
+          "Path": "ClubDoorman/Services/AI/IAiCascadeService.cs",
+          "Kind": "cs",
+          "Loc": 29,
+          "Sha256": "3af3ce0e83e146177bb7d87ba92d2a113b21ded066e3bfdbca5e2af9cac6fcc7"
+        },
+        {
+          "Path": "ClubDoorman/Services/AI/IAiChecks.cs",
+          "Kind": "cs",
+          "Loc": 47,
+          "Sha256": "2404601f38b2849d2ed075c13c23b8139a0039013405e0bdeffdfbd8381249f9"
+        },
+        {
+          "Path": "ClubDoorman/Services/AI/IMimicryClassifier.cs",
+          "Kind": "cs",
+          "Loc": 14,
+          "Sha256": "37964db35b31df21897640035e7b6cd526294d158aa5574db9e26b475b81d99f"
+        },
+        {
+          "Path": "ClubDoorman/Services/AI/ISpamHamClassifier.cs",
+          "Kind": "cs",
+          "Loc": 31,
+          "Sha256": "5c0d25a14e375b28eb141488188ff3203ab829f31aba93bb278926bc12d14789"
+        },
+        {
+          "Path": "ClubDoorman/Services/AI/MimicryClassifier.cs",
+          "Kind": "cs",
+          "Loc": 188,
+          "Sha256": "fade721028c765c89a6a11839fd43c634f17b836a723b4e3c4f88df90ffbde20"
+        },
+        {
+          "Path": "ClubDoorman/Services/AI/SpamHamClassifier.cs",
+          "Kind": "cs",
+          "Loc": 200,
+          "Sha256": "e291f7c6b5743e15c471a8e89d15397c5fc8c5cebb3d407cfb346de33a4603fc"
+        },
+        {
+          "Path": "ClubDoorman/Services/BadMessage/BadMessageManager.cs",
+          "Kind": "cs",
+          "Loc": 107,
+          "Sha256": "5c71a6c5e0e032507ee7fc39913a3ac948349b83d8c5f4013768eb26aac9dc45"
+        },
+        {
+          "Path": "ClubDoorman/Services/BadMessage/BadMessageModule.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "883318a2191c6c90947f6c329b0b7d6bfe057f21b6d7302659a4d6823cbaedbb"
+        },
+        {
+          "Path": "ClubDoorman/Services/BadMessage/IBadMessageManager.cs",
+          "Kind": "cs",
+          "Loc": 22,
+          "Sha256": "cf8890685297070d51e4e40b8aeecad12577eee392091ab8189bf6d7ad771369"
+        },
+        {
+          "Path": "ClubDoorman/Services/Captcha/CaptchaModule.cs",
+          "Kind": "cs",
+          "Loc": 76,
+          "Sha256": "4d17fa14e443ae4c92872328d5e6b06fff147528583f8917ca9cdbb6a93d5104"
+        },
+        {
+          "Path": "ClubDoorman/Services/Captcha/CaptchaService.cs",
+          "Kind": "cs",
+          "Loc": 359,
+          "Sha256": "c7e4fe92e2ee6592d6f4f9f2db68fd628b1ca2d16e6ffd60ddce3995c4c04544"
+        },
+        {
+          "Path": "ClubDoorman/Services/Captcha/ICaptchaService.cs",
+          "Kind": "cs",
+          "Loc": 55,
+          "Sha256": "3e973db03bc5f9aa4b7804bdeefb0ecd8e67eb04ec8006f41b7591889c2260d4"
+        },
+        {
+          "Path": "ClubDoorman/Services/ChannelModeration/ChannelModerationModule.cs",
+          "Kind": "cs",
+          "Loc": 27,
+          "Sha256": "2f880c9c090ad1d3f39e8d1a6e45918ca2406b1e041f78753ef621429c584c2d"
+        },
+        {
+          "Path": "ClubDoorman/Services/ChannelModeration/ChannelModerationService.cs",
+          "Kind": "cs",
+          "Loc": 291,
+          "Sha256": "d7a089720df1cd10ae896809b3dc05561f63a2172021fcfd5799ff4ad14f4da6"
+        },
+        {
+          "Path": "ClubDoorman/Services/ChannelModeration/IChannelModerationService.cs",
+          "Kind": "cs",
+          "Loc": 47,
+          "Sha256": "4ed824e5aa5fc629654c0cfcc5bd0841f87fafcf1a2d5d62ddbac541227c2068"
+        },
+        {
+          "Path": "ClubDoorman/Services/Core/Configuration/AppConfig.cs",
+          "Kind": "cs",
+          "Loc": 233,
+          "Sha256": "07e99af627ac4d269dbed4a472bf83f824af9cf9801039dda18ca5cd1c4b74e9"
+        },
+        {
+          "Path": "ClubDoorman/Services/Core/Configuration/AutoBanOptions.cs",
+          "Kind": "cs",
+          "Loc": 37,
+          "Sha256": "861dbb7c45e9edb7aec2c822dfceb861a1352d2203d35037c6b5eb55f45c95c0"
+        },
+        {
+          "Path": "ClubDoorman/Services/Core/Configuration/ChatFilteringOptions.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "11d3457531950555ac6ed396d68d7c646d08264562bdf7274e764cc16e49d560"
+        },
+        {
+          "Path": "ClubDoorman/Services/Core/Configuration/ConfigurationHelper.cs",
+          "Kind": "cs",
+          "Loc": 113,
+          "Sha256": "a040d1f7a4ab448ed10839879495ff8fc367af4c8e031719ea813406ca3d0321"
+        },
+        {
+          "Path": "ClubDoorman/Services/Core/Configuration/ConfigurationModule.cs",
+          "Kind": "cs",
+          "Loc": 65,
+          "Sha256": "ad3ce672501ef323ca8ea66f1877df75f9fbd8ed002c8eeec23e93f19c2b52eb"
+        },
+        {
+          "Path": "ClubDoorman/Services/Core/Configuration/FeatureToggleOptions.cs",
+          "Kind": "cs",
+          "Loc": 49,
+          "Sha256": "a707b1834aa52c9581134a96775e8c08669c4b7ffc2a202bc5090de3ee1ed4cc"
+        },
+        {
+          "Path": "ClubDoorman/Services/Core/Configuration/IAppConfig.cs",
+          "Kind": "cs",
+          "Loc": 205,
+          "Sha256": "e4b48ff29ec5cf034a023af4eded7d38e8bab02a31d43e67714f38ed1a0b72e4"
+        },
+        {
+          "Path": "ClubDoorman/Services/Core/Configuration/ViolationThresholdOptions.cs",
+          "Kind": "cs",
+          "Loc": 37,
+          "Sha256": "4179ce54e7a6cc8c68d5aef96bcf3b53358d9dabf079c6e5f200a67f4a4ba188"
+        },
+        {
+          "Path": "ClubDoorman/Services/Dispatcher/DispatcherModule.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "ecd9edd33e93367afd1db4685ef46a922c21d45470689d1eaa872cee0677ffa4"
+        },
+        {
+          "Path": "ClubDoorman/Services/Dispatcher/UpdateDispatcher.cs",
+          "Kind": "cs",
+          "Loc": 69,
+          "Sha256": "6ab61866749d4d64ac6c7d0d5225fdffd1ca2a7ebb856119523a4d57018fd655"
+        },
+        {
+          "Path": "ClubDoorman/Services/Handlers/BotPermissionsService.cs",
+          "Kind": "cs",
+          "Loc": 115,
+          "Sha256": "7a798b3156a8efdac3a9837707ba884840a12a9cebb6f38adee2df3a20ba2025"
+        },
+        {
+          "Path": "ClubDoorman/Services/Handlers/CallbackQueryHandler.cs",
+          "Kind": "cs",
+          "Loc": 693,
+          "Sha256": "38b8415b930621955336144740a625499149c2d485da4ca59ed9a257fca5d340"
+        },
+        {
+          "Path": "ClubDoorman/Services/Handlers/ChatMemberHandler.cs",
+          "Kind": "cs",
+          "Loc": 138,
+          "Sha256": "c9902c270f627845a4315630957cbbe33a10f521e1880e07e7fec28b10f64774"
+        },
+        {
+          "Path": "ClubDoorman/Services/Handlers/HandlersModule.cs",
+          "Kind": "cs",
+          "Loc": 34,
+          "Sha256": "500786dad8884fb128e40aaf34bc9689301d1529430d5d9f497cabdd54c0696e"
+        },
+        {
+          "Path": "ClubDoorman/Services/Handlers/IntroFlowService.cs",
+          "Kind": "cs",
+          "Loc": 208,
+          "Sha256": "bfd97a567749d92671dd6d4c8fb6ac5c1166f52188058fbb9c680d8a981ce204"
+        },
+        {
+          "Path": "ClubDoorman/Services/Handlers/IUpdateHandler.cs",
+          "Kind": "cs",
+          "Loc": 19,
+          "Sha256": "83630beac479aa62f944ce2efeb16fc149bf87bf18fea52c74a9357679de1adb"
+        },
+        {
+          "Path": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Kind": "cs",
+          "Loc": 426,
+          "Sha256": "f437599e718060a06041e0c4c778527754d076ae26c7661e671ab41d272bab2d"
+        },
+        {
+          "Path": "ClubDoorman/Services/IBotPermissionsService.cs",
+          "Kind": "cs",
+          "Loc": 33,
+          "Sha256": "d3fefbe9bd3f437e4dd46ae5da0a6ee14638184b8e908e2575537a5891ec6e19"
+        },
+        {
+          "Path": "ClubDoorman/Services/IUpdateDispatcher.cs",
+          "Kind": "cs",
+          "Loc": 14,
+          "Sha256": "da38d25b627102d2807dc9f8601c089803661a69dedc741cabd242f6d7b85b13"
+        },
+        {
+          "Path": "ClubDoorman/Services/LinkFormatting/ChatLinkFormatter.cs",
+          "Kind": "cs",
+          "Loc": 69,
+          "Sha256": "1eab00ece05dc4dc2163bb565f26e1884a096b7007bd57c3999471ffa0db3c16"
+        },
+        {
+          "Path": "ClubDoorman/Services/LinkFormatting/LinkFormattingModule.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "6aa6ab7e92147dba9dd23521b4c93c28485ac32c7f945f304960d72913187ae6"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/IChatLinkFormatter.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "f8c74d507fefb643b47b20527992ffd64036ad72a5d2d226d64954bafc3a5315"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/ILogChatService.cs",
+          "Kind": "cs",
+          "Loc": 19,
+          "Sha256": "459a7f76653c806a76b05415390e34253db8b644de97e79d916a366c1957463b"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/ILoggingConfigurationService.cs",
+          "Kind": "cs",
+          "Loc": 45,
+          "Sha256": "b4c170fd9dbf3b74c47395620df30278e8b6f0c857f916c37e8533ba0c57e891"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/IMessageService.cs",
+          "Kind": "cs",
+          "Loc": 77,
+          "Sha256": "0d99e92e2e435b83728cb5ea337e8bcbb54f6943b1982827021a0eb6026316db"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/INotificationService.cs",
+          "Kind": "cs",
+          "Loc": 30,
+          "Sha256": "25d7273c4911afc66aa30a3e41ff14e38f5ecd9d96a0086eda3ce24fac121623"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/IServiceChatDispatcher.cs",
+          "Kind": "cs",
+          "Loc": 31,
+          "Sha256": "19f830426a2adce8d7f486b05bc54bd3fcdde19866f4bd97df4f71ba2715976a"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/LogChatService.cs",
+          "Kind": "cs",
+          "Loc": 205,
+          "Sha256": "48202cf1faa724d604878d916e8727df9d5884934df5470983e0b01df4526d6c"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/LoggingConfigurationService.cs",
+          "Kind": "cs",
+          "Loc": 107,
+          "Sha256": "120b26e744be0b69d275dd4dc683f71bae36e78c37fbbe248a150f458b422cb3"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/MessageService.cs",
+          "Kind": "cs",
+          "Loc": 490,
+          "Sha256": "c2d77250ed396aca677a1290dde545745ff8da93ebf777e002ec212bc7875d65"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/MessageTemplates.cs",
+          "Kind": "cs",
+          "Loc": 396,
+          "Sha256": "1516e800bdfd8d0e723a7907eb72c65e15a44153546524df761e94ad349d2cf0"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/MessagingModule.cs",
+          "Kind": "cs",
+          "Loc": 31,
+          "Sha256": "40136b07743fea4f8898902afd398625cbc811b694357a21122ad6ed63cf8c30"
+        },
+        {
+          "Path": "ClubDoorman/Services/Messaging/ServiceChatDispatcher.cs",
+          "Kind": "cs",
+          "Loc": 465,
+          "Sha256": "3d67f7048e6a5281b4fa4e499f8cf608094f41b608aaaf0ba753e145d1eaa1b8"
+        },
+        {
+          "Path": "ClubDoorman/Services/Moderation/IModerationService.cs",
+          "Kind": "cs",
+          "Loc": 71,
+          "Sha256": "17ba5973fba25c5d1b5b459f37acdb42484d233b11c0722cfa0bc823bc4d7655"
+        },
+        {
+          "Path": "ClubDoorman/Services/Moderation/ModerationModule.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "45d9eea52e2627ad2df3bc99d85479f7a70ca8c1e8e63fbab155c877355b4ff0"
+        },
+        {
+          "Path": "ClubDoorman/Services/Notification/NotificationModule.cs",
+          "Kind": "cs",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "ClubDoorman/Services/Notifications/ButtonsService.cs",
+          "Kind": "cs",
+          "Loc": 147,
+          "Sha256": "3629aa00a892044462086d2235f2e307d34dde3a4649b33b6083839f90e9db68"
+        },
+        {
+          "Path": "ClubDoorman/Services/Notifications/ForwardingService.cs",
+          "Kind": "cs",
+          "Loc": 43,
+          "Sha256": "b8d9f08e33b8cd4f6b3b59710eadaa40e57be0a98195645592c1ed785dbb308c"
+        },
+        {
+          "Path": "ClubDoorman/Services/Notifications/IButtonsService.cs",
+          "Kind": "cs",
+          "Loc": 11,
+          "Sha256": "16a612deddf5894b442087153fda83bdf34931e62980381fc9939eac8e94833d"
+        },
+        {
+          "Path": "ClubDoorman/Services/Notifications/IForwardingService.cs",
+          "Kind": "cs",
+          "Loc": 10,
+          "Sha256": "77e7e9fd0a57a6c4d88fd3d16f6d63e9d7caba2b9ae50b4557ff2becb4a5dabe"
+        },
+        {
+          "Path": "ClubDoorman/Services/Notifications/INotificationService.cs",
+          "Kind": "cs",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "ClubDoorman/Services/Notifications/NotificationService.cs",
+          "Kind": "cs",
+          "Loc": 440,
+          "Sha256": "db4dc9c9cffdc1d3419e7d4b5b60764806f92dcf43b9870a75a747654a16bd53"
+        },
+        {
+          "Path": "ClubDoorman/Services/SimpleFilters.cs",
+          "Kind": "cs",
+          "Loc": 204,
+          "Sha256": "de75e9f90608a36164a0bc6f0db9904234877492b3d31d09eb5c3d225a67f4e7"
+        },
+        {
+          "Path": "ClubDoorman/Services/Statistics/GlobalStatsManager.cs",
+          "Kind": "cs",
+          "Loc": 203,
+          "Sha256": "f46acc28b4a33535f28dc2004577a8efa371fd4c99aac8875003da481e44382f"
+        },
+        {
+          "Path": "ClubDoorman/Services/Statistics/IStatisticsService.cs",
+          "Kind": "cs",
+          "Loc": 44,
+          "Sha256": "60a1ee288847e8a688f461a6a8284e20cc274b0debd4a73742decff97403c725"
+        },
+        {
+          "Path": "ClubDoorman/Services/Statistics/StatisticsModule.cs",
+          "Kind": "cs",
+          "Loc": 22,
+          "Sha256": "248db414627f84c46a19c3ccbf57ce56cc0ab00abee4872a2b9e3b19ebee1cf1"
+        },
+        {
+          "Path": "ClubDoorman/Services/Statistics/StatisticsService.cs",
+          "Kind": "cs",
+          "Loc": 112,
+          "Sha256": "f01c35800cd17c81314d9d2d6a48a694abcdb7a5d4ea944033c33cb8e3d197bc"
+        },
+        {
+          "Path": "ClubDoorman/Services/SuspiciousUsers/ISuspiciousUsersStorage.cs",
+          "Kind": "cs",
+          "Loc": 82,
+          "Sha256": "f056ec83183c45e29e41f5bde905d17e7b26ff75588e026c9cbd9f6f82b3f7af"
+        },
+        {
+          "Path": "ClubDoorman/Services/SuspiciousUsers/SuspiciousUsersModule.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "eca1824cf06d4024bec2b9f2812856a01f3faf744397088a409b47370efc3b45"
+        },
+        {
+          "Path": "ClubDoorman/Services/SuspiciousUsers/SuspiciousUsersStorage.cs",
+          "Kind": "cs",
+          "Loc": 307,
+          "Sha256": "5aca23d3e1a24521b4bd123fac5f2d8883fc8551ad438ad0fdb7918735920c4d"
+        },
+        {
+          "Path": "ClubDoorman/Services/Telegram/ITelegramBotClientWrapper.cs",
+          "Kind": "cs",
+          "Loc": 186,
+          "Sha256": "e79b52f09513bee92776017efabfd8b76c44b0468035f99de522059909196854"
+        },
+        {
+          "Path": "ClubDoorman/Services/Telegram/TelegramBotClientWrapper.cs",
+          "Kind": "cs",
+          "Loc": 346,
+          "Sha256": "bccdf7ba27266fbe8b2616fa0479af11c8d25acb0f5ee311008214fe51fa3899"
+        },
+        {
+          "Path": "ClubDoorman/Services/Telegram/TelegramModule.cs",
+          "Kind": "cs",
+          "Loc": 22,
+          "Sha256": "3ade13351870cf909cf561279449f77d13f71591f6b92fd357923358f617191e"
+        },
+        {
+          "Path": "ClubDoorman/Services/TextProcessing/TextProcessingModule.cs",
+          "Kind": "cs",
+          "Loc": 13,
+          "Sha256": "ef94ade901cdba71d87d60a7b78026fc47176df142e2999e3eb7600222013d84"
+        },
+        {
+          "Path": "ClubDoorman/Services/TextProcessing/TextProcessor.cs",
+          "Kind": "cs",
+          "Loc": 60,
+          "Sha256": "ab360d05bcb59a3e2543aea056f9edd2f313cce34c799e9e29e710564d632b06"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserBan/BanType.cs",
+          "Kind": "cs",
+          "Loc": 47,
+          "Sha256": "6ec9ccab289b725df3def98e89bf99bc02e7f851cc40c13b9a34456d8ebd41bd"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserBan/IUserBanService.cs",
+          "Kind": "cs",
+          "Loc": 54,
+          "Sha256": "192697eba858f24276dc8e0e4bb5bb6045090d4023970323014e57306f0da478"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserBan/UserBanModule.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "a5233f9e8d3b3a0a9355622e5bf7e62d7479653167fdfce78671f267f3fd47ea"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserBan/UserBanService.cs",
+          "Kind": "cs",
+          "Loc": 583,
+          "Sha256": "3bca1994dcff7ba93c34759ff5a108042720767018cbb88cec4bb05154e660f5"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserFlow/IUserFlowLogger.cs",
+          "Kind": "cs",
+          "Loc": 126,
+          "Sha256": "60694caa3c5f0d3ebc3729b5b167f32230c5920cbb3ad4ce917234a7fb3f8cc4"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserFlow/UserFlowLogger.cs",
+          "Kind": "cs",
+          "Loc": 174,
+          "Sha256": "bd6b9fa292b48addaeeb572fda3f6c84e4698bd01554677dfb139cb32a304a9c"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserFlow/UserFlowModule.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "960b875b304366f554b1faae140ca8450ebc56d6c0488482ab302fc133d6f252"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserJoin/FolderInviteService.cs",
+          "Kind": "cs",
+          "Loc": 116,
+          "Sha256": "011db640e45a45ac4e38d0feaffa8ccf4533465f861643afa0855a0a2587a5be"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserJoin/IFolderInviteService.cs",
+          "Kind": "cs",
+          "Loc": 18,
+          "Sha256": "e30445711c765724f491f27ced52a315e90f6090b0cf58cbb0639bd4753d704e"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserJoin/UserJoinModule.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "cc31095eb8bcf3f0a643d6286d157773672c32bb55a40d7d7aed1239d39ba817"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserManagement/ApprovedUsersStorage.cs",
+          "Kind": "cs",
+          "Loc": 401,
+          "Sha256": "4c3474d6537e8a027fe5fff18085d13f1d0406f19d160865274f04d62094732f"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserManagement/IJoinedUserFlags.cs",
+          "Kind": "cs",
+          "Loc": 29,
+          "Sha256": "c3dfc84d0065b29d6525098a4f650955080ead75501f5582d146c39c3626215c"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserManagement/IUserCleanupService.cs",
+          "Kind": "cs",
+          "Loc": 32,
+          "Sha256": "8852ca3cc7a8821e2f22892807af9e23a2b2e62e01089d71436de7c55e93fe95"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserManagement/IUserIndex.cs",
+          "Kind": "cs",
+          "Loc": 22,
+          "Sha256": "0c02a89cf2a90d1abe4bda18153cde4b89256b1b8bbf86abbe04b8574bc549c0"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserManagement/IUserManager.cs",
+          "Kind": "cs",
+          "Loc": 46,
+          "Sha256": "0dd5bf53f7533d5ed9cf4a1faea823423fd8ede012b2ed8e357caf45d87a7d91"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserManagement/JoinedUserFlags.cs",
+          "Kind": "cs",
+          "Loc": 40,
+          "Sha256": "6924229741f1fa3cfb5fa1f29160fdf9f710451ee4b5bb650cec1615fe721e79"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserManagement/UserCleanupService.cs",
+          "Kind": "cs",
+          "Loc": 93,
+          "Sha256": "c53a63176fca326968b2c1d21263afe0040202d94eaa3f6571bbae327cdf0d21"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserManagement/UserIndex.cs",
+          "Kind": "cs",
+          "Loc": 46,
+          "Sha256": "76d541a1ff348132dbc84e735e612a614671f4345f31f099165ae9d15fa33236"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserManagement/UserManagementModule.cs",
+          "Kind": "cs",
+          "Loc": 32,
+          "Sha256": "db067fd2ef2322a406c57cc1aec997b5c1cc6137fdfa5c37219a94c62a47513c"
+        },
+        {
+          "Path": "ClubDoorman/Services/UserManagement/UserManager.cs",
+          "Kind": "cs",
+          "Loc": 315,
+          "Sha256": "d26ee0d8ba05ebb3d8379313de2be583c6b9e0b755d64899eb0c27215dd0460e"
+        },
+        {
+          "Path": "ClubDoorman/Services/Violation/IViolationTracker.cs",
+          "Kind": "cs",
+          "Loc": 35,
+          "Sha256": "ce7b209e55a515b7effd52488e24f6ef184531027988decf162bdab39f0e7735"
+        },
+        {
+          "Path": "ClubDoorman/Services/Violation/ViolationModule.cs",
+          "Kind": "cs",
+          "Loc": 12,
+          "Sha256": "733827380495d171a2c7359e7ce9155622fe870e08c152cfb8330260f7745c73"
+        },
+        {
+          "Path": "ClubDoorman/Services/Violation/ViolationTracker.cs",
+          "Kind": "cs",
+          "Loc": 155,
+          "Sha256": "1ccae1a2ba65c8d032c236bd8415602676919303cfdd6afb5e7be6f251626704"
+        },
+        {
+          "Path": "ClubDoorman/Worker.cs",
+          "Kind": "cs",
+          "Loc": 425,
+          "Sha256": "7cc672468af3adeec78e1100cdb4f04ab2dc6f382fda41318160614cb42be599"
+        },
+        {
+          "Path": "docker-compose.yml",
+          "Kind": "yml",
+          "Loc": 14,
+          "Sha256": "578c177936a14ee94779a535ace6b72bdecc807433167ded48922a0c11bec182"
+        },
+        {
+          "Path": "docs/scenarios/ErrorHandling.feature.cs",
+          "Kind": "cs",
+          "Loc": 542,
+          "Sha256": "30e1f2891670ca039a40d5e36700d9c5636a22856ea2cc8614e9e1d701cee7b7"
+        },
+        {
+          "Path": "docs/scenarios/MessageModeration.en.feature",
+          "Kind": "feature",
+          "Loc": 161,
+          "Sha256": "1a2250ced8ba4a79fd46429f276f7ab25145b01b250b59a1904980de6541244e"
+        },
+        {
+          "Path": "docs/scenarios/MessageModeration.en.feature.cs",
+          "Kind": "cs",
+          "Loc": 893,
+          "Sha256": "4d663a33bd621ba063ff520bcf210ce57dc764887313ed0bda35a6b524caea24"
+        },
+        {
+          "Path": "docs/scenarios/MessageModeration.feature.cs",
+          "Kind": "cs",
+          "Loc": 591,
+          "Sha256": "27f99c9a3272c786f5363ea7402b657971bf09263b31655e766a593d0434fcf6"
+        },
+        {
+          "Path": "docs/scenarios/UserApproval.feature.cs",
+          "Kind": "cs",
+          "Loc": 633,
+          "Sha256": "29290daab258e407f3891cc8fe4819d46ca98f8a955e071d20eebde06e6d87da"
+        },
+        {
+          "Path": "docs/scenarios/UserNameModeration.feature.cs",
+          "Kind": "cs",
+          "Loc": 205,
+          "Sha256": "11dc7407299ff2e24b6dcf72f5456e0afd4a007381b412d221fa167f68d4182e"
+        },
+        {
+          "Path": "plans/current/test-reorganization/migration_candidates.json",
+          "Kind": "json",
+          "Loc": 1,
+          "Sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+        },
+        {
+          "Path": "plans/current/testkit-unification/testkit-unification-worklog.yaml",
+          "Kind": "yaml",
+          "Loc": 194,
+          "Sha256": "5d42e888cb131b7071cf9d9123feeebf0aed47f85fb4a37ec941f0474dccf0f4"
+        },
+        {
+          "Path": "scripts/test_factory_generator/.dxtoolrc.json",
+          "Kind": "json",
+          "Loc": 35,
+          "Sha256": "9903760fc50b3339e2a6256df9d2df402bce1f164fd69543df91ad6ad7b87918"
+        },
+        {
+          "Path": "stryker-config.json",
+          "Kind": "json",
+          "Loc": 30,
+          "Sha256": "478732686743a5727aed85a2f6e5e522875b874f16a325ca7de4978af4cead43"
+        },
+        {
+          "Path": "tmp/analysis/MessageHandler_RefactoringAnalysis.cs",
+          "Kind": "cs",
+          "Loc": 1608,
+          "Sha256": "70e774fca1b805cfa82ba26f6f5610b2edbd23f3c3e6ba26b4e9ebc41c57024b"
+        },
+        {
+          "Path": "tmp/analysis/MessageHandler_TestCoverageAnalysis.cs",
+          "Kind": "cs",
+          "Loc": 1665,
+          "Sha256": "658843650ddeb990ed88c9fc19e26267485b4d4879395e84209064c377aed91f"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/AnalysisCore.csproj",
+          "Kind": "csproj",
+          "Loc": 228,
+          "Sha256": "a97e46cf8833b9547aebfd423a38d41279c7895dc89ff37361a3e141448172c6"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/AnalysisMessages.cs",
+          "Kind": "cs",
+          "Loc": 83,
+          "Sha256": "2ba077ee6a9d210311771dae769096db9444d0066e8173cf9b9fa407a2a060db"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Async/AsyncDummyProjectCodeProvider.cs",
+          "Kind": "cs",
+          "Loc": 63,
+          "Sha256": "2d1602fb17048fc487f73ab0c4fab1f2001df76d528e03d27b32a9f75c7f9aff"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Async/AsyncProjectCodeProvider.cs",
+          "Kind": "cs",
+          "Loc": 138,
+          "Sha256": "16ae28e3dfbd3e03a37db6498c87f8db705d4a2ce85e620a7a172d8dbeafbce9"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Async/AsyncSolutionManager.cs",
+          "Kind": "cs",
+          "Loc": 153,
+          "Sha256": "1af0d51fa8c6cb13f81f3ebd9c63e3ab4cbbdd0396aad771e6c9a5864e65000f"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/BaseManagers/BaseProjectCodeProvider.cs",
+          "Kind": "cs",
+          "Loc": 525,
+          "Sha256": "8462fb66cf8f5115e75bacfb71c45e894b14cdf76fb3a1c0bf2b7a3baa1be232"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/BaseManagers/DummyProjectCodeProvider.cs",
+          "Kind": "cs",
+          "Loc": 112,
+          "Sha256": "8698e30a3d856a6c17f5fe86587c78decff2552d42ea2a134d5b2f8d8f945811"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/BaseManagers/MethodEntityPropagator.cs",
+          "Kind": "cs",
+          "Loc": 609,
+          "Sha256": "766e1554f65416dabaf9b7ed72b1d85cacff7cbf3eac70dbbd84884eab8da95e"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/BaseManagers/ProjectCodeProviderIncremental.cs",
+          "Kind": "cs",
+          "Loc": 250,
+          "Sha256": "78054f67a796aee613afea880e7498754f43f0592c84bda4b2ed7353ada36af8"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/BaseManagers/RtaManager.cs",
+          "Kind": "cs",
+          "Loc": 43,
+          "Sha256": "cdafb86b0b2576bc4899fe0ed4bb17a29ace7dd90263eab59463d8122b424a00"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/BaseManagers/SolutionManager.cs",
+          "Kind": "cs",
+          "Loc": 279,
+          "Sha256": "9126c1b1c507301604f13d18c887bd82f9a43d01efa3c8b2231513f64f9e5dd8"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Graph/Graph.cs",
+          "Kind": "cs",
+          "Loc": 398,
+          "Sha256": "d9a853ee302aa7a98535744b32693e696ad89d1a09cffe347e96543720839753"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Graph/GraphAnnotationData.cs",
+          "Kind": "cs",
+          "Loc": 47,
+          "Sha256": "4e4538a5869bb27dfd2eb593251f49b043926dea454f5feb2d1e81a470bf6a9b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Graph/GraphvizAdapter.cs",
+          "Kind": "cs",
+          "Loc": 105,
+          "Sha256": "5f682b38f571e5e09563ae32565008bb0335771e89c20be1ca98bd6f93bc2766"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Graph/IGraph.cs",
+          "Kind": "cs",
+          "Loc": 93,
+          "Sha256": "8582963024981bf2cd05e006336d2bc0a94f9c55ead4a7c84822491adfdc14a6"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Graph/PropagationGraph.cs",
+          "Kind": "cs",
+          "Loc": 705,
+          "Sha256": "2bae71cf6b6658cba732360a3b123c22cdd281e0d780ee517f6c4d25b38f4315"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Graph/PropagationGraphAsync.cs",
+          "Kind": "cs",
+          "Loc": 403,
+          "Sha256": "46a8d87b236a4004345373d066c89636fdc8ba6ae0f7c51e5c3a249dd1c970e6"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/IEntity.cs",
+          "Kind": "cs",
+          "Loc": 10,
+          "Sha256": "610b391e58eef7901118fa9aeb8e4393ed915272e30b9165dad0672d6d26bc07"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Logger.cs",
+          "Kind": "cs",
+          "Loc": 148,
+          "Sha256": "1fcbb796c999049b32adf77a762070f1dad7b4a6f75fbb96ca9d4c3d4fffde6b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/MethodEntity.cs",
+          "Kind": "cs",
+          "Loc": 350,
+          "Sha256": "0a9f5cdfe07452c8641673c3ff6d29126baff7ce73d19e95054ce581acfe6713"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 41,
+          "Sha256": "2285b818415f08b97e8a34572fb0a98363e6b76a968694a82fec0f560bc92f57"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Roslyn/CodeGraphHelper.cs",
+          "Kind": "cs",
+          "Loc": 450,
+          "Sha256": "b9bb66eb25e4115f2c7581d3ec1b88e7f9ba9e7efcc1c316ba1e3c55c65b7601"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Roslyn/DocumentDiff.cs",
+          "Kind": "cs",
+          "Loc": 149,
+          "Sha256": "07f4e097ebe1dd923172e70b2a8af26b15109864b398fee47cba3cf0a2afbb5c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Roslyn/ExpressionVisitor.cs",
+          "Kind": "cs",
+          "Loc": 1315,
+          "Sha256": "f6c148754dc7c457c731ef03609124d16767897ea2927fe45e99fc8d3a62f424"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Roslyn/LibraryMethodProcessor.cs",
+          "Kind": "cs",
+          "Loc": 42,
+          "Sha256": "7c5e4e252c1605d4834af1555c5fa66c4edf52635443af606726465a5a345b36"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Roslyn/MethodSimpifier.cs",
+          "Kind": "cs",
+          "Loc": 145,
+          "Sha256": "f7d0b3bae2bcb608349754442b9636e3847601c19fc7439f1f73ed5cc4188af2"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Roslyn/RoslynASTVisitor.cs",
+          "Kind": "cs",
+          "Loc": 1240,
+          "Sha256": "4075ddc36649d6e5b23d33af43407dbe7b0febc1ffbe62673809fa5d40b00359"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Roslyn/RoslynSymbolFactory.cs",
+          "Kind": "cs",
+          "Loc": 166,
+          "Sha256": "f9891d3ea290f0b3d06777a1a9c9436ffbffef4911895c854d9258301c4ab45f"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Roslyn/SolutionFileGenerator.cs",
+          "Kind": "cs",
+          "Loc": 378,
+          "Sha256": "246e86891d5ca60bad68e6120eafca70c5af4fcdc759a9b0ef74d304cdc04453"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Roslyn/Utils.cs",
+          "Kind": "cs",
+          "Loc": 1024,
+          "Sha256": "e8e787c917d7b103014a6ff0f359e1ac9ce1e6f133fd391967ef792d7672ed09"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/StatementProcessor.cs",
+          "Kind": "cs",
+          "Loc": 303,
+          "Sha256": "07ef34bc0ca3c9bde3aaef9657639ac5019ab200d1ef1764d9fd43082a6b4797"
+        },
+        {
+          "Path": "tmp/call-graph-builder/AnalysisCore/Tests/TestSources.cs",
+          "Kind": "cs",
+          "Loc": 111158,
+          "Sha256": "c2433f62f7d13c01b4627eb8c996855abf2d23489a1d12c5c608ffd62b9e2424"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CallGraphGeneration/CallGraphGeneration.csproj",
+          "Kind": "csproj",
+          "Loc": 236,
+          "Sha256": "aa61b4d18efab9a0d404649011795faaefebf9d1bd461a9a3d8ed9d66afba5f0"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CallGraphGeneration/OrleansHostWrapper.cs",
+          "Kind": "cs",
+          "Loc": 89,
+          "Sha256": "0ad4a2410fd5ebd92872a4316ad3a227b3e8c0c26a4cd85a105f31366518e19c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CallGraphGeneration/Program.cs",
+          "Kind": "cs",
+          "Loc": 182,
+          "Sha256": "8e4af02b1f0c4c28a0e9dc0d77193cfe5a38887be7a07533d69f600df94522da"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CallGraphGeneration/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "03b1bd99bc873ade1eb3059b3e18547a78c3f979a57bd862ac5d72af14bb0ab1"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CallGraphGeneration/Properties/orleans.codegen.cs",
+          "Kind": "cs",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CodeGraphModel/Annotation.cs",
+          "Kind": "cs",
+          "Loc": 62,
+          "Sha256": "2b61a8547c3fe0b84040de3ad80aff7a2791594acc7a7f0ff5daee74baa871d4"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CodeGraphModel/CodeGraph.cs",
+          "Kind": "cs",
+          "Loc": 20,
+          "Sha256": "2ebeb9c803003d960b87ad6b38bc2886552e623acd7d69db8ed73a670872997c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CodeGraphModel/CodeGraphModel.csproj",
+          "Kind": "csproj",
+          "Loc": 80,
+          "Sha256": "e9a160b4967f084496b5aee13ba93ce01c645f8ea219b78b6568b2bb04c20938"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CodeGraphModel/Constants.cs",
+          "Kind": "cs",
+          "Loc": 52,
+          "Sha256": "20a4d6121e28122ed00ff6a1e017039d8bcb5d9203556492334a5a24ca2b6f72"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CodeGraphModel/Entity.cs",
+          "Kind": "cs",
+          "Loc": 26,
+          "Sha256": "12b227583d3e4f00b85b0c16e95d99057e32dd0d320066ea9f97305964079bcb"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CodeGraphModel/File.cs",
+          "Kind": "cs",
+          "Loc": 87,
+          "Sha256": "607d86656519fdf4c4f161b77a1311794843b3c90ca1ca1bd730db71820cf847"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CodeGraphModel/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "a44d80fd079ad1a10a2b3d12a48383c1569aa951967a50e38f3dfc0c521210ae"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CodeGraphModel/Symbol.cs",
+          "Kind": "cs",
+          "Loc": 79,
+          "Sha256": "9ea42b18fe2abc0f1d586e1fbf652d3d4b89312af1e41e6c79d134e07528c040"
+        },
+        {
+          "Path": "tmp/call-graph-builder/CodeGraphModel/Vertex.cs",
+          "Kind": "cs",
+          "Loc": 61,
+          "Sha256": "39e14bf372a45814331a735dd05a7d73b77ab32ebce43b18d9a3045c8f73e999"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Common.csproj",
+          "Kind": "csproj",
+          "Loc": 153,
+          "Sha256": "70c228a5b6af1c99d92f2e8d7d78b10917398c533c6e3955126a25f77338c8e9"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Graph/CallNodes.cs",
+          "Kind": "cs",
+          "Loc": 182,
+          "Sha256": "36e6c5efb8da0273917fd23a954c068c540b9d9a3957d5312bf2d8dfcae096f3"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Graph/GraphAnnotationData.cs",
+          "Kind": "cs",
+          "Loc": 35,
+          "Sha256": "80ea8f92da1bcf746ad4817979f75f5468f0540085cd65233b22f81d214b2573"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Graph/GraphvizAdapter.cs",
+          "Kind": "cs",
+          "Loc": 108,
+          "Sha256": "f6a6de8ecffd22414e74d7f92e728716a3707507c40e23859090873d60fc18cd"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Graph/PropagationEffects.cs",
+          "Kind": "cs",
+          "Loc": 17,
+          "Sha256": "e2d2883c4d904ae5c99543b674cf3ffe3a4a6a6928fe86bb994e668ee9c54555"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Graph/PropagationGraph.cs",
+          "Kind": "cs",
+          "Loc": 603,
+          "Sha256": "e95af400b27ab6a66524aaf899a104fc3978d7d4e1cb6c339e5ad987593d8852"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/IEntity.cs",
+          "Kind": "cs",
+          "Loc": 8,
+          "Sha256": "319c0d4bfa9b742ef2978349e86de57ac8fa7e298dfb1b672762265056d6d2e8"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Interfaces.cs",
+          "Kind": "cs",
+          "Loc": 181,
+          "Sha256": "8e1bd037cfcd509c8ba2e4019d30bd15a058b12fd2749754838f84bb98b1deb9"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/MethodEntity.cs",
+          "Kind": "cs",
+          "Loc": 291,
+          "Sha256": "ffa0609ebf76ea466d491347a9ed1d7854605678017ab3682bb1c5b815fcfd2a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/OrleansHostWrapper.cs",
+          "Kind": "cs",
+          "Loc": 194,
+          "Sha256": "9141f6934640b10b93a2441f788abd79b47f5a6361ee0662195c79036f3ad3be"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "09c8fffd69dd6acab24cba17ba7b6bd97e85b4d058e7ec7a3c81e538bb7b6b4e"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Roslyn/CodeProvider.cs",
+          "Kind": "cs",
+          "Loc": 304,
+          "Sha256": "a5cd0646d99211846511a8630f006f103858ab941c81b5c9c7d932a0da121121"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Roslyn/RoslynSymbolFactory.cs",
+          "Kind": "cs",
+          "Loc": 89,
+          "Sha256": "a4d2d75f693ad10c676887ac57739b59fd5d720103f68c0a8e4a74e3c041dc32"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Roslyn/Utils.cs",
+          "Kind": "cs",
+          "Loc": 262,
+          "Sha256": "8774beeee5bbe23695cb4fd43626af052ef899f00ba1d11dfcfdeccbb49b14ab"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/SerializableTypes/AnalysisTypes.cs",
+          "Kind": "cs",
+          "Loc": 1019,
+          "Sha256": "b96c47fd84792f70494042ec21c7c94f503f39ec4af4194e2f6c3ce6e5447ed3"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/SerializableTypes/CallInfo.cs",
+          "Kind": "cs",
+          "Loc": 103,
+          "Sha256": "1d41bd8df7a4293565e88c52094a34eb51b6855eab5d49afadf32b95f7b86f27"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/SerializableTypes/Messages.cs",
+          "Kind": "cs",
+          "Loc": 92,
+          "Sha256": "7f84d500d1b659214ff72ea5a304a4cc09cb9ec98418f8b763d06214edfb9ca5"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/SerializableTypes/PropagationEffects.cs",
+          "Kind": "cs",
+          "Loc": 43,
+          "Sha256": "97772eecbd0923acff7eb0d91bddd31f24b4145a73446bf1c705eeb326dd12ba"
+        },
+        {
+          "Path": "tmp/call-graph-builder/Common/Utils.cs",
+          "Kind": "cs",
+          "Loc": 166,
+          "Sha256": "36eae01465598b911adff36676f997f9d559c151db56044487a4aa1c245a9c24"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ConsoleCobyClient/ConsoleCobyClient.csproj",
+          "Kind": "csproj",
+          "Loc": 222,
+          "Sha256": "ad95e5153d7653ba269c5c6a3a144b9a073d59e0e796470aa8030d41affee8f9"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ConsoleCobyClient/Program.cs",
+          "Kind": "cs",
+          "Loc": 277,
+          "Sha256": "f48956b7d0758c887a92c79814da0abd1cfd6126d617eabe0bc890a934fb560e"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ConsoleCobyClient/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "8331466fe3de8c6ca732cec8e7fa07f030672f1c1f71ad390ba041b70dbfd7f2"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ConsoleServer/ConsoleServer.csproj",
+          "Kind": "csproj",
+          "Loc": 258,
+          "Sha256": "3d28d9d46245001b802eb1f7d07b5ea72ff3b011618062dcd5df531849a8d851"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ConsoleServer/Controllers/OrleansController.cs",
+          "Kind": "cs",
+          "Loc": 246,
+          "Sha256": "309b7e4606e3e5eb4cb6ba4041d0339498ba697cf9cfd0fa7111d26235d2e8ea"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ConsoleServer/OrleansHostWrapper.cs",
+          "Kind": "cs",
+          "Loc": 89,
+          "Sha256": "32c4fbc0ef96b4124926a010319319b6612d526501762913146c1b87c03f85ad"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ConsoleServer/Program.cs",
+          "Kind": "cs",
+          "Loc": 326,
+          "Sha256": "62379af340d803becad50e91a2f1146365d812a3526e16f62373bfc095a937f3"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ConsoleServer/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "e5d5311ef04e0326ac2727d622e1c6181d21f37ace62757d6d25423b5d1d8980"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ConsoleServer/Startup.cs",
+          "Kind": "cs",
+          "Loc": 33,
+          "Sha256": "15a6b1813f27545ad96832f385660a7682af23eced863d82ca3b017b65aa4118"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ConsoleServer/Utils/Algorithms.cs",
+          "Kind": "cs",
+          "Loc": 74,
+          "Sha256": "cdfc56b91820a0ca5e5d3e7f15ae615600875fb5ecfd997402b06043af980bb7"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ConsoleServer/Utils/TimedLog.cs",
+          "Kind": "cs",
+          "Loc": 31,
+          "Sha256": "16f8228872ad35a58afa17268115dbef225e132ad9e2d4fadc11d7d2f3504cba"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/MethodEntity/MethodEntityGrain.cs",
+          "Kind": "cs",
+          "Loc": 413,
+          "Sha256": "510400fc37bcaad1a6b59452512647fca3996e8c38d3696739770cbfd5aacfaf"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/MethodEntity/MethodEntityGrainCallerWrapper.cs",
+          "Kind": "cs",
+          "Loc": 186,
+          "Sha256": "2f47ad660940599bcc461cb17a9d29d1ec0c8c5fbbf3cdce18bea130f4b4d017"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/MethodEntity/OrleansMethodEntity.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "d1aa9a35668baafec7137f2ecdce329853f6a010d2bc3cfa6823527fbf029880"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/OrleansGrains.csproj",
+          "Kind": "csproj",
+          "Loc": 233,
+          "Sha256": "577c8259f924708fdae25a85feb6da757893a68111367667761a0c4e6eac1d6a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/ProjectCodeProvider/OrleansDummyProjectCodeProvider.cs",
+          "Kind": "cs",
+          "Loc": 80,
+          "Sha256": "897af6b7414d5eeb7dd7ee13fb5ee8d347b8331dff1fe01ff1c9320bffdfb3a5"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/ProjectCodeProvider/OrleansProjectCodeProvider.cs",
+          "Kind": "cs",
+          "Loc": 166,
+          "Sha256": "724a3988fe1deb6ef50b63022e7837c93012c26ffc6235d265209c0ce8250cc7"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/ProjectCodeProvider/ProjectCodeProviderGrain.cs",
+          "Kind": "cs",
+          "Loc": 457,
+          "Sha256": "0331bbd91e0d8579ad26b6e84984790bae1ece57958e6aa9aae08be418700af2"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/ProjectCodeProvider/ProjectCodeProviderGrainCallerWrapper.cs",
+          "Kind": "cs",
+          "Loc": 187,
+          "Sha256": "b178e5783ffeed7008295ce7bfdd45b2e3fa8e63dcbb927d65aec3e808bc7651"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/ProjectCodeProvider/ProjectCodeProviderWithCache.cs",
+          "Kind": "cs",
+          "Loc": 173,
+          "Sha256": "bf688bca51feae8b28c89be6a8607394610b91891825a0378ffbf9985cb13e17"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 38,
+          "Sha256": "21c5a5c65e4cdb1c643ce4106ab906dcb83327ec03c4b3ffab42e4f24c11ade1"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/Rta/OrleansRtaManager.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "701523c75683f53f8779b09d1b4324f7d6107bf244ff6df5a1a27b39fc62e9aa"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/Rta/RtaGrain.cs",
+          "Kind": "cs",
+          "Loc": 47,
+          "Sha256": "3751e3fe4d0b223983ffeae0bc7c00163b8e0123d508512c7d1fff017592855e"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/Rta/RtaGrainCallerWrapper.cs",
+          "Kind": "cs",
+          "Loc": 38,
+          "Sha256": "18e485733a423e067266ea526da3fe60416fed876f4c689eeace02f33d351cfa"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/SiloOrchestrator.cs",
+          "Kind": "cs",
+          "Loc": 313,
+          "Sha256": "e897ca043d7889022288f594716c1361e17cda69c127476cbc8802196966246f"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/Solution/OrleansSolutionManager.cs",
+          "Kind": "cs",
+          "Loc": 218,
+          "Sha256": "c3731f99c5a1be6eb049ed8e9d60a6a958fe8b8ecbdbbbd96bca75e116efd919"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/Solution/SolutionGrain.cs",
+          "Kind": "cs",
+          "Loc": 392,
+          "Sha256": "faad0a32eb8ee6afa66b72cb7c50af2b91bf75fa26e64a3372089d62392464d0"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/Solution/SolutionGrainCache.cs",
+          "Kind": "cs",
+          "Loc": 144,
+          "Sha256": "7dffe98d60fb1109f09c51f11eac9e25f0d93b44ff8df0f0003eb4451833ddd2"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/Solution/SolutionGrainCallerWrapper.cs",
+          "Kind": "cs",
+          "Loc": 157,
+          "Sha256": "908c59bab978d3100893cf6c0b219acfb960d4ab8ebfcbf074a8bbb96585524f"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansGrains/StatsGrain.cs",
+          "Kind": "cs",
+          "Loc": 502,
+          "Sha256": "ce8cb7f60629f8f8ad36703b770b60d3fe8b14f6a7cac6b63b52a5edec30f39e"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansInterfaces/IMethodEntityGrain.cs",
+          "Kind": "cs",
+          "Loc": 40,
+          "Sha256": "90ede185f4659c6479ff5eaee2f685bcd1c15cb91567022e263c4080aff836f2"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansInterfaces/IProjectCodeProviderGrain.cs",
+          "Kind": "cs",
+          "Loc": 23,
+          "Sha256": "f2ee915cc49a74a9e2a8924bcba5901c4ce54c37ff99be0dc11c422f40b1ebce"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansInterfaces/IRtaGrain.cs",
+          "Kind": "cs",
+          "Loc": 15,
+          "Sha256": "0a05e08b0c00b8bc08960a73ce84b1a41d3a0cda36915a0ddba4f36abbfe9b84"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansInterfaces/ISolutionGrain.cs",
+          "Kind": "cs",
+          "Loc": 23,
+          "Sha256": "082e6322505fbd3e9d756342a5685cbb32187d9ca51f7e870eeb5a523259f862"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansInterfaces/IStatsGrains.cs",
+          "Kind": "cs",
+          "Loc": 43,
+          "Sha256": "b56ebb9a91d3b961f22a48cf72599c2a233a0b246109a476929aea0a1ffb8658"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansInterfaces/Observers.cs",
+          "Kind": "cs",
+          "Loc": 27,
+          "Sha256": "4412d991c1b7c7a4e7fb7f10561671efac9fb592995fee70a0b104ae6b4c6161"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansInterfaces/OrleansInterfaces.csproj",
+          "Kind": "csproj",
+          "Loc": 113,
+          "Sha256": "c6e74da5571c3b54f3eedc2021ccc84e32987d45b2fe7cc7866b67d7dd822685"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansInterfaces/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "574d28ec6979e22e8a7d1cd47eed449f9ef53060aa924e91b5d6a4ffd74db57a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansSilosInAzure/OrleansSilosInAzure.csproj",
+          "Kind": "csproj",
+          "Loc": 314,
+          "Sha256": "dc97a1fc62acc53df139cf37d7637484a76bd2194243cfadf6d9042095832551"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansSilosInAzure/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "21d5e4d03114f3b17567d23a905acdfb64b45fb59dcf5bb0cdbd4eed2519341c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansSilosInAzure/WorkerRole.cs",
+          "Kind": "cs",
+          "Loc": 409,
+          "Sha256": "520ff4e0b18ae9c1e7627ecf11ba485ce4f6bc8a482a913977cb9616bcf220ed"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansTests/BasicTest.cs",
+          "Kind": "cs",
+          "Loc": 536,
+          "Sha256": "ec594512ba06f49658d49a4dfb8f5a180e8e5d4196507935fcfd310e5bfd015b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansTests/OrleansTests.csproj",
+          "Kind": "csproj",
+          "Loc": 239,
+          "Sha256": "d49d0d5de868ab3d1f232e57fb42a8ce605dc0e5cea7e6ecbf952658206ba66b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansTests/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "5ebff1e39bf5e15e0a1c251a30d4719200e8efcdb224d52aa1f71e9a9b2e7f8a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansTests/Tests.cs",
+          "Kind": "cs",
+          "Loc": 162,
+          "Sha256": "8672b318009b13abdfb0a4232cc9bf7c8db65fc8773f6043e1ad67762d5e0325"
+        },
+        {
+          "Path": "tmp/call-graph-builder/OrleansTests/UnitTest1.cs",
+          "Kind": "cs",
+          "Loc": 29,
+          "Sha256": "4b0ad16535b7d5c84aa6136e6a65a9bed932217035bf95df65f89d68663ce31c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis.sln",
+          "Kind": "sln",
+          "Loc": 225,
+          "Sha256": "c1d772077d0b3c2f6e88009118748ba9a9d5f6a7210a3fe7f4a580d9d94e49cb"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Analysis/AnalysisOrchestrator.cs",
+          "Kind": "cs",
+          "Loc": 791,
+          "Sha256": "e8dc95169e544776d0bf3e8e653209d9cef5ed6517cf2f87a7c18346ac284998"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Analysis/CallGraphQueryInterface.cs",
+          "Kind": "cs",
+          "Loc": 171,
+          "Sha256": "87b4342833a46aa5acbd476dabf0c4249bca902689577371ae493cc78262ed5e"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Analysis/SolutionAnalyzer.cs",
+          "Kind": "cs",
+          "Loc": 431,
+          "Sha256": "911c552d499b39d52634fbb374e53661ede2ad11c7ca36b5941f1f68c4fe41aa"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/CallGraph/CallGraph.cs",
+          "Kind": "cs",
+          "Loc": 218,
+          "Sha256": "71d8707e173be2f28bb363006f8c4451745a2d6b99c3bafecf2e6fb5e1df1e2c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/CallGraph/DGMLGraphDataAdapter.cs",
+          "Kind": "cs",
+          "Loc": 71,
+          "Sha256": "f816d9e885ce74896169256ed304f7f1ecb2cf69b596e62f6d4feb883713011b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/CallGraph/GraphVizGraphDataAdapter .cs",
+          "Kind": "cs",
+          "Loc": 63,
+          "Sha256": "49342d5264f2964ebb70c4d5ae5cd06e5b52cf122ba16d6ca326783286647006"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/MethodWorker.cs",
+          "Kind": "cs",
+          "Loc": 189,
+          "Sha256": "18ca4d6f566a7cff1b79ab927b6ebc97bda54f8405d2bf09ac4c7876c9788f56"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Orleans/Driver/Program.cs",
+          "Kind": "cs",
+          "Loc": 191,
+          "Sha256": "d320132d5812e449c24d906c4e0f2ddae9b455d63df929b9ef6060d05576d581"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Orleans/OrleansHostWrapper.cs",
+          "Kind": "cs",
+          "Loc": 177,
+          "Sha256": "d9b1cb96033cb254297aaeb64eeb28870df37a82a1c47d98cc381de527d315e3"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "2f38b1d78b90488f64fed9b303c2108c2a339230386b2c9c29d603e69c01bb0a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/ReachingTypeAnalysis.csproj",
+          "Kind": "csproj",
+          "Loc": 391,
+          "Sha256": "3406c21222f31070ec17f1987eacc477f0a6b69b4b90c00f0e39bdb7468c57a3"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Statistics/AnalysisClient.cs",
+          "Kind": "cs",
+          "Loc": 980,
+          "Sha256": "2bdf39efbd4cdaad3df54c97a5a5dafb1b6debee189cff756bd11c2be3104131"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Statistics/SolutionStats.cs",
+          "Kind": "cs",
+          "Loc": 17,
+          "Sha256": "8b53564517258e98c851df85326d4f4afd00432df1ad13841ff75658b605533c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Statistics/TableEntries.cs",
+          "Kind": "cs",
+          "Loc": 128,
+          "Sha256": "f0f0d2607aa4f9aaac949b9740b2c1b9d491c588567de2cdd8eb08b96a81d750"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/BasicTest.cs",
+          "Kind": "cs",
+          "Loc": 1245,
+          "Sha256": "1a7ca2f753823eb04a45ce3915a169ce2b5a0cb3aedf322762ebf7a6c9041f1b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/CallGraphGenerator.cs",
+          "Kind": "cs",
+          "Loc": 1527,
+          "Sha256": "a790af087846b0046e02391352a0167edc55777086efdb9519b6bb3f54a1ab13"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/ConcurrencyTest.cs",
+          "Kind": "cs",
+          "Loc": 37,
+          "Sha256": "f954114cd016934cfb2ac601d92051299228cf4cc2f70a5d39ef0fcd23513485"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/Incremental.cs",
+          "Kind": "cs",
+          "Loc": 316,
+          "Sha256": "64550c8539da11e4d32eb30184126e850e72184e14013b9aaddaa68372d4e6db"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/IncrementalAsync.cs",
+          "Kind": "cs",
+          "Loc": 34,
+          "Sha256": "0cd471d1390e1119f4c0fbab605768fec28cf30b9918605f81009e75c5741fe7"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/IncrementalDiff.cs",
+          "Kind": "cs",
+          "Loc": 91,
+          "Sha256": "1bea9f76b0ca43ebe456c55fe52c892da16607c3833c6e2ae08a50a1df74777c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/IncrementalOrleans.cs",
+          "Kind": "cs",
+          "Loc": 44,
+          "Sha256": "aa2691b1a346df8ff64dca3363da8f093be44d7df3f330327da92950212b766d"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/LongTests.cs",
+          "Kind": "cs",
+          "Loc": 432,
+          "Sha256": "bc94486ae6af8131e9410c2584f6fc394b71295e60c1f5b85c5641355db58ef2"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/QueryTests.cs",
+          "Kind": "cs",
+          "Loc": 433,
+          "Sha256": "3602bc52d36b252ef0143a302b3055aaf06c736b29cae19ef4c5e68b38e4fda6"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/SolutionTests.cs",
+          "Kind": "cs",
+          "Loc": 122,
+          "Sha256": "321d3f0c249e3960e8bae7dc4a3b4d43a95d8d219c705d27e064d8c56ee95316"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/SoundnessEntireAsync.cs",
+          "Kind": "cs",
+          "Loc": 106,
+          "Sha256": "35b0d23585fb24a13e1e539a5f7e2fd0eb101c56c3717d272f10c8315006deb8"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/SoundnessOnDemandAsync.cs",
+          "Kind": "cs",
+          "Loc": 170,
+          "Sha256": "6feb90455df91940006370259f0b16eda588bf7fbe4b5ed2d1d00bd32064a043"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/SoundnessOnDemandOrleans.cs",
+          "Kind": "cs",
+          "Loc": 230,
+          "Sha256": "05b3b1b3ef830f47b08f5cf2f05ddbc69d3877edbde68652ae2efcecec3d10a9"
+        },
+        {
+          "Path": "tmp/call-graph-builder/ReachingTypeAnalysis/Tests/TestUtils.cs",
+          "Kind": "cs",
+          "Loc": 145,
+          "Sha256": "fd534ee9c422e108689539b9469076670ddae05271f83852bd44f8aa75225ac8"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StandaloneOrleansAzure/OrleansHostWrapper.cs",
+          "Kind": "cs",
+          "Loc": 89,
+          "Sha256": "9cfd8e9a014807b037ce8405966e12bebc58e8c77d1dccf8e6ab9eff44703ee2"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StandaloneOrleansAzure/Program.cs",
+          "Kind": "cs",
+          "Loc": 133,
+          "Sha256": "a003b0863cc78a7afff66e094f2657bcc2a206d77683f8ea672b519626290d4a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StandaloneOrleansAzure/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "1a165cb8a76c63759e3f78b7697afcfe8262bd63d94a337c8e7b3f1e647f0d5b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StandaloneOrleansAzure/StandaloneOrleansAzure.csproj",
+          "Kind": "csproj",
+          "Loc": 231,
+          "Sha256": "146b8f55218f11d8ea889ee7acca1e58b755cd7a87872db9d62577e101776ac3"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StatsProject/Program.cs",
+          "Kind": "cs",
+          "Loc": 126,
+          "Sha256": "af07c12ec0370c498736f57d6ff47e96f0f09ef066a117cd12f08067841a761a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StatsProject/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "53f116bb8a8dfd42a6bd9a82b0d0b2280ad1fe82539a52c22d5d3fe1b4fb2eda"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StatsProject/Properties/orleans.codegen.cs",
+          "Kind": "cs",
+          "Loc": 0,
+          "Sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StatsProject/StatsProject.csproj",
+          "Kind": "csproj",
+          "Loc": 229,
+          "Sha256": "17d52bbd2444fa7eb3a1efa82749b8b200f2993d039c0a6b252c8c68e240f61a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StorageProviders/BaseJSONStorageProvider.cs",
+          "Kind": "cs",
+          "Loc": 159,
+          "Sha256": "dc7352c585f6d83fa0749c0aa02a30128d88f89c6f82abb8e5f9d1874248d2ff"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StorageProviders/FileStorageProvider.cs",
+          "Kind": "cs",
+          "Loc": 154,
+          "Sha256": "054edd3fbc94a68c0f69291c1cdfbe14bd1ab9a34de6bd35fa78665d06bf681c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StorageProviders/IJSONStateDataManager.cs",
+          "Kind": "cs",
+          "Loc": 54,
+          "Sha256": "c86875f5de0b7a2d990ef46b4104211104acca64a8c48b49f1ff1267e89bdf1b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StorageProviders/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 51,
+          "Sha256": "1d2023d8215aca44b49332942717ced8db88658eeaffbb349ea4b439de38c296"
+        },
+        {
+          "Path": "tmp/call-graph-builder/StorageProviders/Samples.StorageProviders.csproj",
+          "Kind": "csproj",
+          "Loc": 136,
+          "Sha256": "8e96632f34e672f2ceac6d6c46cc9a68eed67c5680e96b8170eee6c7d73fc4ac"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/CallGraph/CallGraph.cs",
+          "Kind": "cs",
+          "Loc": 212,
+          "Sha256": "58629f7b91cce77bf5b415a0b843994b0c23808b2090b6967c243ef935df2440"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/CallGraph/DGMLGraphDataAdapter.cs",
+          "Kind": "cs",
+          "Loc": 71,
+          "Sha256": "f816d9e885ce74896169256ed304f7f1ecb2cf69b596e62f6d4feb883713011b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/CallGraph/GraphVizGraphDataAdapter .cs",
+          "Kind": "cs",
+          "Loc": 63,
+          "Sha256": "49342d5264f2964ebb70c4d5ae5cd06e5b52cf122ba16d6ca326783286647006"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Communication/IDispatcher.cs",
+          "Kind": "cs",
+          "Loc": 65,
+          "Sha256": "8332e5ef7b2931b7e1c8825c4669f7a3538fff30b0ef56e6b9d8faff56222c5d"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Communication/IEntity.cs",
+          "Kind": "cs",
+          "Loc": 9,
+          "Sha256": "acb732822a2a70e1a47d8dd977ce5749328fdb166c727c55a214e3ecc1750a94"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Communication/IEntityProcessor.cs",
+          "Kind": "cs",
+          "Loc": 50,
+          "Sha256": "8b9d6e3db2e508c5a655d0cf783faadaff69436939498102037c5ec648c55d47"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Communication/OnDemandSolutionDispacher.cs",
+          "Kind": "cs",
+          "Loc": 64,
+          "Sha256": "f33959506aee70ab242ab76f07da07027f97342455174291e2a8f2051e2f7dc1"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Communication/QueueingDispatcher.cs",
+          "Kind": "cs",
+          "Loc": 139,
+          "Sha256": "be30f7db0a60a0e7e01145fb8721e537160b564c38a5be9c7cdf256b679c254c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Communication/Serialization.cs",
+          "Kind": "cs",
+          "Loc": 51,
+          "Sha256": "9f85f6d9c042d684d9e16c9dd850475e0c995f16ea705211c420eddeec02e0f0"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Communication/SynchronousLocalDispatcher.cs",
+          "Kind": "cs",
+          "Loc": 44,
+          "Sha256": "6d8876198919c1e3c3c0e7421b0b050365c25818ff82058fb0edfb24f06d4241"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "2d325f36c5900c0ed72a144f77162b2d71dd3fd7b30ca717e5f62e86c0377c61"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Roslyn/ProjectCodeProvider.cs",
+          "Kind": "cs",
+          "Loc": 406,
+          "Sha256": "c79f497dda66516981094606e8ace6ab74a8db65c8812eb4ebcfea6c16bac4c3"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Roslyn/ProjectCodeProviderLegacy.cs",
+          "Kind": "cs",
+          "Loc": 177,
+          "Sha256": "e8752d46668d699ecf415354352e6c84820f8fb65494d0b6ba5b879017ff563a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/SolutionAnalyzerSync.cs",
+          "Kind": "cs",
+          "Loc": 307,
+          "Sha256": "8997a8e779661cb995162b3bd51b365f227816b6aeb2c31646c6b76276584a03"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/SyncLegacyVersion.csproj",
+          "Kind": "csproj",
+          "Loc": 189,
+          "Sha256": "71e687b486667a08bfc854fa904215d8130f52f91a78c2a0ffab7802f4ef9b66"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/SyncVersion/MethodEntityProcessor.cs",
+          "Kind": "cs",
+          "Loc": 587,
+          "Sha256": "b8ffb10f9fac15e7195fd7064162de8c132f4cc44904431109d98d93324ed5ef"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/SyncVersion/MethodEntityProcessorAsync.cs",
+          "Kind": "cs",
+          "Loc": 569,
+          "Sha256": "541c6b22e4c602fd8a052e6844c4eea9bb7745ddba8e631c4c2f641279b7c204"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Tests/BasicTest.cs",
+          "Kind": "cs",
+          "Loc": 678,
+          "Sha256": "9b5a60a1b64236e2b4b0c9d3fa3400a5728a70362f47d8e84d755bd79db5e937"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Tests/LongTests.cs",
+          "Kind": "cs",
+          "Loc": 281,
+          "Sha256": "7a97b16eb23fe181dd76ffc974f88ab3fd7e0aad054a08148434ef8082da5e19"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Tests/SoundnessEntireSync.cs",
+          "Kind": "cs",
+          "Loc": 107,
+          "Sha256": "ed4ea12601f0ab796eeb15da6e3400ed4ed7918afe5597b9c42f22f0eebdf21f"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Tests/SoundnessOnDemandSync.cs",
+          "Kind": "cs",
+          "Loc": 131,
+          "Sha256": "23687153252c813f538f6c31094885955ae9bfee43d68b212026ae6328438ae5"
+        },
+        {
+          "Path": "tmp/call-graph-builder/SyncVersion/Tests/Tests.cs",
+          "Kind": "cs",
+          "Loc": 137,
+          "Sha256": "ef7249b4cf68f6bf09ac239da9859d4b1f99313fade7ef1ce86cd15d6b6117ff"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ClassLibrary1/ClassLibrary1.csproj",
+          "Kind": "csproj",
+          "Loc": 59,
+          "Sha256": "d8f876863c0b560ddf98a9e4948f05f141d1e97b21072937cabcb0725404cd12"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ClassLibrary1/IRemoteClass1.cs",
+          "Kind": "cs",
+          "Loc": 13,
+          "Sha256": "d8c0e14cc01dc52a2a726baebf3cfb28e6c2b3a742e4861609a50bca9dbd2943"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ClassLibrary1/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "97b30308353cdd68ed7d6c68684286e283c1aba402c013de8068e0e7eb2d4919"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ClassLibrary1/RemoteClass1.cs",
+          "Kind": "cs",
+          "Loc": 16,
+          "Sha256": "095f3d4f008ee440c1193ce33a7d1e05fb49394fe531dd4c8c6275f934f4b040"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1.sln",
+          "Kind": "sln",
+          "Loc": 40,
+          "Sha256": "a30a0b9ac3e5108802ba8505c5c79e9ce4e7255f458ddd03fcc4f07aa95244c6"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/ConsoleApplication1.csproj",
+          "Kind": "csproj",
+          "Loc": 79,
+          "Sha256": "4465526c894a7a8f22007c4bae84781d1ad9e5b45c6fb78fc300207fb1726b66"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/ITest.cs",
+          "Kind": "cs",
+          "Loc": 10,
+          "Sha256": "c70e1888679304698084a27dfa5ad4e61ba9cf0f7dcaaa703c835b1e0d0ed914"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/IUnique.cs",
+          "Kind": "cs",
+          "Loc": 13,
+          "Sha256": "83c2e469585f1dd195ed78957b17839435a02f08d0204a3cf0cd10dd3a8b1233"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/LocalClass2.cs",
+          "Kind": "cs",
+          "Loc": 18,
+          "Sha256": "225fa05220f809e24167f8162117ece46ecf2cda6551106b4596ab5202573c21"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/Program.cs",
+          "Kind": "cs",
+          "Loc": 43,
+          "Sha256": "7fdb5d829def1dff71fd6090c3a040b2843bfd89a82b08375888a7f25aaa3fe8"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "28006127e85525edb25160162e6623ae5d91a4aae4f8a2e4ab19d72207ed9b61"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/Test.cs",
+          "Kind": "cs",
+          "Loc": 26,
+          "Sha256": "c97acbc473ccad455a1f556d14706c8e561be221c22cf4311384570e9b248fe5"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/Test2.cs",
+          "Kind": "cs",
+          "Loc": 25,
+          "Sha256": "33086a069765e83426d6ffc5c011996b03f4a20f9d56163e5a3f76a7fad7204d"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/Test3.cs",
+          "Kind": "cs",
+          "Loc": 22,
+          "Sha256": "c12db4ceecb96c816054ca0af5a180105f3099ce6a4feb83c6afaf975ca0cd2b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/TestDelegate.cs",
+          "Kind": "cs",
+          "Loc": 51,
+          "Sha256": "e86b188702145bb0e3e038d74b90e3eef93572b5bfcda0af980f9b38eeba7085"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/Testing.cs",
+          "Kind": "cs",
+          "Loc": 15,
+          "Sha256": "aa525970da07c5965654f2141d4b1826226666b54bd41c9bb6475c7f3a29ae24"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication1/base/ConsoleApplication1/Unique.cs",
+          "Kind": "cs",
+          "Loc": 16,
+          "Sha256": "2a07241c3d7fd0f1db1574a117c06d7218b7b367136d312b7ec17568456b2da6"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication2/base/ConsoleApplication2.sln",
+          "Kind": "sln",
+          "Loc": 22,
+          "Sha256": "ec3fa07b5a59da2e504dbdbdf860ab1b945b61fffca5d0f2a4d49f1709e83efb"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication2/base/ConsoleApplication2/ConsoleApplication2.csproj",
+          "Kind": "csproj",
+          "Loc": 58,
+          "Sha256": "60178b4686582256168121e59635f73ca54b2d351c3a4ecc30694f2aca0b196e"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication2/base/ConsoleApplication2/Program.cs",
+          "Kind": "cs",
+          "Loc": 45,
+          "Sha256": "c5431a2c2ba62f028278ee25142d29917374f9941004e27599bc1987d2452c30"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/ConsoleApplication2/base/ConsoleApplication2/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "87e7bf19c68bf9e6f9a3904cf8295063bb42521ef7ea903789692fd3cf2eb1eb"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest2/LongTest2.cs",
+          "Kind": "cs",
+          "Loc": 995,
+          "Sha256": "452974e2df1fb9731c1c2a6b4e5e1ee8f7a89f94def15bb74334e1fc937097e5"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest2/LongTest2.csproj",
+          "Kind": "csproj",
+          "Loc": 52,
+          "Sha256": "a267e0e107c9ab82aa86d0070ee74c36904c3fc2728bd5511f48d3f74783f4a4"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest2/LongTest2.sln",
+          "Kind": "sln",
+          "Loc": 22,
+          "Sha256": "bfb91ce22640367bc0bbc901bf4d0c9e7e17998800a0c2676ae3cca99e5dbfe4"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest3/LongTest3.cs",
+          "Kind": "cs",
+          "Loc": 9997,
+          "Sha256": "8b0cd70110e2b91d2edd423a40d02b2897bb64495f48dfeef01483ea57b1c380"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest3/LongTest3.csproj",
+          "Kind": "csproj",
+          "Loc": 52,
+          "Sha256": "4624e4a02fc7a3aef8be9b680862b2ed4dffbb6d27059b14ef27510664fc9ec4"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest3/LongTest3.sln",
+          "Kind": "sln",
+          "Loc": 22,
+          "Sha256": "ca25510408f0d9ea33a837d3634dfffc39eb8d22c1d91e9460b6b24b185ed5c7"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest4/LongTest4.cs",
+          "Kind": "cs",
+          "Loc": 99995,
+          "Sha256": "4acf806b12ed4ee1c46b17da8073b51023f275eaae7215e2da8cb2042314d94f"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest4/LongTest4.csproj",
+          "Kind": "csproj",
+          "Loc": 52,
+          "Sha256": "a45dd5c600e0fcd6d223e3f4a47ac8563dedd691ce99f2a1105caa169f383e1f"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest4/LongTest4.sln",
+          "Kind": "sln",
+          "Loc": 22,
+          "Sha256": "36991be76ccd6a4c6c5f768fcae3257cc953eb6595d5de01e233f40d77b050c5"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest5/LongTest5.cs",
+          "Kind": "cs",
+          "Loc": 445464,
+          "Sha256": "36bbe2b207834febc66de00518abadcbce44c7b508f2f13f084920214bffa13f"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest5/LongTest5.csproj",
+          "Kind": "csproj",
+          "Loc": 52,
+          "Sha256": "b1bdc9ff598487483bd9119253c04e9c926d94799848e02c636914d6d027a14b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest5/LongTest5.sln",
+          "Kind": "sln",
+          "Loc": 22,
+          "Sha256": "4a79fcbfd42358c7dd9cb0d4f8018ceb632b3b6a34e509588ea9f9b637b3b945"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest6/LongTest6.cs",
+          "Kind": "cs",
+          "Loc": 913595,
+          "Sha256": "fde734b53f0eada5158efdd38e83320a4262fcafae6fd3a9df3c8e5e119817f9"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest6/LongTest6.csproj",
+          "Kind": "csproj",
+          "Loc": 52,
+          "Sha256": "ba58c645e020949e7c890ef7310b75d67149bc7b18088429b093520b146ed7dd"
+        },
+        {
+          "Path": "tmp/call-graph-builder/TestsSolutions/LongTest6/LongTest6.sln",
+          "Kind": "sln",
+          "Loc": 22,
+          "Sha256": "435fec44e2b2f5d7be261347bfd05677463224f99baeb09c60f28cbb12072def"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/apiapp.json",
+          "Kind": "json",
+          "Loc": 14,
+          "Sha256": "1ddbd2845f1220e53397cfbc4523dcf327c0b387eac47108b2d549242f3b78f1"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/App_Start/IdentityConfig.cs",
+          "Kind": "cs",
+          "Loc": 102,
+          "Sha256": "a37831a76e9155de5409d4c06a4b22959f52f24888a1a3b2c4141ee748b54982"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/App_Start/RouteConfig.cs",
+          "Kind": "cs",
+          "Loc": 27,
+          "Sha256": "43a742ab84d38b6275171abf941e40ca64f715a6a2c7471a4ae95d67d1634367"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/App_Start/Startup.Auth.cs",
+          "Kind": "cs",
+          "Loc": 69,
+          "Sha256": "beac320736cfcb89781fcf7100d20f793e160c17f6a5404b4aa675f5023180f5"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/App_Start/SwaggerConfig.cs",
+          "Kind": "cs",
+          "Loc": 219,
+          "Sha256": "43f6d986968032673b1ef25f0e6c74dd4aa688814e10a4dc8ddd3abdf9e4ba3d"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/App_Start/WebApiConfig.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "04988f798b99033383c595c8c25b2680a691438e998f3b3b00c1296967197b71"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/Controllers/ExperimentsController.cs",
+          "Kind": "cs",
+          "Loc": 224,
+          "Sha256": "963a5ad43070cf5b31426e037dba0ae348a258ece88a02638d4bbd1bcb69b4c8"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/Controllers/OrleansController.cs",
+          "Kind": "cs",
+          "Loc": 368,
+          "Sha256": "b6fb45872fbe00f459d84b19dbbd923ecae702821d1676003fd95968f1edef38"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/Global.asax.cs",
+          "Kind": "cs",
+          "Loc": 55,
+          "Sha256": "fa5a476d20702c4640302c6f8038236c8b75a345cfcc8f8eeae68e953afc8e3d"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/Metadata/deploymentTemplates/apiappconfig.azureresource.json",
+          "Kind": "json",
+          "Loc": 10,
+          "Sha256": "9b44094b67c7b6350d7a47f5661dac4728d1f788c79c21163f4be4716efaa512"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/Models/IdentityModels.cs",
+          "Kind": "cs",
+          "Loc": 100,
+          "Sha256": "b452986d34def73f82d32e1205cc48c49804a367c63cdfa132841688204ed30d"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 35,
+          "Sha256": "c2fb630c21d8cef222fe4d1819297846f8d6479e56a201e75043a2f7d2241cb8"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/Startup.cs",
+          "Kind": "cs",
+          "Loc": 13,
+          "Sha256": "f8ebe9f322cfde78f1d7da55455237595ec3fe3b9c256b948208ba498b4eeec0"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/WebAPI.csproj",
+          "Kind": "csproj",
+          "Loc": 451,
+          "Sha256": "2405aa6318f4fd0131dadbdca1a043dae1159a10f9314691a3281e643183e0e7"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebAPI/WebRole.cs",
+          "Kind": "cs",
+          "Loc": 81,
+          "Sha256": "cf7cb93c0457d0d83671aa87362c81595ea6a521463a5eab94a539fb85c11543"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/About.aspx.cs",
+          "Kind": "cs",
+          "Loc": 17,
+          "Sha256": "642c53cbb4cdd7d60259bcc7f07d08f0e077d5cdbc627bdaa14034b2fece1ed8"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/About.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 17,
+          "Sha256": "2e76238568cca9626bca5b79bb7a7ff38861aa8e9111b8e7ff01ddb7604e23a8"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/AddPhoneNumber.aspx.cs",
+          "Kind": "cs",
+          "Loc": 34,
+          "Sha256": "e6d98d32ac20683bb8f1221f5a1e3af094b91c75e987a7b01f47cde1c0401f6c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/AddPhoneNumber.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 33,
+          "Sha256": "4921955dfb8a5db0a51b494ad51fb0622f0fb22becf94132158a4c6b288c071c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Confirm.aspx.cs",
+          "Kind": "cs",
+          "Loc": 37,
+          "Sha256": "5c0c85e493868bcb05ec6353bedd187c342febf9aa05ab6f64a7b0fc2bffb780"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Confirm.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 43,
+          "Sha256": "8d3371fede3f65e3159480d1b3dac0c343f7ac6caa79ad2c485067782341fccd"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Forgot.aspx.cs",
+          "Kind": "cs",
+          "Loc": 40,
+          "Sha256": "512b7a8bdd0f77fce6089ff7d8be14d5f967b2d5eba28e6f41aceb411c5f30bf"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Forgot.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 60,
+          "Sha256": "4c3bd040e39407574ee70a94a0a1a330de366a668f8e85b5de6e4044c07c0501"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Lockout.aspx.cs",
+          "Kind": "cs",
+          "Loc": 17,
+          "Sha256": "1ceba3fd58a42a5cec685af6dc86da2587c87e1a4f7401a35f60ffc30cc875f5"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Lockout.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 17,
+          "Sha256": "51ca50ceed5c407cf53b0f6c2c2106796b05eab7153470425f9a04b08cfb2154"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Login.aspx.cs",
+          "Kind": "cs",
+          "Loc": 61,
+          "Sha256": "343d817d4cf5e57aa6b1f39899e24163d78d5e26d61d72dff643532cbbfa9b28"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Login.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 78,
+          "Sha256": "ee3d6d1b94738cc2f1f6de87a90daa5de2f278c8205fc02c597f9742d7dcec2d"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Manage.aspx.cs",
+          "Kind": "cs",
+          "Loc": 128,
+          "Sha256": "b9ac36b9515a56efb567e23ff7483d4b0e0db1c9d679ec6742d8a8727b077f16"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Manage.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 51,
+          "Sha256": "d5f03e1d8cf812f70cd85df6b60a13f2e1c8c6eaeaa02abbafa611fa568a793d"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/ManageLogins.aspx.cs",
+          "Kind": "cs",
+          "Loc": 62,
+          "Sha256": "9eed3bfae33f09d809f65a74c75fc9f7a5b87e3ad123c702f48ecd555c0fde01"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/ManageLogins.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "f2b5e11168212d2b89ca0c045c6e433b22c40c31a99a5c1504c0baac86c52feb"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/ManagePassword.aspx.cs",
+          "Kind": "cs",
+          "Loc": 98,
+          "Sha256": "39442866d32bb1d6fbad298db475b06363613c8960896d664d213069cfc10999"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/ManagePassword.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 105,
+          "Sha256": "94ef8d9a7a4a16d3084f4a9e186d445526bf037df66680f746d45d2fabef219a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/OpenAuthProviders.ascx.cs",
+          "Kind": "cs",
+          "Loc": 43,
+          "Sha256": "3f5e77d45112dcb925937baa0bb358c698ab452d0c9f2095f53f04af54759e64"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/OpenAuthProviders.ascx.designer.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "2db665be7b215b1936fe5746e06c8bc1a2efe53b628bd7a65fb7e36f0ec5d41d"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Register.aspx.cs",
+          "Kind": "cs",
+          "Loc": 36,
+          "Sha256": "d187b36fa67c5e50066e0ae41ba140e74b89adc9ad474e7ebf276c6b9684b78a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/Register.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 51,
+          "Sha256": "704fb64b53f81e19a74ebf9e747fca82d742dfa01ff8053c2a31e31f85c8eb3d"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/RegisterExternalLogin.aspx.cs",
+          "Kind": "cs",
+          "Loc": 130,
+          "Sha256": "c7498699e48640874cb1751f905eb51197934eee428f362ed3fada3b8afc498e"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/RegisterExternalLogin.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "2ef92392bc44ac4d9f56c108a9b9dcb9768a0b95c6c520a0dad48def5f434888"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/ResetPassword.aspx.cs",
+          "Kind": "cs",
+          "Loc": 46,
+          "Sha256": "fde24221b84b433fd0af7640db018e98bb2ba751ac48a2a6854195b0a3e32c53"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/ResetPassword.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 51,
+          "Sha256": "1894c6cf536d87a0fca05fae5e164e31d36f12d989fc4737cdbe1565caa18400"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/ResetPasswordConfirmation.aspx.cs",
+          "Kind": "cs",
+          "Loc": 8,
+          "Sha256": "f1bb650ba3a0a268e989c6854221c01c8e8b9c4979e2d43254bc3f4bb23b025e"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/ResetPasswordConfirmation.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "f441114afdeda21404348a2f9ce50dd08a207efa3e718aa149bf48af366b0f29"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/TwoFactorAuthenticationSignIn.aspx.cs",
+          "Kind": "cs",
+          "Loc": 77,
+          "Sha256": "97fd7ea3cff2ca168f56a738ded2c66d8616f859d523a0f426200d5949bd26c3"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/TwoFactorAuthenticationSignIn.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 105,
+          "Sha256": "187821e23f67b15bd8bd9c80f5ee832fe0783df451c3f383e3e457100ded3337"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/VerifyPhoneNumber.aspx.cs",
+          "Kind": "cs",
+          "Loc": 50,
+          "Sha256": "8eae92a0995eba6073c48413b501e5f5bde97c043bed56583be68d12d6a6b779"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Account/VerifyPhoneNumber.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 42,
+          "Sha256": "0d35850f6fa997f8333ef8e952f235f92740377cfb5f483148dac337cd70038b"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/App_Start/BundleConfig.cs",
+          "Kind": "cs",
+          "Loc": 46,
+          "Sha256": "ad13e7c38d0f6b204710f77b3062c6e23f70a6da725b511ef3165c40041562fe"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/App_Start/IdentityConfig.cs",
+          "Kind": "cs",
+          "Loc": 102,
+          "Sha256": "06420249cb03440838592b6a081e8f6ef8b05ccc2a8cfad5165fac37afbdfd26"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/App_Start/RouteConfig.cs",
+          "Kind": "cs",
+          "Loc": 18,
+          "Sha256": "163dca9e08cd6083284d72e74167e23d3b2bd00632919ca7b6b5db16c241dc5c"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/App_Start/Startup.Auth.cs",
+          "Kind": "cs",
+          "Loc": 70,
+          "Sha256": "83a10590280e75c53fa10089204659d07fbeaa9990652ce199e1919184e49a91"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Contact.aspx.cs",
+          "Kind": "cs",
+          "Loc": 17,
+          "Sha256": "62a411dfd257ba8b476438d29bdf208cb92a73e9ee40197749136f6d613af093"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Contact.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 17,
+          "Sha256": "6dcda4a6c2fd9a32c8c634b2047f8f166ba5e6d6b65eaa04c8dc9b47fd22a0cd"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Default.aspx.cs",
+          "Kind": "cs",
+          "Loc": 313,
+          "Sha256": "e5a60a0b4b10de72357f8579bd8562c6aa9a1413abea9f1798c3943d76d7cdbd"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Default.aspx.designer.cs",
+          "Kind": "cs",
+          "Loc": 123,
+          "Sha256": "a71a0b28963b6dfa145aad8c4ea7c10dd4d7af83d8101b25fe234d3527952698"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Global.asax.cs",
+          "Kind": "cs",
+          "Loc": 21,
+          "Sha256": "1837f6e007a2713dfd7bf07f769d9ae5606e91a16832473763fcaa907b8f898a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Models/IdentityModels.cs",
+          "Kind": "cs",
+          "Loc": 100,
+          "Sha256": "4805ee08ff3be338c80b0c3dece18ef4a7dc1c0fbf32ccca4c8098b8308c1ceb"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Properties/AssemblyInfo.cs",
+          "Kind": "cs",
+          "Loc": 35,
+          "Sha256": "784139cd6cd4dd81f5dbd83ba5dcbb00758afddd2778b7a8aaec612f0471981a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Site.Master.cs",
+          "Kind": "cs",
+          "Loc": 80,
+          "Sha256": "81bb9b4441c37054a2262948f19d241fa60112d00394161e3e6b3f0d66ca5d50"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Site.Master.designer.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "3d3a9bc42df8a0d1dc3232e0cfe50110d320acbc8749fbdfcbd3818e9212668a"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Site.Mobile.Master.cs",
+          "Kind": "cs",
+          "Loc": 17,
+          "Sha256": "70e9b7b96f34634d4433140d0e55244c27df3df96ac2c611c8e1502d372ddef7"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Site.Mobile.Master.designer.cs",
+          "Kind": "cs",
+          "Loc": 51,
+          "Sha256": "5850c71bf8ec1d4f820aca8e6c56f8a47b72f344733d8a68f903ab9d3cb0280d"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/Startup.cs",
+          "Kind": "cs",
+          "Loc": 13,
+          "Sha256": "b39cab085f34415c0c585b68e59971a30083a92bba20f9a92b3721c3186f6448"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/ViewSwitcher.ascx.cs",
+          "Kind": "cs",
+          "Loc": 43,
+          "Sha256": "76367ee4d14e80ae3c9610bb7d7b912ec5d7d6a12a10350b68dd29d48c56a009"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/ViewSwitcher.ascx.designer.cs",
+          "Kind": "cs",
+          "Loc": 15,
+          "Sha256": "1d08fb5dd04e80e1c2a24419352715eb82be6e4bd2af3c476d244721373e3bc3"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/WebRole.cs",
+          "Kind": "cs",
+          "Loc": 61,
+          "Sha256": "39945e3971aa5169271a34329a63a52bcce4357ce2c8b9d4ec1f3c4423150908"
+        },
+        {
+          "Path": "tmp/call-graph-builder/WebRole1/WebRole1.csproj",
+          "Kind": "csproj",
+          "Loc": 600,
+          "Sha256": "a950badaf5e8f4d744d1f1477f9527ae04b1b82a8b5e32c382cbfbed1ffb7255"
+        },
+        {
+          "Path": "tmp/migration-playground/inventory.json",
+          "Kind": "json",
+          "Loc": 22,
+          "Sha256": "5399d5f17ffdbec004492d1c545d5000c936cfc16fea382c79f5a26ed5fd23ca"
+        },
+        {
+          "Path": "tmp/migration-playground/MessageHandler_fresh.cs",
+          "Kind": "cs",
+          "Loc": 1587,
+          "Sha256": "5ea70a79bafd476292d079e4b19334e2f498a03e90c0e24cc9914a0160a8e7ae"
+        },
+        {
+          "Path": "tmp/migration-playground/MessageHandler.cs",
+          "Kind": "cs",
+          "Loc": 1587,
+          "Sha256": "2256b1679907a5aa69dd08bbf9529e7448b890c54cb5b7b893ed9a829a9c0d43"
+        },
+        {
+          "Path": "tmp/migration-playground/migration_metrics.json",
+          "Kind": "json",
+          "Loc": 25,
+          "Sha256": "9b1f8068db0fc59108855e43fcd3c41a9d3480ce39ef2627e2600725841914ab"
+        },
+        {
+          "Path": "tmp/migration-playground/router.yaml",
+          "Kind": "yaml",
+          "Loc": 16,
+          "Sha256": "4593171342e20caa36003766220cc3c2e4d34e98609b5c4d133c3d8e17e8e7f8"
+        },
+        {
+          "Path": "tmp/migration-playground/test_absolute_paths.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "f617ac02ad982fe266841c0279c48f38dd4f60cadf459a8fb7828128b2ed91c5"
+        },
+        {
+          "Path": "tmp/migration-playground/test_cut_tags.cs",
+          "Kind": "cs",
+          "Loc": 23,
+          "Sha256": "92641a802786f083473e62d49755587b457f2ee0530dfe0dfc92e1777c9f7151"
+        },
+        {
+          "Path": "tmp/migration-playground/test_target_paths.cs",
+          "Kind": "cs",
+          "Loc": 23,
+          "Sha256": "447c725db6a9869acb041b9b7e83f374d0df507975d04fa92c8fbbb8a371e78b"
+        },
+        {
+          "Path": "tmp/migration-playground/tmp/migration-playground/target/TestHandler.cs",
+          "Kind": "cs",
+          "Loc": 28,
+          "Sha256": "342d272f9c11d6baad45475b72de3681a7435a2484c99288d8e37ec45e0ad1f4"
+        },
+        {
+          "Path": "tmp/original/.github/workflows/dotnet.yml",
+          "Kind": "yml",
+          "Loc": 99,
+          "Sha256": "be6efa2aaf7551dc85622d53312816a809b65132f10f9cb7cb8c1fa901292b5a"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman.sln",
+          "Kind": "sln",
+          "Loc": 37,
+          "Sha256": "7b9bb54171de9090707a093a3350fcea5d3e0ecab90ff30dbf869efad247aba5"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman.Test/ClubDoorman.Test.csproj",
+          "Kind": "csproj",
+          "Loc": 40,
+          "Sha256": "5780c4c2dcd5d67edb8045f562a4ac9301d7c4c46ada6e1654e03f89ca28b233"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman.Test/SimpleFiltersTests.cs",
+          "Kind": "cs",
+          "Loc": 50,
+          "Sha256": "9e5f245a8b9cbceb4d7d69d11d3b1d7205485daf2da6c5e787b493ce25ac209c"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/appsettings.Development.json",
+          "Kind": "json",
+          "Loc": 8,
+          "Sha256": "93ad1e10cea3e4ceb9d81081b69cd69e54eeea86fc6120f6dfb6377814fceae0"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/appsettings.json",
+          "Kind": "json",
+          "Loc": 8,
+          "Sha256": "93ad1e10cea3e4ceb9d81081b69cd69e54eeea86fc6120f6dfb6377814fceae0"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/ClubDoorman.csproj",
+          "Kind": "csproj",
+          "Loc": 37,
+          "Sha256": "38456e901ce0ef2b2fe580930283f6f253fc2d6e03180ac222b8caf067d66057"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/data/chat_settings.json",
+          "Kind": "json",
+          "Loc": 4,
+          "Sha256": "203aa3bf91bdfe3416ee88d788dcf70dc4d6eea484cf1f6c5f9108ea77340e95"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Handlers/CallbackQueryHandler.cs",
+          "Kind": "cs",
+          "Loc": 597,
+          "Sha256": "ede2110fea73df1916f1d1d6c0c31674038e68bfee3b5a2f1aa628b3b08ec8ba"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Handlers/ChatMemberHandler.cs",
+          "Kind": "cs",
+          "Loc": 109,
+          "Sha256": "62ba19e37052ec552fcecd170efd314a0fde23850db51f9f6c957a8c8b82bd7e"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Handlers/Commands/StartCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 133,
+          "Sha256": "be27b9f7054fe205682f9c665cb835202312e985adc9207d4b507dccf809db4c"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Handlers/Commands/SuspiciousCommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 158,
+          "Sha256": "6a2dcd6c5394b6dabd468659e3f3c371f488ddc0b5b04e2104444238c9ca36ac"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Handlers/ICallbackQueryHandler.cs",
+          "Kind": "cs",
+          "Loc": 19,
+          "Sha256": "9bfbc925aaf9ea76497c74c746ad26b658f715b0062d70296448cc4c9029a646"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Handlers/ICommandHandler.cs",
+          "Kind": "cs",
+          "Loc": 19,
+          "Sha256": "b6f905c6b2a4ee717ae61a1650f613cd09a0c801685ee035fef6a0284260cd56"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Handlers/IMessageHandler.cs",
+          "Kind": "cs",
+          "Loc": 19,
+          "Sha256": "efb1858a79d421a8c9eeefa2ecc95b03486bf621dfc9eea706c62e92fc5023e3"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Handlers/IUpdateHandler.cs",
+          "Kind": "cs",
+          "Loc": 19,
+          "Sha256": "612a52103e2761c567db3752a802378deb5865add352d9980a1e724d81b919a8"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Handlers/MessageHandler.cs",
+          "Kind": "cs",
+          "Loc": 1043,
+          "Sha256": "a7c429fe4f531c867434f87c38cc8a604394bc436be4f349159b5a870031d072"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Infrastructure/Captcha.cs",
+          "Kind": "cs",
+          "Loc": 38,
+          "Sha256": "479dcfcdace45676481987275601bbcc497ecb597649cb1f7292d1cb2668f0c1"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Infrastructure/Config.cs",
+          "Kind": "cs",
+          "Loc": 318,
+          "Sha256": "478755c7b09281878b0562b1c51fbb4957831f88c94253a0a6bd808b171eb98c"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Infrastructure/Consts.cs",
+          "Kind": "cs",
+          "Loc": 15,
+          "Sha256": "5da1c2d8a1d7f03081db0c39f6bd2788d6e2ce199d033a33a8dc3aa0f7afe0c5"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Infrastructure/OpenAiExtensions.cs",
+          "Kind": "cs",
+          "Loc": 30,
+          "Sha256": "8947bd47a9cd7420596b51bc5d9e6e8a092572cde1b511393a8b2e685e968465"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Infrastructure/SemaphoreHelper.cs",
+          "Kind": "cs",
+          "Loc": 18,
+          "Sha256": "90c7dd1bd7aba351ffede2637586cf2b1c66c4e36288adefd4c9c22e6b84b776"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Infrastructure/Utils.cs",
+          "Kind": "cs",
+          "Loc": 24,
+          "Sha256": "b1c28375c5b3c037eeba36c22cd6a504fdced9f7c9ec8930d44c4e97ecc2efa5"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Models/CaptchaInfo.cs",
+          "Kind": "cs",
+          "Loc": 16,
+          "Sha256": "8630a825421eb70d92f6b0d17b1eea43ff5cbaa9f9b56366a9067916419542f9"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Models/ChatStats.cs",
+          "Kind": "cs",
+          "Loc": 13,
+          "Sha256": "c0d855fd3ef22437956ac51226e7d4c840f5b6f8f68f12f3cff72d401b38da37"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Models/ModerationResult.cs",
+          "Kind": "cs",
+          "Loc": 22,
+          "Sha256": "1dea55a6b8711ac0c1204fcf0d2ef755cd56559b52b96477fe45275f7bedff8d"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Models/SuspiciousUserInfo.cs",
+          "Kind": "cs",
+          "Loc": 31,
+          "Sha256": "b64883771c1178e26e3fb42b5cb749fc30112f9d32fce9eaf9420d217c8f2a8d"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Program.cs",
+          "Kind": "cs",
+          "Loc": 99,
+          "Sha256": "fd706592a1df0e5d9f68e9862e87ac6f6f7fdbfddfb871b43f3b33debd1c47ec"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Properties/launchSettings.json",
+          "Kind": "json",
+          "Loc": 15,
+          "Sha256": "b5b6638d99d7f11f3a8cc906a586bdcbcbc141b93c4241fd2cc53d972d25b1cb"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/AiChecks.cs",
+          "Kind": "cs",
+          "Loc": 426,
+          "Sha256": "d6614e391a12f5a5ba8c141080963db55fcd6ea813dbb83710f4c46ae699bbd5"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/ApprovedUsersStorage.cs",
+          "Kind": "cs",
+          "Loc": 142,
+          "Sha256": "5ce48484aea8927797457b8216af9eebb5d780d5832b634fd47280f5396050c2"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/ApprovedUsersStorageV2.cs",
+          "Kind": "cs",
+          "Loc": 401,
+          "Sha256": "a2da2c668942b5c7a7914aed64ad4001a7c0e8acca1ac516336a0d799a49292b"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/BadMessageManager.cs",
+          "Kind": "cs",
+          "Loc": 63,
+          "Sha256": "7b99e4bdac1d011e3069389b93007e16295cbcabe577dd75c2de529ebda59d37"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/CaptchaService.cs",
+          "Kind": "cs",
+          "Loc": 216,
+          "Sha256": "a27288b1893589aab906eccc511e516c30803d3e1c4f4e937ec4d5be7c932a7f"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/GlobalStatsManager.cs",
+          "Kind": "cs",
+          "Loc": 201,
+          "Sha256": "c69da85c37cb5b504e987cafcefae301aa014a91712f208cbf8f00b9f5c4ce67"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/ICaptchaService.cs",
+          "Kind": "cs",
+          "Loc": 40,
+          "Sha256": "fb9769c050f304beda767ae763f8aef957e96f28c80fb2fb8c8475472c358705"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/IModerationService.cs",
+          "Kind": "cs",
+          "Loc": 70,
+          "Sha256": "a387ceb3a82e376f2e9b8a1cebd6de187e816fc118a21146b35b8f5e006f7372"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/IntroFlowService.cs",
+          "Kind": "cs",
+          "Loc": 213,
+          "Sha256": "0338cc66952595bbc929000f24f60f8c688919d9106a2c50a9c1a22d2bcc170b"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/IStatisticsService.cs",
+          "Kind": "cs",
+          "Loc": 44,
+          "Sha256": "83239bc2d685041a3012a8914d76567e14a30e7cdb5251671f8a188337420598"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/IUpdateDispatcher.cs",
+          "Kind": "cs",
+          "Loc": 14,
+          "Sha256": "9a2e35dc8c7d43dc4224e105c2e0582656012dd97414a71943912313089aba2a"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/IUserManager.cs",
+          "Kind": "cs",
+          "Loc": 46,
+          "Sha256": "9d062d2ff7ad53047f2f0ea09623934d3ff55c153bb24fa58a322e8172fca7da"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/MimicryClassifier.cs",
+          "Kind": "cs",
+          "Loc": 187,
+          "Sha256": "8a6ff88d44538c95f856b241a1c36cb3df609c72eb8c22ddbc5b398a361ce016"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/ModerationService.cs",
+          "Kind": "cs",
+          "Loc": 824,
+          "Sha256": "d037d60167e24d3fe5bb025377cc3775448a521f098c2c69069c3f6f041881b3"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/SimpleFilters.cs",
+          "Kind": "cs",
+          "Loc": 39,
+          "Sha256": "6fc03b2791bb316479cc836b86e306b34517a5cf100c241b89a65ab4880c5ae4"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/SpamHamClassifier.cs",
+          "Kind": "cs",
+          "Loc": 182,
+          "Sha256": "6bfa02ae21d7e016972fea2646d93f5acd797d074ff64b1e7b69306fc5038ce3"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/StatisticsService.cs",
+          "Kind": "cs",
+          "Loc": 138,
+          "Sha256": "512b531d1e65c0300f56f0e1e3321d355b56bf7c7b910993da6dd9ede15f1760"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/SuspiciousUsersStorage.cs",
+          "Kind": "cs",
+          "Loc": 262,
+          "Sha256": "f57f0b96922b42d4ce19647306381a71b52a6bc99901dbbabf8963b2be67643a"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/TextProcessor.cs",
+          "Kind": "cs",
+          "Loc": 58,
+          "Sha256": "393373c1f5d7638ac4e55fe6cfb5d19d8757d46156c076a64d586aab1c1a99d2"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/UpdateDispatcher.cs",
+          "Kind": "cs",
+          "Loc": 47,
+          "Sha256": "aca26c4f40f19ec2053429be8beb59dec62e202fa87d57abab941e2885cb7c38"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/UserManager.cs",
+          "Kind": "cs",
+          "Loc": 230,
+          "Sha256": "81d478739ac4f3e8a17783f2b50217f41fcf3014d23ff8706ad2632860445d9d"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Services/UserManagerV2.cs",
+          "Kind": "cs",
+          "Loc": 296,
+          "Sha256": "cdca9cd16d4c4b333d8c8f348ceb3e60a76fb41e80e6dd05c6c10352c7c2dfe6"
+        },
+        {
+          "Path": "tmp/original/ClubDoorman/Worker.cs",
+          "Kind": "cs",
+          "Loc": 677,
+          "Sha256": "c264e1a74e14ad5baeb95faa0b8cb5f4535f1651f39bfb3e49d17b65f9ece8d1"
+        }
+      ]
+    }
+  ],
+  "DI": [
+    {
+      "Registrations": [
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.IAdminOpsFacade",
+          "Implementation": "ClubDoorman.Features.AdminOps.AdminOpsFacade",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 38
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.ICommandHandler",
+          "Implementation": "ClubDoorman.Features.AdminOps.CheckCommandHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 19
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.ICommandHandler",
+          "Implementation": "ClubDoorman.Features.AdminOps.HamCommandHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 18
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.ICommandHandler",
+          "Implementation": "ClubDoorman.Features.AdminOps.SayCommandHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 21
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.ICommandHandler",
+          "Implementation": "ClubDoorman.Features.AdminOps.SpamCommandHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 17
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.ICommandHandler",
+          "Implementation": "ClubDoorman.Features.AdminOps.StartCommandHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 24
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.ICommandHandler",
+          "Implementation": "ClubDoorman.Features.AdminOps.StatsCommandHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 20
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.ICommandHandler",
+          "Implementation": "ClubDoorman.Features.AdminOps.SuspiciousCommandHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 23
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.ICommandProcessingService",
+          "Implementation": "ClubDoorman.Features.AdminOps.CommandProcessingService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 35
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.ICommandRouter",
+          "Implementation": "ClubDoorman.Features.AdminOps.CommandRouter",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 32
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.IStartCommandHandler",
+          "Implementation": "ClubDoorman.Features.AdminOps.StartCommandHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 27
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.ISuspiciousCommandHandler",
+          "Implementation": "ClubDoorman.Features.AdminOps.SuspiciousCommandHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 28
+        },
+        {
+          "Interface": "ClubDoorman.Features.AdminOps.StatsCommandHandler",
+          "Implementation": "ClubDoorman.Features.AdminOps.StatsCommandHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/AdminOps/01-AdminOpsFeature.cs",
+          "Line": 29
+        },
+        {
+          "Interface": "ClubDoorman.Features.Moderation.IModerationFacade",
+          "Implementation": "ClubDoorman.Features.Moderation.ModerationFacade",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/Moderation/01-ModerationFeature.cs",
+          "Line": 19
+        },
+        {
+          "Interface": "ClubDoorman.Features.Moderation.IModerationFacade",
+          "Implementation": "ClubDoorman.Features.Moderation.ModerationFacade",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Moderation/ModerationModule.cs",
+          "Line": 11
+        },
+        {
+          "Interface": "ClubDoorman.Features.Moderation.IModerationPolicy",
+          "Implementation": "ClubDoorman.Features.Moderation.ModerationPolicy",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/Moderation/01-ModerationFeature.cs",
+          "Line": 18
+        },
+        {
+          "Interface": "ClubDoorman.Features.UserJoin.IUserJoinFacade",
+          "Implementation": "ClubDoorman.Features.UserJoin.UserJoinFacade",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/UserJoin/01-UserJoinFeature.cs",
+          "Line": 19
+        },
+        {
+          "Interface": "ClubDoorman.Features.UserJoin.IUserJoinPolicy",
+          "Implementation": "ClubDoorman.Features.UserJoin.UserJoinPolicy",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Features/UserJoin/01-UserJoinFeature.cs",
+          "Line": 18
+        },
+        {
+          "Interface": "ClubDoorman.Services.AI.IAiCascadeService",
+          "Implementation": "ClubDoorman.Services.AI.AiCascadeService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/AI/AIModule.cs",
+          "Line": 26
+        },
+        {
+          "Interface": "ClubDoorman.Services.AI.IAiChecks",
+          "Implementation": "ClubDoorman.Services.AI.AiChecks",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/AI/AIModule.cs",
+          "Line": 21
+        },
+        {
+          "Interface": "ClubDoorman.Services.AI.IMimicryClassifier",
+          "Implementation": "ClubDoorman.Services.AI.MimicryClassifier",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/AI/AIModule.cs",
+          "Line": 23
+        },
+        {
+          "Interface": "ClubDoorman.Services.AI.ISpamHamClassifier",
+          "Implementation": "ClubDoorman.Services.AI.SpamHamClassifier",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/AI/AIModule.cs",
+          "Line": 22
+        },
+        {
+          "Interface": "ClubDoorman.Services.BadMessage.IBadMessageManager",
+          "Implementation": "ClubDoorman.Services.BadMessage.BadMessageManager",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/AI/AIModule.cs",
+          "Line": 24
+        },
+        {
+          "Interface": "ClubDoorman.Services.Captcha.ICaptchaService",
+          "Implementation": "ClubDoorman.Services.Captcha.CaptchaService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Captcha/CaptchaModule.cs",
+          "Line": 26
+        },
+        {
+          "Interface": "ClubDoorman.Services.ChannelModeration.IChannelModerationService",
+          "Implementation": "ClubDoorman.Services.ChannelModeration.ChannelModerationService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/ChannelModeration/ChannelModerationModule.cs",
+          "Line": 14
+        },
+        {
+          "Interface": "ClubDoorman.Services.Handlers.CallbackQueryHandler",
+          "Implementation": "ClubDoorman.Services.Handlers.CallbackQueryHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Handlers/HandlersModule.cs",
+          "Line": 28
+        },
+        {
+          "Interface": "ClubDoorman.Services.Handlers.ChatMemberHandler",
+          "Implementation": "ClubDoorman.Services.Handlers.ChatMemberHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Handlers/HandlersModule.cs",
+          "Line": 30
+        },
+        {
+          "Interface": "ClubDoorman.Services.Handlers.IUpdateHandler",
+          "Implementation": "ClubDoorman.Services.Handlers.CallbackQueryHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Handlers/HandlersModule.cs",
+          "Line": 27
+        },
+        {
+          "Interface": "ClubDoorman.Services.Handlers.IUpdateHandler",
+          "Implementation": "ClubDoorman.Services.Handlers.ChatMemberHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Handlers/HandlersModule.cs",
+          "Line": 29
+        },
+        {
+          "Interface": "ClubDoorman.Services.Handlers.IUpdateHandler",
+          "Implementation": "ClubDoorman.Services.Handlers.MessageHandler",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Handlers/HandlersModule.cs",
+          "Line": 24
+        },
+        {
+          "Interface": "ClubDoorman.Services.Handlers.IntroFlowService",
+          "Implementation": "ClubDoorman.Services.Handlers.IntroFlowService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Handlers/HandlersModule.cs",
+          "Line": 20
+        },
+        {
+          "Interface": "ClubDoorman.Services.IBotPermissionsService",
+          "Implementation": "ClubDoorman.Services.Handlers.BotPermissionsService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Handlers/HandlersModule.cs",
+          "Line": 21
+        },
+        {
+          "Interface": "ClubDoorman.Services.IUpdateDispatcher",
+          "Implementation": "ClubDoorman.Services.Dispatcher.UpdateDispatcher",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Handlers/HandlersModule.cs",
+          "Line": 19
+        },
+        {
+          "Interface": "ClubDoorman.Services.Messaging.IChatLinkFormatter",
+          "Implementation": "ClubDoorman.Services.LinkFormatting.ChatLinkFormatter",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Captcha/CaptchaModule.cs",
+          "Line": 66
+        },
+        {
+          "Interface": "ClubDoorman.Services.Messaging.IChatLinkFormatter",
+          "Implementation": "ClubDoorman.Services.LinkFormatting.ChatLinkFormatter",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Messaging/MessagingModule.cs",
+          "Line": 24
+        },
+        {
+          "Interface": "ClubDoorman.Services.Messaging.ILogChatService",
+          "Implementation": "ClubDoorman.Services.Messaging.LogChatService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Messaging/MessagingModule.cs",
+          "Line": 27
+        },
+        {
+          "Interface": "ClubDoorman.Services.Messaging.ILoggingConfigurationService",
+          "Implementation": "ClubDoorman.Services.Messaging.LoggingConfigurationService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Messaging/MessagingModule.cs",
+          "Line": 21
+        },
+        {
+          "Interface": "ClubDoorman.Services.Messaging.IMessageService",
+          "Implementation": "ClubDoorman.Services.Messaging.MessageService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Messaging/MessagingModule.cs",
+          "Line": 23
+        },
+        {
+          "Interface": "ClubDoorman.Services.Messaging.INotificationService",
+          "Implementation": "ClubDoorman.Services.Notifications.NotificationService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Messaging/MessagingModule.cs",
+          "Line": 26
+        },
+        {
+          "Interface": "ClubDoorman.Services.Messaging.IServiceChatDispatcher",
+          "Implementation": "ClubDoorman.Services.Messaging.ServiceChatDispatcher",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Messaging/MessagingModule.cs",
+          "Line": 22
+        },
+        {
+          "Interface": "ClubDoorman.Services.Messaging.MessageTemplates",
+          "Implementation": "ClubDoorman.Services.Messaging.MessageTemplates",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Messaging/MessagingModule.cs",
+          "Line": 20
+        },
+        {
+          "Interface": "ClubDoorman.Services.Moderation.IModerationService",
+          "Implementation": "ClubDoorman.Features.Moderation.ModerationServiceAdapter",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Moderation/ModerationModule.cs",
+          "Line": 14
+        },
+        {
+          "Interface": "ClubDoorman.Services.Notifications.IButtonsService",
+          "Implementation": "ClubDoorman.Services.Notifications.ButtonsService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/AI/AIModule.cs",
+          "Line": 27
+        },
+        {
+          "Interface": "ClubDoorman.Services.Notifications.IForwardingService",
+          "Implementation": "ClubDoorman.Services.Notifications.ForwardingService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/AI/AIModule.cs",
+          "Line": 28
+        },
+        {
+          "Interface": "ClubDoorman.Services.Statistics.GlobalStatsManager",
+          "Implementation": "ClubDoorman.Services.Statistics.GlobalStatsManager",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Captcha/CaptchaModule.cs",
+          "Line": 51
+        },
+        {
+          "Interface": "ClubDoorman.Services.Statistics.GlobalStatsManager",
+          "Implementation": "ClubDoorman.Services.Statistics.GlobalStatsManager",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Statistics/StatisticsModule.cs",
+          "Line": 18
+        },
+        {
+          "Interface": "ClubDoorman.Services.Statistics.IStatisticsService",
+          "Implementation": "ClubDoorman.Services.Statistics.StatisticsService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Statistics/StatisticsModule.cs",
+          "Line": 17
+        },
+        {
+          "Interface": "ClubDoorman.Services.Statistics.IStatisticsService",
+          "Implementation": "ClubDoorman.Services.Statistics.StatisticsService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Captcha/CaptchaModule.cs",
+          "Line": 46
+        },
+        {
+          "Interface": "ClubDoorman.Services.SuspiciousUsers.ISuspiciousUsersStorage",
+          "Implementation": "ClubDoorman.Services.SuspiciousUsers.SuspiciousUsersStorage",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/AI/AIModule.cs",
+          "Line": 25
+        },
+        {
+          "Interface": "ClubDoorman.Services.Telegram.ITelegramBotClientWrapper",
+          "Implementation": "ClubDoorman.Services.Telegram.TelegramBotClientWrapper",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Telegram/TelegramModule.cs",
+          "Line": 18
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserBan.IUserBanService",
+          "Implementation": "ClubDoorman.Services.UserBan.UserBanService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Captcha/CaptchaModule.cs",
+          "Line": 36
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserBan.IUserBanService",
+          "Implementation": "ClubDoorman.Services.UserBan.UserBanService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/UserManagement/UserManagementModule.cs",
+          "Line": 25
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserFlow.IUserFlowLogger",
+          "Implementation": "ClubDoorman.Services.UserFlow.UserFlowLogger",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Captcha/CaptchaModule.cs",
+          "Line": 41
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserFlow.IUserFlowLogger",
+          "Implementation": "ClubDoorman.Services.UserFlow.UserFlowLogger",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/UserManagement/UserManagementModule.cs",
+          "Line": 26
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserJoin.IFolderInviteService",
+          "Implementation": "ClubDoorman.Services.UserJoin.FolderInviteService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/UserJoin/UserJoinModule.cs",
+          "Line": 9
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserManagement.ApprovedUsersStorage",
+          "Implementation": "ClubDoorman.Services.UserManagement.ApprovedUsersStorage",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Captcha/CaptchaModule.cs",
+          "Line": 71
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserManagement.ApprovedUsersStorage",
+          "Implementation": "ClubDoorman.Services.UserManagement.ApprovedUsersStorage",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/UserManagement/UserManagementModule.cs",
+          "Line": 23
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserManagement.IJoinedUserFlags",
+          "Implementation": "ClubDoorman.Services.UserManagement.JoinedUserFlags",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/UserManagement/UserManagementModule.cs",
+          "Line": 27
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserManagement.IUserCleanupService",
+          "Implementation": "ClubDoorman.Services.UserManagement.UserCleanupService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Captcha/CaptchaModule.cs",
+          "Line": 61
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserManagement.IUserCleanupService",
+          "Implementation": "ClubDoorman.Services.UserManagement.UserCleanupService",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/UserManagement/UserManagementModule.cs",
+          "Line": 24
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserManagement.IUserIndex",
+          "Implementation": "ClubDoorman.Services.UserManagement.UserIndex",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/UserManagement/UserManagementModule.cs",
+          "Line": 28
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserManagement.IUserManager",
+          "Implementation": "ClubDoorman.Services.UserManagement.UserManager",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/UserManagement/UserManagementModule.cs",
+          "Line": 22
+        },
+        {
+          "Interface": "ClubDoorman.Services.UserManagement.IUserManager",
+          "Implementation": "ClubDoorman.Services.UserManagement.UserManager",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Captcha/CaptchaModule.cs",
+          "Line": 56
+        },
+        {
+          "Interface": "ClubDoorman.Services.Violation.IViolationTracker",
+          "Implementation": "ClubDoorman.Services.Violation.ViolationTracker",
+          "Lifetime": "Singleton",
+          "File": "ClubDoorman/Services/Captcha/CaptchaModule.cs",
+          "Line": 31
+        }
+      ],
+      "HostedServices": [
+        {
+          "Type": "ClubDoorman.Worker",
+          "File": "ClubDoorman/Infrastructure/ServiceCollectionExtensions.cs",
+          "Line": 108
+        }
+      ]
+    }
+  ],
+  "Entrypoints": [
+    {
+      "Project": {
+        "Name": "ClubDoorman",
+        "File": "ClubDoorman/ClubDoorman.csproj"
+      },
+      "ProgramMain": {
+        "File": "ClubDoorman/Program.cs",
+        "Line": 11,
+        "TypeName": "ClubDoorman.Program"
+      },
+      "HostedServices": [
+        {
+          "Type": "ClubDoorman.Worker",
+          "File": "ClubDoorman/Infrastructure/ServiceCollectionExtensions.cs",
+          "Line": 108
+        }
+      ]
+    }
+  ]
+}
