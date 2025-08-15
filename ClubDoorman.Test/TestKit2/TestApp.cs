@@ -1,105 +1,93 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using Scrutor;
 using ClubDoorman.Services.Telegram;
-using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.UserBan;
-using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.AI;
-using ClubDoorman.Handlers;
-using ClubDoorman.Services.Core.Configuration;
-using ClubDoorman.Services.LinkFormatting;
-using ClubDoorman.Services.Dispatcher;
-using ClubDoorman.Services.UserJoin;
-using ClubDoorman.Services.UserManagement;
-using ClubDoorman.Features.UserJoin;
-using ClubDoorman.Features.Moderation;
-using ClubDoorman.Services.SuspiciousUsers;
-using ClubDoorman.Services.UserFlow;
-using ClubDoorman.Services.Violation;
-using ClubDoorman.Services.BadMessage;
-using ClubDoorman.Services.Statistics;
-using ClubDoorman.Services.Handlers;
-using ClubDoorman.Services.Captcha;
 using ClubDoorman.Tests.TestKit2.Fakes;
+using ClubDoorman.Tests.TestKit2.Core;
+using AutoFixture;
 
 namespace ClubDoorman.Tests.TestKit2;
 
-public sealed class TestApp : IAsyncDisposable
+public sealed class TestApp : IDisposable, IAsyncDisposable
 {
-    private readonly ServiceProvider _provider;
+    private readonly ServiceProvider _serviceProvider;
+    private readonly FakeTelegramBotClientWrapper? _fakeTelegramBotClientWrapper;
+    private readonly FakeUserBanService? _fakeUserBanService;
+    private readonly EffectsSink? _effectsSink;
+    private readonly IFixture _fixture;
 
-    public TestApp(Action<IServiceCollection>? configure = null)
+    // Конструктор для билдера
+    internal TestApp(
+        ServiceProvider serviceProvider,
+        FakeTelegramBotClientWrapper? fakeTelegramBotClientWrapper,
+        FakeUserBanService? fakeUserBanService,
+        EffectsSink? effectsSink)
     {
-        var services = new ServiceCollection();
-
-        // Add basic logging
-        services.AddLogging(builder => 
-        {
-            builder.AddConsole();
-            builder.SetMinimumLevel(LogLevel.Debug);
-        });
-
-        // Add configuration
-        services.AddConfigurationServices();
-        
-        // Add core services that are needed for basic functionality
-        services.AddSingleton<IEffectsSink, EffectsSink>();
-        
-        // Add fake services
-        services.AddSingleton<FakeTelegramBotClientWrapper>();
-        services.AddSingleton<ITelegramBotClientWrapper>(provider => 
-            provider.GetRequiredService<FakeTelegramBotClientWrapper>());
-            
-        services.AddSingleton<IClock, FakeClock>();
-        services.AddSingleton<IGuidProvider, DeterministicGuidProvider>();
-        services.AddSingleton<IRandom, SeededRandom>();
-        services.AddSingleton<IAiCascadeService, FakeAiCascadeService>();
-        services.AddSingleton<ISpamHamClassifier, FakeSpamHamClassifier>();
-        services.AddSingleton<ICaptchaService, FakeCaptchaService>();
-        services.AddSingleton<IModerationService, FakeModerationService>();
-        services.AddSingleton<IUserManager, FakeUserManager>();
-        services.AddSingleton<IBadMessageManager, FakeBadMessageManager>();
-        services.AddSingleton<IAiChecks, FakeAiChecks>();
-        services.AddSingleton<GlobalStatsManager>();
-        services.AddSingleton<IStatisticsService, FakeStatisticsService>();
-        services.AddSingleton<IUserFlowLogger, FakeUserFlowLogger>();
-        services.AddSingleton<IMessageService, FakeMessageService>();
-        services.AddSingleton<IChatLinkFormatter, FakeChatLinkFormatter>();
-        
-        // Add HTTP client with fake handler
-        var fakeHttpHandler = new FakeHttpMessageHandler();
-        services.AddSingleton(fakeHttpHandler);
-        services.AddHttpClient("default", client => { })
-            .ConfigurePrimaryHttpMessageHandler(() => fakeHttpHandler);
-
-        // Add minimal services for MessageHandler
-        services.AddSingleton<IModerationService>(provider =>
-        {
-            return new ModerationServiceAdapter(
-                provider.GetRequiredService<IModerationPolicy>());
-        });
-
-        // Add basic handlers
-        services.AddSingleton<MessageHandler>();
-
-        // Allow custom configuration
-        configure?.Invoke(services);
-
-        _provider = services.BuildServiceProvider(new ServiceProviderOptions
-        {
-            ValidateOnBuild = false, // Disable validation for testing
-            ValidateScopes = false
-        });
+        _serviceProvider = serviceProvider;
+        _fakeTelegramBotClientWrapper = fakeTelegramBotClientWrapper;
+        _fakeUserBanService = fakeUserBanService;
+        _effectsSink = effectsSink;
+        _fixture = new Fixture();
     }
 
-    public MessageHandler Handler() => _provider.GetRequiredService<MessageHandler>();
+    // Конструктор с AutoFixture
+    public TestApp(IFixture fixture)
+    {
+        _fixture = fixture;
+        var services = new ServiceCollection();
 
-    public T GetService<T>() where T : notnull => _provider.GetRequiredService<T>();
+        // Регистрируем только базовые фейки
+        _fakeTelegramBotClientWrapper = new FakeTelegramBotClientWrapper();
+        _fakeUserBanService = new FakeUserBanService();
+        _effectsSink = new EffectsSink();
+
+        services.AddSingleton<ITelegramBotClientWrapper>(_fakeTelegramBotClientWrapper);
+        services.AddSingleton<IUserBanService>(_fakeUserBanService);
+        services.AddSingleton<IEffectsSink>(_effectsSink);
+
+        // Логгер
+        services.AddLogging(builder => builder.AddConsole());
+
+        _serviceProvider = services.BuildServiceProvider();
+    }
+
+    // Старый конструктор для обратной совместимости
+    public TestApp() : this(new Fixture())
+    {
+    }
+
+    // Статический метод для создания с билдером
+    public static TestAppBuilder CreateBuilder() => new TestAppBuilder();
+
+    public FakeTelegramBotClientWrapper? TelegramClient => _fakeTelegramBotClientWrapper;
+    public FakeUserBanService? UserBanService => _fakeUserBanService;
+    public EffectsSink? EffectsSink => _effectsSink;
+
+    // Совместимость со старыми тестами
+    public T GetService<T>() where T : notnull => _serviceProvider.GetRequiredService<T>();
+
+    /// <summary>
+    /// Создать любой объект с автозависимостями
+    /// </summary>
+    public T Create<T>() => _fixture.Create<T>();
+
+    /// <summary>
+    /// Создать объект с кастомизацией
+    /// </summary>
+    public T CreateWith<T>(Action<T> customization) where T : class
+    {
+        var obj = Create<T>();
+        customization(obj);
+        return obj;
+    }
+
+    public void Dispose()
+    {
+        _serviceProvider?.Dispose();
+    }
 
     public async ValueTask DisposeAsync()
     {
-        await _provider.DisposeAsync();
+        await _serviceProvider.DisposeAsync();
     }
 }
