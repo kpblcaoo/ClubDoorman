@@ -9,7 +9,7 @@ public static class ModerationModule
     public static IServiceCollection AddModerationServices(this IServiceCollection services)
     {
         services.AddSingleton<IModerationFacade, ModerationFacade>();
-        
+
         // Регистрация IModerationService с фабрикой как в Program.cs
         services.AddSingleton<IModerationService>(provider =>
         {
@@ -18,7 +18,7 @@ public static class ModerationModule
             return new ModerationServiceAdapter(
                 provider.GetRequiredService<IModerationPolicy>());
         });
-        
+
         return services;
     }
 }

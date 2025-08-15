@@ -16,4 +16,4 @@ public interface ICommandHandler
     /// Обрабатывает команду
     /// </summary>
     Task HandleAsync(Message message, CancellationToken cancellationToken = default);
-} 
+}

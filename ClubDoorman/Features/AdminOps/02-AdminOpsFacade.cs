@@ -27,19 +27,19 @@ public class AdminOpsFacade : IAdminOpsFacade
     /// <returns>true, если команда была обработана</returns>
     public async Task<bool> HandleAdminCommandAsync(Message message, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("AdminOpsFacade: обработка команды '{Command}' от пользователя {UserId} в чате {ChatId}", 
+        _logger.LogDebug("AdminOpsFacade: обработка команды '{Command}' от пользователя {UserId} в чате {ChatId}",
             message.Text?.Split(' ')[0], message.From?.Id, message.Chat?.Id);
 
         var handled = await _commandRouter.HandleCommandAsync(message, cancellationToken);
 
         if (handled)
         {
-            _logger.LogDebug("AdminOpsFacade: команда '{Command}' успешно обработана", 
+            _logger.LogDebug("AdminOpsFacade: команда '{Command}' успешно обработана",
                 message.Text?.Split(' ')[0]);
         }
         else
         {
-            _logger.LogDebug("AdminOpsFacade: команда '{Command}' не была обработана", 
+            _logger.LogDebug("AdminOpsFacade: команда '{Command}' не была обработана",
                 message.Text?.Split(' ')[0]);
         }
 

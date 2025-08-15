@@ -15,27 +15,27 @@ public enum ViolationType
     /// ML фильтр
     /// </summary>
     MlSpam,
-    
+
     /// <summary>
     /// Стоп-слова
     /// </summary>
     StopWords,
-    
+
     /// <summary>
     /// Слишком много эмодзи
     /// </summary>
     TooManyEmojis,
-    
+
     /// <summary>
     /// Lookalike символы
     /// </summary>
     LookalikeSymbols,
-    
+
     /// <summary>
     /// Банальные приветствия
     /// </summary>
     BoringGreetings,
-    
+
     /// <summary>
     /// Непройденная капча
     /// </summary>
@@ -49,13 +49,13 @@ public class ViolationTracker : IViolationTracker
 {
     private readonly ILogger<ViolationTracker> _logger;
     private readonly IAppConfig _appConfig;
-    
+
     public ViolationTracker(ILogger<ViolationTracker> logger, IAppConfig appConfig)
     {
         _logger = logger;
         _appConfig = appConfig;
     }
-    
+
     /// <summary>
     /// Регистрирует нарушение и возвращает true если нужно забанить пользователя
     /// </summary>
@@ -68,26 +68,26 @@ public class ViolationTracker : IViolationTracker
         var key = $"violations_{chatId}_{userId}_{violationType}";
         var currentCount = MemoryCache.Default.Get(key) as int? ?? 0;
         var newCount = currentCount + 1;
-        
+
         // Сохраняем в кэш на 24 часа
         MemoryCache.Default.Set(key, newCount, DateTimeOffset.UtcNow.AddHours(24));
-        
+
         var maxViolations = GetMaxViolationsForType(violationType);
-        
-        _logger.LogInformation("Нарушение {ViolationType} для пользователя {UserId} в чате {ChatId}: {CurrentCount}/{MaxViolations}", 
+
+        _logger.LogInformation("Нарушение {ViolationType} для пользователя {UserId} в чате {ChatId}: {CurrentCount}/{MaxViolations}",
             violationType, userId, chatId, newCount, maxViolations);
-        
+
         // Если достигли лимита нарушений
         if (maxViolations > 0 && newCount >= maxViolations)
         {
-            _logger.LogWarning("Достигнут лимит нарушений {ViolationType} для пользователя {UserId} в чате {ChatId}: {Count}/{Max}", 
+            _logger.LogWarning("Достигнут лимит нарушений {ViolationType} для пользователя {UserId} в чате {ChatId}: {Count}/{Max}",
                 violationType, userId, chatId, newCount, maxViolations);
             return true;
         }
-        
+
         return false;
     }
-    
+
     /// <summary>
     /// Получает количество нарушений для пользователя
     /// </summary>
@@ -100,7 +100,7 @@ public class ViolationTracker : IViolationTracker
         var key = $"violations_{chatId}_{userId}_{violationType}";
         return MemoryCache.Default.Get(key) as int? ?? 0;
     }
-    
+
     /// <summary>
     /// Сбрасывает счетчик нарушений для пользователя
     /// </summary>
@@ -111,10 +111,10 @@ public class ViolationTracker : IViolationTracker
     {
         var key = $"violations_{chatId}_{userId}_{violationType}";
         MemoryCache.Default.Remove(key);
-        _logger.LogInformation("Сброшен счетчик нарушений {ViolationType} для пользователя {UserId} в чате {ChatId}", 
+        _logger.LogInformation("Сброшен счетчик нарушений {ViolationType} для пользователя {UserId} в чате {ChatId}",
             violationType, userId, chatId);
     }
-    
+
     /// <summary>
     /// Получает максимальное количество нарушений для типа
     /// </summary>
@@ -133,7 +133,7 @@ public class ViolationTracker : IViolationTracker
             _ => 0
         };
     }
-    
+
     /// <summary>
     /// Получает название типа нарушения для логов
     /// </summary>
@@ -152,4 +152,4 @@ public class ViolationTracker : IViolationTracker
             _ => "неизвестное нарушение"
         };
     }
-} 
+}

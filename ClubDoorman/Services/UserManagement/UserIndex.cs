@@ -12,7 +12,7 @@ public class UserIndex : IUserIndex
     {
         if (string.IsNullOrEmpty(username))
             return null;
-            
+
         // Поиск в MemoryCache по значениям, где username встречался
         foreach (var item in MemoryCache.Default)
         {
@@ -25,22 +25,22 @@ public class UserIndex : IUserIndex
                     return uid;
             }
         }
-        
+
         return null;
     }
-    
+
     /// <inheritdoc />
     public void IndexUser(long chatId, long userId, string text)
     {
         if (string.IsNullOrEmpty(text))
             return;
-            
+
         var key = $"{chatId}_{userId}";
         var policy = new CacheItemPolicy
         {
             AbsoluteExpiration = DateTimeOffset.Now.AddHours(24) // Хранить 24 часа
         };
-        
+
         MemoryCache.Default.Set(key, text, policy);
     }
 }

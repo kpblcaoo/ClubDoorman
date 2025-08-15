@@ -88,7 +88,7 @@ public class MessageHandler : IUpdateHandler
             ["opId"] = Guid.NewGuid(),
             ["updateType"] = update?.Type.ToString() ?? "null"
         });
-        
+
         try
         {
             if (update == null)
@@ -105,11 +105,11 @@ public class MessageHandler : IUpdateHandler
             var message = update.EditedMessage ?? update.Message!;
             var chat = message.Chat;
 
-            _logger.LogDebug("Received message '{MessageText}' in chat {ChatId} (type: {ChatType}, title: {ChatTitle})", 
+            _logger.LogDebug("Received message '{MessageText}' in chat {ChatId} (type: {ChatType}, title: {ChatTitle})",
                 message.Text, chat.Id, chat.Type, chat.Title);
 
             var isAdminChat = chat.Id == _appConfig.AdminChatId || chat.Id == _appConfig.LogAdminChatId;
-            _logger.LogDebug("Checking whitelist for chat {ChatId}. IsAdminChat: {IsAdminChat}, IsAllowed: {IsAllowed}", 
+            _logger.LogDebug("Checking whitelist for chat {ChatId}. IsAdminChat: {IsAdminChat}, IsAllowed: {IsAllowed}",
                 chat.Id, isAdminChat, _appConfig.IsChatAllowed(chat.Id));
 
             if (!_appConfig.IsChatAllowed(chat.Id) && !isAdminChat)
@@ -119,7 +119,8 @@ public class MessageHandler : IUpdateHandler
                 return;
             }
 
-            if (_appConfig.DisabledChats.Contains(chat.Id)) {
+            if (_appConfig.DisabledChats.Contains(chat.Id))
+            {
                 _logger.LogDebug("Chat {ChatId} is disabled, skipping", chat.Id);
                 _logger.LogInformation("HandleAsync: Chat {ChatId} is disabled, returning", chat.Id);
                 return;
@@ -155,7 +156,7 @@ public class MessageHandler : IUpdateHandler
 
             if (message.NewChatMembers != null && chat.Id != _appConfig.AdminChatId)
             {
-                _logger.LogDebug("Handling new chat members in chat {ChatId}. Members: {Members}", 
+                _logger.LogDebug("Handling new chat members in chat {ChatId}. Members: {Members}",
                     chat.Id, string.Join(", ", message.NewChatMembers.Select(m => $"{m.Id} ({m.Username})")));
                 await _userJoinFacade.HandleNewMembersAsync(message, cancellationToken);
                 _logger.LogDebug("HandleAsync: New chat members handled, returning");
@@ -164,7 +165,7 @@ public class MessageHandler : IUpdateHandler
 
             if (message.LeftChatMember != null && message.From?.Id == _bot.BotId)
             {
-                _logger.LogDebug("Message about left chat member detected. MessageId: {MessageId}, UserId: {UserId}", 
+                _logger.LogDebug("Message about left chat member detected. MessageId: {MessageId}, UserId: {UserId}",
                     message.MessageId, message.LeftChatMember.Id);
                 try
                 {
@@ -182,7 +183,7 @@ public class MessageHandler : IUpdateHandler
 
             if (message.SenderChat != null)
             {
-                _logger.LogDebug("Message from channel detected. SenderChatId: {SenderChatId}, Title: {SenderChatTitle}", 
+                _logger.LogDebug("Message from channel detected. SenderChatId: {SenderChatId}, Title: {SenderChatTitle}",
                     message.SenderChat.Id, message.SenderChat.Title);
                 await HandleChannelMessageAsync(message, cancellationToken);
                 _logger.LogDebug("HandleAsync: Channel message handled, returning");
@@ -202,38 +203,38 @@ public class MessageHandler : IUpdateHandler
 
     public async Task HandleCommandAsync(Message message, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("HandleCommandAsync called. MessageId: {MessageId}, ChatId: {ChatId}, Text: {Text}", 
+        _logger.LogDebug("HandleCommandAsync called. MessageId: {MessageId}, ChatId: {ChatId}, Text: {Text}",
             message.MessageId, message.Chat.Id, message.Text);
 
         // Обрабатываем команду через CommandRouter
-        _logger.LogTrace("HandleCommandAsync: Passing command to CommandRouter. MessageId: {MessageId}, ChatId: {ChatId}", 
+        _logger.LogTrace("HandleCommandAsync: Passing command to CommandRouter. MessageId: {MessageId}, ChatId: {ChatId}",
             message.MessageId, message.Chat.Id);
         var handled = await _commandRouter.HandleCommandAsync(message, cancellationToken);
 
-        _logger.LogDebug("CommandRouter.HandleCommandAsync returned {Handled} for command '{Command}' in chat {ChatId}", 
+        _logger.LogDebug("CommandRouter.HandleCommandAsync returned {Handled} for command '{Command}' in chat {ChatId}",
             handled, message.Text, message.Chat.Id);
 
         if (handled)
         {
             _logger.LogDebug("Команда обработана через CommandRouter: {Command} (chatId: {ChatId}, messageId: {MessageId})",
                 message.Text?.Split(' ')[0], message.Chat.Id, message.MessageId);
-            _logger.LogInformation("HandleCommandAsync: Command '{Command}' handled successfully. ChatId: {ChatId}, MessageId: {MessageId}", 
+            _logger.LogInformation("HandleCommandAsync: Command '{Command}' handled successfully. ChatId: {ChatId}, MessageId: {MessageId}",
                 message.Text, message.Chat.Id, message.MessageId);
         }
         else
         {
             _logger.LogDebug("CommandRouter не смог обработать команду: {Command} (chatId: {ChatId}, messageId: {MessageId})",
                 message.Text?.Split(' ')[0], message.Chat.Id, message.MessageId);
-            _logger.LogWarning("HandleCommandAsync: Command '{Command}' was not handled. ChatId: {ChatId}, MessageId: {MessageId}", 
+            _logger.LogWarning("HandleCommandAsync: Command '{Command}' was not handled. ChatId: {ChatId}, MessageId: {MessageId}",
                 message.Text, message.Chat.Id, message.MessageId);
         }
     }
 
     public async Task HandleChannelMessageAsync(Message message, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("HandleChannelMessageAsync called. MessageId: {MessageId}, SenderChatId: {SenderChatId}, ChatId: {ChatId}", 
+        _logger.LogDebug("HandleChannelMessageAsync called. MessageId: {MessageId}, SenderChatId: {SenderChatId}, ChatId: {ChatId}",
             message.MessageId, message.SenderChat?.Id, message.Chat.Id);
-        _logger.LogDebug("🔍 MessageHandler: Делегируем обработку канала к ChannelModerationService. MessageId: {MessageId}, SenderChatId: {SenderChatId}, ChatId: {ChatId}", 
+        _logger.LogDebug("🔍 MessageHandler: Делегируем обработку канала к ChannelModerationService. MessageId: {MessageId}, SenderChatId: {SenderChatId}, ChatId: {ChatId}",
             message.MessageId, message.SenderChat?.Id, message.Chat.Id);
         await _channelModerationService.HandleChannelMessageAsync(message, cancellationToken);
         _logger.LogDebug("HandleChannelMessageAsync: Channel message processed. MessageId: {MessageId}", message.MessageId);
@@ -241,7 +242,7 @@ public class MessageHandler : IUpdateHandler
 
     internal async Task HandleUserMessageAsync(Message message, bool isSilentMode, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("HandleUserMessageAsync called. MessageId: {MessageId}, IsSilentMode: {IsSilentMode}", 
+        _logger.LogDebug("HandleUserMessageAsync called. MessageId: {MessageId}, IsSilentMode: {IsSilentMode}",
             message.MessageId, isSilentMode);
         var user = message.From;
         var chat = message.Chat;
@@ -250,7 +251,7 @@ public class MessageHandler : IUpdateHandler
 
         if (user == null)
         {
-            _logger.LogDebug("Игнорируем системное сообщение без пользователя. MessageId: {MessageId}, ChatId: {ChatId}", 
+            _logger.LogDebug("Игнорируем системное сообщение без пользователя. MessageId: {MessageId}, ChatId: {ChatId}",
                 message.MessageId, chat.Id);
             _logger.LogInformation("HandleUserMessageAsync: System message without user, returning. MessageId: {MessageId}", message.MessageId);
             return;
@@ -258,7 +259,7 @@ public class MessageHandler : IUpdateHandler
 
         if (user.IsBot)
         {
-            _logger.LogDebug("Игнорируем сообщение от бота {BotId}. MessageId: {MessageId}, ChatId: {ChatId}", 
+            _logger.LogDebug("Игнорируем сообщение от бота {BotId}. MessageId: {MessageId}, ChatId: {ChatId}",
                 user.Id, message.MessageId, chat.Id);
             _logger.LogInformation("HandleUserMessageAsync: Message from bot {BotId}, returning. MessageId: {MessageId}", user.Id, message.MessageId);
             return;
@@ -266,7 +267,7 @@ public class MessageHandler : IUpdateHandler
 
         if (message.LeftChatMember != null)
         {
-            _logger.LogDebug("Игнорируем системное сообщение о выходе пользователя. MessageId: {MessageId}, LeftUserId: {LeftUserId}, ChatId: {ChatId}", 
+            _logger.LogDebug("Игнорируем системное сообщение о выходе пользователя. MessageId: {MessageId}, LeftUserId: {LeftUserId}, ChatId: {ChatId}",
                 message.MessageId, message.LeftChatMember.Id, chat.Id);
             _logger.LogInformation("HandleUserMessageAsync: System message about left user, returning. MessageId: {MessageId}", message.MessageId);
             return;
@@ -277,18 +278,18 @@ public class MessageHandler : IUpdateHandler
         _logger.LogTrace("Captcha check for user {UserId} in chat {ChatId}: {HasCaptcha}", user.Id, chat.Id, captchaInfo != null);
         if (captchaInfo != null)
         {
-            _logger.LogInformation("Удаляем сообщение от пользователя {UserId}, который должен пройти капчу. MessageId: {MessageId}, ChatId: {ChatId}", 
+            _logger.LogInformation("Удаляем сообщение от пользователя {UserId}, который должен пройти капчу. MessageId: {MessageId}, ChatId: {ChatId}",
                 user.Id, message.MessageId, chat.Id);
             try
             {
                 await _bot.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
-                _logger.LogDebug("Сообщение пользователя {UserId} удалено из-за незавершённой капчи. MessageId: {MessageId}, ChatId: {ChatId}", 
+                _logger.LogDebug("Сообщение пользователя {UserId} удалено из-за незавершённой капчи. MessageId: {MessageId}, ChatId: {ChatId}",
                     user.Id, message.MessageId, chat.Id);
                 _logger.LogInformation("HandleUserMessageAsync: Deleted message from user {UserId} due to pending captcha. MessageId: {MessageId}", user.Id, message.MessageId);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Не удалось удалить сообщение от пользователя проходящего капчу. UserId: {UserId}, MessageId: {MessageId}, ChatId: {ChatId}", 
+                _logger.LogWarning(ex, "Не удалось удалить сообщение от пользователя проходящего капчу. UserId: {UserId}, MessageId: {MessageId}, ChatId: {ChatId}",
                     user.Id, message.MessageId, chat.Id);
                 _logger.LogError(ex, "HandleUserMessageAsync: Exception while deleting message for captcha. UserId: {UserId}, MessageId: {MessageId}", user.Id, message.MessageId);
             }
@@ -298,7 +299,7 @@ public class MessageHandler : IUpdateHandler
         _logger.LogDebug("🔍 Проверяем пользователя {UserId} по блэклисту lols.bot", user.Id);
         if (await _userManager.InBanlist(user.Id))
         {
-            _logger.LogWarning("Пользователь {UserId} найден в блэклисте lols.bot. Применяем бан. ChatId: {ChatId}, MessageId: {MessageId}", 
+            _logger.LogWarning("Пользователь {UserId} найден в блэклисте lols.bot. Применяем бан. ChatId: {ChatId}, MessageId: {MessageId}",
                 user.Id, chat.Id, message.MessageId);
             _logger.LogInformation("HandleUserMessageAsync: User {UserId} found in banlist, banning. MessageId: {MessageId}", user.Id, message.MessageId);
             await _userBanService.HandleBlacklistBanAsync(message, user, chat, cancellationToken);
@@ -309,15 +310,15 @@ public class MessageHandler : IUpdateHandler
 
         if (_moderationFacade.IsUserApproved(user.Id, chat.Id))
         {
-            _logger.LogDebug("✅ Пользователь {UserId} уже одобрен в чате {ChatId}, пропускаем модерацию. MessageId: {MessageId}", 
+            _logger.LogDebug("✅ Пользователь {UserId} уже одобрен в чате {ChatId}, пропускаем модерацию. MessageId: {MessageId}",
                 user.Id, chat.Id, message.MessageId);
-            _logger.LogInformation("HandleUserMessageAsync: User {UserId} already approved in chat {ChatId}, skipping moderation. MessageId: {MessageId}", 
+            _logger.LogInformation("HandleUserMessageAsync: User {UserId} already approved in chat {ChatId}, skipping moderation. MessageId: {MessageId}",
                 user.Id, chat.Id, message.MessageId);
             return;
         }
 
         var messageText = message.Text ?? message.Caption ?? "[медиа/стикер/файл]";
-        _logger.LogTrace("Логируем первое сообщение от неодобренного пользователя. UserId: {UserId}, ChatId: {ChatId}, MessageId: {MessageId}, Text: {Text}", 
+        _logger.LogTrace("Логируем первое сообщение от неодобренного пользователя. UserId: {UserId}, ChatId: {ChatId}, MessageId: {MessageId}, Text: {Text}",
             user.Id, chat.Id, message.MessageId, messageText);
         _userFlowLogger.LogFirstMessage(user, chat, messageText);
 
@@ -336,7 +337,7 @@ public class MessageHandler : IUpdateHandler
         if (!string.IsNullOrEmpty(clubName))
         {
             _logger.LogDebug("User is {Name} from club. UserId: {UserId}, ChatId: {ChatId}", clubName, user.Id, chat.Id);
-            _logger.LogInformation("HandleUserMessageAsync: User {UserId} is a club member ({ClubName}), skipping moderation. MessageId: {MessageId}", 
+            _logger.LogInformation("HandleUserMessageAsync: User {UserId} is a club member ({ClubName}), skipping moderation. MessageId: {MessageId}",
                 user.Id, clubName, message.MessageId);
             return;
         }
@@ -344,17 +345,17 @@ public class MessageHandler : IUpdateHandler
         ModerationResult moderationResult;
         try
         {
-            _logger.LogTrace("Вызов CheckMessageAsync для модерации сообщения. UserId: {UserId}, ChatId: {ChatId}, MessageId: {MessageId}", 
+            _logger.LogTrace("Вызов CheckMessageAsync для модерации сообщения. UserId: {UserId}, ChatId: {ChatId}, MessageId: {MessageId}",
                 user.Id, chat.Id, message.MessageId);
             moderationResult = await _moderationFacade.CheckMessageAsync(message);
-            _logger.LogDebug("Результат модерации: Action={Action}, Reason={Reason}, Confidence={Confidence}", 
+            _logger.LogDebug("Результат модерации: Action={Action}, Reason={Reason}, Confidence={Confidence}",
                 moderationResult.Action, moderationResult.Reason, moderationResult.Confidence);
-            _logger.LogInformation("HandleUserMessageAsync: Moderation result: Action={Action}, Reason={Reason}, Confidence={Confidence}", 
+            _logger.LogInformation("HandleUserMessageAsync: Moderation result: Action={Action}, Reason={Reason}, Confidence={Confidence}",
                 moderationResult.Action, moderationResult.Reason, moderationResult.Confidence);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Ошибка при модерации сообщения. UserId: {UserId}, ChatId: {ChatId}, MessageId: {MessageId}", 
+            _logger.LogError(ex, "Ошибка при модерации сообщения. UserId: {UserId}, ChatId: {ChatId}, MessageId: {MessageId}",
                 user.Id, chat.Id, message.MessageId);
             _logger.LogCritical(ex, "HandleUserMessageAsync: Exception during moderation. UserId: {UserId}, MessageId: {MessageId}", user.Id, message.MessageId);
             moderationResult = new ModerationResult(ModerationAction.RequireManualReview, "Ошибка модерации - требуется ручной анализ", 0);
@@ -363,23 +364,23 @@ public class MessageHandler : IUpdateHandler
 
         if (moderationResult.Action == ModerationAction.Allow)
         {
-            _logger.LogTrace("AI анализ профиля для пользователя {UserId} после успешной базовой модерации. ChatId: {ChatId}, MessageId: {MessageId}", 
+            _logger.LogTrace("AI анализ профиля для пользователя {UserId} после успешной базовой модерации. ChatId: {ChatId}, MessageId: {MessageId}",
                 user.Id, chat.Id, message.MessageId);
             var profileAnalysisResult = await _aiCascadeService.PerformAiProfileAnalysisAsync(message, user, chat, cancellationToken);
-            _logger.LogDebug("Результат AI анализа профиля: {ProfileAnalysisResult} (UserId: {UserId}, ChatId: {ChatId})", 
+            _logger.LogDebug("Результат AI анализа профиля: {ProfileAnalysisResult} (UserId: {UserId}, ChatId: {ChatId})",
                 profileAnalysisResult, user.Id, chat.Id);
-            _logger.LogInformation("HandleUserMessageAsync: AI profile analysis result: {ProfileAnalysisResult} (UserId: {UserId}, ChatId: {ChatId})", 
+            _logger.LogInformation("HandleUserMessageAsync: AI profile analysis result: {ProfileAnalysisResult} (UserId: {UserId}, ChatId: {ChatId})",
                 profileAnalysisResult, user.Id, chat.Id);
             if (profileAnalysisResult)
             {
-                _logger.LogWarning("Пользователь {UserId} получил ограничения за подозрительный профиль. ChatId: {ChatId}, MessageId: {MessageId}", 
+                _logger.LogWarning("Пользователь {UserId} получил ограничения за подозрительный профиль. ChatId: {ChatId}, MessageId: {MessageId}",
                     user.Id, chat.Id, message.MessageId);
                 _logger.LogInformation("HandleUserMessageAsync: User {UserId} restricted due to suspicious profile. MessageId: {MessageId}", user.Id, message.MessageId);
                 return;
             }
         }
 
-        _logger.LogTrace("Передаём сообщение на финальную обработку в ModerationFacade. UserId: {UserId}, ChatId: {ChatId}, MessageId: {MessageId}, Action: {Action}", 
+        _logger.LogTrace("Передаём сообщение на финальную обработку в ModerationFacade. UserId: {UserId}, ChatId: {ChatId}, MessageId: {MessageId}, Action: {Action}",
             user.Id, chat.Id, message.MessageId, moderationResult.Action);
         await _moderationFacade.HandleUserMessageAsync(message, user, chat, moderationResult, isSilentMode, cancellationToken);
         _logger.LogTrace("HandleUserMessageAsync: Message passed to ModerationFacade. UserId: {UserId}, MessageId: {MessageId}", user.Id, message.MessageId);
@@ -388,7 +389,7 @@ public class MessageHandler : IUpdateHandler
 
     public void DeleteMessageLater(Message message, TimeSpan after = default, CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("DeleteMessageLater called. MessageId: {MessageId}, ChatId: {ChatId}, After: {After}", 
+        _logger.LogDebug("DeleteMessageLater called. MessageId: {MessageId}, ChatId: {ChatId}, After: {After}",
             message?.MessageId, message?.Chat?.Id, after);
         if (message == null)
         {
@@ -396,7 +397,7 @@ public class MessageHandler : IUpdateHandler
             return;
         }
         if (after == default) after = TimeSpan.FromMinutes(5);
-        _logger.LogDebug("Запланировано удаление сообщения {MessageId} в чате {ChatId} через {After}", 
+        _logger.LogDebug("Запланировано удаление сообщения {MessageId} в чате {ChatId} через {After}",
             message.MessageId, message.Chat.Id, after);
         _ = Task.Run(
             async () =>
@@ -405,7 +406,7 @@ public class MessageHandler : IUpdateHandler
                 {
                     if (after > TimeSpan.Zero)
                     {
-                        _logger.LogTrace("Ожидание {After} перед удалением сообщения {MessageId} в чате {ChatId}", 
+                        _logger.LogTrace("Ожидание {After} перед удалением сообщения {MessageId} в чате {ChatId}",
                             after, message.MessageId, message.Chat.Id);
                         await Task.Delay(after, cancellationToken);
                     }

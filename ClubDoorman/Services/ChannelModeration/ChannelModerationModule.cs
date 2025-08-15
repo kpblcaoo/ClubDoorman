@@ -21,7 +21,7 @@ public static class ChannelModerationModule
                 provider.GetRequiredService<IUserBanService>(),
                 provider.GetRequiredService<ILogger<ChannelModerationService>>());
         });
-        
+
         return services;
     }
 }

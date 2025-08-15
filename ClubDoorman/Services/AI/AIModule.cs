@@ -26,7 +26,7 @@ public static class AIModule
         services.AddSingleton<IAiCascadeService, AiCascadeService>();
         services.AddSingleton<IButtonsService, ButtonsService>();
         services.AddSingleton<IForwardingService, ForwardingService>();
-        
+
         return services;
     }
 }

@@ -123,11 +123,11 @@ public interface IModerationFacade
     /// <param name="isSilentMode">Тихий режим</param>
     /// <param name="cancellationToken">Токен отмены</param>
     Task HandleUserMessageAsync(
-        Message message, 
-        User user, 
-        Chat chat, 
-        ModerationResult moderationResult, 
-        bool isSilentMode, 
+        Message message,
+        User user,
+        Chat chat,
+        ModerationResult moderationResult,
+        bool isSilentMode,
         CancellationToken cancellationToken);
 }
 

@@ -19,4 +19,4 @@ public interface IBadMessageManager
     /// </summary>
     /// <param name="message">Текст сообщения</param>
     ValueTask MarkAsBad(string message);
-} 
+}

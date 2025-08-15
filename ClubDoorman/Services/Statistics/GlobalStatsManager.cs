@@ -200,4 +200,4 @@ public class ChatStat
     public int Members { get; set; } = 0;
     public int CaptchaShown { get; set; } = 0;
     public int Bans { get; set; } = 0;
-} 
+}

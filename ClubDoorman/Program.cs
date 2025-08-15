@@ -13,7 +13,7 @@ public class Program
         // Загружаем переменные из .env файла если он существует
         var currentDir = Directory.GetCurrentDirectory();
         var envPath = Path.Combine(currentDir, ".env");
-        
+
         if (File.Exists(envPath))
         {
             Console.WriteLine($"📄 Загружаем переменные из файла: {envPath}");
@@ -24,7 +24,7 @@ public class Program
             Console.WriteLine("📄 Файл .env не найден, используем переменные окружения");
             Console.WriteLine($"🔍 Искали в: {envPath}");
         }
-        
+
         InitData();
         var host = Host.CreateDefaultBuilder(args)
             .UseSerilog(
@@ -36,7 +36,7 @@ public class Program
                     {
                         Directory.CreateDirectory(logsDir);
                     }
-                    
+
                     config
                         .MinimumLevel.Verbose()
                         .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
@@ -92,7 +92,7 @@ public class Program
 
         // Логируем статус AI и Mimicry систем после полной инициализации
         var appConfig = host.Services.GetRequiredService<IAppConfig>();
-        
+
         if (appConfig.OpenRouterApi != null)
         {
             Console.WriteLine("🤖 AI анализ: ВКЛЮЧЕН");
@@ -101,7 +101,7 @@ public class Program
         {
             Console.WriteLine("🤖 AI анализ: ОТКЛЮЧЕН (DOORMAN_OPENROUTER_API не настроен)");
         }
-        
+
         if (appConfig.SuspiciousDetectionEnabled)
         {
             Console.WriteLine($"🎭 Система мимикрии: ВКЛЮЧЕНА (порог: {appConfig.MimicryThreshold:F1})");
@@ -110,7 +110,7 @@ public class Program
         {
             Console.WriteLine("🎭 Система мимикрии: ОТКЛЮЧЕНА (DOORMAN_SUSPICIOUS_DETECTION_ENABLE не установлен)");
         }
-        
+
         // Информация о загруженных переменных окружения
         Console.WriteLine("📋 Загруженные переменные окружения:");
         Console.WriteLine($"   • DOORMAN_BOT_API: {(string.IsNullOrEmpty(appConfig.BotApi) ? "не найдено" : "найдено")}");

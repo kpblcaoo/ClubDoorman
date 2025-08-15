@@ -15,4 +15,4 @@ public interface ICommandProcessingService
     /// <param name="message">Сообщение с командой</param>
     /// <param name="cancellationToken">Токен отмены</param>
     Task HandleCommandAsync(Message message, CancellationToken cancellationToken = default);
-} 
+}

@@ -1,5 +1,5 @@
 using ClubDoorman.Services.Messaging;
-﻿namespace ClubDoorman.Infrastructure
+namespace ClubDoorman.Infrastructure
 {
     public static class Captcha
     {

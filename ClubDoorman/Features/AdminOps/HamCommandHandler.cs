@@ -54,26 +54,26 @@ public class HamCommandHandler : ICommandHandler
         }
 
         var replyToMessage = message.ReplyToMessage;
-        
+
         // Проверяем, что реплай не на сообщение бота (кроме форвардов)
         if (replyToMessage.From?.Id == _bot.BotId && replyToMessage.ForwardDate == null)
         {
-            await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Warning, 
-                new SimpleNotificationData(message.From!, message.Chat, "Реплай на сообщение бота"), 
+            await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Warning,
+                new SimpleNotificationData(message.From!, message.Chat, "Реплай на сообщение бота"),
                 cancellationToken);
             return;
         }
 
         var text = replyToMessage.Text ?? replyToMessage.Caption;
-        _logger.LogDebug("Команда /ham: извлечен текст='{Text}' (длина={Length})", 
-            string.IsNullOrWhiteSpace(text) ? "[ПУСТОЙ]" : text.Length > 100 ? text.Substring(0, 100) + "..." : text, 
+        _logger.LogDebug("Команда /ham: извлечен текст='{Text}' (длина={Length})",
+            string.IsNullOrWhiteSpace(text) ? "[ПУСТОЙ]" : text.Length > 100 ? text.Substring(0, 100) + "..." : text,
             text?.Length ?? 0);
 
         if (string.IsNullOrWhiteSpace(text))
         {
             _logger.LogWarning("❌ Команда /ham не выполнена: текст сообщения пустой или отсутствует");
-            await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Warning, 
-                new SimpleNotificationData(message.From!, message.Chat, "Сообщение не содержит текста"), 
+            await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Warning,
+                new SimpleNotificationData(message.From!, message.Chat, "Сообщение не содержит текста"),
                 cancellationToken);
             return;
         }
@@ -85,20 +85,20 @@ public class HamCommandHandler : ICommandHandler
     {
         _logger.LogInformation("✅ Обрабатываем команду /ham для текста: '{Text}'", text);
         await _classifier.AddHam(text);
-        
+
         // Уведомление пользователю (исправляем Markdown ошибку)
-        await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Success, 
-            new SimpleNotificationData(message.From!, message.Chat, "Сообщение добавлено как пример НЕ\\-спама"), 
+        await _messageService.SendUserNotificationAsync(message.From!, message.Chat, UserNotificationType.Success,
+            new SimpleNotificationData(message.From!, message.Chat, "Сообщение добавлено как пример НЕ\\-спама"),
             cancellationToken);
-            
+
         // Уведомление в админку о добавлении НЕ-спам примера
         var adminData = new SimpleNotificationData(
-            message.From!, 
-            message.Chat, 
+            message.From!,
+            message.Chat,
             $"Администратор {Utils.FullName(message.From!)} добавил сообщение как пример НЕ-спама:\n\n`{text.Substring(0, Math.Min(text.Length, 200))}{(text.Length > 200 ? "..." : "")}`"
         );
         await _messageService.SendAdminNotificationAsync(AdminNotificationType.SystemInfo, adminData, cancellationToken);
-        
+
         _logger.LogInformation("✅ Команда /ham успешно выполнена");
     }
 }

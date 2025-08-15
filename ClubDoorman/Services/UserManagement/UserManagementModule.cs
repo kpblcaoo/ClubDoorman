@@ -26,7 +26,7 @@ public static class UserManagementModule
         services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
         services.AddSingleton<IJoinedUserFlags, JoinedUserFlags>();
         services.AddSingleton<IUserIndex, UserIndex>();
-        
+
         return services;
     }
 }

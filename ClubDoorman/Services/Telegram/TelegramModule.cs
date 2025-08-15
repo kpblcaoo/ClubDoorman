@@ -16,7 +16,7 @@ public static class TelegramModule
     public static IServiceCollection AddTelegramServices(this IServiceCollection services)
     {
         services.AddSingleton<ITelegramBotClientWrapper, TelegramBotClientWrapper>();
-        
+
         return services;
     }
-} 
+}

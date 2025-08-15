@@ -21,32 +21,32 @@ public class CommandRouter : ICommandRouter
     {
         _commandHandlers = commandHandlers ?? throw new ArgumentNullException(nameof(commandHandlers));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        
+
         // Создаем словарь для быстрого поиска обработчиков по имени команды
         // Обрабатываем дублирующиеся ключи, используя последний зарегистрированный обработчик
         _handlersByCommand = new Dictionary<string, ICommandHandler>();
         var duplicateCommands = new List<string>();
-        
+
         foreach (var handler in _commandHandlers)
         {
             if (_handlersByCommand.ContainsKey(handler.CommandName))
             {
                 duplicateCommands.Add(handler.CommandName);
-                _logger.LogWarning("Обнаружен дублирующийся обработчик команды '{Command}': {ExistingHandler} -> {NewHandler}", 
-                    handler.CommandName, 
-                    _handlersByCommand[handler.CommandName].GetType().Name, 
+                _logger.LogWarning("Обнаружен дублирующийся обработчик команды '{Command}': {ExistingHandler} -> {NewHandler}",
+                    handler.CommandName,
+                    _handlersByCommand[handler.CommandName].GetType().Name,
                     handler.GetType().Name);
             }
             _handlersByCommand[handler.CommandName] = handler;
         }
-        
+
         if (duplicateCommands.Any())
         {
-            _logger.LogWarning("Обнаружены дублирующиеся команды: {DuplicateCommands}. Используются последние зарегистрированные обработчики.", 
+            _logger.LogWarning("Обнаружены дублирующиеся команды: {DuplicateCommands}. Используются последние зарегистрированные обработчики.",
                 string.Join(", ", duplicateCommands.Distinct()));
         }
-        
-        _logger.LogDebug("CommandRouter создан с {Count} обработчиками команд: {Commands}", 
+
+        _logger.LogDebug("CommandRouter создан с {Count} обработчиками команд: {Commands}",
             _handlersByCommand.Count, string.Join(", ", _handlersByCommand.Keys));
     }
 
@@ -68,19 +68,19 @@ public class CommandRouter : ICommandRouter
         var commandText = message.Text.Split(' ')[0].ToLower();
         var command = commandText.StartsWith("/") ? commandText.Substring(1) : commandText;
 
-        _logger.LogDebug("Обработка команды: {Command} от пользователя {UserId} в чате {ChatId}", 
+        _logger.LogDebug("Обработка команды: {Command} от пользователя {UserId} в чате {ChatId}",
             command, message.From?.Id, message.Chat.Id);
 
         if (_handlersByCommand.TryGetValue(command, out var handler))
         {
-            _logger.LogDebug("Найден обработчик для команды {Command}: {HandlerType}", 
+            _logger.LogDebug("Найден обработчик для команды {Command}: {HandlerType}",
                 command, handler.GetType().Name);
-            
+
             await handler.HandleAsync(message, cancellationToken);
             return true;
         }
 
-        _logger.LogDebug("Обработчик для команды {Command} не найден среди зарегистрированных: {RegisteredCommands}", 
+        _logger.LogDebug("Обработчик для команды {Command} не найден среди зарегистрированных: {RegisteredCommands}",
             command, string.Join(", ", _handlersByCommand.Keys));
         return false;
     }

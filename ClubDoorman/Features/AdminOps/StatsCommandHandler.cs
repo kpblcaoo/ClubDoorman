@@ -69,7 +69,7 @@ public class StatsCommandHandler : ICommandHandler
         var report = _statisticsService.GetAllStats();
         var sb = new StringBuilder();
         sb.AppendLine("📊 *Статистика по группам:*\n");
-        
+
         if (report == null || !report.Any())
         {
             sb.AppendLine("Ничего интересного не произошло 🎉");
@@ -82,7 +82,7 @@ public class StatsCommandHandler : ICommandHandler
             );
             return;
         }
-        
+
         foreach (var (chatId, stats) in report.OrderBy(x => x.Value.ChatTitle))
         {
             var sum = stats.KnownBadMessage + stats.BlacklistBanned + stats.StoppedCaptcha + stats.LongNameBanned;
@@ -104,7 +104,7 @@ public class StatsCommandHandler : ICommandHandler
             if (stats.KnownBadMessage > 0)
                 sb.AppendLine($"▫️ Известные спам-сообщения: *{stats.KnownBadMessage}*");
         }
-        
+
         await _messageService.SendUserNotificationAsync(
             message.From!,
             message.Chat,

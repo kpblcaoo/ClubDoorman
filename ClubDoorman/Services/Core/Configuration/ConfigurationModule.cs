@@ -17,7 +17,7 @@ public static class ConfigurationModule
     {
         // Регистрация основного интерфейса конфигурации
         services.AddSingleton<IAppConfig, AppConfig>();
-        
+
         // Регистрация strongly-typed options из переменных окружения
         services.Configure<AutoBanOptions>(options =>
         {
@@ -29,7 +29,7 @@ public static class ConfigurationModule
             options.HighConfidenceAutoBan = loaded.HighConfidenceAutoBan;
             options.BanFolderInviteUsers = loaded.BanFolderInviteUsers;
         });
-        
+
         services.Configure<ViolationThresholdOptions>(options =>
         {
             var loaded = ConfigurationHelper.LoadViolationThresholdOptions();
@@ -40,7 +40,7 @@ public static class ConfigurationModule
             options.BoringGreetingsViolationsBeforeBan = loaded.BoringGreetingsViolationsBeforeBan;
             options.CaptchaViolationsBeforeBan = loaded.CaptchaViolationsBeforeBan;
         });
-        
+
         services.Configure<FeatureToggleOptions>(options =>
         {
             var loaded = ConfigurationHelper.LoadFeatureToggleOptions();
@@ -53,13 +53,13 @@ public static class ConfigurationModule
             options.GlobalApprovalMode = loaded.GlobalApprovalMode;
             options.RepeatedViolationsBanToAdminChat = loaded.RepeatedViolationsBanToAdminChat;
         });
-        
+
         services.Configure<ChatFilteringOptions>(options =>
         {
             var loaded = ConfigurationHelper.LoadChatFilteringOptions();
             options.MediaFilteringDisabledChats = loaded.MediaFilteringDisabledChats;
         });
-        
+
         return services;
     }
-} 
+}

@@ -66,17 +66,17 @@ public class IntroFlowService
     {
         chat = userJoinMessage?.Chat ?? chat;
         Debug.Assert(chat != null);
-        
+
         // Проверка whitelist - если активен, работаем только в разрешённых чатах
         if (!_appConfig.IsChatAllowed(chat.Id))
         {
             _logger.LogDebug("Чат {ChatId} ({ChatTitle}) не в whitelist - игнорируем IntroFlow", chat.Id, chat.Title);
             return;
         }
-        
+
         // Проверяем длину имени
         var fullName = $"{user.FirstName} {user.LastName}".Trim();
-        
+
         // Проверяем длину имени для обоих случаев
         if (fullName.Length > 40)
         {
@@ -94,7 +94,7 @@ public class IntroFlowService
         }
 
         _logger.LogDebug("Intro flow {@User}", user);
-        
+
         // Проверяем, является ли пользователь участником клуба
         var clubUser = await _userManager.GetClubUsername(user.Id);
         if (clubUser != null)
@@ -120,7 +120,7 @@ public class IntroFlowService
         // Создаем капчу через сервис
         var captchaRequest = new CreateCaptchaRequest(chat, user, userJoinMessage);
         var captchaInfo = await _captchaService.CreateCaptchaAsync(captchaRequest);
-        
+
         // Если капча отключена для этой группы, отправляем приветствие сразу
         if (captchaInfo == null)
         {
@@ -147,14 +147,14 @@ public class IntroFlowService
         {
             chat = userJoinMessage?.Chat ?? chat;
             Debug.Assert(chat != null);
-            
+
             // Определяем тип бана на основе длительности
             var banTypeEnum = banDuration.HasValue ? BanTypeEnum.LongName : BanTypeEnum.LongName;
             var reason = $"{nameDescription} длинное имя пользователя ({fullName.Length} символов): {fullName}";
-            
+
             // Используем UserBanService для централизованного бана
             await _userBanService.BanUserAsync(chat, user, banTypeEnum, reason, userJoinMessage, CancellationToken.None);
-            
+
             // Логируем для статистики
             _statisticsService.IncrementLongNameBan(chat.Id);
 
@@ -188,7 +188,7 @@ public class IntroFlowService
                 // Если нет сообщения о входе, используем BanUserAsync с BanTypeEnum.Blacklist
                 await _userBanService.BanUserAsync(chat, user, BanTypeEnum.Blacklist, "Пользователь в блэклисте", null, CancellationToken.None);
             }
-            
+
             return true;
         }
         catch (Exception e)
@@ -205,4 +205,4 @@ public class IntroFlowService
 
     private static string FullName(string firstName, string? lastName) =>
         string.IsNullOrEmpty(lastName) ? firstName : $"{firstName} {lastName}";
-} 
+}

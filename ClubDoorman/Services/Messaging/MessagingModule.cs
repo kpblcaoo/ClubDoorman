@@ -25,7 +25,7 @@ public static class MessagingModule
         // Bind Messaging.INotificationService to Notifications.NotificationService implementation
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<ILogChatService, LogChatService>();
-        
+
         return services;
     }
 }

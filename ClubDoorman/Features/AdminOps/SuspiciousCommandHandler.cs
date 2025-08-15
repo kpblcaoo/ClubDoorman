@@ -26,7 +26,7 @@ public class SuspiciousCommandHandler : ISuspiciousCommandHandler
     public string CommandName => "suspicious";
 
     public SuspiciousCommandHandler(
-        ITelegramBotClientWrapper bot, 
+        ITelegramBotClientWrapper bot,
         IModerationFacade moderationService,
         IMessageService messageService,
         ILogger<SuspiciousCommandHandler> logger,
@@ -53,7 +53,7 @@ public class SuspiciousCommandHandler : ISuspiciousCommandHandler
         }
 
         var subCommand = commandParts[1].ToLower();
-        
+
         try
         {
             switch (subCommand)
@@ -61,11 +61,11 @@ public class SuspiciousCommandHandler : ISuspiciousCommandHandler
                 case "stats":
                     await HandleStatsCommand(message, cancellationToken);
                     break;
-                    
+
                 case "list":
                     await HandleListCommand(message, cancellationToken);
                     break;
-                    
+
                 case "help":
                 default:
                     await ShowHelp(message, cancellationToken);
@@ -89,8 +89,8 @@ public class SuspiciousCommandHandler : ISuspiciousCommandHandler
     {
         var stats = _moderationService.GetSuspiciousUsersStats();
         var aiDetectUsers = _moderationService.GetAiDetectUsers();
-        
-        var statusMessage = 
+
+        var statusMessage =
             $"*Статус системы подозрительных пользователей:*\n\n" +
             $"• Система включена: {(_appConfig.SuspiciousDetectionEnabled ? "✅" : "❌")}\n" +
             $"• Порог мимикрии: *{_appConfig.MimicryThreshold:F1}*\n" +

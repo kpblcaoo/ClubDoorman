@@ -12,7 +12,7 @@ public interface IUserCleanupService
     /// <param name="reason">Причина удаления</param>
     /// <returns>true, если пользователь был удален</returns>
     bool RemoveUserFromAllApprovals(long userId, string reason);
-    
+
     /// <summary>
     /// Удаляет пользователя из списка одобренных конкретной группы
     /// </summary>
@@ -21,7 +21,7 @@ public interface IUserCleanupService
     /// <param name="reason">Причина удаления</param>
     /// <returns>true, если пользователь был удален</returns>
     bool RemoveUserFromGroupApproval(long userId, long groupId, string reason);
-    
+
     /// <summary>
     /// Удаляет пользователя из глобального списка одобренных
     /// </summary>
@@ -29,4 +29,4 @@ public interface IUserCleanupService
     /// <param name="reason">Причина удаления</param>
     /// <returns>true, если пользователь был удален</returns>
     bool RemoveUserFromGlobalApproval(long userId, string reason);
-} 
+}

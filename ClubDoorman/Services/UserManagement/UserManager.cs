@@ -17,7 +17,7 @@ internal sealed class UserManager : IUserManager
     private readonly SemaphoreSlim _semaphore = new(1);
     private readonly HttpClient _clubHttpClient = new();
     private readonly HttpClient _httpClient = new();
-    
+
     // Тестовый блэклист из переменной окружения DOORMAN_TEST_BLACKLIST_IDS
     private static readonly HashSet<long> _testBlacklist = LoadTestBlacklist();
 
@@ -26,10 +26,10 @@ internal sealed class UserManager : IUserManager
         _logger = logger;
         _approvedUsersStorage = approvedUsersStorage;
         _appConfig = appConfig;
-        
+
         // Логируем состояние тестового блэклиста при создании UserManager
         Console.WriteLine($"[DEBUG] UserManager создан: тестовый блэклист содержит {_testBlacklist.Count} ID(s): [{string.Join(", ", _testBlacklist)}]");
-        
+
         if (appConfig.ClubServiceToken == null)
             _logger.LogWarning("DOORMAN_CLUB_SERVICE_TOKEN variable is not set, additional club checks disabled");
         else
@@ -46,19 +46,19 @@ internal sealed class UserManager : IUserManager
                 var httpClient = new HttpClient();
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
                 var banlist = await httpClient.GetFromJsonAsync<long[]>("https://lols.bot/spam/banlist.json", cts.Token);
-                
+
                 if (banlist != null && banlist.Length > 0)
                 {
                     var oldCount = _banlist.Count;
-                    
+
                     // Очищаем текущий список
                     foreach (var key in _banlist.Keys.ToArray())
                         _banlist.TryRemove(key, out _);
-                    
+
                     // Заполняем его новыми значениями: 1 = banned
                     foreach (var id in banlist)
                         _banlist.TryAdd(id, 1);
-                    
+
                     _logger.LogInformation("Обновлен банлист из lols.bot: было {OldCount}, стало {NewCount} записей", oldCount, _banlist.Count);
                 }
                 else
@@ -130,7 +130,7 @@ internal sealed class UserManager : IUserManager
             {
                 return _approvedUsersStorage.RemoveAllApprovals(userId);
             }
-            
+
             if (groupId.HasValue)
             {
                 // Удаляем одобрение в конкретной группе
@@ -177,7 +177,7 @@ internal sealed class UserManager : IUserManager
     {
         Console.WriteLine($"[DEBUG] UserManager.InBanlist: проверяем пользователя {userId} (тестовых ID: {_testBlacklist.Count})");
         _logger.LogDebug("InBanlist: проверяем пользователя {UserId} (тестовых ID: {TestCount})", userId, _testBlacklist.Count);
-        
+
         // 1. Сначала проверяем тестовый блэклист
         if (_testBlacklist.Contains(userId))
         {
@@ -185,7 +185,7 @@ internal sealed class UserManager : IUserManager
             _logger.LogWarning("🎯 Пользователь {UserId} найден в ТЕСТОВОМ блэклисте", userId);
             return true;
         }
-        
+
         // 2. Проверяем кэшированный результат из статического банлиста
         if (_banlist.TryGetValue(userId, out var cachedResult))
         {
@@ -193,7 +193,7 @@ internal sealed class UserManager : IUserManager
             _logger.LogDebug("✅ Пользователь {UserId} найден в кэше: {Status}", userId, isBanned ? "ЗАБЛОКИРОВАН" : "НЕ заблокирован");
             return isBanned; // 1 = banned, 0 = not banned
         }
-        
+
         // 3. Если пользователя нет в статическом банлисте - считаем НЕ заблокированным и кэшируем
         _banlist.TryAdd(userId, 0); // 0 = not banned
         _logger.LogDebug("✅ Пользователь {UserId} НЕ в банлисте lols.bot, кэшируем как незаблокированного", userId);
@@ -207,23 +207,23 @@ internal sealed class UserManager : IUserManager
         var url = $"{_appConfig.ClubUrl}user/by_telegram_id/{userId}.json";
         try
         {
-                    using var cts = new CancellationTokenSource();
-        cts.CancelAfter(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource();
+            cts.CancelAfter(TimeSpan.FromSeconds(5));
             var get = await _clubHttpClient.GetAsync(url, cts.Token);
-            
+
             if (!get.IsSuccessStatusCode)
             {
                 _logger.LogWarning("GetClubUsername: HTTP {StatusCode} для пользователя {UserId}", get.StatusCode, userId);
                 return null;
             }
-            
+
             var content = await get.Content.ReadAsStringAsync(cts.Token);
             if (string.IsNullOrWhiteSpace(content) || !content.TrimStart().StartsWith("{"))
             {
                 _logger.LogWarning("GetClubUsername: не JSON ответ для пользователя {UserId}: '{Content}'", userId, content?.Length > 100 ? content.Substring(0, 100) + "..." : content);
                 return null;
             }
-            
+
             var response = await get.Content.ReadFromJsonAsync<ClubByTgIdResponse>(cancellationToken: cts.Token);
             var fullName = response?.user?.full_name;
             if (!string.IsNullOrEmpty(fullName))
@@ -293,7 +293,7 @@ internal sealed class UserManager : IUserManager
 
         var result = new HashSet<long>();
         var ids = testIds.Split(',', StringSplitOptions.RemoveEmptyEntries);
-        
+
         foreach (var idStr in ids)
         {
             if (long.TryParse(idStr.Trim(), out var id))
@@ -305,11 +305,11 @@ internal sealed class UserManager : IUserManager
                 Console.WriteLine($"[WARNING] Некорректный ID в DOORMAN_TEST_BLACKLIST_IDS: '{idStr}'");
             }
         }
-        
+
         Console.WriteLine($"[DEBUG] Загружен тестовый блэклист: {result.Count} ID(s) [{string.Join(", ", result)}]");
         return result;
     }
 
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 #pragma warning restore IDE1006 // Naming Styles
-} 
+}

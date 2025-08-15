@@ -31,46 +31,46 @@ public static class CaptchaModule
             services.AddSingleton<IViolationTracker, ViolationTracker>();
         }
 
-                if (!services.Any(s => s.ServiceType == typeof(IUserBanService)))
+        if (!services.Any(s => s.ServiceType == typeof(IUserBanService)))
         {
             services.AddSingleton<IUserBanService, UserBanService>();
         }
-        
+
         if (!services.Any(s => s.ServiceType == typeof(IUserFlowLogger)))
         {
             services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
         }
-        
+
         if (!services.Any(s => s.ServiceType == typeof(IStatisticsService)))
         {
             services.AddSingleton<IStatisticsService, StatisticsService>();
         }
-        
+
         if (!services.Any(s => s.ServiceType == typeof(GlobalStatsManager)))
         {
             services.AddSingleton<GlobalStatsManager>();
         }
-        
+
         if (!services.Any(s => s.ServiceType == typeof(IUserManager)))
         {
             services.AddSingleton<IUserManager, UserManager>();
         }
-        
+
         if (!services.Any(s => s.ServiceType == typeof(IUserCleanupService)))
         {
             services.AddSingleton<IUserCleanupService, UserCleanupService>();
         }
-        
+
         if (!services.Any(s => s.ServiceType == typeof(IChatLinkFormatter)))
         {
             services.AddSingleton<IChatLinkFormatter, ChatLinkFormatter>();
         }
-        
+
         if (!services.Any(s => s.ServiceType == typeof(ApprovedUsersStorage)))
         {
             services.AddSingleton<ApprovedUsersStorage>();
         }
-        
+
         return services;
     }
 }

@@ -41,4 +41,4 @@ public interface IStatisticsService
     /// Генерирует отчет по статистике
     /// </summary>
     Task<string> GenerateReportAsync();
-} 
+}

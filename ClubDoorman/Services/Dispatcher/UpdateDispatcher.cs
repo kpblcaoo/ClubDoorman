@@ -38,9 +38,9 @@ public class UpdateDispatcher : IUpdateDispatcher
 
         try
         {
-            _logger.LogDebug("🚀 Dispatcher получил update: Message={Msg}, Callback={CB}, ChatMember={CM}", 
+            _logger.LogDebug("🚀 Dispatcher получил update: Message={Msg}, Callback={CB}, ChatMember={CM}",
                 update.Message != null, update.CallbackQuery != null, update.ChatMember != null);
-                
+
             // ARCHITECTURE - Consider if parallel processing or early termination is needed
             foreach (var handler in _updateHandlers)
             {
@@ -66,4 +66,4 @@ public class UpdateDispatcher : IUpdateDispatcher
             throw;
         }
     }
-} 
+}

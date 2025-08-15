@@ -12,14 +12,14 @@ public interface IJoinedUserFlags
     /// <param name="userId">ID пользователя</param>
     /// <returns>true, если пользователь недавно присоединился</returns>
     bool IsUserRecentlyJoined(long chatId, long userId);
-    
+
     /// <summary>
     /// Отмечает пользователя как недавно присоединившегося
     /// </summary>
     /// <param name="chatId">ID чата</param>
     /// <param name="userId">ID пользователя</param>
     void MarkUserAsJoined(long chatId, long userId);
-    
+
     /// <summary>
     /// Удаляет флаг о недавнем присоединении пользователя
     /// </summary>

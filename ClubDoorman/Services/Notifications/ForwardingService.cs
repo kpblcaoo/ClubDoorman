@@ -25,13 +25,13 @@ public class ForwardingService : IForwardingService
 
             // Проверяем, является ли это автоматическим пересыланием из канала
             var isAutoForward = message.IsAutomaticForward;
-            
+
             if (isAutoForward)
             {
-                _logger.LogDebug("Обнаружено обсуждение канала: chat={ChatId}, autoForward={AutoForward}", 
+                _logger.LogDebug("Обнаружено обсуждение канала: chat={ChatId}, autoForward={AutoForward}",
                     chat.Id, message.IsAutomaticForward);
             }
-            
+
             return Task.FromResult(isAutoForward);
         }
         catch (Exception e)

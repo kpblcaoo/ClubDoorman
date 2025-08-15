@@ -73,46 +73,46 @@ public class SpamHamClassifier : ISpamHamClassifier
     {
         using var token = await SemaphoreHelper.AwaitAsync(_predictionLock);
         var msg = new MessageData { Text = message.ReplaceLineEndings(" ") };
-        
+
         if (_engine == null)
         {
             // PERFORMANCE OPTIMIZATION - Consider using LoggerMessage delegate for better performance
             _logger.LogWarning("ML движок не инициализирован! Жду инициализации с таймаутом...");
-            
+
             // Ждем инициализации с таймаутом 10 секунд
             var timeout = TimeSpan.FromSeconds(10);
             var sw = Stopwatch.StartNew();
-            
+
             while (_engine == null && sw.Elapsed < timeout)
             {
                 await Task.Delay(100);
             }
-            
+
             if (_engine == null)
             {
                 _logger.LogError("ML движок не инициализирован за {Timeout}ms! Возвращаем fallback результат", timeout.TotalMilliseconds);
                 // BUSINESS LOGIC - Fallback assumes 'not spam' for safety, consider configurable behavior
                 return (false, 0.0f); // Fallback: считаем не спамом
             }
-            
+
             _logger.LogInformation("ML движок инициализирован за {Elapsed}ms", sw.ElapsedMilliseconds);
         }
-        
+
         var predict = _engine.Predict(msg);
-        _logger.LogDebug("ML предсказание: текст='{Text}', предсказано={Predicted}, скор={Score}", 
-            message.Length > 50 ? message.Substring(0, 50) + "..." : message, 
+        _logger.LogDebug("ML предсказание: текст='{Text}', предсказано={Predicted}, скор={Score}",
+            message.Length > 50 ? message.Substring(0, 50) + "..." : message,
             predict.PredictedLabel, predict.Score);
-            
+
         return (predict.PredictedLabel, predict.Score);
     }
 
-    public Task AddSpam(string message) 
+    public Task AddSpam(string message)
     {
         _logger.LogInformation("📝 Добавляем СПАМ в датасет: '{Message}'", message.Length > 100 ? message.Substring(0, 100) + "..." : message);
         return AddSpamHam(message, true);
     }
 
-    public Task AddHam(string message) 
+    public Task AddHam(string message)
     {
         _logger.LogInformation("📝 Добавляем НЕ-СПАМ в датасет: '{Message}'", message.Length > 100 ? message.Substring(0, 100) + "..." : message);
         return AddSpamHam(message, false);
@@ -123,11 +123,11 @@ public class SpamHamClassifier : ISpamHamClassifier
         message = message.ReplaceLineEndings(" ");
         message = message.Replace("\"", "\"\"");
         var csvLine = $"\"{message}\", {spam}";
-        
+
         using var token = await SemaphoreHelper.AwaitAsync(_datasetLock);
         var utf8WithoutBom = new UTF8Encoding(false);
         await File.AppendAllLinesAsync(SpamHamDataset, [csvLine], utf8WithoutBom);
-        
+
         _needsRetraining = true;
         _logger.LogDebug("✅ Пример добавлен в файл {File}, установлен флаг переобучения", SpamHamDataset);
     }
@@ -139,13 +139,13 @@ public class SpamHamClassifier : ISpamHamClassifier
             _logger.LogInformation("Начинаем обучение ML модели...");
             using var token = await SemaphoreHelper.AwaitAsync(_datasetLock);
             var sw = Stopwatch.StartNew();
-            
+
             if (!File.Exists(SpamHamDataset))
             {
                 _logger.LogError("Файл датасета {File} не найден!", SpamHamDataset);
                 return;
             }
-            
+
             var stopWords = (await File.ReadAllTextAsync("data/exclude-tokens.txt")).Split(',').Select(x => x.Trim()).ToArray();
             _logger.LogDebug("Загружено {Count} стоп-слов", stopWords.Length);
 
@@ -155,9 +155,9 @@ public class SpamHamClassifier : ISpamHamClassifier
             {
                 dataset = csv.GetRecords<MessageData>().ToList();
             }
-            
+
             _logger.LogInformation("Загружено {Count} записей из датасета", dataset.Count);
-            
+
             var spamCount = dataset.Count(x => x.Label);
             var hamCount = dataset.Count(x => !x.Label);
             _logger.LogInformation("Спам: {SpamCount}, НЕ спам: {HamCount}", spamCount, hamCount);

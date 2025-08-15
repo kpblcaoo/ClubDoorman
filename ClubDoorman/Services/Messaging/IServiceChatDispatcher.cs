@@ -28,4 +28,4 @@ public interface IServiceChatDispatcher
     /// <param name="notification">Данные уведомления</param>
     /// <returns>true если уведомление требует реакции (админ-чат), false если только для логов</returns>
     bool ShouldSendToAdminChat(NotificationData notification);
-} 
+}

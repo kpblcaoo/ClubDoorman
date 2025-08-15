@@ -27,4 +27,4 @@ public interface INotificationService
     /// Отправляет подозрительное сообщение с кнопками для действий
     /// </summary>
     Task SendSuspiciousMessageWithButtons(Message message, User user, SuspiciousMessageNotificationData data, bool isSilentMode, CancellationToken cancellationToken);
-} 
+}

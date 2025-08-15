@@ -44,7 +44,7 @@ public static class ServiceCollectionExtensions
     {
         // Регистрация конфигурации приложения (должна быть первой)
         services.AddConfigurationServices();
-        
+
         // Регистрация основных сервисов в том же порядке, что и в Program.cs
         services.AddLinkFormattingServices();
         services.AddDispatcherServices();
@@ -58,15 +58,15 @@ public static class ServiceCollectionExtensions
         services.AddUserFlowServices();
         services.AddViolationServices();
         services.AddBadMessageServices();
-        
+
         // Telegram Bot Client - создаем после регистрации IAppConfig
         services.AddSingleton<TelegramBotClient>(provider =>
         {
             var logger = provider.GetRequiredService<ILogger<TelegramBotClient>>();
             logger.LogDebug("[DI] TelegramBotClient factory called");
             var appConfig = provider.GetRequiredService<IAppConfig>();
-            logger.LogDebug("[DI] IAppConfig resolved: {AppConfigType}, BotApi: {BotApiPrefix}...", 
-                appConfig.GetType().Name, 
+            logger.LogDebug("[DI] IAppConfig resolved: {AppConfigType}, BotApi: {BotApiPrefix}...",
+                appConfig.GetType().Name,
                 appConfig.BotApi != null ? appConfig.BotApi.Substring(0, Math.Min(appConfig.BotApi.Length, 10)) : "null");
 
             // Проверяем конфигурацию бота
@@ -79,12 +79,12 @@ public static class ServiceCollectionExtensions
                 );
             }
 
-            logger.LogDebug("[DI] 🤖 Starting bot with token: {BotApiPrefix}...", 
+            logger.LogDebug("[DI] 🤖 Starting bot with token: {BotApiPrefix}...",
                 appConfig.BotApi.Substring(0, Math.Min(appConfig.BotApi.Length, 10)));
 
             return new TelegramBotClient(appConfig.BotApi);
         });
-        
+
         // Telegram Bot Client интерфейсы
         services.AddSingleton<ITelegramBotClient>(provider =>
         {
@@ -92,7 +92,7 @@ public static class ServiceCollectionExtensions
             logger.LogDebug("[DI] ITelegramBotClient factory called");
             return provider.GetRequiredService<TelegramBotClient>();
         });
-        
+
         services.AddTelegramServices();
         services.AddStatisticsServices();
         services.AddAIServices();
@@ -103,7 +103,7 @@ public static class ServiceCollectionExtensions
         services.AddHandlersServices();
         services.AddCommandsServices();
         services.AddAdminOpsFeature();
-        
+
         // Регистрация Worker как HostedService
         services.AddHostedService<Worker>(provider =>
         {
@@ -125,10 +125,10 @@ public static class ServiceCollectionExtensions
                 provider.GetRequiredService<IUserBanService>()
             );
         });
-        
+
         // Конфигурация логирования (централизованная система сообщений перенесена в MessagingModule)
         services.Configure<LoggingConfiguration>(options => { });
-        
+
         return services;
     }
 }

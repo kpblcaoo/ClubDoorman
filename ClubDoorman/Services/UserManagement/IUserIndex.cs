@@ -11,7 +11,7 @@ public interface IUserIndex
     /// <param name="username">Username для поиска</param>
     /// <returns>ID пользователя или null, если не найден</returns>
     long? TryFindUserIdByUsername(string username);
-    
+
     /// <summary>
     /// Добавляет информацию о пользователе в индекс
     /// </summary>

@@ -1,6 +1,6 @@
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.Messaging;
