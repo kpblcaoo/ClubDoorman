@@ -33,11 +33,7 @@ namespace ClubDoorman.Test.TestKit
         /// </summary>
         public static MessageHandlerTestFactory CreateMessageHandlerFactory() => new();
 
-        /// <summary>
-        /// Создает билдер для MessageHandler
-        /// <tags>builder, message-handler, test-infrastructure, fluent-api</tags>
-        /// </summary>
-        public static MessageHandlerBuilder CreateMessageHandlerBuilder() => new();
+
 
         /// <summary>
         /// Создает фабрику для ModerationService
@@ -151,11 +147,7 @@ namespace ClubDoorman.Test.TestKit
         /// </summary>
     
         
-        /// <summary>
-        /// Создает билдер для UserJoinService
-        /// <tags>builders, user-join-service, fluent-api</tags>
-        /// </summary>
-        public static UserJoinServiceBuilder CreateUserJoinServiceBuilder() => new();
+
 
         #endregion
 

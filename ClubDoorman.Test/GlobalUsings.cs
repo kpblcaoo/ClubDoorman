@@ -3,6 +3,9 @@
 
 global using Moq;
 global using FluentAssertions;
+global using NUnit.Framework;
+global using ClubDoorman.Services.Handlers;
+global using ClubDoorman.Services.UserJoin;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using Telegram.Bot.Types;
