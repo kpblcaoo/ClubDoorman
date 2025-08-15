@@ -19,17 +19,22 @@ namespace ClubDoorman.Test.Features
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Check Command")]
-    public partial class CheckCommandFeature
+    public partial class CheckCommandFeature : object, Xunit.IClassFixture<CheckCommandFeature.FixtureData>, System.IDisposable
     {
         
-        private TechTalk.SpecFlow.ITestRunner testRunner;
+        private static TechTalk.SpecFlow.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        [NUnit.Framework.OneTimeSetUpAttribute()]
-        public virtual void FeatureSetup()
+        private Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
+        
+        public CheckCommandFeature(CheckCommandFeature.FixtureData fixtureData, ClubDoorman_Test_XUnitAssemblyFixture assemblyFixture, Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        {
+            this._testOutputHelper = testOutputHelper;
+            this.TestInitialize();
+        }
+        
+        public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
             TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Check Command", "  As an administrator\n  I want to check message content for spam\n  So that I can " +
@@ -37,19 +42,16 @@ namespace ClubDoorman.Test.Features
             testRunner.OnFeatureStart(featureInfo);
         }
         
-        [NUnit.Framework.OneTimeTearDownAttribute()]
-        public virtual void FeatureTearDown()
+        public static void FeatureTearDown()
         {
             testRunner.OnFeatureEnd();
             testRunner = null;
         }
         
-        [NUnit.Framework.SetUpAttribute()]
         public void TestInitialize()
         {
         }
         
-        [NUnit.Framework.TearDownAttribute()]
         public void TestTearDown()
         {
             testRunner.OnScenarioEnd();
@@ -58,7 +60,7 @@ namespace ClubDoorman.Test.Features
         public void ScenarioInitialize(TechTalk.SpecFlow.ScenarioInfo scenarioInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<NUnit.Framework.TestContext>(NUnit.Framework.TestContext.CurrentContext);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
         }
         
         public void ScenarioStart()
@@ -77,8 +79,14 @@ namespace ClubDoorman.Test.Features
             testRunner.And("I have a message handler", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Check spam message content")]
+        void System.IDisposable.Dispose()
+        {
+            this.TestTearDown();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Check spam message content")]
+        [Xunit.TraitAttribute("FeatureTitle", "Check Command")]
+        [Xunit.TraitAttribute("Description", "Check spam message content")]
         public void CheckSpamMessageContent()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -103,8 +111,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Check normal message content")]
+        [Xunit.SkippableFactAttribute(DisplayName="Check normal message content")]
+        [Xunit.TraitAttribute("FeatureTitle", "Check Command")]
+        [Xunit.TraitAttribute("Description", "Check normal message content")]
         public void CheckNormalMessageContent()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -127,8 +136,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Check message with emojis")]
+        [Xunit.SkippableFactAttribute(DisplayName="Check message with emojis")]
+        [Xunit.TraitAttribute("FeatureTitle", "Check Command")]
+        [Xunit.TraitAttribute("Description", "Check message with emojis")]
         public void CheckMessageWithEmojis()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -151,8 +161,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Check message with stop words")]
+        [Xunit.SkippableFactAttribute(DisplayName="Check message with stop words")]
+        [Xunit.TraitAttribute("FeatureTitle", "Check Command")]
+        [Xunit.TraitAttribute("Description", "Check message with stop words")]
         public void CheckMessageWithStopWords()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -175,8 +186,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Check command without reply should fail")]
+        [Xunit.SkippableFactAttribute(DisplayName="Check command without reply should fail")]
+        [Xunit.TraitAttribute("FeatureTitle", "Check Command")]
+        [Xunit.TraitAttribute("Description", "Check command without reply should fail")]
         public void CheckCommandWithoutReplyShouldFail()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -199,8 +211,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Non-admin user cannot use check command")]
+        [Xunit.SkippableFactAttribute(DisplayName="Non-admin user cannot use check command")]
+        [Xunit.TraitAttribute("FeatureTitle", "Check Command")]
+        [Xunit.TraitAttribute("Description", "Non-admin user cannot use check command")]
         public void Non_AdminUserCannotUseCheckCommand()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -222,6 +235,22 @@ namespace ClubDoorman.Test.Features
                 testRunner.And("no analysis results should be displayed", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
             }
             this.ScenarioCleanup();
+        }
+        
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
+        [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+        public class FixtureData : System.IDisposable
+        {
+            
+            public FixtureData()
+            {
+                CheckCommandFeature.FeatureSetup();
+            }
+            
+            void System.IDisposable.Dispose()
+            {
+                CheckCommandFeature.FeatureTearDown();
+            }
         }
     }
 }

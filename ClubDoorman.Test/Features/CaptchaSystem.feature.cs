@@ -19,19 +19,24 @@ namespace ClubDoorman.Test.Features
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Captcha System")]
-    [NUnit.Framework.CategoryAttribute("BDD")]
-    public partial class CaptchaSystemFeature
+    [Xunit.TraitAttribute("Category", "BDD")]
+    public partial class CaptchaSystemFeature : object, Xunit.IClassFixture<CaptchaSystemFeature.FixtureData>, System.IDisposable
     {
         
-        private TechTalk.SpecFlow.ITestRunner testRunner;
+        private static TechTalk.SpecFlow.ITestRunner testRunner;
         
         private static string[] featureTags = new string[] {
                 "BDD"};
         
-        [NUnit.Framework.OneTimeSetUpAttribute()]
-        public virtual void FeatureSetup()
+        private Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
+        
+        public CaptchaSystemFeature(CaptchaSystemFeature.FixtureData fixtureData, ClubDoorman_Test_XUnitAssemblyFixture assemblyFixture, Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        {
+            this._testOutputHelper = testOutputHelper;
+            this.TestInitialize();
+        }
+        
+        public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
             TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "Captcha System", "  As a chat administrator\n  I want to protect the chat from bots\n  So that I can " +
@@ -39,19 +44,16 @@ namespace ClubDoorman.Test.Features
             testRunner.OnFeatureStart(featureInfo);
         }
         
-        [NUnit.Framework.OneTimeTearDownAttribute()]
-        public virtual void FeatureTearDown()
+        public static void FeatureTearDown()
         {
             testRunner.OnFeatureEnd();
             testRunner = null;
         }
         
-        [NUnit.Framework.SetUpAttribute()]
         public void TestInitialize()
         {
         }
         
-        [NUnit.Framework.TearDownAttribute()]
         public void TestTearDown()
         {
             testRunner.OnScenarioEnd();
@@ -60,7 +62,7 @@ namespace ClubDoorman.Test.Features
         public void ScenarioInitialize(TechTalk.SpecFlow.ScenarioInfo scenarioInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<NUnit.Framework.TestContext>(NUnit.Framework.TestContext.CurrentContext);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
         }
         
         public void ScenarioStart()
@@ -73,8 +75,14 @@ namespace ClubDoorman.Test.Features
             testRunner.CollectScenarioErrors();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Captcha timeout")]
+        void System.IDisposable.Dispose()
+        {
+            this.TestTearDown();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Captcha timeout")]
+        [Xunit.TraitAttribute("FeatureTitle", "Captcha System")]
+        [Xunit.TraitAttribute("Description", "Captcha timeout")]
         public void CaptchaTimeout()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -98,8 +106,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Wrong captcha button")]
+        [Xunit.SkippableFactAttribute(DisplayName="Wrong captcha button")]
+        [Xunit.TraitAttribute("FeatureTitle", "Captcha System")]
+        [Xunit.TraitAttribute("Description", "Wrong captcha button")]
         public void WrongCaptchaButton()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -123,8 +132,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Correct captcha completion")]
+        [Xunit.SkippableFactAttribute(DisplayName="Correct captcha completion")]
+        [Xunit.TraitAttribute("FeatureTitle", "Captcha System")]
+        [Xunit.TraitAttribute("Description", "Correct captcha completion")]
         public void CorrectCaptchaCompletion()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -147,8 +157,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Captcha in silent mode")]
+        [Xunit.SkippableFactAttribute(DisplayName="Captcha in silent mode")]
+        [Xunit.TraitAttribute("FeatureTitle", "Captcha System")]
+        [Xunit.TraitAttribute("Description", "Captcha in silent mode")]
         public void CaptchaInSilentMode()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -168,6 +179,22 @@ namespace ClubDoorman.Test.Features
                 testRunner.And("the user can pass the captcha", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
             }
             this.ScenarioCleanup();
+        }
+        
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
+        [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+        public class FixtureData : System.IDisposable
+        {
+            
+            public FixtureData()
+            {
+                CaptchaSystemFeature.FeatureSetup();
+            }
+            
+            void System.IDisposable.Dispose()
+            {
+                CaptchaSystemFeature.FeatureTearDown();
+            }
         }
     }
 }

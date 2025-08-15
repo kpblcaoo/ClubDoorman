@@ -19,19 +19,24 @@ namespace ClubDoorman.Test.Features
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Permissions and Quiet Mode")]
-    [NUnit.Framework.CategoryAttribute("BDD")]
-    public partial class PermissionsAndQuietModeFeature
+    [Xunit.TraitAttribute("Category", "BDD")]
+    public partial class PermissionsAndQuietModeFeature : object, Xunit.IClassFixture<PermissionsAndQuietModeFeature.FixtureData>, System.IDisposable
     {
         
-        private TechTalk.SpecFlow.ITestRunner testRunner;
+        private static TechTalk.SpecFlow.ITestRunner testRunner;
         
         private static string[] featureTags = new string[] {
                 "BDD"};
         
-        [NUnit.Framework.OneTimeSetUpAttribute()]
-        public virtual void FeatureSetup()
+        private Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
+        
+        public PermissionsAndQuietModeFeature(PermissionsAndQuietModeFeature.FixtureData fixtureData, ClubDoorman_Test_XUnitAssemblyFixture assemblyFixture, Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        {
+            this._testOutputHelper = testOutputHelper;
+            this.TestInitialize();
+        }
+        
+        public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
             TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "Permissions and Quiet Mode", "  As a chat administrator\n  I want to manage bot permissions and quiet mode\n  So " +
@@ -39,19 +44,16 @@ namespace ClubDoorman.Test.Features
             testRunner.OnFeatureStart(featureInfo);
         }
         
-        [NUnit.Framework.OneTimeTearDownAttribute()]
-        public virtual void FeatureTearDown()
+        public static void FeatureTearDown()
         {
             testRunner.OnFeatureEnd();
             testRunner = null;
         }
         
-        [NUnit.Framework.SetUpAttribute()]
         public void TestInitialize()
         {
         }
         
-        [NUnit.Framework.TearDownAttribute()]
         public void TestTearDown()
         {
             testRunner.OnScenarioEnd();
@@ -60,7 +62,7 @@ namespace ClubDoorman.Test.Features
         public void ScenarioInitialize(TechTalk.SpecFlow.ScenarioInfo scenarioInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<NUnit.Framework.TestContext>(NUnit.Framework.TestContext.CurrentContext);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
         }
         
         public void ScenarioStart()
@@ -73,8 +75,14 @@ namespace ClubDoorman.Test.Features
             testRunner.CollectScenarioErrors();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Working with admin rights")]
+        void System.IDisposable.Dispose()
+        {
+            this.TestTearDown();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Working with admin rights")]
+        [Xunit.TraitAttribute("FeatureTitle", "Permissions and Quiet Mode")]
+        [Xunit.TraitAttribute("Description", "Working with admin rights")]
         public void WorkingWithAdminRights()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -97,8 +105,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Quiet mode")]
+        [Xunit.SkippableFactAttribute(DisplayName="Quiet mode")]
+        [Xunit.TraitAttribute("FeatureTitle", "Permissions and Quiet Mode")]
+        [Xunit.TraitAttribute("Description", "Quiet mode")]
         public void QuietMode()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -121,8 +130,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Disable captcha by chat ID")]
+        [Xunit.SkippableFactAttribute(DisplayName="Disable captcha by chat ID")]
+        [Xunit.TraitAttribute("FeatureTitle", "Permissions and Quiet Mode")]
+        [Xunit.TraitAttribute("Description", "Disable captcha by chat ID")]
         public void DisableCaptchaByChatID()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -143,6 +153,22 @@ namespace ClubDoorman.Test.Features
                 testRunner.And("there is a log record about disabling", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
             }
             this.ScenarioCleanup();
+        }
+        
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
+        [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+        public class FixtureData : System.IDisposable
+        {
+            
+            public FixtureData()
+            {
+                PermissionsAndQuietModeFeature.FeatureSetup();
+            }
+            
+            void System.IDisposable.Dispose()
+            {
+                PermissionsAndQuietModeFeature.FeatureTearDown();
+            }
         }
     }
 }

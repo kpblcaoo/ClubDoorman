@@ -1,0 +1,48 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services;
+using ClubDoorman.Services.UserBan;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
+using NUnit.Framework;
+using ClubDoorman.Services.UserManagement;
+
+namespace ClubDoorman.TestInfrastructure;
+
+/// <summary>
+/// TestFactory для SuspiciousUsersStorage
+/// Автоматически сгенерировано
+/// </summary>
+[TestFixture]
+[Category("test-infrastructure")]
+public class SuspiciousUsersStorageTestFactory
+{
+    public Mock<ILogger<SuspiciousUsersStorage>> LoggerMock { get; } = new();
+
+    public SuspiciousUsersStorage CreateSuspiciousUsersStorage()
+    {
+        return new SuspiciousUsersStorage(
+            LoggerMock.Object
+        );
+    }
+
+    #region Configuration Methods
+
+    public SuspiciousUsersStorageTestFactory WithLoggerSetup(Action<Mock<ILogger<SuspiciousUsersStorage>>> setup)
+    {
+        setup(LoggerMock);
+        return this;
+    }
+
+    #endregion
+
+    #region Smart Methods Based on Business Logic
+
+    public IUserManager CreateUserManagerWithFake()
+    {
+        return new Mock<IUserManager>().Object;
+    }
+    #endregion
+}

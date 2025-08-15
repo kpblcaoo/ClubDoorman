@@ -1,0 +1,132 @@
+using ClubDoorman.Services.SuspiciousUsers;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
+using NUnit.Framework;
+using Telegram.Bot;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Violation;
+
+namespace ClubDoorman.TestInfrastructure;
+
+/// <summary>
+/// TestFactory для CaptchaService
+/// Автоматически сгенерировано
+/// </summary>
+[TestFixture]
+[Category("test-infrastructure")]
+public class CaptchaServiceTestFactory
+{
+    public Mock<ITelegramBotClientWrapper> BotMock { get; } = new();
+    public Mock<ILogger<CaptchaService>> LoggerMock { get; } = new();
+    public Mock<IMessageService> MessageServiceMock { get; } = new();
+    public Mock<IAppConfig> AppConfigMock { get; } = new();
+    public Mock<IViolationTracker> ViolationTrackerMock { get; } = new();
+
+            public CaptchaService CreateCaptchaService()
+        {
+            return new CaptchaService(
+                BotMock.Object,
+                LoggerMock.Object,
+                MessageServiceMock.Object,
+                AppConfigMock.Object,
+                ViolationTrackerMock.Object,
+                new Mock<IUserBanService>().Object
+            );
+        }
+
+    #region Configuration Methods
+
+    public CaptchaServiceTestFactory WithBotSetup(Action<Mock<ITelegramBotClientWrapper>> setup)
+    {
+        setup(BotMock);
+        return this;
+    }
+
+    public CaptchaServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<CaptchaService>>> setup)
+    {
+        setup(LoggerMock);
+        return this;
+    }
+
+    public CaptchaServiceTestFactory WithMessageServiceSetup(Action<Mock<IMessageService>> setup)
+    {
+        setup(MessageServiceMock);
+        return this;
+    }
+
+    public CaptchaServiceTestFactory WithAppConfigSetup(Action<Mock<IAppConfig>> setup)
+    {
+        setup(AppConfigMock);
+        return this;
+    }
+
+    public CaptchaServiceTestFactory WithViolationTrackerSetup(Action<Mock<IViolationTracker>> setup)
+    {
+        setup(ViolationTrackerMock);
+        return this;
+    }
+
+    #endregion
+
+    #region Smart Methods Based on Business Logic
+
+    public FakeTelegramClient FakeTelegramClient => FakeTelegramClientFactory.Create();
+    
+    public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
+
+    public IModerationService CreateModerationServiceWithFake()
+    {
+        return new Mock<IModerationService>().Object;
+    }
+
+    public IUserManager CreateUserManagerWithFake()
+    {
+        return new Mock<IUserManager>().Object;
+    }
+
+    public async Task<CaptchaService> CreateAsync()
+    {
+        return await Task.FromResult(CreateCaptchaService());
+    }
+
+    public SpamHamClassifier CreateMockSpamHamClassifier()
+    {
+        return new SpamHamClassifier(
+            new Mock<ILogger<SpamHamClassifier>>().Object
+        );
+    }
+
+    public CaptchaService CreateCaptchaServiceWithFake()
+    {
+        return CreateCaptchaService();
+    }
+    
+    public CaptchaService CreateCaptchaServiceWithFake(FakeTelegramClient fakeClient)
+    {
+        return new CaptchaService(
+            fakeClient,
+            LoggerMock.Object,
+            MessageServiceMock.Object,
+            AppConfigMock.Object,
+            ViolationTrackerMock.Object,
+            new Mock<IUserBanService>().Object
+        );
+    }
+    
+    public CaptchaService CreateCaptchaServiceWithFake(Action<CaptchaServiceTestFactory> setup)
+    {
+        setup(this);
+        return CreateCaptchaService();
+    }
+    #endregion
+}

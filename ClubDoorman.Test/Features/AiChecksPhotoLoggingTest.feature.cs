@@ -19,17 +19,22 @@ namespace ClubDoorman.Test.Features
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("AiChecksPhotoLoggingTest")]
-    public partial class AiChecksPhotoLoggingTestFeature
+    public partial class AiChecksPhotoLoggingTestFeature : object, Xunit.IClassFixture<AiChecksPhotoLoggingTestFeature.FixtureData>, System.IDisposable
     {
         
-        private TechTalk.SpecFlow.ITestRunner testRunner;
+        private static TechTalk.SpecFlow.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        [NUnit.Framework.OneTimeSetUpAttribute()]
-        public virtual void FeatureSetup()
+        private Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
+        
+        public AiChecksPhotoLoggingTestFeature(AiChecksPhotoLoggingTestFeature.FixtureData fixtureData, ClubDoorman_Test_XUnitAssemblyFixture assemblyFixture, Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        {
+            this._testOutputHelper = testOutputHelper;
+            this.TestInitialize();
+        }
+        
+        public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
             TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "AiChecksPhotoLoggingTest", "  As a developer\n  I want to test AiChecksPhotoLoggingTest\n  So that I can ensure" +
@@ -38,19 +43,16 @@ namespace ClubDoorman.Test.Features
             testRunner.OnFeatureStart(featureInfo);
         }
         
-        [NUnit.Framework.OneTimeTearDownAttribute()]
-        public virtual void FeatureTearDown()
+        public static void FeatureTearDown()
         {
             testRunner.OnFeatureEnd();
             testRunner = null;
         }
         
-        [NUnit.Framework.SetUpAttribute()]
         public void TestInitialize()
         {
         }
         
-        [NUnit.Framework.TearDownAttribute()]
         public void TestTearDown()
         {
             testRunner.OnScenarioEnd();
@@ -59,7 +61,7 @@ namespace ClubDoorman.Test.Features
         public void ScenarioInitialize(TechTalk.SpecFlow.ScenarioInfo scenarioInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<NUnit.Framework.TestContext>(NUnit.Framework.TestContext.CurrentContext);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
         }
         
         public void ScenarioStart()
@@ -72,8 +74,14 @@ namespace ClubDoorman.Test.Features
             testRunner.CollectScenarioErrors();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Getattentionbaitprobability withrealphoto shouldanalyzephotoinapi")]
+        void System.IDisposable.Dispose()
+        {
+            this.TestTearDown();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Getattentionbaitprobability withrealphoto shouldanalyzephotoinapi")]
+        [Xunit.TraitAttribute("FeatureTitle", "AiChecksPhotoLoggingTest")]
+        [Xunit.TraitAttribute("Description", "Getattentionbaitprobability withrealphoto shouldanalyzephotoinapi")]
         public void GetattentionbaitprobabilityWithrealphotoShouldanalyzephotoinapi()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -93,6 +101,22 @@ namespace ClubDoorman.Test.Features
                 testRunner.Then("the result should be as expected", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
             }
             this.ScenarioCleanup();
+        }
+        
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
+        [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+        public class FixtureData : System.IDisposable
+        {
+            
+            public FixtureData()
+            {
+                AiChecksPhotoLoggingTestFeature.FeatureSetup();
+            }
+            
+            void System.IDisposable.Dispose()
+            {
+                AiChecksPhotoLoggingTestFeature.FeatureTearDown();
+            }
         }
     }
 }

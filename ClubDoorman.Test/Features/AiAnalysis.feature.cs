@@ -19,19 +19,24 @@ namespace ClubDoorman.Test.Features
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("AI Profile Analysis")]
-    [NUnit.Framework.CategoryAttribute("BDD")]
-    public partial class AIProfileAnalysisFeature
+    [Xunit.TraitAttribute("Category", "BDD")]
+    public partial class AIProfileAnalysisFeature : object, Xunit.IClassFixture<AIProfileAnalysisFeature.FixtureData>, System.IDisposable
     {
         
-        private TechTalk.SpecFlow.ITestRunner testRunner;
+        private static TechTalk.SpecFlow.ITestRunner testRunner;
         
         private static string[] featureTags = new string[] {
                 "BDD"};
         
-        [NUnit.Framework.OneTimeSetUpAttribute()]
-        public virtual void FeatureSetup()
+        private Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
+        
+        public AIProfileAnalysisFeature(AIProfileAnalysisFeature.FixtureData fixtureData, ClubDoorman_Test_XUnitAssemblyFixture assemblyFixture, Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        {
+            this._testOutputHelper = testOutputHelper;
+            this.TestInitialize();
+        }
+        
+        public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
             TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "AI Profile Analysis", "  As a chat administrator\n  I want AI to analyze suspicious user profiles\n  So th" +
@@ -39,19 +44,16 @@ namespace ClubDoorman.Test.Features
             testRunner.OnFeatureStart(featureInfo);
         }
         
-        [NUnit.Framework.OneTimeTearDownAttribute()]
-        public virtual void FeatureTearDown()
+        public static void FeatureTearDown()
         {
             testRunner.OnFeatureEnd();
             testRunner = null;
         }
         
-        [NUnit.Framework.SetUpAttribute()]
         public void TestInitialize()
         {
         }
         
-        [NUnit.Framework.TearDownAttribute()]
         public void TestTearDown()
         {
             testRunner.OnScenarioEnd();
@@ -60,7 +62,7 @@ namespace ClubDoorman.Test.Features
         public void ScenarioInitialize(TechTalk.SpecFlow.ScenarioInfo scenarioInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<NUnit.Framework.TestContext>(NUnit.Framework.TestContext.CurrentContext);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
         }
         
         public void ScenarioStart()
@@ -73,8 +75,14 @@ namespace ClubDoorman.Test.Features
             testRunner.CollectScenarioErrors();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("AI analysis on first message")]
+        void System.IDisposable.Dispose()
+        {
+            this.TestTearDown();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="AI analysis on first message")]
+        [Xunit.TraitAttribute("FeatureTitle", "AI Profile Analysis")]
+        [Xunit.TraitAttribute("Description", "AI analysis on first message")]
         public void AIAnalysisOnFirstMessage()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -98,8 +106,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Admin button \"🥰 own\"")]
+        [Xunit.SkippableFactAttribute(DisplayName="Admin button \"🥰 own\"")]
+        [Xunit.TraitAttribute("FeatureTitle", "AI Profile Analysis")]
+        [Xunit.TraitAttribute("Description", "Admin button \"🥰 own\"")]
         public void AdminButtonOwn()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -122,8 +131,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Admin button \"🤖 ban\"")]
+        [Xunit.SkippableFactAttribute(DisplayName="Admin button \"🤖 ban\"")]
+        [Xunit.TraitAttribute("FeatureTitle", "AI Profile Analysis")]
+        [Xunit.TraitAttribute("Description", "Admin button \"🤖 ban\"")]
         public void AdminButtonBan()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -146,8 +156,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("AI analysis in channels")]
+        [Xunit.SkippableFactAttribute(DisplayName="AI analysis in channels")]
+        [Xunit.TraitAttribute("FeatureTitle", "AI Profile Analysis")]
+        [Xunit.TraitAttribute("Description", "AI analysis in channels")]
         public void AIAnalysisInChannels()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -168,6 +179,22 @@ namespace ClubDoorman.Test.Features
                 testRunner.And("the captcha is NOT shown (channels don\'t support captcha)", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
             }
             this.ScenarioCleanup();
+        }
+        
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
+        [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+        public class FixtureData : System.IDisposable
+        {
+            
+            public FixtureData()
+            {
+                AIProfileAnalysisFeature.FeatureSetup();
+            }
+            
+            void System.IDisposable.Dispose()
+            {
+                AIProfileAnalysisFeature.FeatureTearDown();
+            }
         }
     }
 }

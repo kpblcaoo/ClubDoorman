@@ -19,17 +19,22 @@ namespace ClubDoorman.Test.Features
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Spam and Ham Commands")]
-    public partial class SpamAndHamCommandsFeature
+    public partial class SpamAndHamCommandsFeature : object, Xunit.IClassFixture<SpamAndHamCommandsFeature.FixtureData>, System.IDisposable
     {
         
-        private TechTalk.SpecFlow.ITestRunner testRunner;
+        private static TechTalk.SpecFlow.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        [NUnit.Framework.OneTimeSetUpAttribute()]
-        public virtual void FeatureSetup()
+        private Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
+        
+        public SpamAndHamCommandsFeature(SpamAndHamCommandsFeature.FixtureData fixtureData, ClubDoorman_Test_XUnitAssemblyFixture assemblyFixture, Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        {
+            this._testOutputHelper = testOutputHelper;
+            this.TestInitialize();
+        }
+        
+        public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
             TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Spam and Ham Commands", "  As an administrator\n  I want to mark messages as spam or ham\n  So that I can tr" +
@@ -37,19 +42,16 @@ namespace ClubDoorman.Test.Features
             testRunner.OnFeatureStart(featureInfo);
         }
         
-        [NUnit.Framework.OneTimeTearDownAttribute()]
-        public virtual void FeatureTearDown()
+        public static void FeatureTearDown()
         {
             testRunner.OnFeatureEnd();
             testRunner = null;
         }
         
-        [NUnit.Framework.SetUpAttribute()]
         public void TestInitialize()
         {
         }
         
-        [NUnit.Framework.TearDownAttribute()]
         public void TestTearDown()
         {
             testRunner.OnScenarioEnd();
@@ -58,7 +60,7 @@ namespace ClubDoorman.Test.Features
         public void ScenarioInitialize(TechTalk.SpecFlow.ScenarioInfo scenarioInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<NUnit.Framework.TestContext>(NUnit.Framework.TestContext.CurrentContext);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
         }
         
         public void ScenarioStart()
@@ -76,9 +78,15 @@ namespace ClubDoorman.Test.Features
             testRunner.Given("the bot is running in a group chat", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Admin can mark message as spam")]
-        [NUnit.Framework.CategoryAttribute("critical")]
+        void System.IDisposable.Dispose()
+        {
+            this.TestTearDown();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="Admin can mark message as spam")]
+        [Xunit.TraitAttribute("FeatureTitle", "Spam and Ham Commands")]
+        [Xunit.TraitAttribute("Description", "Admin can mark message as spam")]
+        [Xunit.TraitAttribute("Category", "critical")]
         public void AdminCanMarkMessageAsSpam()
         {
             string[] tagsOfScenario = new string[] {
@@ -101,9 +109,10 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Admin can mark message as ham")]
-        [NUnit.Framework.CategoryAttribute("critical")]
+        [Xunit.SkippableFactAttribute(DisplayName="Admin can mark message as ham")]
+        [Xunit.TraitAttribute("FeatureTitle", "Spam and Ham Commands")]
+        [Xunit.TraitAttribute("Description", "Admin can mark message as ham")]
+        [Xunit.TraitAttribute("Category", "critical")]
         public void AdminCanMarkMessageAsHam()
         {
             string[] tagsOfScenario = new string[] {
@@ -126,9 +135,10 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Regular user cannot use spam/ham commands")]
-        [NUnit.Framework.CategoryAttribute("critical")]
+        [Xunit.SkippableFactAttribute(DisplayName="Regular user cannot use spam/ham commands")]
+        [Xunit.TraitAttribute("FeatureTitle", "Spam and Ham Commands")]
+        [Xunit.TraitAttribute("Description", "Regular user cannot use spam/ham commands")]
+        [Xunit.TraitAttribute("Category", "critical")]
         public void RegularUserCannotUseSpamHamCommands()
         {
             string[] tagsOfScenario = new string[] {
@@ -151,9 +161,10 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Command without reply should fail")]
-        [NUnit.Framework.CategoryAttribute("critical")]
+        [Xunit.SkippableFactAttribute(DisplayName="Command without reply should fail")]
+        [Xunit.TraitAttribute("FeatureTitle", "Spam and Ham Commands")]
+        [Xunit.TraitAttribute("Description", "Command without reply should fail")]
+        [Xunit.TraitAttribute("Category", "critical")]
         public void CommandWithoutReplyShouldFail()
         {
             string[] tagsOfScenario = new string[] {
@@ -174,6 +185,22 @@ namespace ClubDoorman.Test.Features
                 testRunner.Then("I should receive an error message", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
             }
             this.ScenarioCleanup();
+        }
+        
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
+        [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+        public class FixtureData : System.IDisposable
+        {
+            
+            public FixtureData()
+            {
+                SpamAndHamCommandsFeature.FeatureSetup();
+            }
+            
+            void System.IDisposable.Dispose()
+            {
+                SpamAndHamCommandsFeature.FeatureTearDown();
+            }
         }
     }
 }

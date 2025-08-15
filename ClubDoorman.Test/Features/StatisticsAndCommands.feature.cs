@@ -19,19 +19,24 @@ namespace ClubDoorman.Test.Features
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Statistics and Commands")]
-    [NUnit.Framework.CategoryAttribute("BDD")]
-    public partial class StatisticsAndCommandsFeature
+    [Xunit.TraitAttribute("Category", "BDD")]
+    public partial class StatisticsAndCommandsFeature : object, Xunit.IClassFixture<StatisticsAndCommandsFeature.FixtureData>, System.IDisposable
     {
         
-        private TechTalk.SpecFlow.ITestRunner testRunner;
+        private static TechTalk.SpecFlow.ITestRunner testRunner;
         
         private static string[] featureTags = new string[] {
                 "BDD"};
         
-        [NUnit.Framework.OneTimeSetUpAttribute()]
-        public virtual void FeatureSetup()
+        private Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
+        
+        public StatisticsAndCommandsFeature(StatisticsAndCommandsFeature.FixtureData fixtureData, ClubDoorman_Test_XUnitAssemblyFixture assemblyFixture, Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        {
+            this._testOutputHelper = testOutputHelper;
+            this.TestInitialize();
+        }
+        
+        public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
             TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "Statistics and Commands", "  As a chat administrator\n  I want to view statistics and execute commands\n  So t" +
@@ -39,19 +44,16 @@ namespace ClubDoorman.Test.Features
             testRunner.OnFeatureStart(featureInfo);
         }
         
-        [NUnit.Framework.OneTimeTearDownAttribute()]
-        public virtual void FeatureTearDown()
+        public static void FeatureTearDown()
         {
             testRunner.OnFeatureEnd();
             testRunner = null;
         }
         
-        [NUnit.Framework.SetUpAttribute()]
         public void TestInitialize()
         {
         }
         
-        [NUnit.Framework.TearDownAttribute()]
         public void TestTearDown()
         {
             testRunner.OnScenarioEnd();
@@ -60,7 +62,7 @@ namespace ClubDoorman.Test.Features
         public void ScenarioInitialize(TechTalk.SpecFlow.ScenarioInfo scenarioInfo)
         {
             testRunner.OnScenarioInitialize(scenarioInfo);
-            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<NUnit.Framework.TestContext>(NUnit.Framework.TestContext.CurrentContext);
+            testRunner.ScenarioContext.ScenarioContainer.RegisterInstanceAs<Xunit.Abstractions.ITestOutputHelper>(_testOutputHelper);
         }
         
         public void ScenarioStart()
@@ -73,8 +75,14 @@ namespace ClubDoorman.Test.Features
             testRunner.CollectScenarioErrors();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("/stat command")]
+        void System.IDisposable.Dispose()
+        {
+            this.TestTearDown();
+        }
+        
+        [Xunit.SkippableFactAttribute(DisplayName="/stat command")]
+        [Xunit.TraitAttribute("FeatureTitle", "Statistics and Commands")]
+        [Xunit.TraitAttribute("Description", "/stat command")]
         public void StatCommand()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -106,8 +114,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Automatic statistics")]
+        [Xunit.SkippableFactAttribute(DisplayName="Automatic statistics")]
+        [Xunit.TraitAttribute("FeatureTitle", "Statistics and Commands")]
+        [Xunit.TraitAttribute("Description", "Automatic statistics")]
         public void AutomaticStatistics()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -130,8 +139,9 @@ namespace ClubDoorman.Test.Features
             this.ScenarioCleanup();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Command access rights")]
+        [Xunit.SkippableFactAttribute(DisplayName="Command access rights")]
+        [Xunit.TraitAttribute("FeatureTitle", "Statistics and Commands")]
+        [Xunit.TraitAttribute("Description", "Command access rights")]
         public void CommandAccessRights()
         {
             string[] tagsOfScenario = ((string[])(null));
@@ -151,6 +161,22 @@ namespace ClubDoorman.Test.Features
                 testRunner.And("there is a log record about unauthorized access attempt", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
             }
             this.ScenarioCleanup();
+        }
+        
+        [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
+        [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+        public class FixtureData : System.IDisposable
+        {
+            
+            public FixtureData()
+            {
+                StatisticsAndCommandsFeature.FeatureSetup();
+            }
+            
+            void System.IDisposable.Dispose()
+            {
+                StatisticsAndCommandsFeature.FeatureTearDown();
+            }
         }
     }
 }

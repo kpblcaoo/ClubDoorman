@@ -3,9 +3,6 @@
 
 global using Moq;
 global using FluentAssertions;
-global using NUnit.Framework;
-global using ClubDoorman.Services.Handlers;
-global using ClubDoorman.Services.UserJoin;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using Telegram.Bot.Types;
@@ -23,4 +20,6 @@ global using ClubDoorman.TestInfrastructure;
 global using ClubDoorman.Test.TestInfrastructure;
 global using ClubDoorman.Test.TestKit;
 global using static ClubDoorman.Test.TestKit.TestKit;
-global using TK = ClubDoorman.Test.TestKit.TestKit; 
+global using TK = ClubDoorman.Test.TestKit.TestKit;
+global using ClubDoorman.Services.Handlers;
+global using ClubDoorman.Features.UserJoin; 
