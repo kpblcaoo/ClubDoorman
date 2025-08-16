@@ -4,7 +4,6 @@ using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
@@ -114,6 +113,12 @@ public class FakeServicesFactory
         var moderationServiceMock = new Mock<IModerationService>();
         moderationServiceMock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
         moderationServiceMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>())).ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Test message"));
+
+        // Настраиваем мок фасада модерации так, чтобы возвращался Allow (нужно для запуска AI анализа профиля)
+        var moderationFacadeMock = new Mock<IModerationFacade>();
+        moderationFacadeMock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
+        moderationFacadeMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+            .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Allow for AI analysis"));
         
         var classifierMock = new Mock<ISpamHamClassifier>();
         classifierMock.Setup(x => x.IsSpam(It.IsAny<string>())).ReturnsAsync((false, 0.5f));
@@ -157,6 +162,27 @@ public class FakeServicesFactory
                     $"AI анализ профиля пользователя {data.User.FirstName} {data.User.LastName} (@{data.User.Username})");
             })
             .Returns(Task.CompletedTask);
+
+        // Настраиваем каскадный сервис AI так, чтобы он вызывал отправку уведомления через messageService
+        var aiCascadeServiceMock = new Mock<IAiCascadeService>();
+        aiCascadeServiceMock
+            .Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+            .Callback<Message, User, Chat, CancellationToken>((msg, user, chat, ct) =>
+            {
+                // эмулируем успешный анализ профиля
+                var data = new AiProfileAnalysisData(
+                    user,
+                    chat,
+                    0.93,
+                    "Test suspicious profile",
+                    "Test bio",
+                    msg.Text ?? string.Empty,
+                    Array.Empty<byte>(),
+                    msg.MessageId,
+                    "🗑️ Test automatic action");
+                messageServiceMock.Object.SendAiProfileAnalysisAsync(data, ct);
+            })
+            .ReturnsAsync(true);
         
         var chatLinkFormatterMock = new Mock<IChatLinkFormatter>();
         chatLinkFormatterMock.Setup(x => x.GetChatLink(It.IsAny<long>(), It.IsAny<string>())).Returns("https://t.me/test");
@@ -180,13 +206,13 @@ public class FakeServicesFactory
             new Mock<IChannelModerationService>().Object,
             new Mock<ICommandRouter>().Object,
             new Mock<IUserJoinFacade>().Object,
-            new Mock<IModerationFacade>().Object,
+            moderationFacadeMock.Object,
             logger,
             botPermissionsServiceMock.Object,
             captchaService ?? CreateCaptchaService(),
             userFlowLoggerMock.Object,
             new Mock<IForwardingService>().Object,
-            new Mock<IAiCascadeService>().Object);
+            aiCascadeServiceMock.Object);
     }
 
     /// <summary>

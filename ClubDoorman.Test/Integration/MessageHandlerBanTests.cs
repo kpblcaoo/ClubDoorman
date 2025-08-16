@@ -456,6 +456,10 @@ public class MessageHandlerBanTests
             mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
                 .ReturnsAsync(new ModerationResult(ModerationAction.Delete, "ML решил что это спам"));
         });
+
+        // Дополнительно гарантируем что сам по себе direct setup не перезапишется стандартными моками
+        factory.ModerationFacadeMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+            .ReturnsAsync(new ModerationResult(ModerationAction.Delete, "ML решил что это спам"));
         
         // Настраиваем ViolationTracker для возврата true (достигнут лимит нарушений)
         factory.WithViolationTrackerSetup(mock =>

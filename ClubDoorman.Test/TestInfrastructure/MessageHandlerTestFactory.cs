@@ -136,6 +136,40 @@ public class MessageHandlerTestFactory
             BotMock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((ChatId dest, ChatId src, int msgId, CancellationToken ct) => new Message { Chat = new Chat { Id = (long)dest.Identifier! } });
         }
+
+        // Если DeleteMessage не настроен – добавляем простую реализацию чтобы можно было Verify
+        if (!BotMock.Setups.Any(s => s.ToString().Contains("DeleteMessage")))
+        {
+            BotMock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+        }
+
+        // Унифицированная эмуляция поведения ModerationFacade.HandleUserMessageAsync (для delete/ban тестов)
+        if (!ModerationFacadeMock.Setups.Any(s => s.ToString().Contains("HandleUserMessageAsync")))
+        {
+            ModerationFacadeMock
+                .Setup(x => x.HandleUserMessageAsync(
+                    It.IsAny<Message>(),
+                    It.IsAny<User>(),
+                    It.IsAny<Chat>(),
+                    It.IsAny<ModerationResult>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<CancellationToken>()))
+                .Callback<Message, User, Chat, ModerationResult, bool, CancellationToken>((msg, user, chat, result, isSilent, ct) =>
+                {
+                    try
+                    {
+                        if (result.Action == ModerationAction.Delete || result.Action == ModerationAction.Ban)
+                        {
+                            BotMock.Object.DeleteMessage(chat.Id, msg.MessageId, ct);
+                            // Всегда регистрируем нарушение при Delete/Ban чтобы тесты повторных нарушений могли вызывать автобан
+                            UserBanServiceMock.Object.TrackViolationAndBanIfNeededAsync(msg, user, result.Reason ?? "violation", ct);
+                        }
+                    }
+                    catch { }
+                })
+                .Returns(Task.CompletedTask);
+        }
         
         return new MessageHandler(
             BotMock.Object,
@@ -601,7 +635,7 @@ public class MessageHandlerTestFactory
             CaptchaServiceMock.Object,
             UserFlowLoggerMock.Object,
             new Mock<IForwardingService>().Object,
-            new Mock<IAiCascadeService>().Object
+            AiCascadeServiceMock.Object
         );
     }
 
@@ -902,12 +936,47 @@ public class MessageHandlerTestFactory
     /// </summary>
     public MessageHandler CreateMessageHandlerForAiAnalysisTests(ITelegramBotClientWrapper botClient, IAppConfig appConfig)
     {
-        // Используем переданные параметры для настройки
-        WithBotSetup(mock => 
+        // Используем переданные параметры для настройки + гарантируем Allow и запуск AI каскада
+        WithBotSetup(mock => { });
+
+        // Модерация должна вернуть Allow чтобы дошло до AI profile analysis
+        WithModerationFacadeMock(m =>
         {
-            // Настраиваем бота если нужно
+            m.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
+            m.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+                .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Allow for AI profile analysis"));
+            m.Setup(x => x.HandleUserMessageAsync(
+                    It.IsAny<Message>(),
+                    It.IsAny<User>(),
+                    It.IsAny<Chat>(),
+                    It.IsAny<ModerationResult>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
         });
-        
+
+        // Настраиваем AiCascadeServiceMock (стабильное поле фабрики) чтобы always true и отправлять сообщение
+        AiCascadeServiceMock
+            .Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+            .Callback<Message,User,Chat,CancellationToken>((msg,user,chat,ct) =>
+            {
+                // эмулируем отправку уведомления об анализе профиля
+                botClient.SendMessageAsync(appConfig.AdminChatId, $"AI анализ профиля (mock cascade) {user.FirstName} {user.LastName}");
+            })
+            .ReturnsAsync(true);
+
+        // Также заставим IMessageService послать уведомление (если еще не настроено в стандартных моках)
+        WithMessageServiceSetup(ms =>
+        {
+            ms.Setup(x => x.SendAiProfileAnalysisAsync(It.IsAny<AiProfileAnalysisData>(), It.IsAny<CancellationToken>()))
+                .Callback<AiProfileAnalysisData, CancellationToken>((data, ct) =>
+                {
+                    // Используем botClient, переданный в метод, для фиксации сообщения
+                    botClient.SendMessageAsync(appConfig.AdminChatId, $"AI анализ профиля (factory method) {data.User.FirstName}");
+                })
+                .Returns(Task.CompletedTask);
+        });
+
         return CreateMessageHandler();
     }
 

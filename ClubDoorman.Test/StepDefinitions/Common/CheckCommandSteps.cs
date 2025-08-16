@@ -35,35 +35,21 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [BeforeScenario(Order = 100)]  // Выполняется ПОСЛЕ SuspiciousCommandSteps.BeforeScenario
         public void BeforeScenario()
         {
-            Console.WriteLine("[DEBUG] CheckCommandSteps.BeforeScenario вызван");
-            
-            // Создаем свой factory и инициализируем все необходимое
+            Console.WriteLine("[DEBUG] CheckCommandSteps.BeforeScenario (refactored) start");
             _factory = new MessageHandlerTestFactory();
             _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-            _fakeBot = new FakeTelegramClient();
-            // Делаем пользователя 123456789 администратором для GetChatAdministratorsAsync
-            _fakeBot.TestContextCurrentUserId = 123456789;
-            
-            Console.WriteLine("[DEBUG] Настраиваем CommandRouter в CheckCommandSteps");
-            
-            // Настраиваем базовые моки (как в SuspiciousCommandSteps)
-            _factory.WithStandardMocks();
+            _fakeBot = new FakeTelegramClient { TestContextCurrentUserId = 123456789 }; // текущий пользователь как админ
 
+            _factory.WithStandardMocks();
             _factory.WithAppConfigSetup(mock => {
                 mock.Setup(x => x.AdminChatId).Returns(123456789);
                 mock.Setup(x => x.LogAdminChatId).Returns(123456789);
                 mock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
                 mock.Setup(x => x.DisabledChats).Returns(new HashSet<long>());
             });
-            
-            // Настраиваем мок для классификатора (нужен для команды /check)
-            _factory.WithClassifierSetup(mock => 
-            {
-                mock.Setup(x => x.IsSpam(It.IsAny<string>()))
-                    .ReturnsAsync((false, -0.5f)); // По умолчанию считаем не спамом
+            _factory.WithClassifierSetup(mock => {
+                mock.Setup(x => x.IsSpam(It.IsAny<string>())).ReturnsAsync((false, -0.5f));
             });
-            
-            // Настраиваем BotPermissionsService для admin чата
             var botPermMock = TestKit.TestKit.CreateBotPermissionsServiceMockForChat(123456789);
             _factory.WithBotPermissionsServiceSetup(mock => {
                 mock.Reset();
@@ -72,54 +58,21 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 mock.Setup(x => x.IsSilentModeAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
                     .Returns((long chatId, CancellationToken token) => botPermMock.Object.IsSilentModeAsync(chatId, token));
             });
-            
-            // Настраиваем мок для MessageService (нужен для отправки ответов)
-            _factory.WithMessageServiceSetup(mock => 
-            {
+            _factory.WithMessageServiceSetup(mock => {
                 mock.Setup(x => x.SendUserNotificationAsync(
-                    It.IsAny<User>(), 
-                    It.IsAny<Chat>(), 
-                    It.IsAny<UserNotificationType>(), 
-                    It.IsAny<object>(), 
-                    It.IsAny<CancellationToken>()))
+                    It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<UserNotificationType>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
                     .Callback<User, Chat, UserNotificationType, object, CancellationToken>((user, chat, type, data, token) =>
                     {
-                        // Сохраняем текст уведомления для проверки в тестах
                         if (data is SimpleNotificationData notificationData)
                         {
                             _lastResponse = notificationData.Reason ?? string.Empty;
-                            // Сохраняем в ScenarioContext чтобы другие степы могли получить
                             ScenarioContext.Current["LastResponse"] = _lastResponse;
                         }
                     })
                     .Returns(Task.CompletedTask);
             });
 
-            // Настраиваем мок для MessageService (нужен для отправки ответов)
-            _factory.WithMessageServiceSetup(mock => 
-            {
-                mock.Setup(x => x.SendUserNotificationAsync(
-                    It.IsAny<User>(), 
-                    It.IsAny<Chat>(), 
-                    It.IsAny<UserNotificationType>(), 
-                    It.IsAny<object>(), 
-                    It.IsAny<CancellationToken>()))
-                    .Callback<User, Chat, UserNotificationType, object, CancellationToken>((user, chat, type, data, token) =>
-                    {
-                        // Сохраняем текст уведомления для проверки в тестах
-                        if (data is SimpleNotificationData notificationData)
-                        {
-                            _lastResponse = notificationData.Reason ?? string.Empty;
-                            // Сохраняем в ScenarioContext чтобы другие степы могли получить
-                            ScenarioContext.Current["LastResponse"] = _lastResponse;
-                        }
-                    })
-                    .Returns(Task.CompletedTask);
-            });
-
-            Console.WriteLine("[DEBUG] Настраиваем CommandRouter с реальными обработчиками");
-            
-            // Создаем реальный CommandRouter с CheckCommandHandler
+            // Собираем одиночный CheckCommandHandler
             var checkHandler = new CheckCommandHandler(
                 _fakeBot,
                 _factory.ClassifierMock.Object,
@@ -127,55 +80,29 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 _factory.BotPermissionsServiceMock.Object,
                 _factory.AppConfigMock.Object,
                 _loggerFactory.CreateLogger<CheckCommandHandler>());
-            
-            var commandHandlers = new List<ICommandHandler> { checkHandler };
-            var commandRouter = new CommandRouter(commandHandlers, _loggerFactory.CreateLogger<CommandRouter>());
-            
+            var commandRouter = new CommandRouter(new List<ICommandHandler> { checkHandler }, _loggerFactory.CreateLogger<CommandRouter>());
             _factory.WithCommandRouterSetup(mock => {
                 mock.Setup(x => x.HandleCommandAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
-                    .Returns<Message, CancellationToken>(async (message, cancellationToken) => {
-                        return await commandRouter.HandleCommandAsync(message, cancellationToken);
-                    });
+                    .Returns<Message, CancellationToken>((message, ct) => commandRouter.HandleCommandAsync(message, ct));
             });
-                
-            Console.WriteLine("[DEBUG] CommandRouter mock настроен");
 
-            // Настраиваем FakeTelegramClient для возврата пользователя как администратора
-            var adminUser = new ChatMemberAdministrator
+            // Админы (добавляем текущего)
+            _fakeBot.SetupChatAdministrators(123456789, new ChatMemberAdministrator
             {
                 User = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
-                IsAnonymous = false,
-                CanManageChat = true,
-                CanDeleteMessages = true,
-                CanManageVideoChats = true,
-                CanRestrictMembers = true,
-                CanPromoteMembers = true,
-                CanChangeInfo = true,
-                CanInviteUsers = true,
-                CanPostMessages = false,
-                CanEditMessages = false,
-                CanPinMessages = false,
-                CanPostStories = false,
-                CanEditStories = false,
-                CanDeleteStories = false,
-                CustomTitle = "Admin"
-            };
-            _fakeBot.SetupChatAdministrators(123456789, adminUser);
+                CanManageChat = true, CanDeleteMessages = true, CanManageVideoChats = true,
+                CanRestrictMembers = true, CanPromoteMembers = true, CanChangeInfo = true, CanInviteUsers = true
+            });
 
-            // Создаем MessageHandler с настроенным CommandRouter mock
             _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
             ScenarioContext.Current["MessageHandler"] = _messageHandler;
-            Console.WriteLine("[DEBUG] MessageHandler создан с CommandRouter mock");
+            Console.WriteLine("[DEBUG] CheckCommandSteps.BeforeScenario (refactored) done");
         }
 
         [Given(@"I reply to a user's message with check command ""(.*)""")]
         public void GivenIReplyToAUsersMessageWithCheckCommand(string command)
         {
-            // Пересоздаем MessageHandler с CommandRouter mock для CheckCommand
-            Console.WriteLine("[DEBUG] Пересоздаем MessageHandler с CommandRouter mock для CheckCommand");
-            _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
-            ScenarioContext.Current["MessageHandler"] = _messageHandler;
-            Console.WriteLine("[DEBUG] MessageHandler заменен на версию с CheckCommand CommandRouter mock");
+            // Используем единый _messageHandler (не пересоздаём)
             
             _repliedMessage = new Message
             {
@@ -466,11 +393,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 ReplyToMessage = _repliedMessage
             };
 
-            // Пересоздаем MessageHandler с CommandRouter mock для CheckCommand
-            Console.WriteLine("[DEBUG] Пересоздаем MessageHandler с CommandRouter mock для CheckCommand");
-            _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
-            ScenarioContext.Current["MessageHandler"] = _messageHandler;
-            Console.WriteLine("[DEBUG] MessageHandler заменен на версию с CheckCommand CommandRouter mock");
+            // Используем единый _messageHandler (не пересоздаём)
 
             ScenarioContext.Current["TestMessage"] = _testMessage;
             ScenarioContext.Current["RepliedMessage"] = _repliedMessage;
@@ -495,11 +418,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 ReplyToMessage = _repliedMessage
             };
 
-            // Пересоздаем MessageHandler с CommandRouter mock для CheckCommand
-            Console.WriteLine("[DEBUG] Пересоздаем MessageHandler с CommandRouter mock для CheckCommand");
-            _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
-            ScenarioContext.Current["MessageHandler"] = _messageHandler;
-            Console.WriteLine("[DEBUG] MessageHandler заменен на версию с CheckCommand CommandRouter mock");
+            // Используем единый _messageHandler (не пересоздаём)
 
             ScenarioContext.Current["TestMessage"] = _testMessage;
             ScenarioContext.Current["RepliedMessage"] = _repliedMessage;
@@ -508,11 +427,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Given(@"I reply to a message with emojis with check command ""(.*)""")]
         public void GivenIReplyToAMessageWithEmojisWithCheckCommand(string command)
         {
-            // ВАЖНО: пересоздаем MessageHandler с нашим CommandRouter mock ПОСЛЕ того, как SuspiciousCommandSteps создал свой
-            Console.WriteLine("[DEBUG] Пересоздаем MessageHandler с CommandRouter mock для CheckCommand");
-            _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
-            ScenarioContext.Current["MessageHandler"] = _messageHandler;
-            Console.WriteLine("[DEBUG] MessageHandler заменен на версию с CheckCommand CommandRouter mock");
+            // Используем единый _messageHandler (не пересоздаём)
             
             _repliedMessage = new Message
             {
@@ -536,11 +451,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Given(@"I reply to a message with stop words with check command ""(.*)""")]
         public void GivenIReplyToAMessageWithStopWordsWithCheckCommand(string command)
         {
-            // Пересоздаем MessageHandler с CommandRouter mock для CheckCommand
-            Console.WriteLine("[DEBUG] Пересоздаем MessageHandler с CommandRouter mock для CheckCommand");
-            _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
-            ScenarioContext.Current["MessageHandler"] = _messageHandler;
-            Console.WriteLine("[DEBUG] MessageHandler заменен на версию с CheckCommand CommandRouter mock");
+            // Используем единый _messageHandler (не пересоздаём)
             
             _repliedMessage = new Message
             {
