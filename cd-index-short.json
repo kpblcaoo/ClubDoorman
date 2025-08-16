@@ -2,10 +2,14 @@
   "Meta": {
     "Version": "1.0",
     "SchemaVersion": "1.2",
-    "GeneratedAt": "2025-08-15T23:30:04.4408368Z",
+    "GeneratedAt": "2025-08-15T23:48:48.0996677Z",
     "Sections": [
+      "Callgraphs",
+      "Commands",
+      "Configs",
       "DI",
       "Entrypoints",
+      "MessageFlow",
       "Tree"
     ]
   },
@@ -60,6 +64,30 @@
           "Kind": "json",
           "Loc": 842,
           "Sha256": "26cb2b05b31624655f17480bda868bd11faf0a78841789834351b644f817245d"
+        },
+        {
+          "Path": "cd-index-flow.json",
+          "Kind": "json",
+          "Loc": 4837,
+          "Sha256": "b9d2180253962189742da2db459387cc3d96a36296dec21ade8467676dd0c9c3"
+        },
+        {
+          "Path": "cd-index-full.json",
+          "Kind": "json",
+          "Loc": 4976,
+          "Sha256": "7037195caab2b1f80a6833ac1d9899e3ebecabcb77f2a6adfd6b9fd921ab71bf"
+        },
+        {
+          "Path": "cd-index-short.json",
+          "Kind": "json",
+          "Loc": 4849,
+          "Sha256": "0341b4b3b602398cb3ca7648d93bc726ba83264aa4d18e35e2476a53f79adc11"
+        },
+        {
+          "Path": "cd-index.json",
+          "Kind": "json",
+          "Loc": 4739,
+          "Sha256": "a269042c16585d8f8f2ad2bca288384258a9a942dad4507990110170a7dba2e7"
         },
         {
           "Path": "ClubDoorman.sln",
@@ -173,7 +201,7 @@
           "Path": "ClubDoorman.Test/GlobalUsings.cs",
           "Kind": "cs",
           "Loc": 27,
-          "Sha256": "2138d3c02febbc2c60d25207950f2e7db1d82fb4dc739eff9ec53e41af891657"
+          "Sha256": "8d911fe72f019b16f3152cfc308a0575710eedb00a8b1f28d63e3c3ee74c01c3"
         },
         {
           "Path": "ClubDoorman.Test/ModerationServiceSimpleTests.cs",
@@ -203,7 +231,7 @@
           "Path": "ClubDoorman.Test/obj/Debug/net9.0/ClubDoorman.Test.AssemblyInfo.cs",
           "Kind": "cs",
           "Loc": 22,
-          "Sha256": "e0456ee8ccbc1bf26c0259e609e5a87937c4f0793a07b5187cfd1c1f389b48fc"
+          "Sha256": "50ed93a15f3062c405d97dffb6882064fe679c5e5a3a797c1493db76721c775a"
         },
         {
           "Path": "ClubDoorman.Test/obj/Debug/net9.0/ClubDoorman.Test.GlobalUsings.g.cs",
@@ -215,7 +243,7 @@
           "Path": "ClubDoorman.Test/obj/Debug/net9.0/ClubDoorman.Test.sourcelink.json",
           "Kind": "json",
           "Loc": 1,
-          "Sha256": "95dff99486731263d8b0ccbf147f70eee3cad6da526856d4be6a75abd70dafc0"
+          "Sha256": "b3b3a59c83a5c37c30b90e9e14fa0eb189d2323a9c6030eb5df817f3fb52c6e4"
         },
         {
           "Path": "ClubDoorman.Test/obj/Debug/net9.0/NUnit.AssemblyHooks.cs",
@@ -334,8 +362,8 @@
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/CallbackQueryHandlerTestFactory.cs",
           "Kind": "cs",
-          "Loc": 180,
-          "Sha256": "704ff89b0edbb79dc2b2116cc05922086c29ed7b61588cbba34f0ed9513fd537"
+          "Loc": 170,
+          "Sha256": "e2e56ede9d8a1fa46c301ceba336c30bfcd34edfb7d62c08259147d8ea661946"
         },
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/CallbackQueryHandlerTestFactoryTests.cs",
@@ -346,8 +374,8 @@
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/CaptchaServiceTestFactory.cs",
           "Kind": "cs",
-          "Loc": 145,
-          "Sha256": "957100d2268f919bb6472d9249cc64a1a134230303f2c72b8219063a02ec1622"
+          "Loc": 135,
+          "Sha256": "a28cff677a18d1d461a54ebc36f543b11dd2b8ea727ed5cb5a3f3ce1d484d554"
         },
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/CaptchaServiceTestFactoryTests.cs",
@@ -358,8 +386,8 @@
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/ChatMemberHandlerTestFactory.cs",
           "Kind": "cs",
-          "Loc": 123,
-          "Sha256": "a77ae6c075894ddbf15fc1c4521de202184ed7f04ed6b34a0c58608e87b71118"
+          "Loc": 113,
+          "Sha256": "7e66b2532150d0a85a7c1673ac8a14ec1ce93445837418aa7a702e98c370922d"
         },
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/ChatMemberHandlerTestFactoryTests.cs",
@@ -400,8 +428,8 @@
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/FakeServicesFactory.cs",
           "Kind": "cs",
-          "Loc": 267,
-          "Sha256": "ec1dcbfa269fdfae72c7e6c4de9ea1b47ef6078548b86069167ca4b0b219cffa"
+          "Loc": 268,
+          "Sha256": "3a7f0a6047cc1bd62dcdf06ed940b148197d20dfadc60072b5f885c347865a24"
         },
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/FakeTelegramClient.cs",
@@ -424,8 +452,8 @@
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/MessageHandlerTestFactory.cs",
           "Kind": "cs",
-          "Loc": 783,
-          "Sha256": "10a515b51d1960fa1f3b1431e9aecca1f458fac7b5839d42a69804f612128df6"
+          "Loc": 762,
+          "Sha256": "32f5ba0abb58b45ed9b9e61836542de21d69f4e064b92c4832cd41a49053db01"
         },
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/MessageHandlerTestFactoryTests.cs",
@@ -472,8 +500,8 @@
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/ModerationServiceTestFactory.cs",
           "Kind": "cs",
-          "Loc": 142,
-          "Sha256": "ade164ee7864539f24930ce226fd1342c557f77f6ccf267a4afd15adfde422d5"
+          "Loc": 132,
+          "Sha256": "3c1d278f45f0e41651ea36b4ac160adf16aaf7725a2fc1fb490597818ab9173d"
         },
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/ModerationServiceTestFactoryTests.cs",
@@ -502,8 +530,8 @@
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/StatisticsServiceTestFactory.cs",
           "Kind": "cs",
-          "Loc": 113,
-          "Sha256": "3f66b00d017a4ffdf9fd2d54b7e839a7a91256a9704bdd3a5df578dc2508f389"
+          "Loc": 103,
+          "Sha256": "967d60bbdce66260427933ecfa1bb882b062b9594a6edbc390027b8fb84e7bfc"
         },
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/StatisticsServiceTestFactoryTests.cs",
@@ -538,8 +566,8 @@
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/TelegramBotClientWrapperTestFactory.cs",
           "Kind": "cs",
-          "Loc": 72,
-          "Sha256": "99e49aef8522329a5cf554578e56a0554be813ecb7b0ca4379e4d649d4197e87"
+          "Loc": 62,
+          "Sha256": "6320de3f4fc1d4855c8a1a0dfd1c088d9fb7b574ee87f3e6a21befa20a71abe0"
         },
         {
           "Path": "ClubDoorman.Test/TestInfrastructure/TelegramBotClientWrapperTestFactoryTests.cs",
@@ -682,8 +710,8 @@
         {
           "Path": "ClubDoorman.Test/TestKit/Infra/TestKitAutoFixture.cs",
           "Kind": "cs",
-          "Loc": 366,
-          "Sha256": "4906c0c45d1d9dc0af4242160058fd11861962c9efd94b041e0f6aa3debfee22"
+          "Loc": 364,
+          "Sha256": "6b1b4c212a674c943c294e018470d19d580ca71c7544dc23dec12b96744847e2"
         },
         {
           "Path": "ClubDoorman.Test/TestKit/Infra/TestKitBogus.cs",
@@ -725,7 +753,7 @@
           "Path": "ClubDoorman.Test/TestKit/TestKit.Facade.cs",
           "Kind": "cs",
           "Loc": 334,
-          "Sha256": "a39d7aeb801d5441f54201f4860cb8e2cdab155d594e02c196f437ee69377da1"
+          "Sha256": "6747a11e277336e2190f781600b025c18d75a6365ca7a5a421eb8ac11c85cfea"
         },
         {
           "Path": "ClubDoorman.Test/TestKit/TestKit.GoldenMaster.cs",
@@ -737,13 +765,13 @@
           "Path": "ClubDoorman.Test/TestKit/TestKit.Main.cs",
           "Kind": "cs",
           "Loc": 305,
-          "Sha256": "1c0139929a6c89d5da85c7ace7ad730fed54b494ae9edc877979cf00b1c808f1"
+          "Sha256": "71ca954800e0e5c93ac2d95a0409cd91b2d4872dae777522c7f298eacf183379"
         },
         {
           "Path": "ClubDoorman.Test/TestKit/TestKit.MessageHandlerBuilder.cs",
           "Kind": "cs",
-          "Loc": 403,
-          "Sha256": "d15ab165f2e5dfaebb4094488ff78c8e255c01184f22e97bdcc6ca697085e62e"
+          "Loc": 375,
+          "Sha256": "70f6f8284dc5d1d831877fda065bf8e5abfb4de700c9103c0d6d4251eab5247f"
         },
         {
           "Path": "ClubDoorman.Test/TestKit/TestKit.Mocks.cs",
@@ -767,7 +795,7 @@
           "Path": "ClubDoorman.Test/TestKit/TestKit.UserJoinServiceBuilder.cs",
           "Kind": "cs",
           "Loc": 219,
-          "Sha256": "8aa85c2741dc98e0c35cb0e51c64060e120d8e4f38ee68996d20e9a30752f518"
+          "Sha256": "47a9862d0b05922a6a3aa8c8aaf0c5816e1132451557cee3105b3508b41d5b80"
         },
         {
           "Path": "ClubDoorman.Test/TestTimeoutHelper.cs",
@@ -1337,7 +1365,7 @@
           "Path": "ClubDoorman/obj/Debug/net9.0/ClubDoorman.AssemblyInfo.cs",
           "Kind": "cs",
           "Loc": 24,
-          "Sha256": "2e4603d329c3898ef31a4a0d2dd16e1b53e0186b1e755bf087e221f15ebd26de"
+          "Sha256": "3cc14ca1ac813a6275a061cc225648c3694ba48db7b4621f3d05a699703e4596"
         },
         {
           "Path": "ClubDoorman/obj/Debug/net9.0/ClubDoorman.GlobalUsings.g.cs",
@@ -1349,7 +1377,7 @@
           "Path": "ClubDoorman/obj/Debug/net9.0/ClubDoorman.sourcelink.json",
           "Kind": "json",
           "Loc": 1,
-          "Sha256": "95dff99486731263d8b0ccbf147f70eee3cad6da526856d4be6a75abd70dafc0"
+          "Sha256": "b3b3a59c83a5c37c30b90e9e14fa0eb189d2323a9c6030eb5df817f3fb52c6e4"
         },
         {
           "Path": "ClubDoorman/obj/project.assets.json",
@@ -4567,6 +4595,392 @@
           "Type": "ClubDoorman.Worker",
           "File": "ClubDoorman/Infrastructure/ServiceCollectionExtensions.cs",
           "Line": 108
+        }
+      ]
+    }
+  ],
+  "MessageFlow": [
+    {
+      "Nodes": [
+        {
+          "Order": 0,
+          "Kind": "guard",
+          "Detail": "update == null",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 94
+        },
+        {
+          "Order": 1,
+          "Kind": "guard",
+          "Detail": "update.Message == null \u0026\u0026 update.EditedMessage == null",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 99
+        },
+        {
+          "Order": 2,
+          "Kind": "guard",
+          "Detail": "!_appConfig.IsChatAllowed(chat.Id) \u0026\u0026 !isAdminChat",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 115
+        },
+        {
+          "Order": 3,
+          "Kind": "guard",
+          "Detail": "_appConfig.DisabledChats.Contains(chat.Id)",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 122
+        },
+        {
+          "Order": 4,
+          "Kind": "delegate",
+          "Detail": "IBotPermissionsService.IsSilentModeAsync",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 130
+        },
+        {
+          "Order": 5,
+          "Kind": "guard",
+          "Detail": "isSilentMode",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 132
+        },
+        {
+          "Order": 6,
+          "Kind": "delegate",
+          "Detail": "ChatSettingsManager.EnsureChatInConfig",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 138
+        },
+        {
+          "Order": 7,
+          "Kind": "guard",
+          "Detail": "message.Text?.StartsWith(\u0022/\u0022) == true",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 140
+        },
+        {
+          "Order": 8,
+          "Kind": "guard",
+          "Detail": "chat.Type == ChatType.Private",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 150
+        },
+        {
+          "Order": 9,
+          "Kind": "guard",
+          "Detail": "message.NewChatMembers != null \u0026\u0026 chat.Id != _appConfig.AdminChatId",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 157
+        },
+        {
+          "Order": 10,
+          "Kind": "delegate",
+          "Detail": "IUserJoinFacade.HandleNewMembersAsync",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 161
+        },
+        {
+          "Order": 11,
+          "Kind": "guard",
+          "Detail": "message.LeftChatMember != null \u0026\u0026 message.From?.Id == _bot.BotId",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 166
+        },
+        {
+          "Order": 12,
+          "Kind": "guard",
+          "Detail": "message.SenderChat != null",
+          "File": "ClubDoorman/Services/Handlers/MessageHandler.cs",
+          "Line": 184
+        }
+      ]
+    }
+  ],
+  "Callgraphs": [
+    {
+      "Project": {
+        "Name": "ClubDoorman",
+        "File": "ClubDoorman/ClubDoorman.csproj"
+      },
+      "Graphs": [
+        {
+          "Root": "ClubDoorman.Services.Dispatcher.UpdateDispatcher.DispatchAsync(2)",
+          "Depth": 2,
+          "Truncated": false,
+          "Edges": [
+            {
+              "Caller": "ClubDoorman.Services.Dispatcher.UpdateDispatcher.DispatchAsync(2)",
+              "Callee": "ClubDoorman.Services.Handlers.IUpdateHandler.CanHandle(1)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Dispatcher.UpdateDispatcher.DispatchAsync(2)",
+              "Callee": "ClubDoorman.Services.Handlers.IUpdateHandler.HandleAsync(2)"
+            }
+          ]
+        },
+        {
+          "Root": "ClubDoorman.Services.Handlers.MessageHandler.HandleAsync(2)",
+          "Depth": 2,
+          "Truncated": false,
+          "Edges": [
+            {
+              "Caller": "ClubDoorman.Infrastructure.ChatSettingsManager.EnsureChatInConfig(2)",
+              "Callee": "ClubDoorman.Infrastructure.ChatSettingsManager.ReloadIfNeeded(0)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleAsync(2)",
+              "Callee": "ClubDoorman.Features.UserJoin.IUserJoinFacade.HandleNewMembersAsync(2)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleAsync(2)",
+              "Callee": "ClubDoorman.Infrastructure.ChatSettingsManager.EnsureChatInConfig(2)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleAsync(2)",
+              "Callee": "ClubDoorman.Services.Core.Configuration.IAppConfig.IsChatAllowed(1)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleAsync(2)",
+              "Callee": "ClubDoorman.Services.Handlers.MessageHandler.HandleChannelMessageAsync(2)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleAsync(2)",
+              "Callee": "ClubDoorman.Services.Handlers.MessageHandler.HandleCommandAsync(2)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleAsync(2)",
+              "Callee": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleAsync(2)",
+              "Callee": "ClubDoorman.Services.IBotPermissionsService.IsSilentModeAsync(2)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleAsync(2)",
+              "Callee": "ClubDoorman.Services.Telegram.ITelegramBotClientWrapper.DeleteMessage(3)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleChannelMessageAsync(2)",
+              "Callee": "ClubDoorman.Services.ChannelModeration.IChannelModerationService.HandleChannelMessageAsync(2)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleCommandAsync(2)",
+              "Callee": "ClubDoorman.Features.AdminOps.ICommandRouter.HandleCommandAsync(2)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Features.Moderation.IModerationFacade.CheckMessageAsync(1)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Features.Moderation.IModerationFacade.HandleUserMessageAsync(6)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Features.Moderation.IModerationFacade.IsUserApproved(2)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Infrastructure.Utils.FullName(1)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Services.AI.IAiCascadeService.PerformAiProfileAnalysisAsync(4)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Services.Captcha.ICaptchaService.GenerateKey(2)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Services.Captcha.ICaptchaService.GetCaptchaInfo(1)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Services.Notifications.IForwardingService.IsChannelDiscussion(2)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Services.Telegram.ITelegramBotClientWrapper.DeleteMessage(3)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Services.UserBan.IUserBanService.HandleBlacklistBanAsync(4)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Services.UserFlow.IUserFlowLogger.LogFirstMessage(3)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Services.UserFlow.IUserFlowLogger.LogModerationResult(5)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Services.UserManagement.IUserManager.GetClubUsername(1)"
+            },
+            {
+              "Caller": "ClubDoorman.Services.Handlers.MessageHandler.HandleUserMessageAsync(3)",
+              "Callee": "ClubDoorman.Services.UserManagement.IUserManager.InBanlist(1)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Configs": [
+    {
+      "EnvKeys": [
+        "DOORMAN_ADMIN_CHAT",
+        "DOORMAN_AI_ENABLED_CHATS",
+        "DOORMAN_APPROVE_BUTTON",
+        "DOORMAN_BAN_FOLDER_INVITE_USERS",
+        "DOORMAN_BLACKLIST_AUTOBAN_DISABLE",
+        "DOORMAN_BORING_GREETINGS_VIOLATIONS_BEFORE_BAN",
+        "DOORMAN_BOT_API",
+        "DOORMAN_BUTTON_AUTOBAN_DISABLE",
+        "DOORMAN_CAPTCHA_VIOLATIONS_BEFORE_BAN",
+        "DOORMAN_CHANNELS_AUTOBAN_DISABLE",
+        "DOORMAN_CLUB_SERVICE_TOKEN",
+        "DOORMAN_CLUB_URL",
+        "DOORMAN_DELETE_FORWARDED_MESSAGES",
+        "DOORMAN_DISABLED_CHATS",
+        "DOORMAN_DISABLE_MEDIA_FILTERING",
+        "DOORMAN_DISABLE_WELCOME",
+        "DOORMAN_EMOJI_VIOLATIONS_BEFORE_BAN",
+        "DOORMAN_GROUP_APPROVAL_MODE",
+        "DOORMAN_HIGH_CONFIDENCE_AUTOBAN_DISABLE",
+        "DOORMAN_LOG_ADMIN_CHAT",
+        "DOORMAN_LOOKALIKE_AUTOBAN_DISABLE",
+        "DOORMAN_LOOKALIKE_VIOLATIONS_BEFORE_BAN",
+        "DOORMAN_LOW_CONFIDENCE_HAM_ENABLE",
+        "DOORMAN_MEDIA_FILTERING_DISABLED_CHATS",
+        "DOORMAN_MIMICRY_THRESHOLD",
+        "DOORMAN_ML_VIOLATIONS_BEFORE_BAN",
+        "DOORMAN_NO_CAPTCHA_GROUPS",
+        "DOORMAN_OPENROUTER_API",
+        "DOORMAN_REPEATED_VIOLATIONS_BAN_TO_ADMIN_CHAT",
+        "DOORMAN_STOP_WORDS_VIOLATIONS_BEFORE_BAN",
+        "DOORMAN_SUSPICIOUS_DETECTION_ENABLE",
+        "DOORMAN_SUSPICIOUS_TO_APPROVED_COUNT",
+        "DOORMAN_TEST_BLACKLIST_IDS",
+        "DOORMAN_TEXT_MENTION_FILTER_ENABLE",
+        "DOORMAN_WHITELIST"
+      ],
+      "AppProps": [
+        "Config.AdminChatId",
+        "Config.AiEnabledChats",
+        "Config.BanFolderInviteUsers",
+        "Config.BoringGreetingsViolationsBeforeBan",
+        "Config.BotApi",
+        "Config.CaptchaViolationsBeforeBan",
+        "Config.ChannelAutoBan",
+        "Config.ClubServiceToken",
+        "Config.ClubUrl",
+        "Config.DisableWelcome",
+        "Config.DisabledChats",
+        "Config.EmojiViolationsBeforeBan",
+        "Config.GlobalApprovalMode",
+        "Config.LogAdminChatId",
+        "Config.LookAlikeAutoBan",
+        "Config.LookalikeViolationsBeforeBan",
+        "Config.LowConfidenceHamForward",
+        "Config.MimicryThreshold",
+        "Config.MlViolationsBeforeBan",
+        "Config.NoCaptchaGroups",
+        "Config.NoVpnAdGroups",
+        "Config.OpenRouterApi",
+        "Config.RepeatedViolationsBanToAdminChat",
+        "Config.StopWordsViolationsBeforeBan",
+        "Config.SuspiciousDetectionEnabled",
+        "Config.SuspiciousToApprovedMessageCount",
+        "Config.TextMentionFilterEnabled",
+        "Config.WhitelistChats",
+        "IAppConfig.AdminChatId",
+        "IAppConfig.AiEnabledChats",
+        "IAppConfig.ApproveButtonEnabled",
+        "IAppConfig.BanFolderInviteUsers",
+        "IAppConfig.BlacklistAutoBan",
+        "IAppConfig.BoringGreetingsViolationsBeforeBan",
+        "IAppConfig.BotApi",
+        "IAppConfig.ButtonAutoBan",
+        "IAppConfig.CaptchaViolationsBeforeBan",
+        "IAppConfig.ChannelAutoBan",
+        "IAppConfig.ClubServiceToken",
+        "IAppConfig.ClubUrl",
+        "IAppConfig.DeleteForwardedMessages",
+        "IAppConfig.DisableMediaFiltering",
+        "IAppConfig.DisabledChats",
+        "IAppConfig.EmojiViolationsBeforeBan",
+        "IAppConfig.GlobalApprovalMode",
+        "IAppConfig.HighConfidenceAutoBan",
+        "IAppConfig.LogAdminChatId",
+        "IAppConfig.LookalikeViolationsBeforeBan",
+        "IAppConfig.LowConfidenceHamForward",
+        "IAppConfig.MediaFilteringDisabledChats",
+        "IAppConfig.MimicryThreshold",
+        "IAppConfig.MlViolationsBeforeBan",
+        "IAppConfig.NoCaptchaGroups",
+        "IAppConfig.NoVpnAdGroups",
+        "IAppConfig.OpenRouterApi",
+        "IAppConfig.RepeatedViolationsBanToAdminChat",
+        "IAppConfig.StopWordsViolationsBeforeBan",
+        "IAppConfig.SuspiciousDetectionEnabled",
+        "IAppConfig.SuspiciousToApprovedMessageCount",
+        "IAppConfig.WhitelistChats"
+      ]
+    }
+  ],
+  "Commands": [
+    {
+      "Items": [
+        {
+          "Command": "/check",
+          "Handler": "CheckCommandHandler",
+          "File": "ClubDoorman/Features/AdminOps/CheckCommandHandler.cs",
+          "Line": 27
+        },
+        {
+          "Command": "/ham",
+          "Handler": "HamCommandHandler",
+          "File": "ClubDoorman/Features/AdminOps/HamCommandHandler.cs",
+          "Line": 23
+        },
+        {
+          "Command": "/say",
+          "Handler": "SayCommandHandler",
+          "File": "ClubDoorman/Features/AdminOps/SayCommandHandler.cs",
+          "Line": 22
+        },
+        {
+          "Command": "/spam",
+          "Handler": "SpamCommandHandler",
+          "File": "ClubDoorman/Features/AdminOps/SpamCommandHandler.cs",
+          "Line": 25
+        },
+        {
+          "Command": "/start",
+          "Handler": "StartCommandHandler",
+          "File": "ClubDoorman/Features/AdminOps/StartCommandHandler.cs",
+          "Line": 23
+        },
+        {
+          "Command": "/stats",
+          "Handler": "StatsAliasCommandHandler",
+          "File": "ClubDoorman/Features/AdminOps/StatsAliasCommandHandler.cs",
+          "Line": 21
+        },
+        {
+          "Command": "/stats",
+          "Handler": "StatsCommandHandler",
+          "File": "ClubDoorman/Features/AdminOps/StatsCommandHandler.cs",
+          "Line": 26
+        },
+        {
+          "Command": "/suspicious",
+          "Handler": "SuspiciousCommandHandler",
+          "File": "ClubDoorman/Features/AdminOps/SuspiciousCommandHandler.cs",
+          "Line": 26
         }
       ]
     }

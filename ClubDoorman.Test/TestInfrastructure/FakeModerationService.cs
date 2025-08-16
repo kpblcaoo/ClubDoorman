@@ -11,6 +11,7 @@ using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Features.Moderation;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -18,7 +19,7 @@ namespace ClubDoorman.TestInfrastructure;
 /// Фейковый сервис модерации для тестирования
 /// Позволяет настраивать результаты модерации сообщений
 /// </summary>
-public class FakeModerationService : IModerationService
+public class FakeModerationService : IModerationPolicy
 {
     private readonly ILogger<FakeModerationService> _logger;
     private readonly ISpamHamClassifier _classifier;
@@ -338,6 +339,55 @@ public class FakeModerationService : IModerationService
             return false;
         }
     }
+
+    public async Task HandleUserMessageAsync(
+        Message message,
+        User user,
+        Chat chat,
+        ModerationResult moderationResult,
+        bool isSilentMode,
+        CancellationToken cancellationToken)
+    {
+        if (ShouldThrowException)
+        {
+            throw ExceptionToThrow ?? new Exception("Fake HandleUserMessageAsync exception");
+        }
+
+        await Task.Delay(ResponseTime);
+        
+        // Логируем вызов
+        _logger.LogInformation("FakeModerationService: HandleUserMessageAsync вызван для пользователя {UserId} в чате {ChatId}, действие: {Action}", 
+            user.Id, chat.Id, moderationResult.Action);
+        
+        // В зависимости от результата модерации выполняем соответствующие действия
+        switch (moderationResult.Action)
+        {
+            case ModerationAction.Allow:
+                // Ничего не делаем для разрешенных сообщений
+                break;
+                
+            case ModerationAction.Ban:
+                // Бан пользователя
+                await BanAndCleanupUserAsync(user.Id, chat.Id, message.MessageId);
+                break;
+                
+            case ModerationAction.Delete:
+                // Удаляем сообщение
+                await _userBanService.DeleteMessageByIdAsync(chat.Id, message.MessageId);
+                break;
+                
+            case ModerationAction.Report:
+                // Отправляем отчет (в фейке просто логируем)
+                _logger.LogInformation("FakeModerationService: отправлен отчет для сообщения {MessageId}", message.MessageId);
+                break;
+                
+            default:
+                _logger.LogWarning("FakeModerationService: неизвестное действие модерации {Action}", moderationResult.Action);
+                break;
+        }
+    }
+
+
 }
 
 /// <summary>

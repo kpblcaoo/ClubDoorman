@@ -33,13 +33,25 @@ public class ModerationServiceTestFactory
     public Mock<ITelegramBotClient> BotClientMock { get; } = new();
     public Mock<IMessageService> MessageServiceMock { get; } = new();
     public Mock<IUserBanService> UserBanServiceMock { get; } = new();
-    public Mock<ILogger<ModerationServiceAdapter>> LoggerMock { get; } = new();
+    public Mock<ILogger<FakeModerationService>> LoggerMock { get; } = new();
 
     public ModerationServiceAdapter CreateModerationService()
     {
-        return new ModerationServiceAdapter(
-            new Mock<IModerationPolicy>().Object
+        // Создаем FakeModerationService как IModerationPolicy
+        var fakeModerationService = new FakeModerationService(
+            ClassifierMock.Object,
+            MimicryClassifierMock.Object,
+            BadMessageManagerMock.Object,
+            UserManagerMock.Object,
+            AiChecksMock.Object,
+            SuspiciousUsersStorageMock.Object,
+            TelegramBotClientWrapperMock.Object,
+            MessageServiceMock.Object,
+            UserBanServiceMock.Object,
+            LoggerMock.Object
         );
+        
+        return new ModerationServiceAdapter(fakeModerationService);
     }
 
     #region Configuration Methods
@@ -98,7 +110,7 @@ public class ModerationServiceTestFactory
         return this;
     }
 
-    public ModerationServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<ModerationServiceAdapter>>> setup)
+    public ModerationServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<FakeModerationService>>> setup)
     {
         setup(LoggerMock);
         return this;

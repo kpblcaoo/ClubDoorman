@@ -450,14 +450,14 @@ public class MessageHandlerTestFactory
         }
         
         // Настраиваем мок для удаления сообщений
-        TelegramBotClientWrapperMock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        BotMock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Callback<ChatId, int, CancellationToken>((chatId, messageId, token) =>
             {
                 fakeClient.DeleteMessage(chatId, messageId, token);
             });
 
         return new MessageHandler(
-            TelegramBotClientWrapperMock.Object,
+            BotMock.Object,
             UserManagerMock.Object,
             AppConfigMock.Object,
             UserBanServiceMock.Object,
