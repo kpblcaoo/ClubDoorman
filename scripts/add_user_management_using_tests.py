@@ -20,7 +20,7 @@ def add_user_management_using(file_path):
     if ('IUserManager' not in content and 'UserManager' not in content and 
         'ApprovedUsersStorage' not in content and
         'IUserCleanupService' not in content and 'UserCleanupService' not in content and
-        'IUserJoinService' not in content and 'UserJoinService' not in content):
+    'UserJoinFacade' not in content):
         print(f"⏭️  {file_path} - User Management сервисы не используются")
         return False
     
@@ -76,7 +76,7 @@ def main():
         'ClubDoorman.Test/Unit/Services/CaptchaServiceFakeTests.cs',
         'ClubDoorman.Test/Services/ServiceChatDispatcherTests.cs',
         'ClubDoorman.Test/TestKit/TestKit.NotificationServiceBuilder.cs',
-        'ClubDoorman.Test/TestKit/TestKit.UserJoinServiceBuilder.cs',
+    # Legacy builder removed: TestKit.UserJoinServiceBuilder.cs
         'ClubDoorman.Test/TestKit/TestKit.MessageHandlerBuilder.cs',
         'ClubDoorman.Test/TestKit/TestKit.Mocks.cs',
         'ClubDoorman.Test/TestKit/Builders/MockBuilders/TelegramBotMockBuilder.cs',

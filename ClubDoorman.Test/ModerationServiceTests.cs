@@ -27,8 +27,8 @@ public class ModerationServiceTests
     [SetUp]
     public void Setup()
     {
-        _factory = new ModerationServiceTestFactory();
-        _service = new Mock<IModerationService>().Object;
+    _factory = new ModerationServiceTestFactory();
+    _service = _factory.CreateModerationService();
     }
 
     [Test]

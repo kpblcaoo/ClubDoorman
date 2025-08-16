@@ -9,6 +9,7 @@ using Moq;
 using NUnit.Framework;
 using Telegram.Bot;
 using ClubDoorman.Services;
+using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
@@ -85,9 +86,11 @@ public class ChatMemberHandlerTestFactory
     
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
-    public IModerationService CreateModerationServiceWithFake()
+    public ModerationServiceAdapter CreateModerationServiceWithFake()
     {
-        return new Mock<IModerationService>().Object;
+        return new ModerationServiceAdapter(
+            new Mock<IModerationPolicy>().Object
+        );
     }
 
     public IUserManager CreateUserManagerWithFake()

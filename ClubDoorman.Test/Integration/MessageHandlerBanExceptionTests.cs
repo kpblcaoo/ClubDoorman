@@ -26,6 +26,7 @@ using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Features.Moderation;
 
 namespace ClubDoorman.Test.Integration;
 
@@ -43,7 +44,7 @@ public class MessageHandlerBanExceptionTests
 {
     private MessageHandler _handler = null!;
     private Mock<ITelegramBotClientWrapper> _botMock = null!;
-    private Mock<IModerationService> _moderationServiceMock = null!;
+    private Mock<IModerationFacade> _moderationServiceMock = null!;
     private Mock<IMessageService> _messageServiceMock = null!;
     private Mock<ILogger<MessageHandler>> _loggerMock = null!;
     private Mock<IUserBanService> _userBanServiceMock = null!;
@@ -53,7 +54,7 @@ public class MessageHandlerBanExceptionTests
     {
         // Используем автомоки для создания основных зависимостей
         _botMock = TK.CreateMockBotClientWrapper();
-        _moderationServiceMock = TK.CreateMockModerationService();
+        _moderationServiceMock = TK.CreateMock<IModerationFacade>();
         _messageServiceMock = TK.CreateMockMessageService();
         _loggerMock = new Mock<ILogger<MessageHandler>>();
         _userBanServiceMock = TK.CreateMockUserBanService();
@@ -119,38 +120,22 @@ public class MessageHandlerBanExceptionTests
         
         var commandRouterMock = new Mock<ICommandRouter>();
         
-        // Создаем MessageHandler с настроенными моками
+        // Создаем MessageHandler с настроенными моками (новая сигнатура конструктора)
         _handler = new MessageHandler(
             _botMock.Object,
-            _moderationServiceMock.Object,
-            captchaServiceMock.Object,
             userManagerMock.Object,
-            classifierMock.Object,
-            badMessageManagerMock.Object,
-            aiChecksMock.Object,
-            globalStatsManagerMock.Object,
-            statisticsServiceMock.Object,
-            userFlowLoggerMock.Object,
-            _messageServiceMock.Object,
-            chatLinkFormatterMock.Object,
-            botPermissionsServiceMock.Object,
             appConfigMock.Object,
-            violationTrackerMock.Object,
-            _loggerMock.Object,
             _userBanServiceMock.Object,
             channelModerationServiceMock.Object,
-            startCommandHandlerMock.Object,
-            suspiciousCommandHandlerMock.Object,
             commandRouterMock.Object,
-            logChatServiceMock.Object,
-            Mock.Of<IJoinedUserFlags>(),
-            Mock.Of<IUserIndex>(),
-            Mock.Of<IAiCascadeService>(),
-            Mock.Of<INotificationService>(),
-            Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
-            Mock.Of<ClubDoorman.Services.Notifications.IButtonsService>(),
             Mock.Of<IUserJoinFacade>(),
-            Mock.Of<ClubDoorman.Features.Moderation.IModerationFacade>()
+            _moderationServiceMock.Object,
+            _loggerMock.Object,
+            botPermissionsServiceMock.Object,
+            captchaServiceMock.Object,
+            userFlowLoggerMock.Object,
+            Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
+            Mock.Of<IAiCascadeService>()
         );
     }
 
