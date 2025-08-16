@@ -107,13 +107,13 @@ public class MessageHandlerTestFactory
             ChannelModerationServiceMock.Object,
             new Mock<ICommandRouter>().Object,
             new Mock<IUserJoinFacade>().Object,
-            new Mock<IModerationFacade>().Object,
+            ModerationFacadeMock.Object,
             LoggerMock.Object,
             BotPermissionsServiceMock.Object,
             CaptchaServiceMock.Object,
             UserFlowLoggerMock.Object,
             new Mock<IForwardingService>().Object,
-            new Mock<IAiCascadeService>().Object
+            AiCascadeServiceMock.Object
         );
     }
     
@@ -134,13 +134,13 @@ public class MessageHandlerTestFactory
             ChannelModerationServiceMock.Object,
             new Mock<ICommandRouter>().Object,
             new Mock<IUserJoinFacade>().Object,
-            new Mock<IModerationFacade>().Object,
+            ModerationFacadeMock.Object,
             LoggerMock.Object,
             BotPermissionsServiceMock.Object,
             CaptchaServiceMock.Object,
             UserFlowLoggerMock.Object,
             new Mock<IForwardingService>().Object,
-            new Mock<IAiCascadeService>().Object
+            AiCascadeServiceMock.Object
         );
     }
 
@@ -155,6 +155,12 @@ public class MessageHandlerTestFactory
     public MessageHandlerTestFactory WithModerationServiceSetup(Action<Mock<IModerationFacade>> setup)
     {
         setup(ModerationServiceMock);
+        return this;
+    }
+
+    public MessageHandlerTestFactory WithModerationFacadeSetup(Action<Mock<IModerationFacade>> setup)
+    {
+        setup(ModerationFacadeMock);
         return this;
     }
 
