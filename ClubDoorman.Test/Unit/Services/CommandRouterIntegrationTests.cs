@@ -35,7 +35,7 @@ public class CommandRouterIntegrationTests
     {
         // Добавляем необходимые зависимости для тестирования
         services.AddSingleton(Mock.Of<ITelegramBotClientWrapper>());
-        services.AddSingleton(Mock.Of<IMessageHandler>());
+        services.AddSingleton(Mock.Of<IUpdateHandler>());
         services.AddSingleton(Mock.Of<IAppConfig>());
         services.AddSingleton(Mock.Of<IModerationService>());
         services.AddSingleton(Mock.Of<IMessageService>());

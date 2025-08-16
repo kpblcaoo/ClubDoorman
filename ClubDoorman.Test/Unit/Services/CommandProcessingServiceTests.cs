@@ -28,7 +28,7 @@ public class CommandProcessingServiceTests
     [SetUp]
     public void Setup()
     {
-        _messageHandlerMock = new Mock<IMessageHandler>();
+        _messageHandlerMock = new Mock<IUpdateHandler>();
         _loggerMock = new Mock<ILogger<CommandProcessingService>>();
         _service = new CommandProcessingService(_messageHandlerMock.Object, _loggerMock.Object);
     }

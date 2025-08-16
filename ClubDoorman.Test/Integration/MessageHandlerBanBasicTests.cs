@@ -23,6 +23,7 @@ using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Features.Moderation;
 
 namespace ClubDoorman.Test.Integration;
 
@@ -38,7 +39,7 @@ public class MessageHandlerBanBasicTests
     private MessageHandlerTestFactory _factory = null!;
     private MessageHandler _handler = null!;
     private Mock<ITelegramBotClientWrapper> _botMock = null!;
-    private Mock<IModerationService> _moderationServiceMock = null!;
+    private Mock<IModerationFacade> _moderationServiceMock = null!;
 
     [SetUp]
     public void SetUp()

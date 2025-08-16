@@ -31,7 +31,7 @@ public class MessagingModuleTests
         
         // Добавляем необходимые зависимости для тестирования
         _services.AddSingleton(Mock.Of<ITelegramBotClientWrapper>());
-        _services.AddSingleton(Mock.Of<IMessageHandler>());
+        _services.AddSingleton(Mock.Of<IUpdateHandler>());
         _services.AddSingleton(Mock.Of<IOptions<LoggingConfiguration>>());
         _services.AddSingleton(Mock.Of<IAppConfig>());
         _services.AddSingleton(Mock.Of<IUserBanService>());
