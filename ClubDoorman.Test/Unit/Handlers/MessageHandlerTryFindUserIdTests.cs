@@ -32,45 +32,12 @@ namespace ClubDoorman.Test.Unit.Handlers;
 [Category("MessageHandler")]
 public class MessageHandlerTryFindUserIdTests
 {
-    private MessageHandler _messageHandler;
+    private IUserIndex _userIndex;
 
     [SetUp]
     public void Setup()
     {
-        var fixture = TestKitAutoFixture.GetFixture();
-        var realUserIndex = new ClubDoorman.Services.UserManagement.UserIndex();
-        _messageHandler = new MessageHandler(
-            TestKitAutoFixture.Create<ITelegramBotClientWrapper>(),
-            TestKitAutoFixture.Create<IModerationService>(),
-            TestKitAutoFixture.Create<ICaptchaService>(),
-            TestKitAutoFixture.Create<IUserManager>(),
-            TestKitAutoFixture.Create<ISpamHamClassifier>(),
-            TestKitAutoFixture.Create<IBadMessageManager>(),
-            TestKitAutoFixture.Create<IAiChecks>(),
-            TestKitAutoFixture.Create<GlobalStatsManager>(),
-            TestKitAutoFixture.Create<IStatisticsService>(),
-            TestKitAutoFixture.Create<IUserFlowLogger>(),
-            TestKitAutoFixture.Create<IMessageService>(),
-            TestKitAutoFixture.Create<IChatLinkFormatter>(),
-            TestKitAutoFixture.Create<IBotPermissionsService>(),
-            TestKitAutoFixture.Create<IAppConfig>(),
-            TestKitAutoFixture.Create<IViolationTracker>(),
-            TestKitAutoFixture.Create<ILogger<MessageHandler>>(),
-            TestKitAutoFixture.Create<IUserBanService>(),
-            TestKitAutoFixture.Create<IChannelModerationService>(),
-            TestKitAutoFixture.Create<IStartCommandHandler>(),
-            TestKitAutoFixture.Create<ISuspiciousCommandHandler>(),
-            TestKitAutoFixture.Create<ICommandRouter>(),
-            TestKitAutoFixture.Create<ILogChatService>(),
-            TestKitAutoFixture.Create<IJoinedUserFlags>(),
-            realUserIndex,
-            TestKitAutoFixture.Create<IAiCascadeService>(),
-            TestKitAutoFixture.Create<ClubDoorman.Services.Messaging.INotificationService>(),
-            TestKitAutoFixture.Create<ClubDoorman.Services.Notifications.IForwardingService>(),
-            TestKitAutoFixture.Create<ClubDoorman.Services.Notifications.IButtonsService>(),
-            TestKitAutoFixture.Create<IUserJoinFacade>(),
-            TestKitAutoFixture.Create<ClubDoorman.Features.Moderation.IModerationFacade>()
-        );
+        _userIndex = new ClubDoorman.Services.UserManagement.UserIndex();
         foreach (var item in MemoryCache.Default.ToList())
             MemoryCache.Default.Remove(item.Key);
     }
@@ -103,7 +70,7 @@ public class MessageHandlerTryFindUserIdTests
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.EqualTo(userId));
@@ -124,7 +91,7 @@ public class MessageHandlerTryFindUserIdTests
         MemoryCache.Default.Add("123_456", "Message from @otheruser", new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -142,7 +109,7 @@ public class MessageHandlerTryFindUserIdTests
         var username = "";
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -160,7 +127,7 @@ public class MessageHandlerTryFindUserIdTests
         string? username = null;
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username!);
+        var result = _userIndex.TryFindUserIdByUsername(username!);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -184,7 +151,7 @@ public class MessageHandlerTryFindUserIdTests
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username.ToLower());
+        var result = _userIndex.TryFindUserIdByUsername(username.ToLower());
 
         // Assert
         Assert.That(result, Is.EqualTo(userId));
@@ -210,7 +177,7 @@ public class MessageHandlerTryFindUserIdTests
         MemoryCache.Default.Add($"{chatId2}_{userId2}", $"Message from @{otherUsername}", new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(targetUsername);
+        var result = _userIndex.TryFindUserIdByUsername(targetUsername);
 
         // Assert
         Assert.That(result, Is.EqualTo(userId1));
@@ -232,7 +199,7 @@ public class MessageHandlerTryFindUserIdTests
         MemoryCache.Default.Add(invalidCacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -256,7 +223,7 @@ public class MessageHandlerTryFindUserIdTests
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -276,7 +243,7 @@ public class MessageHandlerTryFindUserIdTests
         // Кэш пустой
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -300,7 +267,7 @@ public class MessageHandlerTryFindUserIdTests
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.EqualTo(userId));
@@ -340,7 +307,7 @@ public class MessageHandlerTryFindUserIdTests
         }
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Console.WriteLine($"Результат поиска: {result}");

@@ -43,13 +43,13 @@ namespace ClubDoorman.Test.TestKit
         /// Создает фабрику для ModerationService
         /// <tags>factory, moderation-service, test-infrastructure</tags>
         /// </summary>
-        // public static ModerationServiceTestFactory CreateModerationServiceFactory() => new();
+        public static ModerationServiceTestFactory CreateModerationServiceFactory() => new();
 
         /// <summary>
         /// Создает фабрику для CaptchaService
         /// <tags>factory, captcha-service, test-infrastructure</tags>
         /// </summary>
-        // public static CaptchaServiceTestFactory CreateCaptchaServiceFactory() => new();
+        public static CaptchaServiceTestFactory CreateCaptchaServiceFactory() => new();
 
         /// <summary>
         /// Создает фабрику для CallbackQueryHandler

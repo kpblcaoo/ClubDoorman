@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.UserJoin;
+using ClubDoorman.Features.UserJoin;
 
 namespace ClubDoorman.Test.Unit.Services.UserManagement;
 
@@ -64,9 +65,9 @@ public class UserManagementModuleTests
         services.AddUserManagementServices();
         
         // Assert
-        var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IUserJoinService));
+        var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IUserJoinFacade));
         Assert.That(descriptor, Is.Not.Null);
-        Assert.That(descriptor!.ImplementationType, Is.EqualTo(typeof(UserJoinService)));
+        Assert.That(descriptor!.ImplementationType, Is.EqualTo(typeof(UserJoinFacade)));
     }
     
     [Test]

@@ -689,6 +689,15 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
         
         return message;
     }
+
+    /// <summary>
+    /// Настраивает администраторов чата для тестов
+    /// </summary>
+    public void SetupChatAdministrators(long chatId, params ChatMember[] administrators)
+    {
+        // Простая реализация для тестов
+        // В реальности здесь была бы логика настройки администраторов
+    }
 }
 
 // Модели для отслеживания действий

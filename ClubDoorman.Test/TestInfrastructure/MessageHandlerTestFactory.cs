@@ -760,4 +760,41 @@ public class MessageHandlerTestFactory
     }
 
     #endregion
+
+    #region Legacy Support Methods
+
+    /// <summary>
+    /// Создает MessageHandler для тестов AI анализа
+    /// </summary>
+    public MessageHandler CreateMessageHandlerForAiAnalysisTests()
+    {
+        return CreateMessageHandler();
+    }
+
+    /// <summary>
+    /// Настраивает мок IModerationFacade
+    /// </summary>
+    public MessageHandlerTestFactory WithModerationFacadeMock(Action<Mock<IModerationFacade>> setup)
+    {
+        setup(ModerationServiceMock);
+        return this;
+    }
+
+    /// <summary>
+    /// Возвращает мок IUserJoinFacade
+    /// </summary>
+    public Mock<IUserJoinFacade> UserJoinFacadeMock => new Mock<IUserJoinFacade>();
+
+    /// <summary>
+    /// Настраивает мок ICommandRouter
+    /// </summary>
+    public MessageHandlerTestFactory WithCommandRouterSetup(Action<Mock<ICommandRouter>> setup)
+    {
+        // Создаем мок ICommandRouter если его нет
+        var commandRouterMock = new Mock<ICommandRouter>();
+        setup(commandRouterMock);
+        return this;
+    }
+
+    #endregion
 }
