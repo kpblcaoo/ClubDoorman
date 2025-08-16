@@ -111,6 +111,7 @@ public class CheckCommandHandler : ICommandHandler
 
             // Получаем список администраторов чата
             var chatAdmins = await _bot.GetChatAdministratorsAsync(message.Chat.Id, cancellationToken);
+            Console.WriteLine($"[DEBUG] CheckCommandHandler: получено {chatAdmins.Length} админ(ов): [{string.Join(',', chatAdmins.Select(a => a.User?.Id))}]; ищем {message.From?.Id}");
             var isUserAdmin = chatAdmins.Any(admin => admin.User.Id == message.From!.Id);
 
             Console.WriteLine($"[DEBUG] CheckCommandHandler: isUserAdmin={isUserAdmin}");

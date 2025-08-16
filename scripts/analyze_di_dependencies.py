@@ -145,8 +145,8 @@ class DIDependencyAnalyzer:
             'ApprovedUsersStorage': 'UserManagement',
             'IUserCleanupService': 'UserManagement',
             'UserCleanupService': 'UserManagement',
-            'IUserJoinService': 'UserManagement',
-            'UserJoinService': 'UserManagement',
+            # UserJoinFacade supersedes removed UserJoinService
+            'IUserJoinFacade': 'UserJoinFeature',
             
             # Messaging
             'IMessageService': 'Messaging',

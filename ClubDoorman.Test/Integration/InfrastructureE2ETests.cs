@@ -68,8 +68,12 @@ public class InfrastructureE2ETests : TestBase
         var mockUserManager = CreateMock<IUserManager>();
         var mockMessageService = CreateMock<IMessageService>();
         
-        // Используем мок/фейк IModerationService для тестов
-        _moderationService = new Mock<IModerationService>().Object;
+        // Используем простой фейковый IModerationService, возвращающий Allow, вместо пустого мока (иначе null)
+        var moderationServiceMock = new Mock<IModerationService>();
+        moderationServiceMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+            .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "infrastructure-allow"));
+        moderationServiceMock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
+        _moderationService = moderationServiceMock.Object;
     }
 
     [TearDown]

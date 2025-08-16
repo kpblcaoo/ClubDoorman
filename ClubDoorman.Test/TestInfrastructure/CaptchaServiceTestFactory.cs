@@ -3,6 +3,7 @@ using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
+using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -84,9 +85,11 @@ public class CaptchaServiceTestFactory
     
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
-    public IModerationService CreateModerationServiceWithFake()
+    public ModerationServiceAdapter CreateModerationServiceWithFake()
     {
-        return new Mock<IModerationService>().Object;
+        return new ModerationServiceAdapter(
+            new Mock<IModerationPolicy>().Object
+        );
     }
 
     public IUserManager CreateUserManagerWithFake()

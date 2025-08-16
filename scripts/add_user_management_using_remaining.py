@@ -50,8 +50,9 @@ def main():
     """Основная функция"""
     # Список файлов, которые нужно обновить
     files_to_update = [
-        'ClubDoorman.Test/Integration/UserJoinServiceIntegrationTests.cs',
-        'ClubDoorman.Test/TestKit/TestKit.UserJoinServiceBuilder.cs',
+    'ClubDoorman.Test/Integration/UserJoinFacadeIntegrationTests.cs',
+    # Legacy builder file removed: TestKit.UserJoinServiceBuilder.cs
+        # Legacy builder file removed: TestKit.UserJoinServiceBuilder.cs
         'ClubDoorman.Test/ModerationServiceSimpleTests.cs',
         'ClubDoorman.Test/Integration/AiAnalysisTests.cs',
         'ClubDoorman.Test/TestInfrastructure/AiChecksTestFactory.cs',

@@ -565,7 +565,7 @@ namespace ClubDoorman.Test.TestKit
                 /// </summary>
                 public class ModerationSetup
                 {
-                    public IModerationService Service { get; init; } = null!;
+                    public IModerationPolicy Service { get; init; } = null!;
                     public SpamHamClassifier SpamClassifier { get; init; } = null!;
                     public MimicryClassifier MimicryClassifier { get; init; } = null!;
                     public BadMessageManager BadMessageManager { get; init; } = null!;
@@ -576,7 +576,7 @@ namespace ClubDoorman.Test.TestKit
                     public Mock<IUserManager> UserManagerMock { get; init; } = null!;
                     public Mock<ITelegramBotClientWrapper> BotClientMock { get; init; } = null!;
                     public Mock<IMessageService> MessageServiceMock { get; init; } = null!;
-                    public Mock<ILogger<IModerationService>> LoggerMock { get; init; } = null!;
+                    public Mock<ILogger<IModerationPolicy>> LoggerMock { get; init; } = null!;
                     // Логгеры для отдельных компонентов
                     public Mock<ILogger<SpamHamClassifier>> SpamLoggerMock { get; init; } = null!;
                     public Mock<ILogger<MimicryClassifier>> MimicryLoggerMock { get; init; } = null!;
@@ -623,6 +623,7 @@ namespace ClubDoorman.Test.TestKit
                         suspiciousUsersStorage,
                         botClientWrapperMock.Object,
                         messageServiceMock.Object,
+                        new Mock<IUserBanService>().Object,
                         CreateLoggerMock<ClubDoorman.TestInfrastructure.FakeModerationService>().Object
                     );
 
@@ -637,7 +638,7 @@ namespace ClubDoorman.Test.TestKit
                         UserManagerMock = userManagerMock,
                         BotClientMock = botClientWrapperMock,
                         MessageServiceMock = messageServiceMock,
-                        LoggerMock = CreateLoggerMock<IModerationService>(),
+                        LoggerMock = CreateLoggerMock<IModerationPolicy>(),
                         SpamLoggerMock = spamLoggerMock,
                         MimicryLoggerMock = mimicryLoggerMock,
                         SuspiciousLoggerMock = suspiciousLoggerMock,
@@ -676,6 +677,7 @@ namespace ClubDoorman.Test.TestKit
                         suspiciousUsersStorage,
                         botClientWrapperMock.Object,
                         messageServiceMock.Object,
+                        new Mock<IUserBanService>().Object,
                         CreateLoggerMock<ClubDoorman.TestInfrastructure.FakeModerationService>().Object
                     );
 
@@ -690,7 +692,7 @@ namespace ClubDoorman.Test.TestKit
                         UserManagerMock = userManagerMock,
                         BotClientMock = botClientWrapperMock,
                         MessageServiceMock = messageServiceMock,
-                        LoggerMock = CreateLoggerMock<IModerationService>(),
+                        LoggerMock = CreateLoggerMock<IModerationPolicy>(),
                         SpamLoggerMock = spamLoggerMock,
                         MimicryLoggerMock = mimicryLoggerMock,
                         SuspiciousLoggerMock = suspiciousLoggerMock,
@@ -703,7 +705,7 @@ namespace ClubDoorman.Test.TestKit
                 /// Использует реальные объекты для sealed классов и моки для интерфейсов
                 /// </summary>
                 /// <returns>Setup с мокированными компонентами</returns>
-                public static (IModerationService service, Dictionary<string, Mock> mocks) MockedSetup()
+                public static (IModerationPolicy service, Dictionary<string, Mock> mocks) MockedSetup()
                 {
                     var mocks = new Dictionary<string, Mock>();
 
@@ -742,6 +744,7 @@ namespace ClubDoorman.Test.TestKit
                         suspiciousUsersStorage,
                         botClientWrapperMock.Object,
                         messageServiceMock.Object,
+                        new Mock<IUserBanService>().Object,
                         loggerMock.Object
                     );
 

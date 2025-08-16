@@ -12,7 +12,6 @@ using Telegram.Bot;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services;
 using ClubDoorman.Services.UserBan;
-using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
@@ -132,9 +131,11 @@ public class CallbackQueryHandlerTestFactory
     
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
-    public IModerationService CreateModerationServiceWithFake()
+    public ModerationServiceAdapter CreateModerationServiceWithFake()
     {
-        return new Mock<IModerationService>().Object;
+        return new ModerationServiceAdapter(
+            new Mock<IModerationPolicy>().Object
+        );
     }
 
             public CaptchaService CreateCaptchaServiceWithFake()

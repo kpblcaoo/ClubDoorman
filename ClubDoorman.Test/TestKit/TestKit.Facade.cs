@@ -2,8 +2,7 @@ using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Test.TestInfrastructure;
+using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Test.TestData;
 using ClubDoorman.Handlers;
 using ClubDoorman.Test.TestKit.Builders;
@@ -16,6 +15,7 @@ using Moq;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Test.TestInfrastructure;
 
 namespace ClubDoorman.Test.TestKit
 {
@@ -55,19 +55,19 @@ namespace ClubDoorman.Test.TestKit
         /// Создает фабрику для CallbackQueryHandler
         /// <tags>factory, callback-query-handler, test-infrastructure</tags>
         /// </summary>
-        public static CallbackQueryHandlerTestFactory CreateCallbackQueryHandlerFactory() => new();
+        // public static CallbackQueryHandlerTestFactory CreateCallbackQueryHandlerFactory() => new();
 
         /// <summary>
         /// Создает фабрику для ChatMemberHandler
         /// <tags>factory, chat-member-handler, test-infrastructure</tags>
         /// </summary>
-        public static ChatMemberHandlerTestFactory CreateChatMemberHandlerFactory() => new();
+        // public static ChatMemberHandlerTestFactory CreateChatMemberHandlerFactory() => new();
 
         /// <summary>
         /// Создает фабрику для ServiceChatDispatcher
         /// <tags>factory, service-chat-dispatcher, test-infrastructure</tags>
         /// </summary>
-        public static ServiceChatDispatcherTestFactory CreateServiceChatDispatcherFactory() => new();
+        // public static ServiceChatDispatcherTestFactory CreateServiceChatDispatcherFactory() => new();
 
         /// <summary>
         /// Создает базовую конфигурацию приложения
@@ -85,25 +85,25 @@ namespace ClubDoorman.Test.TestKit
         /// Создает фабрику для AiChecks
         /// <tags>factory, ai-checks, ai, test-infrastructure</tags>
         /// </summary>
-        public static AiChecksTestFactory CreateAiChecksFactory() => new();
+        // public static AiChecksTestFactory CreateAiChecksFactory() => new();
 
         /// <summary>
         /// Создает фабрику для StatisticsService
         /// <tags>factory, statistics-service, test-infrastructure</tags>
         /// </summary>
-        public static StatisticsServiceTestFactory CreateStatisticsServiceFactory() => new();
+        // public static StatisticsServiceTestFactory CreateStatisticsServiceFactory() => new();
 
         /// <summary>
         /// Создает фабрику для SpamHamClassifier
         /// <tags>factory, spam-ham-classifier, ml, test-infrastructure</tags>
         /// </summary>
-        public static SpamHamClassifierTestFactory CreateSpamHamClassifierFactory() => new();
+        // public static SpamHamClassifierTestFactory CreateSpamHamClassifierFactory() => new();
 
         /// <summary>
         /// Создает фабрику для MimicryClassifier
         /// <tags>factory, mimicry-classifier, ml, test-infrastructure</tags>
         /// </summary>
-        public static MimicryClassifierTestFactory CreateMimicryClassifierFactory() => new();
+        // public static MimicryClassifierTestFactory CreateMimicryClassifierFactory() => new();
 
         #endregion
 
@@ -152,10 +152,10 @@ namespace ClubDoorman.Test.TestKit
     
         
         /// <summary>
-        /// Создает билдер для UserJoinService
-        /// <tags>builders, user-join-service, fluent-api</tags>
-        /// </summary>
-        public static UserJoinServiceBuilder CreateUserJoinServiceBuilder() => new();
+    /// Создает билдер для UserJoinFacade
+    /// <tags>builders, user-join-facade, fluent-api</tags>
+    /// </summary>
+    public static UserJoinFacadeBuilder CreateUserJoinFacadeBuilder() => new();
 
         #endregion
 

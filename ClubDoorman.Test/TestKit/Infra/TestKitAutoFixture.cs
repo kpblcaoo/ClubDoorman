@@ -124,12 +124,8 @@ public static class TestKitAutoFixture
                     Mock.Of<ILogger<StartCommandHandler>>(),
                     Mock.Of<IMessageService>(),
                     Mock.Of<IAppConfig>()).Object;
-                var suspiciousCommandHandler = new Mock<SuspiciousCommandHandler>(
-                    Mock.Of<ITelegramBotClientWrapper>(),
-                    Mock.Of<IModerationService>(),
-                    Mock.Of<IMessageService>(),
-                    Mock.Of<ILogger<SuspiciousCommandHandler>>(),
-                    Mock.Of<IAppConfig>()).Object;
+                // Используем интерфейс вместо конкретного класса чтобы избежать проблем с Castle DynamicProxy при изменениях конструктора
+                var suspiciousCommandHandler = new Mock<ISuspiciousCommandHandler>().Object;
                 var logChatService = TK.CreateMock<ILogChatService>().Object;
                 var commandRouter = TK.CreateMock<ICommandRouter>().Object;
                 var aiCascadeService = TK.CreateMock<IAiCascadeService>().Object;
@@ -140,12 +136,10 @@ public static class TestKitAutoFixture
                 var userIndex = TK.CreateMock<IUserIndex>().Object;
 
                 return new MessageHandler(
-                    bot, moderationService, captchaService, userManager, classifier,
-                    badMessageManager, aiChecks, globalStatsManager, statisticsService,
-                    userFlowLogger, messageService, chatLinkFormatter,
-                    botPermissionsService, appConfig, violationTracker, logger, userBanService,
-                    channelModerationService, startCommandHandler, suspiciousCommandHandler, commandRouter, logChatService,
-                    joinedUserFlags, userIndex, aiCascadeService, notificationService, forwardingService, buttonsService, TK.CreateMock<IUserJoinFacade>().Object, TK.CreateMock<IModerationFacade>().Object);
+                    bot, userManager, appConfig, userBanService, channelModerationService,
+                    commandRouter, TK.CreateMock<IUserJoinFacade>().Object, TK.CreateMock<IModerationFacade>().Object,
+                    logger, botPermissionsService, captchaService, userFlowLogger,
+                    forwardingService, aiCascadeService);
             })
             .OmitAutoProperties());
 
