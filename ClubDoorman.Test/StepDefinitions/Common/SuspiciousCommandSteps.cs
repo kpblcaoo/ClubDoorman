@@ -52,9 +52,14 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Given(@"I am an administrator")]
         public void GivenIAmAnAdministrator()
         {
+            long adminId = 123456789; // default legacy admin id
+            if (ScenarioContext.Current.ContainsKey("CheckCommandAdminUserId"))
+            {
+                try { adminId = (long)ScenarioContext.Current["CheckCommandAdminUserId"]; } catch { /* ignore cast issues */ }
+            }
             _testMessage = new Message
             {
-                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = adminId, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow
             };
@@ -76,6 +81,51 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             
             // Пересоздаем MessageHandler с новым значением isAdmin
             GivenIHaveAMessageHandler();
+            _fakeBot.TestContextCurrentUserId = null; // убираем пользователя из сценарных админов
+            // Явно задаем список админов чата (без текущего пользователя)
+            _fakeBot.SetupChatAdministrators(123456789,
+                new ChatMemberOwner { User = new User { Id = 123, FirstName = "TestOwner", Username = "testowner" } },
+                new ChatMemberAdministrator
+                {
+                    User = new User { Id = 456, FirstName = "TestAdmin", Username = "testadmin" },
+                    IsAnonymous = false,
+                    CanManageChat = true,
+                    CanDeleteMessages = true,
+                    CanManageVideoChats = true,
+                    CanRestrictMembers = true,
+                    CanPromoteMembers = true,
+                    CanChangeInfo = true,
+                    CanInviteUsers = true,
+                    CustomTitle = "Admin"
+                });
+
+            // Настраиваем список администраторов чата (бот видит только настоящего админа 123456789)
+            _fakeBot.SetupChatAdministrators(123456789, new ChatMemberAdministrator
+            {
+                User = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
+                CanManageChat = true, CanDeleteMessages = true, CanManageVideoChats = true,
+                CanRestrictMembers = true, CanPromoteMembers = true, CanChangeInfo = true, CanInviteUsers = true
+            });
+
+            // Регистрируем обработчик /check команды (используется в этом сценарии)
+            var checkHandler = new CheckCommandHandler(
+                _fakeBot,
+                _factory.ClassifierMock.Object,
+                _factory.MessageServiceMock.Object,
+                _factory.BotPermissionsServiceMock.Object,
+                _factory.AppConfigMock.Object,
+                _loggerFactory.CreateLogger<CheckCommandHandler>());
+            var commandRouter = new CommandRouter(new List<ICommandHandler> { checkHandler }, _loggerFactory.CreateLogger<CommandRouter>());
+            _factory.WithCommandRouterSetup(mock =>
+            {
+                mock.Reset();
+                mock.Setup(x => x.HandleCommandAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
+                    .Returns<Message, CancellationToken>((message, ct) => commandRouter.HandleCommandAsync(message, ct));
+            });
+
+            // Пересоздаем handler, чтобы он захватил обновленный CommandRouter
+            _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
+            ScenarioContext.Current["MessageHandler"] = _messageHandler;
         }
 
         [Given(@"I have a message handler")]
@@ -131,7 +181,51 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             // Передаём текущего пользователя в fake bot, чтобы он считался админом при необходимости
             if (_testMessage?.From != null)
             {
-                _fakeBot.TestContextCurrentUserId = _testMessage.From.Id;
+                if (ScenarioContext.Current.ContainsKey("IsAdmin") && (bool)ScenarioContext.Current["IsAdmin"])
+                {
+                    _fakeBot.TestContextCurrentUserId = _testMessage.From.Id;
+                }
+            }
+
+            // Настраиваем реальный обработчик /check внутри CommandRouterMock, если ещё не настроен
+            if (!_factory.CommandRouterMock.Setups.Any(s => s.ToString().Contains("/check")))
+            {
+                var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
+                var checkHandler = new CheckCommandHandler(
+                    _factory.BotMock.Object,
+                    _factory.ClassifierMock.Object,
+                    _factory.MessageServiceMock.Object,
+                    _factory.BotPermissionsServiceMock.Object,
+                    _factory.AppConfigMock.Object,
+                    loggerFactory.CreateLogger<CheckCommandHandler>());
+
+                // Настраиваем получения админов для успешного прохождения проверки прав (только в админ сценариях)
+                var isAdminScenario = ScenarioContext.Current.ContainsKey("IsAdmin") && (bool)ScenarioContext.Current["IsAdmin"];
+                if (isAdminScenario)
+                {
+                    // Если CheckCommandSteps уже установил общий AdminUserId - используем его
+                    long adminUserId = _testMessage?.From?.Id ?? 123456789;
+                    if (ScenarioContext.Current.ContainsKey("CheckCommandAdminUserId"))
+                    {
+                        try { adminUserId = (long)ScenarioContext.Current["CheckCommandAdminUserId"]; } catch { /* ignore */ }
+                    }
+                    _factory.BotMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
+                        .ReturnsAsync(new ChatMember[]
+                        {
+                            new ChatMemberOwner { User = new User { Id = 1, FirstName = "Owner" } },
+                new ChatMemberAdministrator { User = new User { Id = adminUserId, FirstName = "AdminUser" } }
+                        });
+            Console.WriteLine($"[DEBUG] SuspiciousCommandSteps: BotMock admins configured with adminUserId={adminUserId}");
+                }
+
+                _factory.CommandRouterMock
+                    .Setup(x => x.HandleCommandAsync(It.Is<Message>(m => m.Text != null && m.Text.StartsWith("/check")), It.IsAny<CancellationToken>()))
+                    .Returns<Message, CancellationToken>(async (msg, ct) => { await checkHandler.HandleAsync(msg, ct); return true; });
+
+                // Для всех прочих команд возвращаем false (если не настроено ранее)
+                _factory.CommandRouterMock
+                    .Setup(x => x.HandleCommandAsync(It.Is<Message>(m => m.Text != null && !m.Text.StartsWith("/check")), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(false);
             }
             ScenarioContext.Current["MessageHandler"] = _messageHandler;
         }

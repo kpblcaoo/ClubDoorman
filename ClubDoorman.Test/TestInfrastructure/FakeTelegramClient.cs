@@ -43,6 +43,8 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
     private Dictionary<long, ChatFullInfo> _chatFullInfos = new();
     private Dictionary<string, string> _filePaths = new();
     private int _nextMessageId = 1;
+    // Настраиваемые администраторы для конкретных чатов (если заданы - переопределяют дефолтный список)
+    private readonly Dictionary<long, ChatMember[]> _customAdmins = new();
     
     // MessageEnvelope для тестовых сценариев
     private Dictionary<int, MessageEnvelope> _messageEnvelopes = new();
@@ -521,6 +523,14 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
         if (ShouldThrowException)
             throw ExceptionToThrow ?? new Exception("Fake exception");
 
+        var chatKey = chatId.Identifier ?? 0;
+        if (_customAdmins.TryGetValue(chatKey, out var custom))
+        {
+            // Используем только явно заданный список
+            OperationLog.Add($"GetChatAdministratorsAsync(custom): chatId={chatKey}; admins=[{string.Join(',', custom.Select(a=>a.User.Id))}]");
+            return Task.FromResult(custom);
+        }
+
         // Базовые администраторы
         var administrators = new List<ChatMember>
         {
@@ -715,8 +725,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
     /// </summary>
     public void SetupChatAdministrators(long chatId, params ChatMember[] administrators)
     {
-        // Простая реализация для тестов
-        // В реальности здесь была бы логика настройки администраторов
+    _customAdmins[chatId] = administrators;
     }
 }
 
