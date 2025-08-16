@@ -12,6 +12,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using ClubDoorman.Test.TestKit;
+using ClubDoorman.TestInfrastructure;
 
 namespace ClubDoorman.Test.Unit.Services;
 
@@ -24,7 +25,7 @@ namespace ClubDoorman.Test.Unit.Services;
 [Category("moderation")]
 public class ModerationServiceBusinessLogicTests
 {
-    private IModerationService _service;
+    private ModerationServiceAdapter _service;
     private FakeTelegramClient _fakeClient;
     private ModerationServiceTestFactory _factory;
 

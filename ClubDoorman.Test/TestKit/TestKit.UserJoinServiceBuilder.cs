@@ -212,6 +212,12 @@ return new UserJoinFacade(new Mock<IUserJoinPolicy>().Object, _loggerMock.Object
 public Mock<IUpdateHandler> MessageHandlerMock => _messageHandlerMock;
 
     /// <summary>
+    /// Возвращает мок IUserJoinFacade для дополнительной настройки
+/// <tags>builders, user-join-service, user-join-facade-mock, fluent-api</tags>
+/// </summary>
+public Mock<IUserJoinFacade> UserJoinFacadeMock => new Mock<IUserJoinFacade>();
+
+    /// <summary>
     /// Возвращает мок логгера для дополнительной настройки
 /// <tags>builders, user-join-service, logger-mock, fluent-api</tags>
 /// </summary>

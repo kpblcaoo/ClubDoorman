@@ -21,7 +21,7 @@ namespace ClubDoorman.Test.Unit.Services;
 [Category("command-processing")]
 public class CommandProcessingServiceTests
 {
-    private Mock<IMessageHandler> _messageHandlerMock = null!;
+    private Mock<MessageHandler> _messageHandlerMock = null!;
     private Mock<ILogger<CommandProcessingService>> _loggerMock = null!;
     private CommandProcessingService _service = null!;
 
