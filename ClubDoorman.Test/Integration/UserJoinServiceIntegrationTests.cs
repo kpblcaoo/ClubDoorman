@@ -514,7 +514,8 @@ public class UserJoinServiceIntegrationTests
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithCustomScenario(mock => 
             {
-                mock.Setup(x => x.ProcessNewUserAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<CancellationToken>()))
+                // Настраиваем мок IUpdateHandler для обработки команд
+                mock.Setup(x => x.HandleAsync(It.IsAny<Update>(), It.IsAny<CancellationToken>()))
                     .Returns(Task.CompletedTask);
             });
         var userJoinService = (UserJoinFacade)builder.Build();

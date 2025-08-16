@@ -65,6 +65,7 @@ public class MessageHandlerTestFactory
     public Mock<IUserBanService> UserBanServiceMock { get; } = TK.CreateMockUserBanService();
     public Mock<IChannelModerationService> ChannelModerationServiceMock { get; } = TK.CreateMock<IChannelModerationService>();
     public Mock<IAiCascadeService> AiCascadeServiceMock { get; } = TK.CreateMock<IAiCascadeService>();
+    public Mock<INotificationService> NotificationServiceMock { get; } = TK.CreateMock<INotificationService>();
 
     public Mock<IUserCleanupService> UserCleanupServiceMock { get; } = TK.CreateMock<IUserCleanupService>();
     

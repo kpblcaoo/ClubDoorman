@@ -70,7 +70,7 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
 
         // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
+        await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
 
         // Assert
         _factory.BotMock.Verify(
@@ -126,7 +126,7 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
 
         // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
+        await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
 
         // Assert
         _factory.BotMock.Verify(
@@ -171,7 +171,7 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
 
         // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
+        await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
 
         // Assert
         _factory.BotMock.Verify(
@@ -218,7 +218,7 @@ public class MessageHandlerSendSuspiciousMessageTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
+        await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
 
         // Assert
         _factory.MessageServiceMock.Verify(
@@ -242,7 +242,7 @@ public class MessageHandlerSendSuspiciousMessageTests
 
         // Act & Assert
         Assert.DoesNotThrowAsync(async () => 
-            await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data!, isSilentMode, CancellationToken.None),
+            await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, user, data!, isSilentMode, CancellationToken.None),
             "Метод должен обрабатывать null данные без исключений"
         );
     }
@@ -258,7 +258,7 @@ public class MessageHandlerSendSuspiciousMessageTests
 
         // Act & Assert
         Assert.DoesNotThrowAsync(async () => 
-            await _messageHandler.SendSuspiciousMessageWithButtons(nullMessage!, user, data, isSilentMode, CancellationToken.None),
+            await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(nullMessage!, user, data, isSilentMode, CancellationToken.None),
             "Метод должен обрабатывать null сообщение без исключений"
         );
     }
@@ -274,7 +274,7 @@ public class MessageHandlerSendSuspiciousMessageTests
 
         // Act & Assert
         Assert.DoesNotThrowAsync(async () => 
-            await _messageHandler.SendSuspiciousMessageWithButtons(message, nullUser!, data, isSilentMode, CancellationToken.None),
+            await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, nullUser!, data, isSilentMode, CancellationToken.None),
             "Метод должен обрабатывать null пользователя без исключений"
         );
     }
@@ -308,7 +308,7 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
 
         // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
+        await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
 
         // Assert
         _factory.BotMock.Verify(
@@ -355,7 +355,7 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
 
         // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
+        await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
 
         // Assert
         _factory.BotMock.Verify(
@@ -402,7 +402,7 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
 
         // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
+        await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
 
         // Assert
         _factory.BotMock.Verify(
