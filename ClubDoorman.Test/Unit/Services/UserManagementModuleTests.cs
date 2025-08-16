@@ -65,9 +65,9 @@ public class UserManagementModuleTests
         services.AddUserManagementServices();
         
         // Assert
-        var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IUserJoinFacade));
+        var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IUserIndex));
         Assert.That(descriptor, Is.Not.Null);
-        Assert.That(descriptor!.ImplementationType, Is.EqualTo(typeof(UserJoinFacade)));
+        Assert.That(descriptor!.ImplementationType, Is.EqualTo(typeof(UserIndex)));
     }
     
     [Test]
