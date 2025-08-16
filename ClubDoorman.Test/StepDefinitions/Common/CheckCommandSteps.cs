@@ -23,9 +23,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
     [Category("BDD")]
     public class CheckCommandSteps
     {
-    // Используем ID администратора, отличный от BotId (BotId=123456789) чтобы реплай не считался ответом боту
-    private const long AdminUserId = 223456789;
-    private const long NonAdminUserId = 987654321;
+        // Admin/NonAdmin constants moved to TestAdmin
         private Message _testMessage = null!;
         private Message _repliedMessage = null!;
         private Exception? _thrownException;
@@ -43,7 +41,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
             _fakeBot = new FakeTelegramClient();
             // Делимся ID администратора с другими step definitions (SuspiciousCommandSteps)
-            ScenarioContext.Current["CheckCommandAdminUserId"] = AdminUserId;
+            ScenarioContext.Current["CheckCommandAdminUserId"] = TestAdmin.AdminUserId;
 
             _factory.WithStandardMocks();
             _factory.WithAppConfigSetup(mock => {
@@ -93,77 +91,33 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             // Админы (добавляем текущего)
             // Настраиваем кастомных админов чата (без обычных пользователей)
-            _fakeBot.SetupChatAdministrators(123456789,
-                new ChatMemberOwner { User = new User { Id = 123, FirstName = "TestOwner", Username = "testowner" } },
-                new ChatMemberAdministrator
-                {
-                    User = new User { Id = AdminUserId, FirstName = "AdminUser", Username = "admin" },
-                    IsAnonymous = false,
-                    CanManageChat = true,
-                    CanDeleteMessages = true,
-                    CanManageVideoChats = true,
-                    CanRestrictMembers = true,
-                    CanPromoteMembers = true,
-                    CanChangeInfo = true,
-                    CanInviteUsers = true,
-                    CustomTitle = "Admin"
-                });
+            TestAdmin.ApplyStandardAdmins(_fakeBot);
 
             _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
             ScenarioContext.Current["MessageHandler"] = _messageHandler;
             // По умолчанию считаем что сценарий админский (Given I am an administrator должен быть выполнен до специфичных шагов)
             // Устанавливаем текущего пользователя как администратора для fake бота
-            _fakeBot.TestContextCurrentUserId = AdminUserId;
+            _fakeBot.TestContextCurrentUserId = TestAdmin.AdminUserId;
             // Также настраиваем BotMock (который используется внутри MessageHandler) чтобы возвращать список админов с нашим AdminUserId
             _factory.BotMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ChatMember[]
                 {
                     new ChatMemberOwner { User = new User { Id = 1, FirstName = "Owner" } },
-                    new ChatMemberAdministrator { User = new User { Id = AdminUserId, FirstName = "AdminUser" } }
+                    new ChatMemberAdministrator { User = new User { Id = TestAdmin.AdminUserId, FirstName = "AdminUser" } }
                 });
-            Console.WriteLine($"[DEBUG] CheckCommandSteps: BotMock admins setup with AdminUserId={AdminUserId}");
+            Console.WriteLine($"[DEBUG] CheckCommandSteps: BotMock admins setup with AdminUserId={TestAdmin.AdminUserId}");
             Console.WriteLine("[DEBUG] CheckCommandSteps.BeforeScenario (refactored) done");
         }
 
         [Given(@"I reply to a user's message with check command ""(.*)""")]
         public void GivenIReplyToAUsersMessageWithCheckCommand(string command)
         {
-            // Используем единый _messageHandler (не пересоздаём)
             var isAdmin = ScenarioContext.Current.ContainsKey("IsAdmin") && (bool)ScenarioContext.Current["IsAdmin"];
-            var currentUserId = isAdmin ? AdminUserId : NonAdminUserId;
-
-            // Настраиваем список админов у fake бота: если пользователь не админ, убираем его из списка
-            _fakeBot.TestContextCurrentUserId = isAdmin ? AdminUserId : (long?)null;
-
-            _repliedMessage = new Message
-            {
-                // Используем корректный ID администратора, заданный в константе AdminUserId
-                From = new User { Id = AdminUserId, FirstName = "AdminUser", Username = "admin" },
-                Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
-                Date = DateTime.UtcNow.AddMinutes(-5),
-                Text = "Hello, this is a test message"
-            };
-
-            _testMessage = new Message
-            {
-                From = new User { Id = currentUserId, FirstName = isAdmin ? "AdminUser" : "RegularUser", Username = isAdmin ? "admin" : "user" },
-                Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
-                Date = DateTime.UtcNow,
-                Text = command,
-                ReplyToMessage = _repliedMessage
-            };
-
-            // Помечаем текущего пользователя как администратора для FakeTelegramClient (в админ сценариях)
-            if (isAdmin)
-            {
-                _fakeBot.TestContextCurrentUserId = AdminUserId;
-            }
-
-            if (isAdmin)
-            {
-                _fakeBot.TestContextCurrentUserId = AdminUserId; // только для админа
-            }
-
+            var currentUserId = isAdmin ? TestAdmin.AdminUserId : TestAdmin.NonAdminUserId;
+            _fakeBot.TestContextCurrentUserId = isAdmin ? TestAdmin.AdminUserId : (long?)null;
+            _repliedMessage = new Message { From = new User { Id = TestAdmin.AdminUserId, FirstName = "AdminUser", Username = "admin" }, Chat = new Chat { Id = TestAdmin.AdminChatId, Title = "Admin Chat", Type = ChatType.Group }, Date = DateTime.UtcNow.AddMinutes(-5), Text = "Hello, this is a test message" };
+            _testMessage = new Message { From = new User { Id = currentUserId, FirstName = isAdmin ? "AdminUser" : "RegularUser", Username = isAdmin ? "admin" : "user" }, Chat = new Chat { Id = TestAdmin.AdminChatId, Title = "Admin Chat", Type = ChatType.Group }, Date = DateTime.UtcNow, Text = command, ReplyToMessage = _repliedMessage };
+            if (isAdmin) _fakeBot.TestContextCurrentUserId = TestAdmin.AdminUserId;
             ScenarioContext.Current["TestMessage"] = _testMessage;
             ScenarioContext.Current["RepliedMessage"] = _repliedMessage;
         }
@@ -173,7 +127,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             _testMessage = new Message
             {
-                From = new User { Id = AdminUserId, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = TestAdmin.AdminUserId, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command
@@ -195,7 +149,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             _testMessage = new Message
             {
-                From = new User { Id = AdminUserId, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = TestAdmin.AdminUserId, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -226,7 +180,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             _testMessage = new Message
             {
-                From = new User { Id = AdminUserId, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = TestAdmin.AdminUserId, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -257,7 +211,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             _testMessage = new Message
             {
-                From = new User { Id = AdminUserId, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = TestAdmin.AdminUserId, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -288,7 +242,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             _testMessage = new Message
             {
-                From = new User { Id = AdminUserId, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = TestAdmin.AdminUserId, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -433,7 +387,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             };
             _testMessage = new Message
             {
-                From = new User { Id = AdminUserId, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = TestAdmin.AdminUserId, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -442,7 +396,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             // Используем единый _messageHandler (не пересоздаём)
 
-            _fakeBot.TestContextCurrentUserId = AdminUserId;
+            _fakeBot.TestContextCurrentUserId = TestAdmin.AdminUserId;
 
             ScenarioContext.Current["TestMessage"] = _testMessage;
             ScenarioContext.Current["RepliedMessage"] = _repliedMessage;
@@ -460,7 +414,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             };
             _testMessage = new Message
             {
-                From = new User { Id = AdminUserId, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = TestAdmin.AdminUserId, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -468,7 +422,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             };
 
             // Используем единый _messageHandler (не пересоздаём)
-            _fakeBot.TestContextCurrentUserId = AdminUserId;
+            _fakeBot.TestContextCurrentUserId = TestAdmin.AdminUserId;
 
             ScenarioContext.Current["TestMessage"] = _testMessage;
             ScenarioContext.Current["RepliedMessage"] = _repliedMessage;
@@ -488,7 +442,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             };
             _testMessage = new Message
             {
-                From = new User { Id = AdminUserId, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = TestAdmin.AdminUserId, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -497,7 +451,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             ScenarioContext.Current["TestMessage"] = _testMessage;
             ScenarioContext.Current["RepliedMessage"] = _repliedMessage;
 
-            _fakeBot.TestContextCurrentUserId = AdminUserId;
+            _fakeBot.TestContextCurrentUserId = TestAdmin.AdminUserId;
         }
 
         [Given(@"I reply to a message with stop words with check command ""(.*)""")]
@@ -514,7 +468,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             };
             _testMessage = new Message
             {
-                From = new User { Id = AdminUserId, FirstName = "AdminUser", Username = "admin" },
+                From = new User { Id = TestAdmin.AdminUserId, FirstName = "AdminUser", Username = "admin" },
                 Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
                 Date = DateTime.UtcNow,
                 Text = command,
@@ -523,7 +477,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             ScenarioContext.Current["TestMessage"] = _testMessage;
             ScenarioContext.Current["RepliedMessage"] = _repliedMessage;
 
-            _fakeBot.TestContextCurrentUserId = AdminUserId;
+            _fakeBot.TestContextCurrentUserId = TestAdmin.AdminUserId;
         }
     }
-} 
+}

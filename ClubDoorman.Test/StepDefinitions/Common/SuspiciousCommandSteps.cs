@@ -52,17 +52,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Given(@"I am an administrator")]
         public void GivenIAmAnAdministrator()
         {
-            long adminId = 123456789; // default legacy admin id
-            if (ScenarioContext.Current.ContainsKey("CheckCommandAdminUserId"))
-            {
-                try { adminId = (long)ScenarioContext.Current["CheckCommandAdminUserId"]; } catch { /* ignore cast issues */ }
-            }
-            _testMessage = new Message
-            {
-                From = new User { Id = adminId, FirstName = "AdminUser", Username = "admin" },
-                Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
-                Date = DateTime.UtcNow
-            };
+            var adminId = TestAdmin.AdminUserId;
+            _testMessage = new Message { From = new User { Id = adminId, FirstName = "AdminUser", Username = "admin" }, Chat = new Chat { Id = TestAdmin.AdminChatId, Title = "Admin Chat", Type = ChatType.Group }, Date = DateTime.UtcNow };
             ScenarioContext.Current["TestMessage"] = _testMessage;
             ScenarioContext.Current["IsAdmin"] = true;
         }
@@ -70,12 +61,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Given(@"I am not an administrator")]
         public void GivenIAmNotAnAdministrator()
         {
-            _testMessage = new Message
-            {
-                From = new User { Id = 987654321, FirstName = "RegularUser", Username = "user" },
-                Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
-                Date = DateTime.UtcNow
-            };
+            _testMessage = new Message { From = new User { Id = TestAdmin.NonAdminUserId, FirstName = "RegularUser", Username = "user" }, Chat = new Chat { Id = TestAdmin.AdminChatId, Title = "Admin Chat", Type = ChatType.Group }, Date = DateTime.UtcNow };
             ScenarioContext.Current["TestMessage"] = _testMessage;
             ScenarioContext.Current["IsAdmin"] = false;
             
@@ -203,19 +189,9 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 var isAdminScenario = ScenarioContext.Current.ContainsKey("IsAdmin") && (bool)ScenarioContext.Current["IsAdmin"];
                 if (isAdminScenario)
                 {
-                    // Если CheckCommandSteps уже установил общий AdminUserId - используем его
-                    long adminUserId = _testMessage?.From?.Id ?? 123456789;
-                    if (ScenarioContext.Current.ContainsKey("CheckCommandAdminUserId"))
-                    {
-                        try { adminUserId = (long)ScenarioContext.Current["CheckCommandAdminUserId"]; } catch { /* ignore */ }
-                    }
-                    _factory.BotMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
-                        .ReturnsAsync(new ChatMember[]
-                        {
-                            new ChatMemberOwner { User = new User { Id = 1, FirstName = "Owner" } },
-                new ChatMemberAdministrator { User = new User { Id = adminUserId, FirstName = "AdminUser" } }
-                        });
-            Console.WriteLine($"[DEBUG] SuspiciousCommandSteps: BotMock admins configured with adminUserId={adminUserId}");
+                    long adminUserId = TestAdmin.AdminUserId;
+                    _factory.BotMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ChatMember[] { new ChatMemberOwner { User = new User { Id = 1, FirstName = "Owner" } }, new ChatMemberAdministrator { User = new User { Id = adminUserId, FirstName = "AdminUser" } } });
+                    Console.WriteLine($"[DEBUG] SuspiciousCommandSteps: BotMock admins configured with adminUserId={adminUserId}");
                 }
 
                 _factory.CommandRouterMock
@@ -539,4 +515,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             lastMessage.Text.Should().Contain("добавлен");
         }
     }
-} 
+}
