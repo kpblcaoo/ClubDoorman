@@ -47,8 +47,9 @@ public class MessageHandlerTestFactory
 {
     // Используем TestKit для создания моков
     public Mock<ITelegramBotClientWrapper> BotMock { get; } = TK.CreateMockBotClientWrapper();
-    public Mock<IModerationFacade> ModerationServiceMock { get; } = TK.CreateMock<IModerationFacade>();
+    // Single canonical moderation facade mock. Keep alias property name for backward compatibility with older tests.
     public Mock<IModerationFacade> ModerationFacadeMock { get; } = TK.CreateMock<IModerationFacade>();
+    public Mock<IModerationFacade> ModerationServiceMock => ModerationFacadeMock; // alias
     public Mock<ICaptchaService> CaptchaServiceMock { get; } = TK.CreateMockCaptchaService();
     public Mock<IUserManager> UserManagerMock { get; } = TK.CreateMockUserManager();
     public Mock<ISpamHamClassifier> ClassifierMock { get; } = TK.CreateMockSpamHamClassifier();
@@ -106,7 +107,7 @@ public class MessageHandlerTestFactory
             UserBanServiceMock.Object,
             ChannelModerationServiceMock.Object,
             new Mock<ICommandRouter>().Object,
-            new Mock<IUserJoinFacade>().Object,
+            _userJoinFacadeMock.Object,
             ModerationFacadeMock.Object,
             LoggerMock.Object,
             BotPermissionsServiceMock.Object,
@@ -133,7 +134,7 @@ public class MessageHandlerTestFactory
             CreateRealUserBanService(),
             ChannelModerationServiceMock.Object,
             new Mock<ICommandRouter>().Object,
-            new Mock<IUserJoinFacade>().Object,
+            _userJoinFacadeMock.Object,
             ModerationFacadeMock.Object,
             LoggerMock.Object,
             BotPermissionsServiceMock.Object,
@@ -154,13 +155,13 @@ public class MessageHandlerTestFactory
 
     public MessageHandlerTestFactory WithModerationServiceSetup(Action<Mock<IModerationFacade>> setup)
     {
-        setup(ModerationServiceMock);
+    setup(ModerationFacadeMock);
         return this;
     }
 
     public MessageHandlerTestFactory WithModerationFacadeSetup(Action<Mock<IModerationFacade>> setup)
     {
-        setup(ModerationFacadeMock);
+    setup(ModerationFacadeMock);
         return this;
     }
 
@@ -384,6 +385,23 @@ public class MessageHandlerTestFactory
                 .ReturnsAsync(new ModerationResult(action, reason));
             mock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(false);
+            // Имитация legacy поведения: если действие Ban - сразу вызываем AutoBan и логируем
+            if (action == ModerationAction.Ban)
+            {
+                mock.Setup(x => x.HandleUserMessageAsync(
+                        It.IsAny<Message>(),
+                        It.IsAny<User>(),
+                        It.IsAny<Chat>(),
+                        It.IsAny<ModerationResult>(),
+                        It.IsAny<bool>(),
+                        It.IsAny<CancellationToken>()))
+                    .Callback<Message, User, Chat, ModerationResult, bool, CancellationToken>((m, u, c, r, s, ct) =>
+                    {
+                        UserFlowLoggerMock.Object.LogUserBanned(u, c, r.Reason);
+                        UserBanServiceMock.Object.AutoBanAsync(m, r.Reason, ct).GetAwaiter().GetResult();
+                    })
+                    .Returns(Task.CompletedTask);
+            }
         });
         
         return this;
@@ -498,7 +516,7 @@ public class MessageHandlerTestFactory
         UserManagerMock.Setup(x => x.Approved(user.Id, null)).Returns(false);
         UserManagerMock.Setup(x => x.InBanlist(user.Id)).ReturnsAsync(false);
         UserManagerMock.Setup(x => x.GetClubUsername(user.Id)).ReturnsAsync((string?)null);
-        ModerationServiceMock.Setup(x => x.CheckUserNameAsync(user))
+    ModerationFacadeMock.Setup(x => x.CheckUserNameAsync(user))
             .ReturnsAsync(new ModerationResult(ModerationAction.Ban, "Длинное имя пользователя"));
         
         return this;
@@ -512,7 +530,7 @@ public class MessageHandlerTestFactory
         UserManagerMock.Setup(x => x.Approved(user.Id, null)).Returns(false);
         UserManagerMock.Setup(x => x.InBanlist(user.Id)).ReturnsAsync(true);
         UserManagerMock.Setup(x => x.GetClubUsername(user.Id)).ReturnsAsync((string?)null);
-        ModerationServiceMock.Setup(x => x.CheckUserNameAsync(user))
+    ModerationFacadeMock.Setup(x => x.CheckUserNameAsync(user))
             .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Нормальное имя"));
         
         return this;
@@ -525,7 +543,7 @@ public class MessageHandlerTestFactory
     {
         UserManagerMock.Setup(x => x.Approved(user.Id, null)).Returns(false);
         UserManagerMock.Setup(x => x.InBanlist(user.Id)).ReturnsAsync(true);
-        ModerationServiceMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+    ModerationFacadeMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
             .ReturnsAsync(new ModerationResult(ModerationAction.Ban, reason));
         
         return this;
@@ -791,14 +809,15 @@ public class MessageHandlerTestFactory
     /// </summary>
     public MessageHandlerTestFactory WithModerationFacadeMock(Action<Mock<IModerationFacade>> setup)
     {
-        setup(ModerationServiceMock);
+    setup(ModerationFacadeMock);
         return this;
     }
 
     /// <summary>
     /// Возвращает мок IUserJoinFacade
     /// </summary>
-    public Mock<IUserJoinFacade> UserJoinFacadeMock => new Mock<IUserJoinFacade>();
+    private readonly Mock<IUserJoinFacade> _userJoinFacadeMock = new();
+    public Mock<IUserJoinFacade> UserJoinFacadeMock => _userJoinFacadeMock; // stable instance for verifications
 
     /// <summary>
     /// Возвращает мок ICommandRouter

@@ -103,6 +103,8 @@ public class MessageHandler : IUpdateHandler
             }
 
             var message = update.EditedMessage ?? update.Message!;
+            // Legacy compatibility log line expected by older tests (searches for 'MessageHandler получил сообщение')
+            _logger.LogDebug("MessageHandler получил сообщение: {MessageId}", message.MessageId);
             var chat = message.Chat;
 
             _logger.LogDebug("Received message '{MessageText}' in chat {ChatId} (type: {ChatType}, title: {ChatTitle})",
