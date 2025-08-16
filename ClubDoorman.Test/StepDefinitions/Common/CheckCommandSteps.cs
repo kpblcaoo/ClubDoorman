@@ -41,6 +41,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             _factory = new MessageHandlerTestFactory();
             _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
             _fakeBot = new FakeTelegramClient();
+            // Делаем пользователя 123456789 администратором для GetChatAdministratorsAsync
+            _fakeBot.TestContextCurrentUserId = 123456789;
             
             Console.WriteLine("[DEBUG] Настраиваем CommandRouter в CheckCommandSteps");
             

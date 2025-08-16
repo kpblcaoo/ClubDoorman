@@ -1,6 +1,5 @@
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using TechTalk.SpecFlow;
 using ClubDoorman.Models;
@@ -129,6 +128,11 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             });
 
             _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
+            // Передаём текущего пользователя в fake bot, чтобы он считался админом при необходимости
+            if (_testMessage?.From != null)
+            {
+                _fakeBot.TestContextCurrentUserId = _testMessage.From.Id;
+            }
             ScenarioContext.Current["MessageHandler"] = _messageHandler;
         }
 

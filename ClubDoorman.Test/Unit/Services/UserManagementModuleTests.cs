@@ -56,7 +56,7 @@ public class UserManagementModuleTests
     }
     
     [Test]
-    public void AddUserManagementServices_ShouldRegisterIUserJoinService()
+    public void AddUserManagementServices_ShouldRegisterUserIndex()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -65,7 +65,7 @@ public class UserManagementModuleTests
         services.AddUserManagementServices();
         
         // Assert
-        var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IUserIndex));
+    var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IUserIndex));
         Assert.That(descriptor, Is.Not.Null);
         Assert.That(descriptor!.ImplementationType, Is.EqualTo(typeof(UserIndex)));
     }

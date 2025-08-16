@@ -16,6 +16,7 @@ using ClubDoorman.Services.LinkFormatting;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
+using ClubDoorman.Features.Moderation; // IModerationFacade (only for type reference)
 
 namespace ClubDoorman.Test.Unit.Services.Commands;
 
@@ -37,8 +38,10 @@ public class CommandRouterIntegrationTests
         services.AddSingleton(Mock.Of<ITelegramBotClientWrapper>());
         services.AddSingleton(Mock.Of<IUpdateHandler>());
         services.AddSingleton(Mock.Of<IAppConfig>());
-        services.AddSingleton(Mock.Of<IModerationService>());
-        services.AddSingleton(Mock.Of<IMessageService>());
+    services.AddSingleton(Mock.Of<IModerationService>()); // legacy adapter
+    services.AddSingleton(Mock.Of<IMessageService>());
+    // Критично: нужно зарегистрировать интерфейс как сервис, иначе контейнер не найдёт его.
+    services.AddSingleton<IModerationFacade>(Mock.Of<IModerationFacade>());
         services.AddSingleton(Mock.Of<ISpamHamClassifier>());
         services.AddSingleton(Mock.Of<IBotPermissionsService>());
         services.AddSingleton(Mock.Of<IBadMessageManager>());
@@ -63,7 +66,7 @@ public class CommandRouterIntegrationTests
         var services = new ServiceCollection();
         services.AddLogging();
         SetupDependencies(services);
-        services.AddCommandsServices();
+    services.AddCommandsServices(); // только командный модуль + явные моки зависимостей
 
         // Act
         var serviceProvider = services.BuildServiceProvider();
@@ -85,7 +88,7 @@ public class CommandRouterIntegrationTests
         var services = new ServiceCollection();
         services.AddLogging();
         SetupDependencies(services);
-        services.AddCommandsServices();
+    services.AddCommandsServices();
 
         // Act
         var serviceProvider = services.BuildServiceProvider();
@@ -119,7 +122,7 @@ public class CommandRouterIntegrationTests
         var services = new ServiceCollection();
         services.AddLogging();
         SetupDependencies(services);
-        services.AddCommandsServices();
+    services.AddCommandsServices();
 
         // Act
         var serviceProvider = services.BuildServiceProvider();

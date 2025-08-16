@@ -152,10 +152,10 @@ namespace ClubDoorman.Test.TestKit
     
         
         /// <summary>
-        /// Создает билдер для UserJoinService
-        /// <tags>builders, user-join-service, fluent-api</tags>
-        /// </summary>
-        public static UserJoinServiceBuilder CreateUserJoinServiceBuilder() => new();
+    /// Создает билдер для UserJoinFacade
+    /// <tags>builders, user-join-facade, fluent-api</tags>
+    /// </summary>
+    public static UserJoinFacadeBuilder CreateUserJoinFacadeBuilder() => new();
 
         #endregion
 

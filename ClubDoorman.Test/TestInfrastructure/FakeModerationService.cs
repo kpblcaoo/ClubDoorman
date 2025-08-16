@@ -32,6 +32,8 @@ public class FakeModerationService : IModerationPolicy
     private readonly ITelegramBotClientWrapper _bot;
     private readonly IMessageService _messageService;
     private readonly IUserBanService _userBanService;
+    // Флаг для принудительного применения настроенного результата при следующем обращении
+    private bool _forceNextResult;
 
     // Настраиваемые результаты
     public ModerationResult NextResult { get; set; } = new ModerationResult(ModerationAction.Allow, "Безопасно");
@@ -72,6 +74,8 @@ public class FakeModerationService : IModerationPolicy
     public FakeModerationService SetResult(ModerationResult result)
     {
         NextResult = result;
+    // После вызова SetResult() следующий вызов CheckMessageAsync вернет это значение, минуя внутреннюю логику
+    _forceNextResult = true;
         return this;
     }
 
@@ -121,6 +125,14 @@ public class FakeModerationService : IModerationPolicy
             throw new ArgumentNullException(nameof(message));
         if (message.From == null)
             throw new ModerationException("Информация о пользователе отсутствует в сообщении");
+
+        // Если в тесте явно настроен следующий результат — отдаем его немедленно (упрощает детерминированные unit-тесты)
+        if (_forceNextResult)
+        {
+            _forceNextResult = false; // одноразовое применение
+            _logger.LogInformation("FakeModerationService: принудительно возвращен настроенный результат {Action}", NextResult.Action);
+            return NextResult;
+        }
             
         var request = new ModerationRequest
         {

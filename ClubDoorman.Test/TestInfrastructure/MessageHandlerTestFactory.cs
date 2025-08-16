@@ -99,6 +99,43 @@ public class MessageHandlerTestFactory
             ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
                 .Returns(ChannelModerationServiceMock.Object);
         }
+
+        // Базовый AdminChatId по умолчанию для тестов с подозрительными сообщениями
+        if (!AppConfigMock.Setups.Any(s => s.ToString().Contains("AdminChatId")))
+        {
+            AppConfigMock.Setup(x => x.AdminChatId).Returns(12345L);
+        }
+
+        // Дефолтная эмуляция NotificationService.SendSuspiciousMessageWithButtons если не настроено явно
+        if (!NotificationServiceMock.Setups.Any(s => s.ToString().Contains("SendSuspiciousMessageWithButtons")))
+        {
+            NotificationServiceMock
+                .Setup(x => x.SendSuspiciousMessageWithButtons(
+                    It.IsAny<Message>(),
+                    It.IsAny<User>(),
+                    It.IsAny<SuspiciousMessageNotificationData>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<CancellationToken>()))
+                .Callback<Message, User, SuspiciousMessageNotificationData, bool, CancellationToken>((msg, user, data, silent, ct) =>
+                {
+                    var adminChatId = AppConfigMock.Object.AdminChatId;
+                    var keyboard = new InlineKeyboardMarkup(new[] { new[] { new InlineKeyboardButton("noop") { CallbackData = "noop" } } });
+                    try
+                    {
+                        BotMock.Object.ForwardMessage(new ChatId(adminChatId), msg.Chat.Id, msg.MessageId, ct);
+                    }
+                    catch { /* forward может упасть - игнорируем */ }
+                    BotMock.Object.SendMessage(new ChatId(adminChatId), "stub suspicious message", Telegram.Bot.Types.Enums.ParseMode.Html, null, keyboard, ct);
+                })
+                .Returns(Task.CompletedTask);
+        }
+
+        // ForwardMessage базовый, если не переопределён в конкретном тесте
+        if (!BotMock.Setups.Any(s => s.ToString().Contains("ForwardMessage")))
+        {
+            BotMock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((ChatId dest, ChatId src, int msgId, CancellationToken ct) => new Message { Chat = new Chat { Id = (long)dest.Identifier! } });
+        }
         
         return new MessageHandler(
             BotMock.Object,
@@ -106,7 +143,7 @@ public class MessageHandlerTestFactory
             AppConfigMock.Object,
             UserBanServiceMock.Object,
             ChannelModerationServiceMock.Object,
-            new Mock<ICommandRouter>().Object,
+            CommandRouterMock.Object,
             _userJoinFacadeMock.Object,
             ModerationFacadeMock.Object,
             LoggerMock.Object,
@@ -133,7 +170,7 @@ public class MessageHandlerTestFactory
             AppConfigMock.Object,
             CreateRealUserBanService(),
             ChannelModerationServiceMock.Object,
-            new Mock<ICommandRouter>().Object,
+            CommandRouterMock.Object,
             _userJoinFacadeMock.Object,
             ModerationFacadeMock.Object,
             LoggerMock.Object,
@@ -313,6 +350,9 @@ public class MessageHandlerTestFactory
             mock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(false);
         });
+        // Дублируем настройку для фасада если он используется напрямую
+        ModerationFacadeMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+            .ReturnsAsync(TK.Specialized.Moderation.Allow());
         
         // Настройка ServiceProvider для CommandHandler'ов
         WithServiceProviderSetup(mock =>
@@ -480,15 +520,82 @@ public class MessageHandlerTestFactory
                 fakeClient.DeleteMessage(chatId, messageId, token);
             });
 
+        // Гарантируем что ModerationFacade возвращает валидный результат (иначе NullReference на .Action)
+        if (!ModerationFacadeMock.Setups.Any(s => s.ToString().Contains("CheckMessageAsync")))
+        {
+            ModerationFacadeMock
+                .Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+                .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "default-allow"));
+        }
+
+        // Гарантируем AdminChatId (тесты ожидают 12345L)
+        if (!AppConfigMock.Setups.Any(s => s.ToString().Contains("AdminChatId")))
+        {
+            AppConfigMock.Setup(x => x.AdminChatId).Returns(12345L);
+        }
+
+        // Дефолт для NotificationService: имитируем логику пересылки подозрительного сообщения
+        if (!NotificationServiceMock.Setups.Any(s => s.ToString().Contains("SendSuspiciousMessageWithButtons")))
+        {
+            NotificationServiceMock
+                .Setup(x => x.SendSuspiciousMessageWithButtons(
+                    It.IsAny<Message>(),
+                    It.IsAny<User>(),
+                    It.IsAny<SuspiciousMessageNotificationData>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<CancellationToken>()))
+                .Callback<Message, User, SuspiciousMessageNotificationData, bool, CancellationToken>((msg, user, data, silent, ct) =>
+                {
+                    var adminChatId = AppConfigMock.Object.AdminChatId;
+                    var keyboard = new InlineKeyboardMarkup(new[] { new[] { new InlineKeyboardButton("noop") { CallbackData = "noop" } } });
+                    try
+                    {
+                        BotMock.Object.ForwardMessage(new ChatId(adminChatId), msg.Chat.Id, msg.MessageId, ct);
+                    }
+                    catch { /* forward can fail - emulate production graceful handling */ }
+                    BotMock.Object.SendMessage(new ChatId(adminChatId), "stub suspicious message", Telegram.Bot.Types.Enums.ParseMode.Html, null, keyboard, ct);
+                })
+                .Returns(Task.CompletedTask);
+        }
+
+        // Если ForwardMessage не настроен явно – добавляем pass-through чтобы Moq регистрировал вызов
+        if (!BotMock.Setups.Any(s => s.ToString().Contains("ForwardMessage")))
+        {
+            BotMock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((ChatId dest, ChatId src, int msgId, CancellationToken ct) => new Message { Chat = new Chat { Id = (long)dest.Identifier! } });
+        }
+
+        // Добавляем дефолтную логику для HandleUserMessageAsync чтобы эмулировать реальное удаление
+        if (!ModerationFacadeMock.Setups.Any(s => s.ToString().Contains("HandleUserMessageAsync")))
+        {
+            ModerationFacadeMock
+                .Setup(x => x.HandleUserMessageAsync(
+                    It.IsAny<Message>(),
+                    It.IsAny<User>(),
+                    It.IsAny<Chat>(),
+                    It.IsAny<ModerationResult>(),
+                    It.IsAny<bool>(),
+                    It.IsAny<CancellationToken>()))
+                .Callback<Message, User, Chat, ModerationResult, bool, CancellationToken>((msg, user, chat, result, isSilent, ct) =>
+                {
+                    // Эмуляция поведения настоящего фасада: при Delete/Ban удаляем сообщение
+                    if (result.Action == ModerationAction.Delete || result.Action == ModerationAction.Ban)
+                    {
+                        try { BotMock.Object.DeleteMessage(chat.Id, msg.MessageId, ct); } catch { /* ignore in test context */ }
+                    }
+                })
+                .Returns(Task.CompletedTask);
+        }
+
         return new MessageHandler(
             BotMock.Object,
             UserManagerMock.Object,
             AppConfigMock.Object,
             UserBanServiceMock.Object,
             ChannelModerationServiceMock.Object,
-            new Mock<ICommandRouter>().Object,
-            new Mock<IUserJoinFacade>().Object,
-            new Mock<IModerationFacade>().Object,
+            CommandRouterMock.Object,
+            _userJoinFacadeMock.Object,
+            ModerationFacadeMock.Object,
             LoggerMock.Object,
             BotPermissionsServiceMock.Object,
             CaptchaServiceMock.Object,
@@ -822,7 +929,8 @@ public class MessageHandlerTestFactory
     /// <summary>
     /// Возвращает мок ICommandRouter
     /// </summary>
-    public Mock<ICommandRouter> CommandRouterMock => new Mock<ICommandRouter>();
+    private readonly Mock<ICommandRouter> _commandRouterMock = new();
+    public Mock<ICommandRouter> CommandRouterMock => _commandRouterMock; // stable instance
 
     /// <summary>
     /// Возвращает мок IButtonsService
@@ -834,9 +942,7 @@ public class MessageHandlerTestFactory
     /// </summary>
     public MessageHandlerTestFactory WithCommandRouterSetup(Action<Mock<ICommandRouter>> setup)
     {
-        // Создаем мок ICommandRouter если его нет
-        var commandRouterMock = new Mock<ICommandRouter>();
-        setup(commandRouterMock);
+    setup(CommandRouterMock);
         return this;
     }
 

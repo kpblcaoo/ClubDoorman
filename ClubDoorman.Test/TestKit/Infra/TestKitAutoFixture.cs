@@ -124,12 +124,8 @@ public static class TestKitAutoFixture
                     Mock.Of<ILogger<StartCommandHandler>>(),
                     Mock.Of<IMessageService>(),
                     Mock.Of<IAppConfig>()).Object;
-                var suspiciousCommandHandler = new Mock<SuspiciousCommandHandler>(
-                    Mock.Of<ITelegramBotClientWrapper>(),
-                    Mock.Of<IModerationService>(),
-                    Mock.Of<IMessageService>(),
-                    Mock.Of<ILogger<SuspiciousCommandHandler>>(),
-                    Mock.Of<IAppConfig>()).Object;
+                // Используем интерфейс вместо конкретного класса чтобы избежать проблем с Castle DynamicProxy при изменениях конструктора
+                var suspiciousCommandHandler = new Mock<ISuspiciousCommandHandler>().Object;
                 var logChatService = TK.CreateMock<ILogChatService>().Object;
                 var commandRouter = TK.CreateMock<ICommandRouter>().Object;
                 var aiCascadeService = TK.CreateMock<IAiCascadeService>().Object;

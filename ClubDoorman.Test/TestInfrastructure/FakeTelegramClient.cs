@@ -1,4 +1,3 @@
-using ClubDoorman.Services.UserBan;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -522,8 +521,8 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
         if (ShouldThrowException)
             throw ExceptionToThrow ?? new Exception("Fake exception");
 
-        // Возвращаем фейковых администраторов чата
-        var administrators = new ChatMember[]
+        // Базовые администраторы
+        var administrators = new List<ChatMember>
         {
             new ChatMemberOwner
             {
@@ -552,9 +551,30 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
             }
         };
 
+        // Добавляем динамически пользователя теста как админа, если он присутствует в контексте
+        if (TestContextCurrentUserId.HasValue && administrators.All(a => a.User.Id != TestContextCurrentUserId.Value))
+        {
+            administrators.Add(new ChatMemberAdministrator
+            {
+                User = new User { Id = TestContextCurrentUserId.Value, FirstName = "ScenarioAdmin", Username = "scenario_admin" },
+                IsAnonymous = false,
+                CanManageChat = true,
+                CanDeleteMessages = true,
+                CanManageVideoChats = true,
+                CanRestrictMembers = true,
+                CanPromoteMembers = true,
+                CanChangeInfo = true,
+                CanInviteUsers = true,
+                CustomTitle = "ScenarioAdmin"
+            });
+        }
+
         OperationLog.Add($"GetChatAdministratorsAsync: chatId={chatId.Identifier}");
-        return Task.FromResult(administrators);
+        return Task.FromResult(administrators.ToArray());
     }
+
+    // Позволяет шагам теста указать текущего пользователя как администратора
+    public long? TestContextCurrentUserId { get; set; }
 
     public Task<Chat> GetChatAsync(ChatId chatId, CancellationToken cancellationToken = default)
     {
