@@ -24,6 +24,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Notifications;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -44,7 +45,12 @@ public class FakeServicesFactory
     {
         _fakeBot = fakeBot ?? new FakeTelegramClient();
         _loggerFactory = loggerFactory ?? LoggerFactory.Create(builder => builder.AddConsole());
-        _appConfig = appConfig ?? new AppConfig();
+        _appConfig = appConfig ?? new AppConfig(
+            new Mock<IOptions<AutoBanOptions>>().Object,
+            new Mock<IOptions<ViolationThresholdOptions>>().Object,
+            new Mock<IOptions<FeatureToggleOptions>>().Object,
+            new Mock<IOptions<ChatFilteringOptions>>().Object
+        );
     }
 
     /// <summary>
@@ -85,7 +91,8 @@ public class FakeServicesFactory
         
         return new FakeModerationService(
             classifier, mimicryClassifier, badMessageManager, userManager,
-            aiChecks, suspiciousUsersStorage, _fakeBot, messageService, logger);
+            aiChecks, suspiciousUsersStorage, _fakeBot, messageService, 
+            new Mock<IUserBanService>().Object, logger);
     }
 
     /// <summary>
@@ -167,23 +174,19 @@ public class FakeServicesFactory
 
         return new MessageHandler(
             _fakeBot,
-            moderationService ?? moderationServiceMock.Object,
-            captchaService ?? CreateCaptchaService(),
             userManagerMock.Object,
-            classifierMock.Object,
-            badMessageManagerMock.Object,
-            aiChecksMock.Object,
-            globalStatsManager,
-            statisticsServiceMock.Object,
-            serviceProviderMock.Object,
-            userFlowLoggerMock.Object,
-            messageServiceMock.Object,
-            chatLinkFormatterMock.Object,
-            botPermissionsServiceMock.Object,
             _appConfig,
-            new ViolationTracker(_loggerFactory.CreateLogger<ViolationTracker>(), _appConfig),
+            new Mock<IUserBanService>().Object,
+            new Mock<IChannelModerationService>().Object,
+            new Mock<ICommandRouter>().Object,
+            new Mock<IUserJoinFacade>().Object,
+            new Mock<IModerationFacade>().Object,
             logger,
-            new Mock<IUserBanService>().Object);
+            botPermissionsServiceMock.Object,
+            captchaService ?? CreateCaptchaService(),
+            userFlowLoggerMock.Object,
+            new Mock<IForwardingService>().Object,
+            new Mock<IAiCascadeService>().Object);
     }
 
     /// <summary>

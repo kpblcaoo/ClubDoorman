@@ -31,7 +31,7 @@ public class ModerationServiceTestFactoryTests
 
         // Assert
         Assert.That(instance, Is.Not.Null);
-        Assert.That(instance, Is.InstanceOf<ModerationService>());
+        Assert.That(instance, Is.InstanceOf<ModerationServiceAdapter>());
     }
 
     [Test]

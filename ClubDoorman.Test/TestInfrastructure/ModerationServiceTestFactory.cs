@@ -38,17 +38,7 @@ public class ModerationServiceTestFactory
     public ModerationServiceAdapter CreateModerationService()
     {
         return new ModerationServiceAdapter(
-            ClassifierMock.Object,
-            MimicryClassifierMock.Object,
-            BadMessageManagerMock.Object,
-            UserManagerMock.Object,
-            AiChecksMock.Object,
-            SuspiciousUsersStorageMock.Object,
-            BotClientMock.Object,
-            MessageServiceMock.Object,
-            UserBanServiceMock.Object,
-            new Mock<IUserCleanupService>().Object,
-            LoggerMock.Object
+            new Mock<IModerationPolicy>().Object
         );
     }
 

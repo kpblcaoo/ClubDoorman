@@ -623,6 +623,7 @@ namespace ClubDoorman.Test.TestKit
                         suspiciousUsersStorage,
                         botClientWrapperMock.Object,
                         messageServiceMock.Object,
+                        new Mock<IUserBanService>().Object,
                         CreateLoggerMock<ClubDoorman.TestInfrastructure.FakeModerationService>().Object
                     );
 
@@ -676,6 +677,7 @@ namespace ClubDoorman.Test.TestKit
                         suspiciousUsersStorage,
                         botClientWrapperMock.Object,
                         messageServiceMock.Object,
+                        new Mock<IUserBanService>().Object,
                         CreateLoggerMock<ClubDoorman.TestInfrastructure.FakeModerationService>().Object
                     );
 
@@ -742,6 +744,7 @@ namespace ClubDoorman.Test.TestKit
                         suspiciousUsersStorage,
                         botClientWrapperMock.Object,
                         messageServiceMock.Object,
+                        new Mock<IUserBanService>().Object,
                         loggerMock.Object
                     );
 

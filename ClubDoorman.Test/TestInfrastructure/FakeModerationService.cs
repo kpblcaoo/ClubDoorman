@@ -29,6 +29,7 @@ public class FakeModerationService : IModerationService
     private readonly ISuspiciousUsersStorage _suspiciousUsersStorage;
     private readonly ITelegramBotClientWrapper _bot;
     private readonly IMessageService _messageService;
+    private readonly IUserBanService _userBanService;
 
     // Настраиваемые результаты
     public ModerationResult NextResult { get; set; } = new ModerationResult(ModerationAction.Allow, "Безопасно");
@@ -48,6 +49,7 @@ public class FakeModerationService : IModerationService
         ISuspiciousUsersStorage suspiciousUsersStorage,
         ITelegramBotClientWrapper bot,
         IMessageService messageService,
+        IUserBanService userBanService,
         ILogger<FakeModerationService> logger)
     {
         _classifier = classifier;
@@ -58,6 +60,7 @@ public class FakeModerationService : IModerationService
         _suspiciousUsersStorage = suspiciousUsersStorage;
         _bot = bot;
         _messageService = messageService;
+        _userBanService = userBanService;
         _logger = logger;
     }
 
@@ -112,6 +115,9 @@ public class FakeModerationService : IModerationService
 
     public async Task<ModerationResult> CheckMessageAsync(Message message)
     {
+        if (message == null)
+            throw new ArgumentNullException(nameof(message));
+            
         var request = new ModerationRequest
         {
             MessageId = message.MessageId,
@@ -130,14 +136,54 @@ public class FakeModerationService : IModerationService
 
         await Task.Delay(ResponseTime);
 
-        _logger.LogInformation("FakeModerationService: модерация сообщения {MessageId} от пользователя {UserId}, действие: {Action}", 
-            message.MessageId, message.From?.Id, NextResult.Action);
+        // Проверяем, есть ли пользователь в блэклисте
+        if (message.From != null && _userManager.InBanlist(message.From.Id).Result)
+        {
+            var result = new ModerationResult(ModerationAction.Ban, "Пользователь в блэклисте спамеров");
+            _logger.LogInformation("FakeModerationService: модерация сообщения {MessageId} от пользователя {UserId}, действие: {Action}", 
+                message.MessageId, message.From.Id, result.Action);
+            return result;
+        }
 
-        return NextResult;
+        // Проверяем BadMessageManager
+        if (_badMessageManager.KnownBadMessage(message.Text ?? ""))
+        {
+            var result = new ModerationResult(ModerationAction.Ban, "Известное спам-сообщение");
+            _logger.LogInformation("FakeModerationService: модерация сообщения {MessageId} от пользователя {UserId}, действие: {Action}", 
+                message.MessageId, message.From?.Id, result.Action);
+            return result;
+        }
+
+        // Проверяем SpamHamClassifier
+        try
+        {
+            var (isSpam, probability) = await _classifier.IsSpam(message.Text ?? "");
+            if (isSpam)
+            {
+                var result = new ModerationResult(ModerationAction.Delete, $"ML решил что это спам (вероятность: {probability:F2})");
+                _logger.LogInformation("FakeModerationService: модерация сообщения {MessageId} от пользователя {UserId}, действие: {Action}", 
+                    message.MessageId, message.From?.Id, result.Action);
+                return result;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Пробрасываем исключение как есть, без оборачивания в AggregateException
+            throw;
+        }
+
+        // Если все проверки пройдены, возвращаем Allow
+        var allowResult = new ModerationResult(ModerationAction.Allow, "Сообщение прошло все проверки");
+        _logger.LogInformation("FakeModerationService: модерация сообщения {MessageId} от пользователя {UserId}, действие: {Action}", 
+            message.MessageId, message.From?.Id, allowResult.Action);
+        return allowResult;
     }
 
     public async Task<ModerationResult> CheckUserNameAsync(User user)
     {
+        if (user == null)
+            throw new ArgumentNullException(nameof(user));
+            
         var request = new ModerationRequest
         {
             UserId = user.Id,
@@ -154,10 +200,29 @@ public class FakeModerationService : IModerationService
 
         await Task.Delay(ResponseTime);
 
-        _logger.LogInformation("FakeModerationService: модерация пользователя {UserId}, действие: {Action}", 
-            user.Id, NextResult.Action);
+        // Анализируем длину имени пользователя
+        var fullName = $"{user.FirstName} {user.LastName}".Trim();
+        
+        if (fullName.Length > 100)
+        {
+            var result = new ModerationResult(ModerationAction.Ban, "Экстремально длинное имя");
+            _logger.LogInformation("FakeModerationService: модерация пользователя {UserId}, действие: {Action}", 
+                user.Id, result.Action);
+            return result;
+        }
+        
+        if (fullName.Length > 50)
+        {
+            var result = new ModerationResult(ModerationAction.Report, "Подозрительно длинное имя");
+            _logger.LogInformation("FakeModerationService: модерация пользователя {UserId}, действие: {Action}", 
+                user.Id, result.Action);
+            return result;
+        }
 
-        return NextResult;
+        var allowResult = new ModerationResult(ModerationAction.Allow, "Имя пользователя корректно");
+        _logger.LogInformation("FakeModerationService: модерация пользователя {UserId}, действие: {Action}", 
+            user.Id, allowResult.Action);
+        return allowResult;
     }
 
     public async Task ExecuteModerationActionAsync(Message message, ModerationResult result)
@@ -243,9 +308,35 @@ public class FakeModerationService : IModerationService
         }
 
         await Task.Delay(ResponseTime);
-        _logger.LogInformation("FakeModerationService: забанен и очищен пользователь {UserId} в чате {ChatId}", 
-            userId, chatId);
-        return true;
+        
+        try
+        {
+            // Создаем фейковые объекты для бана
+            var chat = new Chat { Id = chatId };
+            var user = new User { Id = userId };
+            
+            // Вызываем реальные методы через зависимости
+            await _userBanService.BanUserAsync(chat, user, BanTypeEnum.AutoBan, "Автобан", null, CancellationToken.None);
+            
+            // Удаляем сообщение, если указано
+            if (messageIdToDelete.HasValue)
+            {
+                await _userBanService.DeleteMessageByIdAsync(chatId, messageIdToDelete.Value);
+            }
+            
+            // Очищаем пользователя из всех списков
+            CleanupUserFromAllLists(userId, chatId);
+            
+            _logger.LogInformation("FakeModerationService: забанен и очищен пользователь {UserId} в чате {ChatId}", 
+                userId, chatId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "FakeModerationService: ошибка при бане пользователя {UserId} в чате {ChatId}", 
+                userId, chatId);
+            return false;
+        }
     }
 }
 

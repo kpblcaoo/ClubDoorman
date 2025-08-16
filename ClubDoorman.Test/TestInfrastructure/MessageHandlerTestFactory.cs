@@ -12,7 +12,7 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Test.TestKit;
-using ClubDoorman.Test.TestInfrastructure;
+using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -29,8 +29,10 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.Notifications;
 using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Test.TestInfrastructure;
 
 
 namespace ClubDoorman.Test.TestInfrastructure;
@@ -45,7 +47,7 @@ public class MessageHandlerTestFactory
 {
     // Используем TestKit для создания моков
     public Mock<ITelegramBotClientWrapper> BotMock { get; } = TK.CreateMockBotClientWrapper();
-    public Mock<IModerationService> ModerationServiceMock { get; } = TK.CreateMockModerationService();
+    public Mock<IModerationFacade> ModerationServiceMock { get; } = TK.CreateMock<IModerationFacade>();
     public Mock<ICaptchaService> CaptchaServiceMock { get; } = TK.CreateMockCaptchaService();
     public Mock<IUserManager> UserManagerMock { get; } = TK.CreateMockUserManager();
     public Mock<ISpamHamClassifier> ClassifierMock { get; } = TK.CreateMockSpamHamClassifier();
@@ -96,23 +98,19 @@ public class MessageHandlerTestFactory
         
         return new MessageHandler(
             BotMock.Object,
-            ModerationServiceMock.Object,
-            CaptchaServiceMock.Object,
             UserManagerMock.Object,
-            ClassifierMock.Object,
-            BadMessageManagerMock.Object,
-            AiChecksMock.Object,
-            new GlobalStatsManager(),
-            StatisticsServiceMock.Object,
-            ServiceProviderMock.Object,
-            UserFlowLoggerMock.Object,
-            MessageServiceMock.Object,
-            ChatLinkFormatterMock.Object,
-            BotPermissionsServiceMock.Object,
             AppConfigMock.Object,
-            ViolationTrackerMock.Object,
+            UserBanServiceMock.Object,
+            ChannelModerationServiceMock.Object,
+            new Mock<ICommandRouter>().Object,
+            new Mock<IUserJoinFacade>().Object,
+            new Mock<IModerationFacade>().Object,
             LoggerMock.Object,
-            UserBanServiceMock.Object
+            BotPermissionsServiceMock.Object,
+            CaptchaServiceMock.Object,
+            UserFlowLoggerMock.Object,
+            new Mock<IForwardingService>().Object,
+            new Mock<IAiCascadeService>().Object
         );
     }
     
@@ -127,23 +125,19 @@ public class MessageHandlerTestFactory
         
         return new MessageHandler(
             BotMock.Object,
-            ModerationServiceMock.Object,
-            CaptchaServiceMock.Object,
             UserManagerMock.Object,
-            ClassifierMock.Object,
-            BadMessageManagerMock.Object,
-            AiChecksMock.Object,
-            new GlobalStatsManager(),
-            StatisticsServiceMock.Object,
-            ServiceProviderMock.Object,
-            UserFlowLoggerMock.Object,
-            MessageServiceMock.Object,
-            ChatLinkFormatterMock.Object,
-            BotPermissionsServiceMock.Object,
             AppConfigMock.Object,
-            ViolationTrackerMock.Object,
+            CreateRealUserBanService(),
+            ChannelModerationServiceMock.Object,
+            new Mock<ICommandRouter>().Object,
+            new Mock<IUserJoinFacade>().Object,
+            new Mock<IModerationFacade>().Object,
             LoggerMock.Object,
-            CreateRealUserBanService()
+            BotPermissionsServiceMock.Object,
+            CaptchaServiceMock.Object,
+            UserFlowLoggerMock.Object,
+            new Mock<IForwardingService>().Object,
+            new Mock<IAiCascadeService>().Object
         );
     }
 
@@ -155,7 +149,7 @@ public class MessageHandlerTestFactory
         return this;
     }
 
-    public MessageHandlerTestFactory WithModerationServiceSetup(Action<Mock<IModerationService>> setup)
+    public MessageHandlerTestFactory WithModerationServiceSetup(Action<Mock<IModerationFacade>> setup)
     {
         setup(ModerationServiceMock);
         return this;
@@ -406,17 +400,7 @@ public class MessageHandlerTestFactory
         var mockMessageService = new Mock<IMessageService>();
 
         return new ModerationServiceAdapter(
-            mockClassifier.Object,
-            mockMimicryClassifier.Object,
-            mockBadMessageManager.Object,
-            mockUserManager.Object,
-            mockAiChecks.Object,
-            mockSuspiciousUsersStorage.Object,
-            FakeBotClient as ITelegramBotClient,
-            mockMessageService.Object,
-            UserBanServiceMock.Object,
-            new Mock<IUserCleanupService>().Object,
-            mockLogger.Object
+            new Mock<IModerationPolicy>().Object
         );
     }
 
@@ -471,23 +455,19 @@ public class MessageHandlerTestFactory
 
         return new MessageHandler(
             TelegramBotClientWrapperMock.Object,
-            ModerationServiceMock.Object,
-            CaptchaServiceMock.Object,
             UserManagerMock.Object,
-            ClassifierMock.Object,
-            BadMessageManagerMock.Object,
-            AiChecksMock.Object,
-            new GlobalStatsManager(),
-            StatisticsServiceMock.Object,
-            ServiceProviderMock.Object,
-            UserFlowLoggerMock.Object,
-            MessageServiceMock.Object,
-            ChatLinkFormatterMock.Object,
-            BotPermissionsServiceMock.Object,
             AppConfigMock.Object,
-            ViolationTrackerMock.Object,
+            UserBanServiceMock.Object,
+            ChannelModerationServiceMock.Object,
+            new Mock<ICommandRouter>().Object,
+            new Mock<IUserJoinFacade>().Object,
+            new Mock<IModerationFacade>().Object,
             LoggerMock.Object,
-            UserBanServiceMock.Object
+            BotPermissionsServiceMock.Object,
+            CaptchaServiceMock.Object,
+            UserFlowLoggerMock.Object,
+            new Mock<IForwardingService>().Object,
+            new Mock<IAiCascadeService>().Object
         );
     }
 

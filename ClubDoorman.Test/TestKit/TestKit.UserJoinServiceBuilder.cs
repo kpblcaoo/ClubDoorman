@@ -202,7 +202,7 @@ public class UserJoinServiceBuilder
 /// </summary>
 public UserJoinFacade Build()
 {
-return new UserJoinFacade(_messageHandlerMock.Object, _loggerMock.Object);
+return new UserJoinFacade(new Mock<IUserJoinPolicy>().Object, _loggerMock.Object);
 }
 
     /// <summary>

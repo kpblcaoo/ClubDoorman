@@ -89,17 +89,7 @@ public class ChatMemberHandlerTestFactory
     public ModerationServiceAdapter CreateModerationServiceWithFake()
     {
         return new ModerationServiceAdapter(
-            new Mock<ISpamHamClassifier>().Object,
-            new Mock<IMimicryClassifier>().Object,
-            new Mock<IBadMessageManager>().Object,
-            new Mock<IUserManager>().Object,
-            new Mock<IAiChecks>().Object,
-            new Mock<ISuspiciousUsersStorage>().Object,
-            new Mock<ITelegramBotClient>().Object,
-            new Mock<IMessageService>().Object,
-            new Mock<IUserBanService>().Object,
-            new Mock<IUserCleanupService>().Object,
-            new Mock<ILogger<ModerationService>>().Object
+            new Mock<IModerationPolicy>().Object
         );
     }
 

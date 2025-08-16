@@ -140,12 +140,10 @@ public static class TestKitAutoFixture
                 var userIndex = TK.CreateMock<IUserIndex>().Object;
 
                 return new MessageHandler(
-                    bot, moderationService, captchaService, userManager, classifier,
-                    badMessageManager, aiChecks, globalStatsManager, statisticsService,
-                    userFlowLogger, messageService, chatLinkFormatter,
-                    botPermissionsService, appConfig, violationTracker, logger, userBanService,
-                    channelModerationService, startCommandHandler, suspiciousCommandHandler, commandRouter, logChatService,
-                    joinedUserFlags, userIndex, aiCascadeService, notificationService, forwardingService, buttonsService, TK.CreateMock<IUserJoinFacade>().Object, TK.CreateMock<IModerationFacade>().Object);
+                    bot, userManager, appConfig, userBanService, channelModerationService,
+                    commandRouter, TK.CreateMock<IUserJoinFacade>().Object, TK.CreateMock<IModerationFacade>().Object,
+                    logger, botPermissionsService, captchaService, userFlowLogger,
+                    forwardingService, aiCascadeService);
             })
             .OmitAutoProperties());
 

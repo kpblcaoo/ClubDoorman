@@ -33,6 +33,7 @@ using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Features.Moderation;
+using ClubDoorman.Services.Notifications;
 
 namespace ClubDoorman.Test.TestKit;
 
@@ -307,35 +308,19 @@ public class MessageHandlerBuilder
     {
         return new MessageHandler(
             _botMock.Object,
-            _moderationServiceMock.Object,
-            _captchaServiceMock.Object,
             _userManagerMock.Object,
-            _classifierMock.Object,
-            _badMessageManagerMock.Object,
-            _aiChecksMock.Object,
-            new GlobalStatsManager(),
-            _statisticsServiceMock.Object,
-            _userFlowLoggerMock.Object,
-            _messageServiceMock.Object,
-            _chatLinkFormatterMock.Object,
-            _botPermissionsServiceMock.Object,
             _appConfigMock.Object,
-            _violationTrackerMock.Object,
-            _loggerMock.Object,
             _userBanServiceMock.Object,
             _channelModerationServiceMock.Object,
-            _startCommandHandlerMock.Object,
-            _suspiciousCommandHandlerMock.Object,
             _commandRouterMock.Object,
-            _logChatServiceMock.Object,
-            null, // JoinedUserFlags
-            null, // UserIndex
-            null, // AiCascadeService
-            null, // NotificationService
-            null, // ForwardingService
-            null, // ButtonsService
-            null, // UserJoinFacade
-            _moderationFacadeMock.Object
+            new Mock<IUserJoinFacade>().Object,
+            new Mock<IModerationFacade>().Object,
+            _loggerMock.Object,
+            _botPermissionsServiceMock.Object,
+            _captchaServiceMock.Object,
+            _userFlowLoggerMock.Object,
+            new Mock<IForwardingService>().Object,
+            new Mock<IAiCascadeService>().Object
         );
     }
 
@@ -349,24 +334,12 @@ public Mock<IUpdateHandler> BuildMock()
         var realHandler = Build();
         
         // Настраиваем прокси-вызовы к реальному MessageHandler
-        _messageHandlerMock.Setup(x => x.SendSuspiciousMessageWithButtons(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<SuspiciousMessageNotificationData>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
-            .Returns<Message, User, SuspiciousMessageNotificationData, bool, CancellationToken>((msg, user, data, silent, ct) => 
-                realHandler.SendSuspiciousMessageWithButtons(msg, user, data, silent, ct));
-                
-        _messageHandlerMock.Setup(x => x.HandleNewMembersAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
-            .Returns<Message, CancellationToken>((msg, ct) => 
-                realHandler.HandleNewMembersAsync(msg, ct));
-                
-        _messageHandlerMock.Setup(x => x.ProcessNewUserAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<CancellationToken>()))
-            .Returns<Message, User, CancellationToken>((msg, user, ct) => 
-                realHandler.ProcessNewUserAsync(msg, user, ct));
-                
-        _messageHandlerMock.Setup(x => x.CanHandle(It.IsAny<Message>()))
-            .Returns<Message>(msg => realHandler.CanHandle(msg));
+        _messageHandlerMock.Setup(x => x.CanHandle(It.IsAny<Update>()))
+            .Returns<Update>(update => realHandler.CanHandle(update));
             
-        _messageHandlerMock.Setup(x => x.HandleAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
-            .Returns<Message, CancellationToken>((msg, ct) => 
-                realHandler.HandleAsync(msg, ct));
+        _messageHandlerMock.Setup(x => x.HandleAsync(It.IsAny<Update>(), It.IsAny<CancellationToken>()))
+            .Returns<Update, CancellationToken>((update, ct) => 
+                realHandler.HandleAsync(update, ct));
         
         return _messageHandlerMock;
     }
