@@ -6,6 +6,7 @@ using ClubDoorman.Services.Messaging;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 using ClubDoorman.Models;
+using ClubDoorman.Effects;
 
 namespace ClubDoorman.Features.Moderation;
 
@@ -22,6 +23,9 @@ public class ModerationFacade : IModerationFacade
     private readonly IUserFlowLogger _userFlowLogger;
     private readonly ILogger<ModerationFacade> _logger;
     private readonly IMessageService _messageService;
+    private readonly IModerationEffectsBuilder _moderationEffectsBuilder;
+    private readonly IEffectBus _effectBus;
+
 
     public ModerationFacade(
         IModerationPolicy moderationPolicy,
@@ -29,6 +33,8 @@ public class ModerationFacade : IModerationFacade
         IUserFlowLogger userFlowLogger,
         ILogger<ModerationFacade> logger,
         IMessageService messageService,
+        IModerationEffectsBuilder moderationEffectsBuilder,
+        IEffectBus effectBus,
         INotificationService notificationService,
         IAiCascadeService aiCascadeService)
     {
@@ -37,6 +43,8 @@ public class ModerationFacade : IModerationFacade
         _userFlowLogger = userFlowLogger;
         _logger = logger;
         _messageService = messageService;
+        _moderationEffectsBuilder = moderationEffectsBuilder;
+        _effectBus = effectBus;
         _notificationService = notificationService;
         _aiCascadeService = aiCascadeService;
     }
@@ -119,8 +127,11 @@ public class ModerationFacade : IModerationFacade
         bool isSilentMode,
         CancellationToken cancellationToken)
     {
+        var effects = _moderationEffectsBuilder.BuildEffects(message, moderationResult, isSilentMode);
+        await _effectBus.ExecuteAsync(effects, cancellationToken);
         switch (moderationResult.Action)
         {
+
             case ModerationAction.Allow:
                 _logger.LogDebug("Сообщение разрешено: {Reason}", moderationResult.Reason);
                 var allowedMessageText = message.Text ?? message.Caption ?? "";

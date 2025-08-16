@@ -22,6 +22,7 @@ using ClubDoorman.Services.UserJoin;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Models.Logging;
+using ClubDoorman.Effects;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -98,6 +99,8 @@ public static class ServiceCollectionExtensions
         services.AddAIServices();
         services.AddUserManagementServices();
         services.AddMessagingServices();
+        services.AddSingleton<IEffectBus, LoggingEffectBus>();
+        services.AddSingleton<IModerationEffectsBuilder, LoggingModerationEffectsBuilder>();
         services.AddTextProcessingServices();
         services.AddCaptchaServices();
         services.AddHandlersServices();

@@ -3,6 +3,7 @@ using ClubDoorman.Services.Core.Configuration;
 using Serilog;
 using Serilog.Events;
 using DotNetEnv;
+using ClubDoorman.Effects;
 
 namespace ClubDoorman;
 
