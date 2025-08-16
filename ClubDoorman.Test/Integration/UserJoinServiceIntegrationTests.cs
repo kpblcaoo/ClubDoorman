@@ -11,6 +11,7 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Services.UserJoin;
+using ClubDoorman.Features.UserJoin;
 
 namespace ClubDoorman.Test.Integration;
 
@@ -122,7 +123,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithSuccessfulJoinScenario();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var (_, envelope, message, _) = TK.CreateNewUserScenario();
         var user = message.NewChatMembers?.FirstOrDefault() ?? TK.CreateUser();
@@ -155,7 +156,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithBlacklistedUserScenario();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var (_, envelope, message, _) = TK.CreateNewUserScenario();
         var user = message.NewChatMembers?.FirstOrDefault() ?? TK.CreateUser();
@@ -188,7 +189,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithLongNameScenario();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var (_, envelope, message, _) = TK.CreateNewUserScenario();
         var user = message.NewChatMembers?.FirstOrDefault() ?? TK.CreateUser();
@@ -221,7 +222,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithClubUserScenario();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var (_, envelope, message, _) = TK.CreateNewUserScenario();
         var user = message.NewChatMembers?.FirstOrDefault() ?? TK.CreateUser();
@@ -254,7 +255,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithCaptchaScenario();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var (_, envelope, message, _) = TK.CreateNewUserScenario();
         var user = message.NewChatMembers?.FirstOrDefault() ?? TK.CreateUser();
@@ -287,7 +288,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithErrorScenario();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var (_, envelope, message, _) = TK.CreateNewUserScenario();
         var user = message.NewChatMembers?.FirstOrDefault() ?? TK.CreateUser();
@@ -323,7 +324,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithStandardMocks();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var (_, envelope, message, _) = TK.CreateNewUserScenario();
 
@@ -355,7 +356,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithStandardMocks();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var (_, envelope, message, _) = TK.CreateNewUserScenario();
         var user = message.NewChatMembers?.FirstOrDefault() ?? TK.CreateUser();
@@ -392,7 +393,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithStandardMocks();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var user = TK.CreateUser();
 
@@ -412,7 +413,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithStandardMocks();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var (_, envelope, message, _) = TK.CreateNewUserScenario();
 
@@ -432,7 +433,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithStandardMocks();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var (_, envelope, message, _) = TK.CreateNewUserScenario();
         var user = message.NewChatMembers?.FirstOrDefault() ?? TK.CreateUser();
@@ -459,7 +460,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithSuccessfulJoinScenario();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var message = TK.CreateNewUserJoinMessage();
         message.NewChatMembers = new[]
@@ -486,7 +487,7 @@ public class UserJoinServiceIntegrationTests
         // Arrange
         var builder = TK.CreateUserJoinServiceBuilder()
             .WithStandardMocks();
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var message = TK.CreateNewUserJoinMessage();
         message.NewChatMembers = null;
@@ -516,7 +517,7 @@ public class UserJoinServiceIntegrationTests
                 mock.Setup(x => x.ProcessNewUserAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<CancellationToken>()))
                     .Returns(Task.CompletedTask);
             });
-        var userJoinService = builder.Build();
+        var userJoinService = (UserJoinFacade)builder.Build();
         
         var (_, envelope, message, _) = TK.CreateNewUserScenario();
         var user = message.NewChatMembers?.FirstOrDefault() ?? TK.CreateUser();

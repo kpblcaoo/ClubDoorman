@@ -196,7 +196,7 @@ public class AiAnalysisTests
     public async Task E2E_AI_Analysis_WithRealApi_ShouldWork()
     {
         // Arrange - создаем AiChecks с реальной конфигурацией из .env файла
-        var realAppConfig = new AppConfig(); // Используем реальную конфигурацию
+        var realAppConfig = AppConfigTestFactory.CreateDefault(); // Используем реальную конфигурацию
         var realAiChecks = new AiChecks(_fakeBot, _logger, realAppConfig);
         
         var suspiciousUser = new User
@@ -519,7 +519,7 @@ public class AiAnalysisTests
     public async Task E2E_AI_Analysis_SpecificUserDnekxpb_ShouldDetectSuspiciousProfile()
     {
         // Arrange - создаем AiChecks с реальным API для анализа конкретного пользователя
-        var realAppConfig = new AppConfig(); // Используем реальную конфигурацию
+        var realAppConfig = AppConfigTestFactory.CreateDefault(); // Используем реальную конфигурацию
         var realAiChecks = new AiChecks(_fakeBot, _logger, realAppConfig);
         
         var suspiciousUser = TK.CreateSuspiciousUser(987654321);
@@ -565,7 +565,7 @@ public class AiAnalysisTests
     public async Task E2E_AI_Analysis_VerySuspiciousUser_ShouldDetectHighSpamProbability()
     {
         // Arrange - создаем AiChecks с реальным API для анализа очень подозрительного пользователя
-        var realAppConfig = new AppConfig(); // Используем реальную конфигурацию
+        var realAppConfig = AppConfigTestFactory.CreateDefault(); // Используем реальную конфигурацию
         
         // Загружаем .env файл для реального API
         var envPath = FindEnvFile();
@@ -699,7 +699,7 @@ public class AiAnalysisTests
     public async Task E2E_AI_Analysis_WithRealPhoto_ShouldDetectHighSpamProbability()
     {
         // Arrange - создаем AiChecks с реальной конфигурацией и настроенным фото
-        var realAppConfig = new AppConfig(); // Используем реальную конфигурацию
+        var realAppConfig = AppConfigTestFactory.CreateDefault(); // Используем реальную конфигурацию
         
         // Загружаем .env файл для реального API
         var envPath = FindEnvFile();

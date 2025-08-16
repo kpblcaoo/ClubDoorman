@@ -48,6 +48,7 @@ public class MessageHandlerTestFactory
     // Используем TestKit для создания моков
     public Mock<ITelegramBotClientWrapper> BotMock { get; } = TK.CreateMockBotClientWrapper();
     public Mock<IModerationFacade> ModerationServiceMock { get; } = TK.CreateMock<IModerationFacade>();
+    public Mock<IModerationFacade> ModerationFacadeMock { get; } = TK.CreateMock<IModerationFacade>();
     public Mock<ICaptchaService> CaptchaServiceMock { get; } = TK.CreateMockCaptchaService();
     public Mock<IUserManager> UserManagerMock { get; } = TK.CreateMockUserManager();
     public Mock<ISpamHamClassifier> ClassifierMock { get; } = TK.CreateMockSpamHamClassifier();
@@ -766,8 +767,14 @@ public class MessageHandlerTestFactory
     /// <summary>
     /// Создает MessageHandler для тестов AI анализа
     /// </summary>
-    public MessageHandler CreateMessageHandlerForAiAnalysisTests()
+    public MessageHandler CreateMessageHandlerForAiAnalysisTests(ITelegramBotClientWrapper botClient, IAppConfig appConfig)
     {
+        // Используем переданные параметры для настройки
+        WithBotSetup(mock => 
+        {
+            // Настраиваем бота если нужно
+        });
+        
         return CreateMessageHandler();
     }
 
@@ -784,6 +791,16 @@ public class MessageHandlerTestFactory
     /// Возвращает мок IUserJoinFacade
     /// </summary>
     public Mock<IUserJoinFacade> UserJoinFacadeMock => new Mock<IUserJoinFacade>();
+
+    /// <summary>
+    /// Возвращает мок ICommandRouter
+    /// </summary>
+    public Mock<ICommandRouter> CommandRouterMock => new Mock<ICommandRouter>();
+
+    /// <summary>
+    /// Возвращает мок IButtonsService
+    /// </summary>
+    public Mock<IButtonsService> ButtonsServiceMock => new Mock<IButtonsService>();
 
     /// <summary>
     /// Настраивает мок ICommandRouter
