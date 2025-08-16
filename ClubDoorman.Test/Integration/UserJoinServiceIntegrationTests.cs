@@ -26,7 +26,7 @@ public class UserJoinServiceIntegrationTests
 {
     private UserJoinServiceBuilder _builder = null!;
     private UserJoinFacade _userJoinService = null!;
-    private Mock<IUserJoinFacade> _userJoinFacadeMock = null!;
+    private Mock<IUserJoinPolicy> _userJoinPolicyMock = null!;
     private Mock<ILogger<UserJoinFacade>> _loggerMock = null!;
 
     [SetUp]
@@ -35,7 +35,7 @@ public class UserJoinServiceIntegrationTests
         _builder = TK.CreateUserJoinServiceBuilder()
             .WithStandardMocks();
         _userJoinService = _builder.Build();
-        _userJoinFacadeMock = _builder.UserJoinFacadeMock;
+        _userJoinPolicyMock = _builder.UserJoinPolicyMock;
         _loggerMock = _builder.LoggerMock;
     }
 
@@ -70,7 +70,7 @@ public class UserJoinServiceIntegrationTests
             .WithStandardMocks();
 
         // Act & Assert
-        Assert.That(builder.UserJoinFacadeMock, Is.Not.Null);
+        Assert.That(builder.UserJoinPolicyMock, Is.Not.Null);
         Assert.That(builder.LoggerMock, Is.Not.Null);
     }
 
@@ -88,7 +88,7 @@ public class UserJoinServiceIntegrationTests
         await _userJoinService.HandleNewMembersAsync(message, CancellationToken.None);
 
         // Assert
-        _userJoinFacadeMock.Verify(x => x.HandleNewMembersAsync(message, CancellationToken.None), Times.Once);
+        _userJoinPolicyMock.Verify(x => x.HandleNewMembersAsync(message, CancellationToken.None), Times.Once);
     }
 
     /// <summary>
@@ -106,7 +106,7 @@ public class UserJoinServiceIntegrationTests
         await _userJoinService.ProcessNewUserAsync(message, user, CancellationToken.None);
 
         // Assert
-        _userJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
+        _userJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
     }
 
     #endregion
@@ -132,7 +132,7 @@ public class UserJoinServiceIntegrationTests
         await userJoinService.ProcessNewUserAsync(message, user, CancellationToken.None);
 
         // Assert
-        builder.UserJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
         
         // Проверяем логирование
         builder.LoggerMock.Verify(
@@ -164,8 +164,8 @@ public class UserJoinServiceIntegrationTests
         // Act
         await userJoinService.ProcessNewUserAsync(message, user, CancellationToken.None);
 
-        // Assert - проверяем, что MessageHandler был вызван (он содержит логику бана)
-        builder.UserJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
+        // Assert - проверяем, что UserJoinPolicy был вызван
+        builder.UserJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
         
         // Проверяем логирование
         builder.LoggerMock.Verify(
@@ -198,7 +198,7 @@ public class UserJoinServiceIntegrationTests
         await userJoinService.ProcessNewUserAsync(message, user, CancellationToken.None);
 
         // Assert - проверяем, что MessageHandler был вызван (он содержит логику проверки имени)
-        builder.UserJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
         
         // Проверяем логирование
         builder.LoggerMock.Verify(
@@ -231,7 +231,7 @@ public class UserJoinServiceIntegrationTests
         await userJoinService.ProcessNewUserAsync(message, user, CancellationToken.None);
 
         // Assert - проверяем, что MessageHandler был вызван (он содержит логику проверки клубного пользователя)
-        builder.UserJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
         
         // Проверяем логирование
         builder.LoggerMock.Verify(
@@ -264,7 +264,7 @@ public class UserJoinServiceIntegrationTests
         await userJoinService.ProcessNewUserAsync(message, user, CancellationToken.None);
 
         // Assert - проверяем, что MessageHandler был вызван (он содержит логику создания капчи)
-        builder.UserJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
         
         // Проверяем логирование
         builder.LoggerMock.Verify(
@@ -296,7 +296,7 @@ public class UserJoinServiceIntegrationTests
         // Act & Assert - должно обрабатываться gracefully, но MessageHandler все равно вызывается
         await userJoinService.ProcessNewUserAsync(message, user, CancellationToken.None);
         
-        builder.UserJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
         
         // Проверяем логирование
         builder.LoggerMock.Verify(
@@ -332,7 +332,7 @@ public class UserJoinServiceIntegrationTests
         await userJoinService.HandleNewMembersAsync(message, CancellationToken.None);
 
         // Assert
-        builder.UserJoinFacadeMock.Verify(x => x.HandleNewMembersAsync(message, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.HandleNewMembersAsync(message, CancellationToken.None), Times.Once);
         
         // Проверяем логирование
         builder.LoggerMock.Verify(
@@ -365,7 +365,7 @@ public class UserJoinServiceIntegrationTests
         await userJoinService.ProcessNewUserAsync(message, user, CancellationToken.None);
 
         // Assert
-        builder.UserJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
         
         // Проверяем логирование
         builder.LoggerMock.Verify(
@@ -400,7 +400,7 @@ public class UserJoinServiceIntegrationTests
         // Act & Assert - должно обрабатываться gracefully
         await userJoinService.ProcessNewUserAsync(null!, user, CancellationToken.None);
         
-        builder.UserJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(null!, user, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(null!, user, CancellationToken.None), Times.Once);
     }
 
     /// <summary>
@@ -420,7 +420,7 @@ public class UserJoinServiceIntegrationTests
         // Act & Assert - должно обрабатываться gracefully
         await userJoinService.ProcessNewUserAsync(message, null!, CancellationToken.None);
         
-        builder.UserJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(message, null!, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(message, null!, CancellationToken.None), Times.Once);
     }
 
     /// <summary>
@@ -443,7 +443,7 @@ public class UserJoinServiceIntegrationTests
         // Act & Assert - должно обрабатываться gracefully
         await userJoinService.ProcessNewUserAsync(message, user, cancellationTokenSource.Token);
         
-        builder.UserJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(message, user, cancellationTokenSource.Token), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(message, user, cancellationTokenSource.Token), Times.Once);
     }
 
     #endregion
@@ -474,7 +474,7 @@ public class UserJoinServiceIntegrationTests
         await userJoinService.HandleNewMembersAsync(message, CancellationToken.None);
 
         // Assert - проверяем, что MessageHandler был вызван для обработки всех пользователей
-        builder.UserJoinFacadeMock.Verify(x => x.HandleNewMembersAsync(message, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.HandleNewMembersAsync(message, CancellationToken.None), Times.Once);
     }
 
     /// <summary>
@@ -496,7 +496,7 @@ public class UserJoinServiceIntegrationTests
         await userJoinService.HandleNewMembersAsync(message, CancellationToken.None);
 
         // Assert - проверяем, что MessageHandler был вызван даже для пустого списка
-        builder.UserJoinFacadeMock.Verify(x => x.HandleNewMembersAsync(message, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.HandleNewMembersAsync(message, CancellationToken.None), Times.Once);
     }
 
     #endregion
@@ -527,7 +527,7 @@ public class UserJoinServiceIntegrationTests
         await userJoinService.ProcessNewUserAsync(message, user, CancellationToken.None);
 
         // Assert - проверяем, что кастомный сценарий был применен
-        builder.UserJoinFacadeMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
+        builder.UserJoinPolicyMock.Verify(x => x.ProcessNewUserAsync(message, user, CancellationToken.None), Times.Once);
     }
 
     #endregion

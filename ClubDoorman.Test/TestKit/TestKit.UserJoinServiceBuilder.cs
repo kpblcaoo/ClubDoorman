@@ -53,6 +53,7 @@ public class UserJoinServiceBuilder
     private readonly Mock<ILogger<MessageHandler>> _messageHandlerLoggerMock = new();
     private readonly Mock<IUserBanService> _userBanServiceMock = new();
     private readonly Mock<ILogger<UserJoinFacade>> _loggerMock = new();
+    private readonly Mock<IUserJoinPolicy> _userJoinPolicyMock = new();
     
     private Mock<IUpdateHandler> _messageHandlerMock = new();
 
@@ -202,7 +203,7 @@ public class UserJoinServiceBuilder
 /// </summary>
 public UserJoinFacade Build()
 {
-return new UserJoinFacade(new Mock<IUserJoinPolicy>().Object, _loggerMock.Object);
+    return new UserJoinFacade(_userJoinPolicyMock.Object, _loggerMock.Object);
 }
 
     /// <summary>
@@ -212,10 +213,10 @@ return new UserJoinFacade(new Mock<IUserJoinPolicy>().Object, _loggerMock.Object
 public Mock<IUpdateHandler> MessageHandlerMock => _messageHandlerMock;
 
     /// <summary>
-    /// Возвращает мок IUserJoinFacade для дополнительной настройки
-/// <tags>builders, user-join-service, user-join-facade-mock, fluent-api</tags>
+    /// Возвращает мок IUserJoinPolicy для дополнительной настройки
+/// <tags>builders, user-join-service, user-join-policy-mock, fluent-api</tags>
 /// </summary>
-public Mock<IUserJoinFacade> UserJoinFacadeMock => new Mock<IUserJoinFacade>();
+public Mock<IUserJoinPolicy> UserJoinPolicyMock => _userJoinPolicyMock;
 
     /// <summary>
     /// Возвращает мок логгера для дополнительной настройки
