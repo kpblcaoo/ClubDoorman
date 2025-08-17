@@ -1,47 +1,30 @@
-# GitLeaks конфигурация для ClubDoorman
-# Обнаруживает только реальные токены и ключи
+############################################################
+# GitLeaks конфигурация для ClubDoorman                   #
+# Цели:                                                   #
+#  1. Минимизировать ложные срабатывания                  #
+#  2. Детектить реальные токены (telegram, openai, etc.)  #
+#  3. Игнорировать артефакты сборки и тестов              #
+#  4. Использовать baseline только для истории            #
+############################################################
 
-[global]
-# Игнорируем все тестовые файлы и примеры
-allowlist = [
-    '''bin/''',
-    '''obj/''',
-    '''*.user''',
-    '''.vscode/''',
-    '''*.suo''',
-    '''*.dll''',
-    '''*.exe''',
-    '''*.pdb''',
-    '''*.cache''',
-    '''coverage/''',
-    '''TestResults/''',
-    '''tmp/''',
-    '''*.example''',
-    '''*.sample''',
-    '''test.env''',
-    '''**/.env''',
-    '''test_bot.sh.example''',
-    '''run_with_real_token.sh.example''',
-    '''test_bot.sh''',
-    '''run_with_real_token.sh''',
-    '''**/test_bot.sh''',
-    '''**/run_with_real_token.sh''',
-    '''./test_bot.sh''',
-    '''./run_with_real_token.sh''',
-    '''ClubDoorman/.env''',
-    '''.gitleaks.baseline.json''',
-    '''scripts/run_tests*.sh''',
-    '''ClubDoorman.Test/''',
-    '''plans/''',
-    '''plans/phase2-test-analysis/df733b7-code-diff.txt''',
-    '''AI_PROFILE_CHECKS.md''',
-    '''.env.sample''',
-    '''docker-compose.yml.example''',
-    '''.github/workflows/''',
-    '''env.example''',
-    '''test_bot.sh.example''',
-    '''2217e45fe88b6c20ea772da616db2b0b0bff8f38'''  # Старый коммит с тестовыми токенами
+[allowlist]
+description = "Минимальный allowlist для шумных артефактов"
+paths = [
+    # Build & obj (корневые пути достаточно)
+    "bin/",
+    "obj/",
+    # Test result noise (простая маска каталога)
+    "TestResults/",
+    # Local env templates/examples
+    "env.example",
+    ".env.sample",
+    "docker-compose.yml.example",
+    # Baseline files
+    ".gitleaks.baseline.json",
+    ".gitleaks.baseline"
 ]
+
+# Примечание: локальный `.env` не в репо => не нужен в списке. Старые коммиты не сканируем pre-commit (pipe diff).
 
 # Правила для Telegram токенов (только реальные)
 [[rules]]

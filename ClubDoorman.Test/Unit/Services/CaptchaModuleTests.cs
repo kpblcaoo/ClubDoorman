@@ -23,12 +23,12 @@ public class CaptchaModuleTests
     public void Setup()
     {
         _services = new ServiceCollection();
-        
+
         // Добавляем необходимые зависимости для тестирования
         _services.AddSingleton(Mock.Of<ITelegramBotClientWrapper>());
         _services.AddSingleton(Mock.Of<IMessageService>());
         _services.AddSingleton(Mock.Of<IAppConfig>());
-        
+
         // Добавляем логгеры
         _services.AddLogging();
     }
@@ -80,4 +80,4 @@ public class CaptchaModuleTests
         // Assert
         Assert.That(result, Is.SameAs(_services));
     }
-} 
+}

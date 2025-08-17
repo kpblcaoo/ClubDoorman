@@ -31,7 +31,7 @@ public class TelegramBotMockBuilder
                 It.IsAny<ReplyMarkup?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Message { Text = "Test message" });
-        
+
         return this;
     }
 
@@ -46,7 +46,7 @@ public class TelegramBotMockBuilder
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        
+
         return this;
     }
 
@@ -62,7 +62,7 @@ public class TelegramBotMockBuilder
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Message { Text = "Forwarded message" });
-        
+
         return this;
     }
 
@@ -77,7 +77,7 @@ public class TelegramBotMockBuilder
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Delete failed"));
-        
+
         return this;
     }
 
@@ -95,7 +95,7 @@ public class TelegramBotMockBuilder
                 It.IsAny<ReplyMarkup?>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Send failed"));
-        
+
         return this;
     }
 
@@ -110,4 +110,4 @@ public class TelegramBotMockBuilder
     /// <tags>builders, telegram-bot, build-object, fluent-api</tags>
     /// </summary>
     public ITelegramBotClientWrapper BuildObject() => Build().Object;
-} 
+}

@@ -15,7 +15,7 @@ namespace ClubDoorman.Test.TestKit;
 public static class TestKitTelegram
 {
     private static int _nextMessageId = 1;
-    
+
     /// <summary>
     /// Создает FakeTelegramClient с предустановленными настройками
     /// <tags>telegram, fake-client, test-infrastructure</tags>
@@ -24,7 +24,7 @@ public static class TestKitTelegram
     {
         return new FakeTelegramClient();
     }
-    
+
     /// <summary>
     /// Создает MessageEnvelope с автоматическим MessageId
     /// <tags>telegram, message-envelope, message-id, test-infrastructure</tags>
@@ -51,7 +51,7 @@ public static class TestKitTelegram
             Date: DateTime.UtcNow
         );
     }
-    
+
     /// <summary>
     /// Создает MessageEnvelope для спам-сообщений
     /// <tags>telegram, message-envelope, spam, message-id, test-infrastructure</tags>
@@ -75,7 +75,7 @@ public static class TestKitTelegram
             Date: DateTime.UtcNow
         );
     }
-    
+
     /// <summary>
     /// Создает MessageEnvelope для новых участников
     /// <tags>telegram, message-envelope, new-user, message-id, test-infrastructure</tags>
@@ -99,7 +99,7 @@ public static class TestKitTelegram
             Date: DateTime.UtcNow
         );
     }
-    
+
     /// <summary>
     /// Создает Message из MessageEnvelope через FakeTelegramClient
     /// <tags>telegram, message, message-envelope, fake-client, test-infrastructure</tags>
@@ -109,7 +109,7 @@ public static class TestKitTelegram
         fakeClient.RegisterMessageEnvelope(envelope);
         return fakeClient.CreateMessageFromEnvelope(envelope);
     }
-    
+
     /// <summary>
     /// Создает Update с Message из MessageEnvelope
     /// </summary>
@@ -118,7 +118,7 @@ public static class TestKitTelegram
         var message = CreateMessageFromEnvelope(fakeClient, envelope);
         return new Update { Message = message };
     }
-    
+
     /// <summary>
     /// Создает CallbackQuery с автоматическим MessageId
     /// </summary>
@@ -134,7 +134,7 @@ public static class TestKitTelegram
         {
             message = TK.CreateValidMessageWithId(messageId.Value);
         }
-        
+
         return new CallbackQuery
         {
             Id = Guid.NewGuid().ToString(),
@@ -144,7 +144,7 @@ public static class TestKitTelegram
             Data = data
         };
     }
-    
+
     /// <summary>
     /// Создает Update с CallbackQuery
     /// </summary>
@@ -159,7 +159,7 @@ public static class TestKitTelegram
             CallbackQuery = CreateCallbackQuery(userId, chatId, data, messageId)
         };
     }
-    
+
     /// <summary>
     /// Создает ChatMemberUpdated для тестов
     /// </summary>
@@ -170,7 +170,7 @@ public static class TestKitTelegram
         ChatMemberStatus newStatus = ChatMemberStatus.Administrator)
     {
         var user = TestKitBogus.CreateRealisticUser(userId);
-        
+
         return new ChatMemberUpdated
         {
             Chat = TestKitBogus.CreateRealisticGroup(),
@@ -180,7 +180,7 @@ public static class TestKitTelegram
             NewChatMember = CreateChatMemberByStatus(user, newStatus)
         };
     }
-    
+
     /// <summary>
     /// Создает Update с ChatMemberUpdated
     /// </summary>
@@ -195,7 +195,7 @@ public static class TestKitTelegram
             ChatMember = CreateChatMemberUpdated(userId, chatId, oldStatus, newStatus)
         };
     }
-    
+
     /// <summary>
     /// Создает полный тестовый сценарий с FakeTelegramClient
     /// </summary>
@@ -208,10 +208,10 @@ public static class TestKitTelegram
         var envelope = CreateEnvelope(userId, chatId, text);
         var message = CreateMessageFromEnvelope(fakeClient, envelope);
         var update = new Update { Message = message };
-        
+
         return (fakeClient, envelope, message, update);
     }
-    
+
     /// <summary>
     /// Создает спам-сценарий с FakeTelegramClient
     /// </summary>
@@ -223,10 +223,10 @@ public static class TestKitTelegram
         var envelope = CreateSpamEnvelope(userId, chatId);
         var message = CreateMessageFromEnvelope(fakeClient, envelope);
         var update = new Update { Message = message };
-        
+
         return (fakeClient, envelope, message, update);
     }
-    
+
     /// <summary>
     /// Создает сценарий нового участника с FakeTelegramClient
     /// </summary>
@@ -238,10 +238,10 @@ public static class TestKitTelegram
         var envelope = CreateNewUserEnvelope(userId, chatId);
         var message = CreateMessageFromEnvelope(fakeClient, envelope);
         var update = new Update { Message = message };
-        
+
         return (fakeClient, envelope, message, update);
     }
-    
+
     /// <summary>
     /// Сбрасывает счетчик MessageId (для изоляции тестов)
     /// </summary>
@@ -249,7 +249,7 @@ public static class TestKitTelegram
     {
         _nextMessageId = 1;
     }
-    
+
     /// <summary>
     /// Устанавливает следующий MessageId (для предсказуемых тестов)
     /// </summary>
@@ -257,7 +257,7 @@ public static class TestKitTelegram
     {
         _nextMessageId = messageId;
     }
-    
+
     /// <summary>
     /// Создает ChatMember с нужным статусом
     /// </summary>
@@ -274,4 +274,4 @@ public static class TestKitTelegram
             _ => new ChatMemberMember { User = user }
         };
     }
-} 
+}

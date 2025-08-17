@@ -20,8 +20,17 @@ dotnet format --verify-no-changes || {
 if command -v gitleaks >/dev/null 2>&1; then
   if [ -f .gitleaks.toml ]; then
     echo "[pre-commit] gitleaks scan"
-    if ! gitleaks detect --no-git --verbose --source . --redact --report-format json --report-path /tmp/gitleaks-precommit.json; then
+  # Сканируем ТОЛЬКО staged diff через pipe (текущие изменения). Историю не трогаем.
+  GITLEAKS_CMD=(gitleaks detect --verbose --config .gitleaks.toml --pipe --redact --report-format json --report-path /tmp/gitleaks-precommit.json)
+    # Используем baseline если существует
+    if [ -f .gitleaks.baseline ]; then
+      GITLEAKS_CMD+=(--baseline-path .gitleaks.baseline)
+    elif [ -f .gitleaks.baseline.json ]; then
+      GITLEAKS_CMD+=(--baseline-path .gitleaks.baseline.json)
+    fi
+  if ! git diff --cached --unified=0 | "${GITLEAKS_CMD[@]}"; then
       echo "[pre-commit] gitleaks обнаружил возможные секреты. Проверьте отчёт /tmp/gitleaks-precommit.json" >&2
+      echo "[pre-commit] Если это ложные срабатывания (например, TestResults/*.trx), обновите allowlist или baseline." >&2
       exit 1
     fi
   fi

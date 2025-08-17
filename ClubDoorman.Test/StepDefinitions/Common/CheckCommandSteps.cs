@@ -44,24 +44,28 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             ScenarioContext.Current["CheckCommandAdminUserId"] = TestAdmin.AdminUserId;
 
             _factory.WithStandardMocks();
-            _factory.WithAppConfigSetup(mock => {
+            _factory.WithAppConfigSetup(mock =>
+            {
                 mock.Setup(x => x.AdminChatId).Returns(123456789);
                 mock.Setup(x => x.LogAdminChatId).Returns(123456789);
                 mock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
                 mock.Setup(x => x.DisabledChats).Returns(new HashSet<long>());
             });
-            _factory.WithClassifierSetup(mock => {
+            _factory.WithClassifierSetup(mock =>
+            {
                 mock.Setup(x => x.IsSpam(It.IsAny<string>())).ReturnsAsync((false, -0.5f));
             });
             var botPermMock = TestKit.TestKit.CreateBotPermissionsServiceMockForChat(123456789);
-            _factory.WithBotPermissionsServiceSetup(mock => {
+            _factory.WithBotPermissionsServiceSetup(mock =>
+            {
                 mock.Reset();
                 mock.Setup(x => x.IsBotAdminAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
                     .Returns((long chatId, CancellationToken token) => botPermMock.Object.IsBotAdminAsync(chatId, token));
                 mock.Setup(x => x.IsSilentModeAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
                     .Returns((long chatId, CancellationToken token) => botPermMock.Object.IsSilentModeAsync(chatId, token));
             });
-            _factory.WithMessageServiceSetup(mock => {
+            _factory.WithMessageServiceSetup(mock =>
+            {
                 mock.Setup(x => x.SendUserNotificationAsync(
                     It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<UserNotificationType>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
                     .Callback<User, Chat, UserNotificationType, object, CancellationToken>((user, chat, type, data, token) =>
@@ -84,7 +88,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 _factory.AppConfigMock.Object,
                 _loggerFactory.CreateLogger<CheckCommandHandler>());
             var commandRouter = new CommandRouter(new List<ICommandHandler> { checkHandler }, _loggerFactory.CreateLogger<CommandRouter>());
-            _factory.WithCommandRouterSetup(mock => {
+            _factory.WithCommandRouterSetup(mock =>
+            {
                 mock.Setup(x => x.HandleCommandAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
                     .Returns<Message, CancellationToken>((message, ct) => commandRouter.HandleCommandAsync(message, ct));
             });
@@ -260,7 +265,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             {
                 // Получаем тестовое сообщение из контекста
                 var testMessage = (Message)ScenarioContext.Current["TestMessage"];
-                
+
                 // Используем уже созданный MessageHandler из ScenarioContext
                 _messageHandler = (MessageHandler)ScenarioContext.Current["MessageHandler"];
                 Console.WriteLine($"[DEBUG] WhenISendTheCheckCommand: sending message FromId={testMessage.From?.Id}, ChatId={testMessage.Chat.Id}, Text={testMessage.Text}, ReplyTo.From={testMessage.ReplyToMessage?.From?.Id}");
@@ -316,10 +321,10 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void ThenIShouldReceiveSpamAnalysisResults()
         {
             // Получаем ответ из ScenarioContext (установлен в SuspiciousCommandSteps)
-            var response = ScenarioContext.Current.ContainsKey("LastResponse") 
-                ? (string)ScenarioContext.Current["LastResponse"] 
+            var response = ScenarioContext.Current.ContainsKey("LastResponse")
+                ? (string)ScenarioContext.Current["LastResponse"]
                 : string.Empty;
-                
+
             response.Should().NotBeNullOrEmpty();
             response.Should().Contain("Результат проверки:");
         }
@@ -327,8 +332,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Then(@"the analysis should include emoji check")]
         public void ThenTheAnalysisShouldIncludeEmojiCheck()
         {
-            var response = ScenarioContext.Current.ContainsKey("LastResponse") 
-                ? (string)ScenarioContext.Current["LastResponse"] 
+            var response = ScenarioContext.Current.ContainsKey("LastResponse")
+                ? (string)ScenarioContext.Current["LastResponse"]
                 : string.Empty;
             response.Should().Contain("Много эмодзи:");
         }
@@ -336,8 +341,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Then(@"the analysis should include stop words check")]
         public void ThenTheAnalysisShouldIncludeStopWordsCheck()
         {
-            var response = ScenarioContext.Current.ContainsKey("LastResponse") 
-                ? (string)ScenarioContext.Current["LastResponse"] 
+            var response = ScenarioContext.Current.ContainsKey("LastResponse")
+                ? (string)ScenarioContext.Current["LastResponse"]
                 : string.Empty;
             response.Should().Contain("Найдены стоп-слова:");
         }
@@ -345,8 +350,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Then(@"the analysis should include ML classifier results")]
         public void ThenTheAnalysisShouldIncludeMLClassifierResults()
         {
-            var response = ScenarioContext.Current.ContainsKey("LastResponse") 
-                ? (string)ScenarioContext.Current["LastResponse"] 
+            var response = ScenarioContext.Current.ContainsKey("LastResponse")
+                ? (string)ScenarioContext.Current["LastResponse"]
                 : string.Empty;
             response.Should().Contain("ML классификатор:");
         }
@@ -354,8 +359,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Then(@"the analysis should show ""(.*)""")]
         public void ThenTheAnalysisShouldShow(string expectedText)
         {
-            var response = ScenarioContext.Current.ContainsKey("LastResponse") 
-                ? (string)ScenarioContext.Current["LastResponse"] 
+            var response = ScenarioContext.Current.ContainsKey("LastResponse")
+                ? (string)ScenarioContext.Current["LastResponse"]
                 : string.Empty;
             // Убираем звездочки из ответа для сравнения (они используются для Markdown)
             var responseWithoutMarkdown = response.Replace("*", "");
@@ -365,8 +370,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Then(@"no analysis results should be displayed")]
         public void ThenNoAnalysisResultsShouldBeDisplayed()
         {
-            var response = ScenarioContext.Current.ContainsKey("LastResponse") 
-                ? (string)ScenarioContext.Current["LastResponse"] 
+            var response = ScenarioContext.Current.ContainsKey("LastResponse")
+                ? (string)ScenarioContext.Current["LastResponse"]
                 : string.Empty;
             // Ожидаем отсутствие контента анализа
             response.Should().NotContain("Результат проверки");
@@ -432,7 +437,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void GivenIReplyToAMessageWithEmojisWithCheckCommand(string command)
         {
             // Используем единый _messageHandler (не пересоздаём)
-            
+
             _repliedMessage = new Message
             {
                 From = new User { Id = 777777777, FirstName = "EmojiUser", Username = "emojiuser" },
@@ -458,7 +463,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void GivenIReplyToAMessageWithStopWordsWithCheckCommand(string command)
         {
             // Используем единый _messageHandler (не пересоздаём)
-            
+
             _repliedMessage = new Message
             {
                 From = new User { Id = 888888888, FirstName = "StopWordUser", Username = "stopworduser" },

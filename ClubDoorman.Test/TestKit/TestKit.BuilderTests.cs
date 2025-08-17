@@ -48,7 +48,7 @@ public class TestKitBuilderTests
         // Arrange & Act
         var builder = TK.CreateMessageHandlerBuilder()
             .WithBanMocks();
-        
+
         var handler = builder.Build();
 
         // Assert
@@ -63,7 +63,7 @@ public class TestKitBuilderTests
         // Arrange & Act
         var builder = TK.CreateMessageHandlerBuilder()
             .WithStandardMocks();
-        
+
         var handler = builder.Build();
 
         // Assert
@@ -192,15 +192,15 @@ public class TestKitBuilderTests
     {
         // Act
         var setup = TK.Specialized.ModerationScenarios.CompleteSetup();
-        
+
         // Assert
         Assert.That(setup.Service, Is.Not.Null);
         Assert.That(setup.SpamClassifier, Is.Not.Null);
-        Assert.That(setup.MimicryClassifier, Is.Not.Null);  
+        Assert.That(setup.MimicryClassifier, Is.Not.Null);
         Assert.That(setup.BadMessageManager, Is.Not.Null);
         Assert.That(setup.SuspiciousUsersStorage, Is.Not.Null);
         Assert.That(setup.AiChecks, Is.Not.Null);
-        
+
         // Проверяем моки
         Assert.That(setup.UserManagerMock, Is.Not.Null);
         Assert.That(setup.BotClientMock, Is.Not.Null);
@@ -215,13 +215,13 @@ public class TestKitBuilderTests
     {
         // Act
         var setup = TK.Specialized.ModerationScenarios.MinimalSetup();
-        
+
         // Assert
         Assert.That(setup.Service, Is.Not.Null);
         Assert.That(setup.SpamClassifier, Is.Not.Null);
         Assert.That(setup.MimicryClassifier, Is.Not.Null);
         Assert.That(setup.BadMessageManager, Is.Not.Null);
-        
+
         // Минимальный setup использует моки для некоторых компонентов
         Assert.That(setup.AiChecks, Is.Not.Null);
         Assert.That(setup.SuspiciousUsersStorage, Is.Not.Null);
@@ -229,24 +229,24 @@ public class TestKitBuilderTests
 
     [Test]
     [Category(TestCategories.TestInfrastructure)]
-    [Category("scenarios")]  
+    [Category("scenarios")]
     public void ModerationScenarios_MockedSetup_WorksCorrectly()
     {
         // Act
         var (service, mocks) = TK.Specialized.ModerationScenarios.MockedSetup();
-        
+
         // Assert
         Assert.That(service, Is.Not.Null);
         Assert.That(mocks, Is.Not.Null);
         Assert.That(mocks.Count, Is.EqualTo(8)); // 8 моков в словаре (только интерфейсы)
-        
+
         // Проверяем что все ожидаемые моки есть
         Assert.That(mocks.ContainsKey("UserManager"), Is.True);
         Assert.That(mocks.ContainsKey("AiChecks"), Is.True);
         Assert.That(mocks.ContainsKey("Logger"), Is.True);
         Assert.That(mocks.ContainsKey("BotClient"), Is.True);
         Assert.That(mocks.ContainsKey("MessageService"), Is.True);
-        
+
         // Sealed классы не мокаются, поэтому их нет в словаре
         Assert.That(mocks.ContainsKey("BadMessageManager"), Is.False);
     }
@@ -258,7 +258,7 @@ public class TestKitBuilderTests
     {
         // Act
         var client = TK.CreateTestBotClient();
-        
+
         // Assert
         Assert.That(client, Is.Not.Null);
         Assert.That(client, Is.InstanceOf<TelegramBotClient>());
@@ -272,10 +272,10 @@ public class TestKitBuilderTests
         // Act
         var token1 = TK.CreateTestToken();
         var token2 = TK.CreateTestToken();
-        
+
         // Assert
         Assert.That(token1, Is.EqualTo(token2));
         Assert.That(token1, Does.StartWith("1234567890:"));
         Assert.That(token1, Does.Contain("TEST_TOKEN"));
     }
-} 
+}

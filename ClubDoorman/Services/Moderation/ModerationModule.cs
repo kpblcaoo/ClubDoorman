@@ -8,10 +8,10 @@ public static class ModerationModule
 {
     public static IServiceCollection AddModerationServices(this IServiceCollection services)
     {
-    // LEGACY NOTE:
-    // Раньше здесь регистрировался IModerationFacade (дублировало Feature: AddModerationFeature).
-    // Теперь единственный источник регистрации фасада — Feature слой.
-    // Оставляем здесь только мост (адаптер) IModerationService -> IModerationPolicy для старых потребителей.
+        // LEGACY NOTE:
+        // Раньше здесь регистрировался IModerationFacade (дублировало Feature: AddModerationFeature).
+        // Теперь единственный источник регистрации фасада — Feature слой.
+        // Оставляем здесь только мост (адаптер) IModerationService -> IModerationPolicy для старых потребителей.
 
         // Регистрация IModerationService с фабрикой как в Program.cs
         services.AddSingleton<IModerationService>(provider =>

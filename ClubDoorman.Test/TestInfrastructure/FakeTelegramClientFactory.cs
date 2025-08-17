@@ -13,7 +13,7 @@ public static class FakeTelegramClientFactory
     /// Создает стандартный FakeTelegramClient
     /// </summary>
     public static FakeTelegramClient Create() => TestKitTelegram.CreateFakeClient();
-    
+
     /// <summary>
     /// Создает FakeTelegramClient с кастомной настройкой
     /// </summary>
@@ -23,28 +23,28 @@ public static class FakeTelegramClientFactory
         setup(client);
         return client;
     }
-    
+
     /// <summary>
     /// Создает FakeTelegramClient с настройкой для тестирования ошибок
     /// </summary>
     public static FakeTelegramClient CreateWithException(Exception exception)
     {
-        return CreateWithCustomSetup(client => 
+        return CreateWithCustomSetup(client =>
         {
             client.ShouldThrowException = true;
             client.ExceptionToThrow = exception;
         });
     }
-    
+
     /// <summary>
     /// Создает FakeTelegramClient с настройкой для интеграционных тестов
     /// </summary>
     public static FakeTelegramClient CreateForIntegrationTests()
     {
-        return CreateWithCustomSetup(client => 
+        return CreateWithCustomSetup(client =>
         {
             // Настройки для интеграционных тестов
             // Можно добавить специфичные настройки
         });
     }
-} 
+}

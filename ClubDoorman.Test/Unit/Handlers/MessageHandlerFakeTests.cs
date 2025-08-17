@@ -38,7 +38,7 @@ public class MessageHandlerFakeTests
     public void Setup()
     {
         _factory = new MessageHandlerTestFactory()
-            .WithAppConfigSetup(mock => 
+            .WithAppConfigSetup(mock =>
             {
                 mock.Setup(x => x.NoCaptchaGroups).Returns(new HashSet<long>());
                 mock.Setup(x => x.NoVpnAdGroups).Returns(new HashSet<long>());
@@ -50,13 +50,13 @@ public class MessageHandlerFakeTests
             .WithMessageServiceSetup(mock =>
             {
                 mock.Setup(x => x.SendCaptchaMessageAsync(It.IsAny<SendCaptchaMessageRequest>()))
-                    .ReturnsAsync(new Message 
-                    { 
+                    .ReturnsAsync(new Message
+                    {
                         Chat = new Chat { Id = 123456 },
                         Date = DateTime.UtcNow
                     });
             });
-        
+
         // Настройка моков для UserManager
         _factory.UserManagerMock
             .Setup(x => x.InBanlist(It.IsAny<long>()))
@@ -100,10 +100,10 @@ public class MessageHandlerFakeTests
     {
         // Arrange - используем новые возможности TestKit
         var (fakeClient, envelope, message, update) = TestKitTelegram.CreateSpamScenario(
-            userId: 789, 
+            userId: 789,
             chatId: 123456
         );
-        
+
         // Создаем MessageHandler с правильным FakeTelegramClient
         var service = _factory.CreateMessageHandlerWithFake(fakeClient);
 
@@ -132,17 +132,17 @@ public class MessageHandlerFakeTests
     {
         // Arrange - используем новые возможности TestKit
         var fakeClient = TestKitTelegram.CreateFakeClient();
-        
+
         // Создаем сервисное сообщение о новом участнике через билдеры
         var message = TestKitBuilders.CreateMessage()
             .FromUser(12345)
             .InChat(67890)
             .WithText(null) // null для сервисных сообщений
             .Build();
-        
+
         // Добавляем NewChatMembers для сервисного сообщения
         message.NewChatMembers = new[] { TestKitBogus.CreateRealisticUser(12345) };
-        
+
         var update = new Update { Message = message };
         var service = _factory.CreateMessageHandlerWithFake(fakeClient);
 
@@ -297,7 +297,7 @@ public class MessageHandlerFakeTests
         // Arrange
         _fakeClient.ShouldThrowException = true;
         _fakeClient.ExceptionToThrow = new Exception("Telegram API error");
-        
+
         var service = _factory.CreateMessageHandlerWithFake(_fakeClient);
         var message = TK.CreateValidMessage();
 
@@ -335,7 +335,7 @@ public class MessageHandlerFakeTests
 
         // Настройка ServiceProvider для команд
         var mockStartCommandHandler = new Mock<StartCommandHandler>(
-            MockBehavior.Loose, 
+            MockBehavior.Loose,
             new TelegramBotClientWrapper(new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz")),
             NullLogger<StartCommandHandler>.Instance,
             new Mock<IMessageService>().Object,
@@ -421,4 +421,4 @@ public class MessageHandlerFakeTests
             x => x.CheckMessageAsync(It.IsAny<Message>()),
             Times.Once);
     }
-} 
+}

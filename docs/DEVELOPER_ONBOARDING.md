@@ -18,7 +18,7 @@ export PATH="$HOME/.dotnet:$PATH"
 
 ## 3. Клонирование и restore
 ```bash
-git clone <fork-url> spampyre
+git clone git@github.com:momai/ClubDoorman.git spampyre
 cd spampyre
 export PATH="$HOME/.dotnet:$PATH"
 dotnet restore

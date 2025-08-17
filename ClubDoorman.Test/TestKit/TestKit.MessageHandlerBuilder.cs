@@ -60,12 +60,12 @@ public class MessageHandlerBuilder
     private readonly Mock<IUserBanService> _userBanServiceMock = TK.CreateMockUserBanService();
     private readonly Mock<ILogChatService> _logChatServiceMock = TK.CreateMock<ILogChatService>();
     private readonly Mock<IChannelModerationService> _channelModerationServiceMock = TK.CreateMock<IChannelModerationService>();
-    
+
     // Мокаем интерфейсы командных обработчиков
     private readonly Mock<IStartCommandHandler> _startCommandHandlerMock = TK.CreateMock<IStartCommandHandler>();
     private readonly Mock<ISuspiciousCommandHandler> _suspiciousCommandHandlerMock = TK.CreateMock<ISuspiciousCommandHandler>();
     private readonly Mock<ICommandRouter> _commandRouterMock = TK.CreateMock<ICommandRouter>();
-    
+
     private readonly Mock<ILogger<MessageHandler>> _loggerMock = TK.CreateLoggerMock<MessageHandler>();
     private readonly Mock<ILogger<SuspiciousCommandHandler>> _suspiciousCommandHandlerLoggerMock = TK.CreateLoggerMock<SuspiciousCommandHandler>();
     private readonly Mock<ISuspiciousUsersStorage> _suspiciousUsersStorageMock = TK.CreateMock<ISuspiciousUsersStorage>();
@@ -92,13 +92,13 @@ public class MessageHandlerBuilder
         var builder = TK.CreateUserManagerMock();
         configure(builder);
         var mock = builder.Build();
-        
+
         // Копируем настройки в основной мок
         _userManagerMock.Setup(x => x.Approved(It.IsAny<long>(), null))
             .Returns(mock.Object.Approved(It.IsAny<long>(), null));
         _userManagerMock.Setup(x => x.InBanlist(It.IsAny<long>()))
             .Returns(mock.Object.InBanlist(It.IsAny<long>()));
-        
+
         return this;
     }
 
@@ -111,11 +111,11 @@ public class MessageHandlerBuilder
         var builder = TK.CreateCaptchaServiceMock();
         configure(builder);
         var mock = builder.Build();
-        
+
         // Копируем настройки в основной мок
         _captchaServiceMock.Setup(x => x.CreateCaptchaAsync(It.IsAny<CreateCaptchaRequest>()))
             .Returns(mock.Object.CreateCaptchaAsync(It.IsAny<CreateCaptchaRequest>()));
-        
+
         return this;
     }
 
@@ -128,11 +128,11 @@ public class MessageHandlerBuilder
         var builder = TK.CreateAiChecksMock();
         configure(builder);
         var mock = builder.Build();
-        
+
         // Копируем настройки в основной мок
         _aiChecksMock.Setup(x => x.GetSpamProbability(It.IsAny<Message>()))
             .Returns(mock.Object.GetSpamProbability(It.IsAny<Message>()));
-        
+
         return this;
     }
 
@@ -145,7 +145,7 @@ public class MessageHandlerBuilder
         var builder = TK.CreateTelegramBotMock();
         configure(builder);
         var mock = builder.Build();
-        
+
         // Копируем настройки в основной мок
         _botMock.Setup(x => x.SendMessageAsync(
             It.IsAny<ChatId>(),
@@ -161,7 +161,7 @@ public class MessageHandlerBuilder
                 It.IsAny<ReplyParameters>(),
                 It.IsAny<ReplyMarkup>(),
                 It.IsAny<CancellationToken>()));
-        
+
         return this;
     }
 
@@ -177,20 +177,20 @@ public class MessageHandlerBuilder
         _moderationFacadeMock.Setup(x => x.CheckUserNameAsync(It.IsAny<User>()))
             .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Test user name"));
         _moderationFacadeMock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
-        
+
         _userManagerMock.Setup(x => x.Approved(It.IsAny<long>(), null)).Returns(false);
         _userManagerMock.Setup(x => x.InBanlist(It.IsAny<long>())).ReturnsAsync(false);
-        
+
         _captchaServiceMock.Setup(x => x.CreateCaptchaAsync(It.IsAny<CreateCaptchaRequest>()))
             .ReturnsAsync(new CaptchaInfo(123, "Test Chat", DateTime.UtcNow, new User { Id = 456 }, 1, new CancellationTokenSource(), null));
-        
+
         _classifierMock.Setup(x => x.IsSpam(It.IsAny<string>())).ReturnsAsync((false, 0.5f));
-        
+
         _badMessageManagerMock.Setup(x => x.KnownBadMessage(It.IsAny<string>())).Returns(false);
-        
+
         _aiChecksMock.Setup(x => x.GetSpamProbability(It.IsAny<Message>()))
             .ReturnsAsync(new SpamProbability { Probability = 0.1, Reason = "Approved" });
-        
+
         _botMock.Setup(x => x.SendMessageAsync(
             It.IsAny<ChatId>(),
             It.IsAny<string>(),
@@ -199,21 +199,21 @@ public class MessageHandlerBuilder
             It.IsAny<ReplyMarkup>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Message());
-        
+
         // Настраиваем мок для ILogChatService
         _logChatServiceMock.Setup(x => x.SendLogNotificationAsync(It.IsAny<Message>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         _logChatServiceMock.Setup(x => x.HandleLogBanAsync(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        
+
         // Настраиваем IServiceProvider для возврата ILogChatService
         _serviceProviderMock.Setup(x => x.GetService(typeof(ILogChatService)))
             .Returns(_logChatServiceMock.Object);
-        
+
         // Настраиваем IServiceProvider для возврата IChannelModerationService
         _serviceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
             .Returns(_channelModerationServiceMock.Object);
-        
+
         return this;
     }
 
@@ -224,10 +224,10 @@ public class MessageHandlerBuilder
     public MessageHandlerBuilder WithBanMocks()
     {
         WithStandardMocks();
-        
+
         _moderationFacadeMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
             .ReturnsAsync(new ModerationResult(ModerationAction.Ban, "Spam detected"));
-        
+
         _botMock.Setup(x => x.BanChatMemberAsync(
             It.IsAny<ChatId>(),
             It.IsAny<long>(),
@@ -235,7 +235,7 @@ public class MessageHandlerBuilder
             It.IsAny<bool?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        
+
         return this;
     }
 
@@ -246,10 +246,10 @@ public class MessageHandlerBuilder
     public MessageHandlerBuilder WithChannelMocks()
     {
         WithStandardMocks();
-        
+
         // ChannelAutoBan отсутствует в IAppConfig, это статическое свойство в Config.cs
         // _appConfigMock.Setup(x => x.ChannelAutoBan).Returns(true);
-        
+
         _botMock.Setup(x => x.BanChatMemberAsync(
             It.IsAny<ChatId>(),
             It.IsAny<long>(),
@@ -257,7 +257,7 @@ public class MessageHandlerBuilder
             It.IsAny<bool?>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        
+
         return this;
     }
 
@@ -268,10 +268,10 @@ public class MessageHandlerBuilder
     public MessageHandlerBuilder WithModerationMocks(ModerationAction action = ModerationAction.Allow, string reason = "Test moderation")
     {
         WithStandardMocks();
-        
+
         _moderationFacadeMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
             .ReturnsAsync(new ModerationResult(action, reason));
-        
+
         if (action == ModerationAction.Delete)
         {
             _botMock.Setup(x => x.DeleteMessageAsync(
@@ -280,7 +280,7 @@ public class MessageHandlerBuilder
                 It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
         }
-        
+
         return this;
     }
 
@@ -291,12 +291,12 @@ public class MessageHandlerBuilder
     public MessageHandlerBuilder WithAiMlMocks(double probability = 0.8, string reason = "ML подозрение")
     {
         WithStandardMocks();
-        
+
         _classifierMock.Setup(x => x.IsSpam(It.IsAny<string>())).ReturnsAsync((true, (float)probability));
-        
+
         _aiChecksMock.Setup(x => x.GetSpamProbability(It.IsAny<Message>()))
             .ReturnsAsync(new SpamProbability { Probability = probability, Reason = probability > 0.5 ? "Spam detected" : "Approved" });
-        
+
         return this;
     }
 
@@ -326,21 +326,21 @@ public class MessageHandlerBuilder
 
     /// <summary>
     /// Создает Mock<IUpdateHandler> для прокси-сервисов
-/// <tags>builders, message-handler, proxy-services, fluent-api</tags>
-/// </summary>
-public Mock<IUpdateHandler> BuildMock()
+    /// <tags>builders, message-handler, proxy-services, fluent-api</tags>
+    /// </summary>
+    public Mock<IUpdateHandler> BuildMock()
     {
         // Настраиваем мок IMessageHandler на основе реального MessageHandler
         var realHandler = Build();
-        
+
         // Настраиваем прокси-вызовы к реальному MessageHandler
         _messageHandlerMock.Setup(x => x.CanHandle(It.IsAny<Update>()))
             .Returns<Update>(update => realHandler.CanHandle(update));
-            
+
         _messageHandlerMock.Setup(x => x.HandleAsync(It.IsAny<Update>(), It.IsAny<CancellationToken>()))
-            .Returns<Update, CancellationToken>((update, ct) => 
+            .Returns<Update, CancellationToken>((update, ct) =>
                 realHandler.HandleAsync(update, ct));
-        
+
         return _messageHandlerMock;
     }
 

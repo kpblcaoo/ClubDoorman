@@ -33,17 +33,17 @@ public class CaptchaServiceTestFactory
     public Mock<IAppConfig> AppConfigMock { get; } = new();
     public Mock<IViolationTracker> ViolationTrackerMock { get; } = new();
 
-            public CaptchaService CreateCaptchaService()
-        {
-            return new CaptchaService(
-                BotMock.Object,
-                LoggerMock.Object,
-                MessageServiceMock.Object,
-                AppConfigMock.Object,
-                ViolationTrackerMock.Object,
-                new Mock<IUserBanService>().Object
-            );
-        }
+    public CaptchaService CreateCaptchaService()
+    {
+        return new CaptchaService(
+            BotMock.Object,
+            LoggerMock.Object,
+            MessageServiceMock.Object,
+            AppConfigMock.Object,
+            ViolationTrackerMock.Object,
+            new Mock<IUserBanService>().Object
+        );
+    }
 
     #region Configuration Methods
 
@@ -82,7 +82,7 @@ public class CaptchaServiceTestFactory
     #region Smart Methods Based on Business Logic
 
     public FakeTelegramClient FakeTelegramClient => FakeTelegramClientFactory.Create();
-    
+
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
     public ModerationServiceAdapter CreateModerationServiceWithFake()
@@ -113,7 +113,7 @@ public class CaptchaServiceTestFactory
     {
         return CreateCaptchaService();
     }
-    
+
     public CaptchaService CreateCaptchaServiceWithFake(FakeTelegramClient fakeClient)
     {
         return new CaptchaService(
@@ -125,7 +125,7 @@ public class CaptchaServiceTestFactory
             new Mock<IUserBanService>().Object
         );
     }
-    
+
     public CaptchaService CreateCaptchaServiceWithFake(Action<CaptchaServiceTestFactory> setup)
     {
         setup(this);

@@ -47,7 +47,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // Базовая настройка для всех тестов
             _messageHandler = _factory
-                .WithAppConfigSetup(mock => 
+                .WithAppConfigSetup(mock =>
                 {
                     mock.Setup(x => x.AdminChatId).Returns(123456789);
                     mock.Setup(x => x.LogAdminChatId).Returns(123456789);
@@ -146,4 +146,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             // Проверяем, что пользователь получил сообщение об ошибке
         }
     }
-} 
+}

@@ -33,7 +33,7 @@ public class MessageHandlerHandleAsyncBasicTests
     public void Setup()
     {
         _factory = new MessageHandlerTestFactory();
-        
+
         // Настройка базовых моков для предотвращения NullReferenceException
         _factory.WithModerationFacadeMock(mock =>
         {
@@ -44,7 +44,7 @@ public class MessageHandlerHandleAsyncBasicTests
             mock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(false);
         });
-        
+
         _factory.WithUserManagerSetup(mock =>
         {
             mock.Setup(x => x.Approved(It.IsAny<long>(), It.IsAny<long?>()))
@@ -54,7 +54,7 @@ public class MessageHandlerHandleAsyncBasicTests
             mock.Setup(x => x.InBanlist(It.IsAny<long>()))
                 .ReturnsAsync(false);
         });
-        
+
         // Настройка AiCascadeService mock для AI анализа
         _factory.AiCascadeServiceMock.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false); // false означает, что профиль не подозрительный
@@ -76,8 +76,8 @@ public class MessageHandlerHandleAsyncBasicTests
         // Act & Assert: Проверяем исключение
         var exception = Assert.ThrowsAsync<ArgumentNullException>(
             async () => await _messageHandler.HandleAsync(update));
-        
-        Assert.That(exception.ParamName, Is.EqualTo("update"), 
+
+        Assert.That(exception.ParamName, Is.EqualTo("update"),
             "Параметр исключения должен быть 'update'");
     }
 
@@ -170,8 +170,8 @@ public class MessageHandlerHandleAsyncBasicTests
         // Arrange: Создаем конкретные объекты для точных проверок
         var user = new User { Id = 12345, FirstName = "Test", Username = "testuser" };
         var chat = new Chat { Id = -1001234567890, Type = ChatType.Supergroup, Title = "Test Chat" };
-        var message = new Message 
-        { 
+        var message = new Message
+        {
             Date = DateTime.UtcNow,
             From = user,
             Chat = chat,
@@ -184,8 +184,8 @@ public class MessageHandlerHandleAsyncBasicTests
 
         // Assert: Проверяем конкретные вызовы с точными параметрами
         _factory.ModerationFacadeMock.Verify(
-            x => x.CheckMessageAsync(It.Is<Message>(m => 
-                m.Text == "Hello world" && 
+            x => x.CheckMessageAsync(It.Is<Message>(m =>
+                m.Text == "Hello world" &&
                 m.From!.Id == 12345)),
             Times.Once,
             "Должна вызваться проверка сообщения с точными параметрами");

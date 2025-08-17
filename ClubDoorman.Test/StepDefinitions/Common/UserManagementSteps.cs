@@ -31,7 +31,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void BeforeScenario()
         {
             _fakeBot = new FakeTelegramClient();
-            _loggerFactory = LoggerFactory.Create(builder => 
+            _loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddConsole();
                 builder.SetMinimumLevel(LogLevel.Debug);
@@ -62,7 +62,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // В тестовой среде симулируем предоставление доступа
             // В реальной реализации здесь была бы проверка через UserManager
-            
+
             // Для демонстрации - симулируем успешное предоставление доступа
             var userId = _testMessage.From!.Id;
             // В реальной реализации: var isApproved = _userManager.Approved(userId, _testMessage.Chat.Id);
@@ -73,7 +73,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void ThenCaptchaIsNotShown()
         {
             // Проверяем, что капча не была показана
-            
+
             // В реальной реализации здесь была бы проверка, что CaptchaService не был вызван
             // или что сообщение о капче не было отправлено
         }
@@ -85,4 +85,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             // В реальной реализации здесь была бы проверка логов или состояния
         }
     }
-} 
+}

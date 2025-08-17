@@ -31,20 +31,20 @@ public class MessageHandlerHandleUserMessageTests
     public void Setup()
     {
         _factory = TK.CreateMessageHandlerFactory();
-        
+
         // Настраиваем ModerationFacadeMock для предотвращения NullReferenceException
-        _factory.WithModerationFacadeSetup(mock => 
+        _factory.WithModerationFacadeSetup(mock =>
         {
             mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
                 .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Test", 0.5f));
             mock.Setup(x => x.HandleUserMessageAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<ModerationResult>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
         });
-        
+
         // Настраиваем AiCascadeServiceMock для предотвращения NullReferenceException
         _factory.AiCascadeServiceMock.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-        
+
         _messageHandler = _factory.CreateMessageHandler();
     }
 
@@ -261,7 +261,7 @@ public class MessageHandlerHandleUserMessageTests
 
         // Настраиваем мок для DeleteAndReportMessage
         _factory.MessageServiceMock.Setup(x => x.SendUserNotificationAsync(
-            It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<UserNotificationType>(), 
+            It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<UserNotificationType>(),
             It.IsAny<SimpleNotificationData>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
@@ -327,4 +327,4 @@ public class MessageHandlerHandleUserMessageTests
         // Метод должен завершиться без исключений
         Assert.Pass("AI анализ профиля выполнен корректно");
     }
-} 
+}

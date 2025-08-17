@@ -56,7 +56,7 @@ public class MessageHandlerIntegrationTests
         // Arrange
         var message = CreateMessage("/stats", ChatType.Group);
         var update = CreateUpdate(message);
-        
+
         // Mock admin user
         _factory.UserManagerMock.Setup(x => x.Approved(It.IsAny<long>(), null))
             .Returns(true);
@@ -75,7 +75,7 @@ public class MessageHandlerIntegrationTests
         // Arrange
         var message = CreateMessage("/stats", ChatType.Group);
         var update = CreateUpdate(message);
-        
+
         // Mock non-admin user
         _factory.UserManagerMock.Setup(x => x.Approved(It.IsAny<long>(), null))
             .Returns(false);
@@ -95,7 +95,7 @@ public class MessageHandlerIntegrationTests
         // Arrange
         var message = CreateMessage("/say Hello, this is a test message", ChatType.Group);
         var update = CreateUpdate(message);
-        
+
         // Mock admin user
         _factory.UserManagerMock.Setup(x => x.Approved(It.IsAny<long>(), null))
             .Returns(true);
@@ -115,7 +115,7 @@ public class MessageHandlerIntegrationTests
         // Arrange
         var message = CreateMessage("/say", ChatType.Group);
         var update = CreateUpdate(message);
-        
+
         // Mock admin user
         _factory.UserManagerMock.Setup(x => x.Approved(It.IsAny<long>(), null))
             .Returns(true);
@@ -134,7 +134,7 @@ public class MessageHandlerIntegrationTests
         // Arrange
         var message = CreateMessage("/suspicious", ChatType.Group);
         var update = CreateUpdate(message);
-        
+
         // Mock admin user
         _factory.UserManagerMock.Setup(x => x.Approved(It.IsAny<long>(), null))
             .Returns(true);
@@ -239,7 +239,7 @@ public class MessageHandlerIntegrationTests
         // Arrange
         var message = CreateMessage("Hello from approved user", ChatType.Group);
         var update = CreateUpdate(message);
-        
+
         // Mock approved user
         _factory.UserManagerMock.Setup(x => x.Approved(It.IsAny<long>(), null))
             .Returns(true);
@@ -258,7 +258,7 @@ public class MessageHandlerIntegrationTests
         // Arrange
         var message = CreateMessage("Hello from banned user", ChatType.Group);
         var update = CreateUpdate(message);
-        
+
         // Mock banned user
         _factory.UserManagerMock.Setup(x => x.InBanlist(It.IsAny<long>()))
             .ReturnsAsync(true);
@@ -277,7 +277,7 @@ public class MessageHandlerIntegrationTests
         // Arrange
         var message = CreateMessage("Hello from suspicious user", ChatType.Group);
         var update = CreateUpdate(message);
-        
+
         // Mock suspicious user
         _factory.SuspiciousUsersStorageMock.Setup(x => x.IsSuspicious(It.IsAny<long>(), It.IsAny<long>()))
             .Returns(true);
@@ -300,7 +300,7 @@ public class MessageHandlerIntegrationTests
         // Arrange
         var message = CreateMessage("Test message", ChatType.Group);
         var update = CreateUpdate(message);
-        
+
         // Mock exception in UserManager
         _factory.UserManagerMock.Setup(x => x.Approved(It.IsAny<long>(), null))
             .Throws(new System.Exception("Test exception"));
@@ -316,7 +316,7 @@ public class MessageHandlerIntegrationTests
         // Arrange
         var message = CreateMessage("Test message", ChatType.Group);
         var update = CreateUpdate(message);
-        
+
         // Mock exception in ModerationService
         _factory.ModerationServiceMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
             .ThrowsAsync(new System.Exception("Test exception"));
@@ -332,7 +332,7 @@ public class MessageHandlerIntegrationTests
         // Arrange
         var message = CreateMessage("Test message", ChatType.Group);
         var update = CreateUpdate(message);
-        
+
         // Mock exception in BotClient
         _factory.BotMock.Setup(x => x.SendMessageAsync(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), It.IsAny<ReplyParameters>(), It.IsAny<ReplyMarkup>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new System.Exception("Test exception"));

@@ -69,4 +69,4 @@ public class UserManagerMockBuilder
     /// <tags>builders, user-manager, build-object, fluent-api</tags>
     /// </summary>
     public IUserManager BuildObject() => Build().Object;
-} 
+}

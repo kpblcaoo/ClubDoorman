@@ -63,7 +63,7 @@ public static class TestTimeoutHelper
     public static int GetTimeoutForTest(string testClassName, string testMethodName)
     {
         var config = LoadConfig();
-        
+
         // Проверяем специфичный таймаут для метода
         if (config.TestTimeouts.TryGetValue(testClassName, out var classConfig))
         {
@@ -71,14 +71,14 @@ public static class TestTimeoutHelper
             {
                 return specificTimeout;
             }
-            
+
             // Возвращаем таймаут по умолчанию для класса
             if (classConfig.DefaultTimeoutSeconds > 0)
             {
                 return classConfig.DefaultTimeoutSeconds;
             }
         }
-        
+
         // Возвращаем глобальный таймаут по умолчанию
         return config.DefaultTimeoutSeconds;
     }
@@ -99,14 +99,14 @@ public static class TestTimeoutHelper
     {
         var testName = TestContext.CurrentContext.Test.Name;
         var className = TestContext.CurrentContext.Test.ClassName?.Split('.').Last() ?? "Unknown";
-        
+
         Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] TestTimeoutHelper: Creating timeout token for {className}.{testName}");
-        
+
         var timeoutSeconds = GetTimeoutForTest(className, testName);
         var timeout = TimeSpan.FromSeconds(timeoutSeconds);
-        
+
         Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] TestTimeoutHelper: Using timeout of {timeoutSeconds} seconds for {className}.{testName}");
-        
+
         return new CancellationTokenSource(timeout);
     }
-} 
+}

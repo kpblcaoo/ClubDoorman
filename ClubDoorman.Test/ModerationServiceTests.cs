@@ -27,8 +27,8 @@ public class ModerationServiceTests
     [SetUp]
     public void Setup()
     {
-    _factory = new ModerationServiceTestFactory();
-    _service = _factory.CreateModerationService();
+        _factory = new ModerationServiceTestFactory();
+        _service = _factory.CreateModerationService();
     }
 
     [Test]
@@ -133,16 +133,16 @@ public class ModerationServiceTests
 
         // Настраиваем UserBanService для успешного выполнения
         _factory.UserBanServiceMock.Setup(x => x.BanUserAsync(
-            It.IsAny<Chat>(), 
-            It.IsAny<User>(), 
-            It.IsAny<BanTypeEnum>(), 
-            It.IsAny<string>(), 
-            It.IsAny<Message>(), 
+            It.IsAny<Chat>(),
+            It.IsAny<User>(),
+            It.IsAny<BanTypeEnum>(),
+            It.IsAny<string>(),
+            It.IsAny<Message>(),
             It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         _factory.UserBanServiceMock.Setup(x => x.DeleteMessageByIdAsync(
-            It.IsAny<long>(), 
+            It.IsAny<long>(),
             It.IsAny<int>()))
             .Returns(Task.CompletedTask);
 
@@ -152,15 +152,15 @@ public class ModerationServiceTests
         // Assert
         Assert.That(result, Is.True);
         _factory.UserBanServiceMock.Verify(x => x.BanUserAsync(
-            It.IsAny<Chat>(), 
-            It.IsAny<User>(), 
-            BanTypeEnum.AutoBan, 
-            "Автобан", 
-            null, 
+            It.IsAny<Chat>(),
+            It.IsAny<User>(),
+            BanTypeEnum.AutoBan,
+            "Автобан",
+            null,
             It.IsAny<CancellationToken>()), Times.Once);
-        
+
         _factory.UserBanServiceMock.Verify(x => x.DeleteMessageByIdAsync(
-            chatId, 
+            chatId,
             messageId), Times.Once);
     }
 
@@ -172,11 +172,11 @@ public class ModerationServiceTests
         var chatId = 67890L;
 
         _factory.UserBanServiceMock.Setup(x => x.BanUserAsync(
-            It.IsAny<Chat>(), 
-            It.IsAny<User>(), 
-            It.IsAny<BanTypeEnum>(), 
-            It.IsAny<string>(), 
-            It.IsAny<Message>(), 
+            It.IsAny<Chat>(),
+            It.IsAny<User>(),
+            It.IsAny<BanTypeEnum>(),
+            It.IsAny<string>(),
+            It.IsAny<Message>(),
             It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
@@ -186,15 +186,15 @@ public class ModerationServiceTests
         // Assert
         Assert.That(result, Is.True);
         _factory.UserBanServiceMock.Verify(x => x.BanUserAsync(
-            It.IsAny<Chat>(), 
-            It.IsAny<User>(), 
-            BanTypeEnum.AutoBan, 
-            "Автобан", 
-            null, 
+            It.IsAny<Chat>(),
+            It.IsAny<User>(),
+            BanTypeEnum.AutoBan,
+            "Автобан",
+            null,
             It.IsAny<CancellationToken>()), Times.Once);
-        
+
         _factory.UserBanServiceMock.Verify(x => x.DeleteMessageByIdAsync(
-            It.IsAny<long>(), 
+            It.IsAny<long>(),
             It.IsAny<int>()), Times.Never);
     }
 
@@ -206,11 +206,11 @@ public class ModerationServiceTests
         var chatId = 67890L;
 
         _factory.UserBanServiceMock.Setup(x => x.BanUserAsync(
-            It.IsAny<Chat>(), 
-            It.IsAny<User>(), 
-            It.IsAny<BanTypeEnum>(), 
-            It.IsAny<string>(), 
-            It.IsAny<Message>(), 
+            It.IsAny<Chat>(),
+            It.IsAny<User>(),
+            It.IsAny<BanTypeEnum>(),
+            It.IsAny<string>(),
+            It.IsAny<Message>(),
             It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Telegram API error"));
 
@@ -230,9 +230,9 @@ public class ModerationServiceTests
             .ThrowsAsync(new Exception("Classifier error"));
 
         // Act & Assert
-        var exception = Assert.ThrowsAsync<Exception>(async () => 
+        var exception = Assert.ThrowsAsync<Exception>(async () =>
             await _service.CheckMessageAsync(message));
-        
+
         Assert.That(exception.Message, Is.EqualTo("Classifier error"));
     }
 }

@@ -32,4 +32,4 @@ public class UserCleanupServiceTestFactory
         var approvedUsersStorage = approvedUsersStorageFactory.CreateApprovedUsersStorage();
         return new UserCleanupService(approvedUsersStorage, LoggerMock.Object);
     }
-} 
+}

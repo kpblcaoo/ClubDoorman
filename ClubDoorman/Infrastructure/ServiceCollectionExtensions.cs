@@ -46,7 +46,7 @@ public static class ServiceCollectionExtensions
     {
         // Регистрация конфигурации приложения (должна быть первой)
         services.AddConfigurationServices();
-        
+
         // Регистрация инфраструктуры эффектов (должна быть перед AppConfig)
         services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration
         {

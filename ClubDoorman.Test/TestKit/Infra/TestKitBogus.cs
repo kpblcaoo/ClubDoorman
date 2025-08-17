@@ -63,7 +63,7 @@ public static class TestKitBogus
             .RuleFor(u => u.Id, f => userId ?? f.Random.Long(100000000, 999999999))
             .RuleFor(u => u.IsBot, false)
             .RuleFor(u => u.FirstName, f => f.PickRandom(
-                "🔥CRYPTO_EXPERT🔥", "💰MONEY_MAKER💰", "📈TRADER_PRO📈", 
+                "🔥CRYPTO_EXPERT🔥", "💰MONEY_MAKER💰", "📈TRADER_PRO📈",
                 "Anna", "Maria", "Elena")) // Иногда нормальные имена
             .RuleFor(u => u.LastName, f => f.Random.Bool() ? f.Name.LastName() : null)
             .RuleFor(u => u.Username, (string?)null) // Часто без username
@@ -87,7 +87,7 @@ public static class TestKitBogus
             .RuleFor(c => c.Id, f => chatId ?? f.Random.Long(-1000000000000, -1000000000))
             .RuleFor(c => c.Type, ChatType.Group)
             .RuleFor(c => c.Title, f => f.Company.CompanyName())
-            .RuleFor(c => c.Username, f => f.Random.Bool(0.3f) ? 
+            .RuleFor(c => c.Username, f => f.Random.Bool(0.3f) ?
                 f.Internet.UserName().ToLowerInvariant() : null); // 30% с username
 
         return groupFaker.Generate();
@@ -103,7 +103,7 @@ public static class TestKitBogus
             .RuleFor(c => c.Id, f => chatId ?? f.Random.Long(-1000000000000, -1000000000))
             .RuleFor(c => c.Type, ChatType.Supergroup)
             .RuleFor(c => c.Title, f => f.Company.CompanyName())
-            .RuleFor(c => c.Username, f => f.Random.Bool(0.7f) ? 
+            .RuleFor(c => c.Username, f => f.Random.Bool(0.7f) ?
                 f.Internet.UserName().ToLowerInvariant() : null); // 70% с username
 
         return supergroupFaker.Generate();
@@ -120,7 +120,7 @@ public static class TestKitBogus
             .RuleFor(c => c.Type, ChatType.Private)
             .RuleFor(c => c.FirstName, f => f.Name.FirstName())
             .RuleFor(c => c.LastName, f => f.Name.LastName())
-            .RuleFor(c => c.Username, f => f.Random.Bool(0.6f) ? 
+            .RuleFor(c => c.Username, f => f.Random.Bool(0.6f) ?
                 f.Internet.UserName() : null); // 60% с username
 
         return privateFaker.Generate();
@@ -193,7 +193,7 @@ public static class TestKitBogus
         chat ??= CreateRealisticGroup();
 
         var message = CreateRealisticMessage(from, chat);
-        
+
         // Добавляем случайный тип медиа
         var mediaType = _faker.PickRandom("photo", "video", "document", "sticker");
         switch (mediaType)
@@ -240,7 +240,7 @@ public static class TestKitBogus
     public static List<Message> CreateConversation(Chat chat, List<User> participants, int messageCount = 10)
     {
         var messages = new List<Message>();
-        
+
         for (int i = 0; i < messageCount; i++)
         {
             var from = _faker.PickRandom(participants);
@@ -253,15 +253,15 @@ public static class TestKitBogus
     }
 
     #endregion
-    
+
     #region Backward Compatibility Methods
-    
+
     /// <summary>
     /// Создает спам-сообщение с реалистичными паттернами (alias для CreateSpamMessage)
     /// <tags>bogus, spam-message, realistic, faker</tags>
     /// </summary>
     public static Message CreateRealisticSpamMessage(User? from = null, Chat? chat = null) => CreateSpamMessage(from, chat);
-    
+
     /// <summary>
     /// Создает сообщение от бота
     /// <tags>bogus, bot-message, faker</tags>
@@ -270,7 +270,7 @@ public static class TestKitBogus
     {
         var botUser = from ?? CreateRealisticBot();
         var messageChat = chat ?? CreateRealisticGroup();
-        
+
         var messageFaker = new Faker<Message>()
             .RuleFor(m => m.MessageId, f => f.Random.Int(1, 10000))
             .RuleFor(m => m.Date, f => f.Date.Recent(7))
@@ -283,7 +283,7 @@ public static class TestKitBogus
 
         return messageFaker.Generate();
     }
-    
+
     /// <summary>
     /// Создает сообщение с командой /start
     /// <tags>bogus, start-command, faker</tags>
@@ -292,7 +292,7 @@ public static class TestKitBogus
     {
         var messageUser = from ?? CreateRealisticUser();
         var messageChat = chat ?? CreateRealisticGroup();
-        
+
         var messageFaker = new Faker<Message>()
             .RuleFor(m => m.MessageId, f => f.Random.Int(1, 10000))
             .RuleFor(m => m.Date, f => f.Date.Recent(7))
@@ -305,7 +305,7 @@ public static class TestKitBogus
 
         return messageFaker.Generate();
     }
-    
+
     /// <summary>
     /// Создает реалистичный канал
     /// <tags>bogus, channel, realistic, faker</tags>
@@ -320,7 +320,7 @@ public static class TestKitBogus
 
         return channelFaker.Generate();
     }
-    
+
     /// <summary>
     /// Проверяет, содержит ли текст спам-паттерны
     /// <tags>bogus, spam-check, utility</tags>
@@ -328,13 +328,13 @@ public static class TestKitBogus
     public static bool IsSpamText(string? text)
     {
         if (string.IsNullOrEmpty(text)) return false;
-        
+
         var spamEmojis = new[] { "🔥", "💰", "🎁", "⚡", "💎", "🚀", "📱", "❗️" };
         var spamWords = new[] { "внимание", "заработал", "миллион", "деньги", "быстро", "срочно", "бесплатно", "скам", "bit.ly" };
-        
+
         var lowerText = text.ToLowerInvariant();
-        
-        return spamEmojis.Any(p => text.Contains(p)) || 
+
+        return spamEmojis.Any(p => text.Contains(p)) ||
                spamWords.Any(word => lowerText.Contains(word));
     }
 
@@ -376,4 +376,4 @@ public static class TestKitBogus
     }
 
     #endregion
-} 
+}

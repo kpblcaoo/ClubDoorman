@@ -28,7 +28,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void BeforeScenario()
         {
             _fakeBot = new FakeTelegramClient();
-            _loggerFactory = LoggerFactory.Create(builder => 
+            _loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddConsole();
                 builder.SetMinimumLevel(LogLevel.Debug);
@@ -85,7 +85,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             {
                 // Симулируем автоматическую отправку статистики
                 ScenarioContext.Current["StatisticsResult"] = "mock_stats";
-                
+
                 // Создаем тестовое сообщение, если его нет
                 if (_testMessage == null)
                 {
@@ -96,7 +96,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                         Date = DateTime.UtcNow
                     };
                 }
-                
+
                 // Отправляем тестовое сообщение со статистикой
                 var statsMessage = new SentMessage(
                     _testMessage.Chat.Id,
@@ -106,7 +106,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                     _testMessage
                 );
                 _fakeBot.SentMessages.Add(statsMessage);
-                
+
                 // Отладочная информация
                 Console.WriteLine($"Debug: Added message to _fakeBot.SentMessages. Count: {_fakeBot.SentMessages.Count}");
             }
@@ -159,10 +159,10 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             // Проверяем отправку ежедневного отчета
             var allMessages = _fakeBot.SentMessages.ToList();
             var sentMessages = allMessages
-                .Where(m => m.Text.Contains("statistics", StringComparison.OrdinalIgnoreCase) || 
+                .Where(m => m.Text.Contains("statistics", StringComparison.OrdinalIgnoreCase) ||
                            m.Text.Contains("report", StringComparison.OrdinalIgnoreCase))
                 .ToList();
-            
+
             // Отладочная информация
             if (allMessages.Any())
             {
@@ -172,7 +172,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                     Console.WriteLine($"  - Text: '{msg.Text}'");
                 }
             }
-            
+
             sentMessages.Should().NotBeEmpty("должен быть отправлен отчет со статистикой");
         }
 
@@ -191,7 +191,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             var sentMessages = _fakeBot.SentMessages
                 .Where(m => m.Text.Contains("statistics") || m.Text.Contains("report"))
                 .ToList();
-            
+
             sentMessages.Should().NotBeEmpty();
         }
 
@@ -209,4 +209,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             _thrownException.Should().BeNull();
         }
     }
-} 
+}

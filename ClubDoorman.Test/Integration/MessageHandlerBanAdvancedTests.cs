@@ -113,11 +113,11 @@ public class MessageHandlerBanAdvancedTests
         Assert.That(realisticUser.IsBot, Is.False);
         Assert.That(realisticUser.FirstName, Is.Not.Null.And.Not.Empty);
         Assert.That(realisticUser.Username, Is.Not.Null.And.Not.Empty);
-        
+
         Assert.That(realisticGroup.Id, Is.EqualTo(67890));
         Assert.That(realisticGroup.Type, Is.EqualTo(ChatType.Group));
         Assert.That(realisticGroup.Title, Is.Not.Null.And.Not.Empty);
-        
+
         Assert.That(realisticSpamMessage.From, Is.EqualTo(realisticUser));
         Assert.That(realisticSpamMessage.Chat, Is.EqualTo(realisticGroup));
         Assert.That(TestKitBogus.IsSpamText(realisticSpamMessage.Text), Is.True, $"Text '{realisticSpamMessage.Text}' should be detected as spam");
@@ -268,14 +268,14 @@ public class MessageHandlerBanAdvancedTests
     public void Integration_CompleteBanFlow_WithAllTestKitFeatures_WorksCorrectly()
     {
         // Arrange - комплексный тест с использованием всех возможностей TestKit
-        
+
         // 1. Создаем фабрику через фасад
         var factory = TK.CreateMessageHandlerFactory();
-        
+
         // 2. Создаем реалистичные данные через Bogus
         var realisticUser = TestKitBogus.CreateRealisticUser(12345);
         var realisticGroup = TestKitBogus.CreateRealisticGroup(67890);
-        
+
         // 3. Создаем сообщение через Builders
         var spamMessage = TestKitBuilders.CreateMessage()
             .WithText("🔥💰🎁 Make money fast! 💰🔥🎁")
@@ -283,37 +283,37 @@ public class MessageHandlerBanAdvancedTests
             .InChat(realisticGroup)
             .AsSpam()
             .Build();
-        
+
         // 4. Создаем результат модерации через Builders
         var banResult = TestKitBuilders.CreateModerationResult()
             .WithAction(ModerationAction.Ban)
             .WithReason("Spam detected by ML")
             .WithConfidence(0.95)
             .Build();
-        
+
         // 5. Создаем автомоки
         var moderationService = TestKitAutoFixture.Create<IModerationService>();
         var userManager = TestKitAutoFixture.Create<IUserManager>();
-        
+
         // 6. Настраиваем моки через создание новых
         var moderationServiceMock = new Mock<IModerationService>();
         moderationServiceMock.Setup(x => x.CheckMessageAsync(spamMessage))
             .ReturnsAsync(banResult);
-        
+
         var userManagerMock = new Mock<IUserManager>();
         userManagerMock.Setup(x => x.Approved(realisticUser.Id, realisticGroup.Id))
             .Returns(false);
-        
+
         // Act
         var result = moderationServiceMock.Object.CheckMessageAsync(spamMessage).Result;
         var isApproved = userManagerMock.Object.Approved(realisticUser.Id, realisticGroup.Id);
-        
+
         // Assert
         Assert.That(result.Action, Is.EqualTo(ModerationAction.Ban));
         Assert.That(result.Reason, Is.EqualTo("Spam detected by ML"));
         Assert.That(result.Confidence, Is.EqualTo(0.95));
         Assert.That(isApproved, Is.False);
-        
+
         // Проверяем реалистичность данных
         Assert.That(realisticUser.Id, Is.EqualTo(12345));
         Assert.That(realisticGroup.Id, Is.EqualTo(67890));
@@ -326,23 +326,23 @@ public class MessageHandlerBanAdvancedTests
     {
         // Arrange & Act - тест производительности автомоков
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        
+
         // Создаем много объектов через автомоки
         var handlers = TestKitAutoFixture.CreateMany<MessageHandler>(10).ToList();
         var services = TestKitAutoFixture.CreateMany<IModerationService>(10).ToList();
         var users = TestKitAutoFixture.CreateMany<Telegram.Bot.Types.User>(20).ToList();
         var messages = TestKitAutoFixture.CreateMany<Telegram.Bot.Types.Message>(20).ToList();
-        
+
         stopwatch.Stop();
-        
+
         // Assert
         Assert.That(handlers, Has.Count.EqualTo(10));
         Assert.That(services, Has.Count.EqualTo(10));
         Assert.That(users, Has.Count.EqualTo(20));
         Assert.That(messages, Has.Count.EqualTo(20));
-        
+
         // Проверяем, что создание объектов происходит быстро
-        Assert.That(stopwatch.ElapsedMilliseconds, Is.LessThan(1000), 
+        Assert.That(stopwatch.ElapsedMilliseconds, Is.LessThan(1000),
             "Создание 60 объектов через автомоки должно происходить быстро");
     }
-} 
+}

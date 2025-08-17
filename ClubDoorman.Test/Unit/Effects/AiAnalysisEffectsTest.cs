@@ -20,7 +20,7 @@ public class AiAnalysisEffectsTest
     {
         _aiCascadeServiceMock = new Mock<IAiCascadeService>();
         _loggerMock = new Mock<ILogger<RequireAiAnalysisEffect>>();
-        
+
         _testUser = new User { Id = 456, Username = "testuser" };
         _testMessage = new Message
         {

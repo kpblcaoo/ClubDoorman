@@ -12,7 +12,7 @@ namespace ClubDoorman.Test.TestKit.Builders;
 public class ChatBuilder
 {
     private Chat _chat = TestKitBogus.CreateRealisticGroup();
-    
+
     /// <summary>
     /// Устанавливает ID чата
     /// <tags>builders, chat, id, fluent-api</tags>
@@ -22,7 +22,7 @@ public class ChatBuilder
         _chat.Id = chatId;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает тип чата
     /// <tags>builders, chat, type, fluent-api</tags>
@@ -32,7 +32,7 @@ public class ChatBuilder
         _chat.Type = chatType;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает название чата
     /// <tags>builders, chat, title, fluent-api</tags>
@@ -42,7 +42,7 @@ public class ChatBuilder
         _chat.Title = title;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает чат как группу
     /// <tags>builders, chat, group, fluent-api</tags>
@@ -52,7 +52,7 @@ public class ChatBuilder
         _chat.Type = ChatType.Group;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает чат как супергруппу
     /// <tags>builders, chat, supergroup, fluent-api</tags>
@@ -62,7 +62,7 @@ public class ChatBuilder
         _chat.Type = ChatType.Supergroup;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает чат как приватный
     /// <tags>builders, chat, private, fluent-api</tags>
@@ -72,7 +72,7 @@ public class ChatBuilder
         _chat.Type = ChatType.Private;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает чат как канал
     /// <tags>builders, chat, channel, fluent-api</tags>
@@ -84,7 +84,7 @@ public class ChatBuilder
         _chat.Username = "test_channel";
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает чат с требованием капчи
     /// <tags>builders, chat, captcha, fluent-api</tags>
@@ -95,16 +95,16 @@ public class ChatBuilder
         _chat.Title = "Chat with Captcha";
         return this;
     }
-    
+
     /// <summary>
     /// Строит чат
     /// <tags>builders, chat, build, fluent-api</tags>
     /// </summary>
     public Chat Build() => _chat;
-    
+
     /// <summary>
     /// Неявное преобразование в Chat
     /// <tags>builders, chat, conversion, fluent-api</tags>
     /// </summary>
     public static implicit operator Chat(ChatBuilder builder) => builder.Build();
-} 
+}

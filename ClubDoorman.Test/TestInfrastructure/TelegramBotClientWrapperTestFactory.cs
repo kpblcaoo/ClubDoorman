@@ -39,7 +39,7 @@ public class TelegramBotClientWrapperTestFactory
     #region Smart Methods Based on Business Logic
 
     public FakeTelegramClient FakeTelegramClient => FakeTelegramClientFactory.Create();
-    
+
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
     public ModerationServiceAdapter CreateModerationServiceWithFake()

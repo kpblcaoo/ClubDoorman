@@ -24,7 +24,7 @@ public class ChannelModerationServiceTests
     private Mock<ILogger<ChannelModerationService>> _loggerMock = null!;
     private ChannelModerationService _service = null!;
 
-        [SetUp]
+    [SetUp]
     public void Setup()
     {
         _botMock = new Mock<ITelegramBotClientWrapper>();
@@ -48,7 +48,7 @@ public class ChannelModerationServiceTests
         {
             new ChatMemberOwner { User = new User { Id = 123 } }
         };
-        
+
         _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
 
@@ -68,7 +68,7 @@ public class ChannelModerationServiceTests
         {
             new ChatMemberOwner { User = new User { Id = 456 } }
         };
-        
+
         _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
 
@@ -88,7 +88,7 @@ public class ChannelModerationServiceTests
         {
             new ChatMemberOwner { User = new User { Id = 123 } }
         };
-        
+
         _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
         _botMock.Setup(x => x.GetChatAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
@@ -107,7 +107,7 @@ public class ChannelModerationServiceTests
         // Arrange
         var message = CreateTestMessage();
         message.IsAutomaticForward = true;
-        
+
         _botMock.Setup(x => x.GetChatAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Chat { Id = 1, Type = ChatType.Supergroup });
 
@@ -127,7 +127,7 @@ public class ChannelModerationServiceTests
         {
             new ChatMemberOwner { User = new User { Id = 456 } }
         };
-        
+
         _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
         _botMock.Setup(x => x.GetChatAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
@@ -150,4 +150,4 @@ public class ChannelModerationServiceTests
             Text = "Test message"
         };
     }
-} 
+}

@@ -24,7 +24,7 @@ public class BanEffectsTest
         _userBanServiceMock = new Mock<IUserBanService>();
         _userFlowLoggerMock = new Mock<IUserFlowLogger>();
         _loggerMock = new Mock<ILogger<BanUserEffect>>();
-        
+
         _testUser = new User { Id = 456, Username = "testuser" };
         _testChat = new Chat { Id = 789, Title = "Test Chat" };
         _testMessage = new Message
@@ -56,7 +56,7 @@ public class BanEffectsTest
         _userFlowLoggerMock.Verify(
             x => x.LogUserBanned(_testUser, _testChat, reason),
             Times.Once);
-            
+
         _userBanServiceMock.Verify(
             x => x.AutoBanAsync(_testMessage, reason, CancellationToken.None),
             Times.Once);

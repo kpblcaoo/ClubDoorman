@@ -186,7 +186,7 @@ public class MessageHandlerSendSuspiciousMessageTests
         var isSilentMode = false;
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
+        Assert.DoesNotThrowAsync(async () =>
             await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, user, data!, isSilentMode, CancellationToken.None),
             "Метод должен обрабатывать null данные без исключений"
         );
@@ -202,7 +202,7 @@ public class MessageHandlerSendSuspiciousMessageTests
         Message? nullMessage = null;
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
+        Assert.DoesNotThrowAsync(async () =>
             await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(nullMessage!, user, data, isSilentMode, CancellationToken.None),
             "Метод должен обрабатывать null сообщение без исключений"
         );
@@ -218,7 +218,7 @@ public class MessageHandlerSendSuspiciousMessageTests
         User? nullUser = null;
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
+        Assert.DoesNotThrowAsync(async () =>
             await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, nullUser!, data, isSilentMode, CancellationToken.None),
             "Метод должен обрабатывать null пользователя без исключений"
         );
@@ -306,4 +306,4 @@ public class MessageHandlerSendSuspiciousMessageTests
             x => x.SendMessage(Chat(12345L), It.IsAny<string>(), ParseMode.Html, It.IsAny<ReplyParameters>(), It.IsAny<InlineKeyboardMarkup>(), It.IsAny<CancellationToken>()),
             Times.Once, "Сообщение должно быть отправлено с специальными символами");
     }
-} 
+}

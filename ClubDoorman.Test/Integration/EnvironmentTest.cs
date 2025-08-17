@@ -14,7 +14,7 @@ public class EnvironmentTest
         var currentDir = Directory.GetCurrentDirectory();
         Console.WriteLine($"AppContext.BaseDirectory: {baseDir}");
         Console.WriteLine($"Current directory: {currentDir}");
-        
+
         // Пробуем разные пути относительно AppContext.BaseDirectory
         var possiblePaths = new[]
         {
@@ -29,7 +29,7 @@ public class EnvironmentTest
             Path.Combine(baseDir, "../ClubDoorman/ClubDoorman/.env"),
             Path.Combine(baseDir, "ClubDoorman/ClubDoorman/.env")
         };
-        
+
         foreach (var path in possiblePaths)
         {
             var fullPath = Path.GetFullPath(path);
@@ -40,7 +40,7 @@ public class EnvironmentTest
                 return path;
             }
         }
-        
+
         return null; // Файл не найден
     }
     [Test]
@@ -53,16 +53,18 @@ public class EnvironmentTest
             Assert.Ignore("Файл .env не найден, пропускаем тест");
         }
         DotNetEnv.Env.Load(envPath);
-        
+
         // Assert
         var apiKey = DotNetEnv.Env.GetString("DOORMAN_OPENROUTER_API");
         var botToken = DotNetEnv.Env.GetString("DOORMAN_BOT_API");
         var adminChat = DotNetEnv.Env.GetString("DOORMAN_ADMIN_CHAT");
-        
-        Console.WriteLine($"API Key: {apiKey}");
-        Console.WriteLine($"Bot Token: {botToken}");
+
+        // DON'T log full secrets; mask to prevent leaking into test artifacts
+        string Mask(string? v) => string.IsNullOrEmpty(v) ? "<empty>" : (v!.Length <= 6 ? "******" : v[..3] + "***" + v[^3..]);
+        Console.WriteLine($"API Key: {Mask(apiKey)}");
+        Console.WriteLine($"Bot Token: {Mask(botToken)}");
         Console.WriteLine($"Admin Chat: {adminChat}");
-        
+
         Assert.That(apiKey, Is.Not.Null);
         Assert.That(apiKey, Is.Not.Empty);
         Assert.That(botToken, Is.Not.Null);
@@ -81,17 +83,18 @@ public class EnvironmentTest
             Assert.Ignore("Файл .env не найден, пропускаем тест");
         }
         DotNetEnv.Env.Load(envPath);
-        
+
         // Assert
         var apiKey = Environment.GetEnvironmentVariable("DOORMAN_OPENROUTER_API");
         var botToken = Environment.GetEnvironmentVariable("DOORMAN_BOT_API");
         var adminChat = Environment.GetEnvironmentVariable("DOORMAN_ADMIN_CHAT");
-        
-        Console.WriteLine($"Environment API Key: {apiKey}");
-        Console.WriteLine($"Environment Bot Token: {botToken}");
+
+        string Mask(string? v) => string.IsNullOrEmpty(v) ? "<empty>" : (v!.Length <= 6 ? "******" : v[..3] + "***" + v[^3..]);
+        Console.WriteLine($"Environment API Key: {Mask(apiKey)}");
+        Console.WriteLine($"Environment Bot Token: {Mask(botToken)}");
         Console.WriteLine($"Environment Admin Chat: {adminChat}");
-        
+
         // Эти переменные могут быть null, так как они не загружены в Environment
         // но должны быть доступны через DotNetEnv.Env.GetString
     }
-} 
+}

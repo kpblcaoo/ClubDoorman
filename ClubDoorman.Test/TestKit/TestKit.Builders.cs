@@ -17,19 +17,19 @@ public static class TestKitBuilders
     /// <tags>builders, message, telegram, fluent-api</tags>
     /// </summary>
     public static MessageBuilder CreateMessage() => new MessageBuilder();
-    
+
     /// <summary>
     /// Создает builder для пользователя Telegram
     /// <tags>builders, user, telegram, fluent-api</tags>
     /// </summary>
     public static UserBuilder CreateUser() => new UserBuilder();
-    
+
     /// <summary>
     /// Создает builder для чата Telegram
     /// <tags>builders, chat, telegram, fluent-api</tags>
     /// </summary>
     public static ChatBuilder CreateChat() => new ChatBuilder();
-    
+
     /// <summary>
     /// Создает builder для результата модерации
     /// <tags>builders, moderation-result, moderation, fluent-api</tags>
@@ -44,7 +44,7 @@ public static class TestKitBuilders
 public class MessageBuilder
 {
     private Message _message = TestKitBogus.CreateRealisticMessage();
-    
+
     /// <summary>
     /// Устанавливает текст сообщения
     /// <tags>builders, message, text, fluent-api</tags>
@@ -54,7 +54,7 @@ public class MessageBuilder
         _message.Text = text;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает отправителя сообщения
     /// <tags>builders, message, user, fluent-api</tags>
@@ -64,7 +64,7 @@ public class MessageBuilder
         _message.From = TestKitBogus.CreateRealisticUser(userId);
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает отправителя сообщения (полный объект)
     /// <tags>builders, message, user, fluent-api</tags>
@@ -74,7 +74,7 @@ public class MessageBuilder
         _message.From = user;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает чат
     /// <tags>builders, message, chat, fluent-api</tags>
@@ -85,7 +85,7 @@ public class MessageBuilder
         _message.Chat.Id = chatId;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает чат (полный объект)
     /// <tags>builders, message, chat, fluent-api</tags>
@@ -95,7 +95,7 @@ public class MessageBuilder
         _message.Chat = chat;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает ID сообщения (только для чтения, не изменяет)
     /// <tags>builders, message, id, fluent-api</tags>
@@ -108,7 +108,7 @@ public class MessageBuilder
         // Note: MessageId остается 0, так как это readonly свойство
         return this;
     }
-    
+
     /// <summary>
     /// Делает сообщение спамом
     /// <tags>builders, message, spam, moderation, fluent-api</tags>
@@ -118,7 +118,7 @@ public class MessageBuilder
         _message.Text = TestKitBogus.CreateRealisticSpamMessage().Text;
         return this;
     }
-    
+
     /// <summary>
     /// Делает сообщение валидным
     /// </summary>
@@ -127,12 +127,12 @@ public class MessageBuilder
         _message.Text = "Hello, this is a valid message!";
         return this;
     }
-    
+
     /// <summary>
     /// Создает сообщение
     /// </summary>
     public Message Build() => _message;
-    
+
     /// <summary>
     /// Неявное преобразование в Message
     /// </summary>
@@ -145,7 +145,7 @@ public class MessageBuilder
 public class UserBuilder
 {
     private User _user = TestKitBogus.CreateRealisticUser();
-    
+
     /// <summary>
     /// Устанавливает ID пользователя
     /// </summary>
@@ -154,7 +154,7 @@ public class UserBuilder
         _user.Id = userId;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает имя пользователя
     /// </summary>
@@ -163,7 +163,7 @@ public class UserBuilder
         _user.Username = username;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает имя
     /// </summary>
@@ -172,7 +172,7 @@ public class UserBuilder
         _user.FirstName = firstName;
         return this;
     }
-    
+
     /// <summary>
     /// Делает пользователя ботом
     /// </summary>
@@ -181,7 +181,7 @@ public class UserBuilder
         _user.IsBot = true;
         return this;
     }
-    
+
     /// <summary>
     /// Делает пользователя обычным пользователем
     /// </summary>
@@ -190,12 +190,12 @@ public class UserBuilder
         _user.IsBot = false;
         return this;
     }
-    
+
     /// <summary>
     /// Создает пользователя
     /// </summary>
     public User Build() => _user;
-    
+
     /// <summary>
     /// Неявное преобразование в User
     /// </summary>
@@ -208,7 +208,7 @@ public class UserBuilder
 public class ChatBuilder
 {
     private Chat _chat = TestKitBogus.CreateRealisticGroup();
-    
+
     /// <summary>
     /// Устанавливает ID чата
     /// </summary>
@@ -217,7 +217,7 @@ public class ChatBuilder
         _chat.Id = chatId;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает тип чата
     /// </summary>
@@ -226,7 +226,7 @@ public class ChatBuilder
         _chat.Type = chatType;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает название чата
     /// </summary>
@@ -235,7 +235,7 @@ public class ChatBuilder
         _chat.Title = title;
         return this;
     }
-    
+
     /// <summary>
     /// Делает чат группой
     /// </summary>
@@ -244,7 +244,7 @@ public class ChatBuilder
         _chat.Type = ChatType.Group;
         return this;
     }
-    
+
     /// <summary>
     /// Делает чат супергруппой
     /// </summary>
@@ -253,7 +253,7 @@ public class ChatBuilder
         _chat.Type = ChatType.Supergroup;
         return this;
     }
-    
+
     /// <summary>
     /// Делает чат приватным
     /// </summary>
@@ -262,12 +262,12 @@ public class ChatBuilder
         _chat.Type = ChatType.Private;
         return this;
     }
-    
+
     /// <summary>
     /// Создает чат
     /// </summary>
     public Chat Build() => _chat;
-    
+
     /// <summary>
     /// Неявное преобразование в Chat
     /// </summary>
@@ -282,7 +282,7 @@ public class ModerationResultBuilder
     private ModerationAction _action = ModerationAction.Allow;
     private string _reason = "Valid message";
     private double? _confidence = null;
-    
+
     /// <summary>
     /// Устанавливает действие модерации
     /// </summary>
@@ -291,7 +291,7 @@ public class ModerationResultBuilder
         _action = action;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает причину
     /// </summary>
@@ -300,7 +300,7 @@ public class ModerationResultBuilder
         _reason = reason;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает уровень уверенности
     /// </summary>
@@ -309,7 +309,7 @@ public class ModerationResultBuilder
         _confidence = confidence;
         return this;
     }
-    
+
     /// <summary>
     /// Делает результат "Разрешить"
     /// </summary>
@@ -319,7 +319,7 @@ public class ModerationResultBuilder
         _reason = "Valid message";
         return this;
     }
-    
+
     /// <summary>
     /// Делает результат "Удалить"
     /// </summary>
@@ -329,7 +329,7 @@ public class ModerationResultBuilder
         _reason = "Spam detected";
         return this;
     }
-    
+
     /// <summary>
     /// Делает результат "Забанить"
     /// </summary>
@@ -339,14 +339,14 @@ public class ModerationResultBuilder
         _reason = "User banned";
         return this;
     }
-    
+
     /// <summary>
     /// Создает результат модерации
     /// </summary>
     public ModerationResult Build() => new ModerationResult(_action, _reason, _confidence);
-    
+
     /// <summary>
     /// Неявное преобразование в ModerationResult
     /// </summary>
     public static implicit operator ModerationResult(ModerationResultBuilder builder) => builder.Build();
-} 
+}

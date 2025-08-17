@@ -33,7 +33,7 @@ public class MessageHandlerCanHandleTests
     public void Setup()
     {
         _factory = new MessageHandlerTestFactory();
-        
+
         // Настройка базовых моков для предотвращения NullReferenceException
         _factory.WithModerationFacadeMock(mock =>
         {
@@ -44,7 +44,7 @@ public class MessageHandlerCanHandleTests
             mock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(false);
         });
-        
+
         _factory.WithUserManagerSetup(mock =>
         {
             mock.Setup(x => x.Approved(It.IsAny<long>(), It.IsAny<long?>()))
@@ -142,9 +142,9 @@ public class MessageHandlerCanHandleTests
     public void CanHandle_UpdateWithCallbackQuery_ReturnsFalse()
     {
         // Arrange: Создаем Update с CallbackQuery
-        var update = new Update 
-        { 
-            Message = null, 
+        var update = new Update
+        {
+            Message = null,
             EditedMessage = null,
             CallbackQuery = new CallbackQuery { Id = "test" }
         };

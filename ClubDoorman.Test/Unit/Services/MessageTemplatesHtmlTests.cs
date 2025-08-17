@@ -36,11 +36,11 @@ namespace ClubDoorman.Test.Unit.Services
             Assert.That(result, Contains.Substring("<b>Первые 3 сообщения</b>"));
             Assert.That(result, Contains.Substring("<b>стоп-слова</b>"));
             Assert.That(result, Contains.Substring("<a href=\"tg://user?id=12345\">Test User</a>"));
-            
+
             // Проверяем, что нет лишних слешей
             Assert.That(result, Does.Not.Contain("\\."));
             Assert.That(result, Does.Not.Contain("\\-"));
-            
+
             // Проверяем, что нет Markdown синтаксиса
             Assert.That(result, Does.Not.Contain("*новичок*"));
             Assert.That(result, Does.Not.Contain("*Первые 3 сообщения*"));
@@ -80,4 +80,4 @@ namespace ClubDoorman.Test.Unit.Services
             Assert.That(result, Does.Not.Contain("`Test message 1`"));
         }
     }
-} 
+}

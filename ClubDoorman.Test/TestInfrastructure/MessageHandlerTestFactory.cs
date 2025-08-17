@@ -69,7 +69,7 @@ public class MessageHandlerTestFactory
     public Mock<INotificationService> NotificationServiceMock { get; } = TK.CreateMock<INotificationService>();
 
     public Mock<IUserCleanupService> UserCleanupServiceMock { get; } = TK.CreateMock<IUserCleanupService>();
-    
+
     public IUserBanService CreateRealUserBanService()
     {
         return new UserBanService(
@@ -170,7 +170,7 @@ public class MessageHandlerTestFactory
                 })
                 .Returns(Task.CompletedTask);
         }
-        
+
         return new MessageHandler(
             BotMock.Object,
             UserManagerMock.Object,
@@ -188,7 +188,7 @@ public class MessageHandlerTestFactory
             AiCascadeServiceMock.Object
         );
     }
-    
+
     public MessageHandler CreateMessageHandlerWithRealUserBanService()
     {
         // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
@@ -197,7 +197,7 @@ public class MessageHandlerTestFactory
             ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
                 .Returns(ChannelModerationServiceMock.Object);
         }
-        
+
         return new MessageHandler(
             BotMock.Object,
             UserManagerMock.Object,
@@ -226,13 +226,13 @@ public class MessageHandlerTestFactory
 
     public MessageHandlerTestFactory WithModerationServiceSetup(Action<Mock<IModerationFacade>> setup)
     {
-    setup(ModerationFacadeMock);
+        setup(ModerationFacadeMock);
         return this;
     }
 
     public MessageHandlerTestFactory WithModerationFacadeSetup(Action<Mock<IModerationFacade>> setup)
     {
-    setup(ModerationFacadeMock);
+        setup(ModerationFacadeMock);
         return this;
     }
 
@@ -347,20 +347,20 @@ public class MessageHandlerTestFactory
     /// </summary>
     public MessageHandlerTestFactory WithStandardMocks()
     {
-        WithAppConfigSetup(mock => 
+        WithAppConfigSetup(mock =>
         {
             mock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
             mock.Setup(x => x.DisabledChats).Returns(new HashSet<long>());
             mock.Setup(x => x.AdminChatId).Returns(123456789);
             mock.Setup(x => x.LogAdminChatId).Returns(987654321);
         });
-        
+
         WithBotPermissionsServiceSetup(mock =>
         {
             mock.Setup(x => x.IsSilentModeAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
         });
-        
+
         WithCaptchaServiceSetup(mock =>
         {
             mock.Setup(x => x.GenerateKey(It.IsAny<long>(), It.IsAny<long>()))
@@ -368,7 +368,7 @@ public class MessageHandlerTestFactory
             mock.Setup(x => x.GetCaptchaInfo(It.IsAny<string>()))
                 .Returns((CaptchaInfo?)null);
         });
-        
+
         WithUserManagerSetup(mock =>
         {
             mock.Setup(x => x.InBanlist(It.IsAny<long>()))
@@ -376,8 +376,8 @@ public class MessageHandlerTestFactory
             mock.Setup(x => x.GetClubUsername(It.IsAny<long>()))
                 .ReturnsAsync((string?)null);
         });
-        
-        WithModerationServiceSetup(mock => 
+
+        WithModerationServiceSetup(mock =>
         {
             mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
                 .ReturnsAsync(TK.Specialized.Moderation.Allow());
@@ -387,7 +387,7 @@ public class MessageHandlerTestFactory
         // Дублируем настройку для фасада если он используется напрямую
         ModerationFacadeMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
             .ReturnsAsync(TK.Specialized.Moderation.Allow());
-        
+
         // Настройка ServiceProvider для CommandHandler'ов
         WithServiceProviderSetup(mock =>
         {
@@ -398,7 +398,7 @@ public class MessageHandlerTestFactory
                 MessageServiceMock.Object,
                 AppConfigMock.Object
             );
-            
+
             var suspiciousCommandHandler = new SuspiciousCommandHandler(
                 BotMock.Object,
                 ModerationServiceMock.Object,
@@ -406,18 +406,18 @@ public class MessageHandlerTestFactory
                 TK.CreateLoggerMock<SuspiciousCommandHandler>().Object,
                 AppConfigMock.Object
             );
-            
+
             // Настраиваем ServiceProvider для возврата CommandHandler'ов
             mock.Setup(x => x.GetService(typeof(StartCommandHandler)))
                 .Returns(startCommandHandler);
             mock.Setup(x => x.GetService(typeof(SuspiciousCommandHandler)))
                 .Returns(suspiciousCommandHandler);
-            
+
             // Настраиваем ServiceProvider для возврата IChannelModerationService
             mock.Setup(x => x.GetService(typeof(IChannelModerationService)))
                 .Returns(ChannelModerationServiceMock.Object);
         });
-        
+
         return this;
     }
 
@@ -441,10 +441,10 @@ public class MessageHandlerTestFactory
             // ChannelAutoBan отсутствует в эталонной версии momai
             // mock.Setup(x => x.ChannelAutoBan).Returns(true);
         });
-        
+
         // В legacy режиме UserBanService не используется, поэтому не настраиваем его
         // MessageHandler будет вызывать BotMock напрямую
-        
+
         return this;
     }
 
@@ -453,7 +453,7 @@ public class MessageHandlerTestFactory
     /// </summary>
     public MessageHandlerTestFactory WithModerationMocks(ModerationAction action = ModerationAction.Allow, string reason = "Test moderation")
     {
-        WithModerationServiceSetup(mock => 
+        WithModerationServiceSetup(mock =>
         {
             mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
                 .ReturnsAsync(new ModerationResult(action, reason));
@@ -477,7 +477,7 @@ public class MessageHandlerTestFactory
                     .Returns(Task.CompletedTask);
             }
         });
-        
+
         return this;
     }
 
@@ -505,13 +505,13 @@ public class MessageHandlerTestFactory
         );
     }
 
-            public CaptchaService CreateCaptchaServiceWithFake()
-        {
-            var mockLogger = new Mock<ILogger<CaptchaService>>();
-            var mockMessageService = new Mock<IMessageService>();
-            var mockAppConfig = new Mock<IAppConfig>();
-            return new CaptchaService(TelegramBotClientWrapperMock.Object, mockLogger.Object, mockMessageService.Object, mockAppConfig.Object, ViolationTrackerMock.Object, new Mock<IUserBanService>().Object);
-        }
+    public CaptchaService CreateCaptchaServiceWithFake()
+    {
+        var mockLogger = new Mock<ILogger<CaptchaService>>();
+        var mockMessageService = new Mock<IMessageService>();
+        var mockAppConfig = new Mock<IAppConfig>();
+        return new CaptchaService(TelegramBotClientWrapperMock.Object, mockLogger.Object, mockMessageService.Object, mockAppConfig.Object, ViolationTrackerMock.Object, new Mock<IUserBanService>().Object);
+    }
 
     public IUserManager CreateUserManagerWithFake()
     {
@@ -546,7 +546,7 @@ public class MessageHandlerTestFactory
             ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
                 .Returns(ChannelModerationServiceMock.Object);
         }
-        
+
         // Настраиваем мок для удаления сообщений
         BotMock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Callback<ChatId, int, CancellationToken>((chatId, messageId, token) =>
@@ -657,9 +657,9 @@ public class MessageHandlerTestFactory
         UserManagerMock.Setup(x => x.Approved(user.Id, null)).Returns(false);
         UserManagerMock.Setup(x => x.InBanlist(user.Id)).ReturnsAsync(false);
         UserManagerMock.Setup(x => x.GetClubUsername(user.Id)).ReturnsAsync((string?)null);
-    ModerationFacadeMock.Setup(x => x.CheckUserNameAsync(user))
-            .ReturnsAsync(new ModerationResult(ModerationAction.Ban, "Длинное имя пользователя"));
-        
+        ModerationFacadeMock.Setup(x => x.CheckUserNameAsync(user))
+                .ReturnsAsync(new ModerationResult(ModerationAction.Ban, "Длинное имя пользователя"));
+
         return this;
     }
 
@@ -671,9 +671,9 @@ public class MessageHandlerTestFactory
         UserManagerMock.Setup(x => x.Approved(user.Id, null)).Returns(false);
         UserManagerMock.Setup(x => x.InBanlist(user.Id)).ReturnsAsync(true);
         UserManagerMock.Setup(x => x.GetClubUsername(user.Id)).ReturnsAsync((string?)null);
-    ModerationFacadeMock.Setup(x => x.CheckUserNameAsync(user))
-            .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Нормальное имя"));
-        
+        ModerationFacadeMock.Setup(x => x.CheckUserNameAsync(user))
+                .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Нормальное имя"));
+
         return this;
     }
 
@@ -684,9 +684,9 @@ public class MessageHandlerTestFactory
     {
         UserManagerMock.Setup(x => x.Approved(user.Id, null)).Returns(false);
         UserManagerMock.Setup(x => x.InBanlist(user.Id)).ReturnsAsync(true);
-    ModerationFacadeMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
-            .ReturnsAsync(new ModerationResult(ModerationAction.Ban, reason));
-        
+        ModerationFacadeMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+                .ReturnsAsync(new ModerationResult(ModerationAction.Ban, reason));
+
         return this;
     }
 
@@ -696,7 +696,7 @@ public class MessageHandlerTestFactory
     public MessageHandlerTestFactory SetupModerationDeleteScenario(string reason = "ML решил что это спам")
     {
         SetupStandardBanTestScenario();
-        
+
         WithModerationServiceSetup(mock =>
         {
             mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
@@ -704,7 +704,7 @@ public class MessageHandlerTestFactory
             mock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(false);
         });
-        
+
         // Настраиваем BotMock для обработки ForwardMessage
         WithBotSetup(mock =>
         {
@@ -713,7 +713,7 @@ public class MessageHandlerTestFactory
             mock.Setup(x => x.SendMessage(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), It.IsAny<ReplyParameters>(), It.IsAny<ReplyMarkup>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new Message { Chat = new Chat { Id = 123456789 } });
         });
-        
+
         return this;
     }
 
@@ -723,7 +723,7 @@ public class MessageHandlerTestFactory
     public MessageHandlerTestFactory SetupAiMlBanScenario(double probability = 0.8, string reason = "ML подозрение")
     {
         SetupStandardBanTestScenario();
-        
+
         WithModerationServiceSetup(mock =>
         {
             // RequireAiReview отсутствует в эталонной версии momai
@@ -732,14 +732,14 @@ public class MessageHandlerTestFactory
             mock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(false);
         });
-        
+
         WithAiChecksSetup(mock =>
         {
             // GetMlSuspiciousMessageAnalysis отсутствует в эталонной версии momai
             // mock.Setup(x => x.GetMlSuspiciousMessageAnalysis(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<double>()))
             //     .ReturnsAsync(new SpamProbability { Probability = probability, Reason = reason });
         });
-        
+
         return this;
     }
 
@@ -749,7 +749,7 @@ public class MessageHandlerTestFactory
     public MessageHandlerTestFactory SetupAiMlRejectScenario(double probability = 0.3, string reason = "ML подозрение")
     {
         SetupStandardBanTestScenario();
-        
+
         WithModerationServiceSetup(mock =>
         {
             // RequireAiReview отсутствует в эталонной версии momai
@@ -758,14 +758,14 @@ public class MessageHandlerTestFactory
             mock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(false);
         });
-        
+
         WithAiChecksSetup(mock =>
         {
             // GetMlSuspiciousMessageAnalysis отсутствует в эталонной версии momai
             // mock.Setup(x => x.GetMlSuspiciousMessageAnalysis(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<double>()))
             //     .ReturnsAsync(new SpamProbability { Probability = probability, Reason = reason });
         });
-        
+
         return this;
     }
 
@@ -775,13 +775,13 @@ public class MessageHandlerTestFactory
     public MessageHandlerTestFactory SetupRepeatedViolationsBanScenario(string violationType = "TextMention")
     {
         SetupStandardBanTestScenario();
-        
+
         WithViolationTrackerSetup(mock =>
         {
             mock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>()))
                 .Returns(true); // Возвращаем true, что означает необходимость бана
         });
-        
+
         return this;
     }
 
@@ -843,15 +843,15 @@ public class MessageHandlerTestFactory
     public MessageHandlerTestFactory SetupLongNameBanTestScenario(User user)
     {
         SetupStandardBanTestScenario();
-        
+
         WithUserManagerSetup(mock =>
         {
             mock.Setup(x => x.Approved(user.Id, null)).Returns(false);
             mock.Setup(x => x.InBanlist(user.Id)).ReturnsAsync(false);
             mock.Setup(x => x.GetClubUsername(user.Id)).ReturnsAsync((string?)null);
         });
-        
-        WithModerationServiceSetup(mock => 
+
+        WithModerationServiceSetup(mock =>
         {
             mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
                 .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Valid message"));
@@ -860,10 +860,10 @@ public class MessageHandlerTestFactory
             mock.Setup(x => x.CheckUserNameAsync(It.IsAny<User>()))
                 .ReturnsAsync(new ModerationResult(ModerationAction.Ban, "Длинное имя пользователя"));
         });
-        
+
         // В legacy режиме UserBanService не используется, поэтому не настраиваем его
         // MessageHandler будет вызывать BotMock напрямую
-        
+
         return this;
     }
 
@@ -873,15 +873,15 @@ public class MessageHandlerTestFactory
     public MessageHandlerTestFactory SetupBlacklistUserTestScenario(User user)
     {
         SetupStandardBanTestScenario();
-        
+
         WithUserManagerSetup(mock =>
         {
             mock.Setup(x => x.Approved(user.Id, null)).Returns(false);
             mock.Setup(x => x.InBanlist(user.Id)).ReturnsAsync(true); // Пользователь в блэклисте
             mock.Setup(x => x.GetClubUsername(user.Id)).ReturnsAsync((string?)null);
         });
-        
-        WithModerationServiceSetup(mock => 
+
+        WithModerationServiceSetup(mock =>
         {
             mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
                 .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Valid message"));
@@ -890,10 +890,10 @@ public class MessageHandlerTestFactory
             mock.Setup(x => x.CheckUserNameAsync(It.IsAny<User>()))
                 .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Имя пользователя в порядке"));
         });
-        
+
         // В legacy режиме UserBanService не используется, поэтому не настраиваем его
         // MessageHandler будет вызывать BotMock напрямую
-        
+
         return this;
     }
 
@@ -903,27 +903,27 @@ public class MessageHandlerTestFactory
     public MessageHandlerTestFactory SetupChannelTestScenario(Chat chat)
     {
         SetupStandardBanTestScenario();
-        
+
         WithUserManagerSetup(mock =>
         {
             mock.Setup(x => x.InBanlist(It.IsAny<long>())).ReturnsAsync(false);
             mock.Setup(x => x.GetClubUsername(It.IsAny<long>())).ReturnsAsync((string?)null);
         });
-        
-        WithModerationServiceSetup(mock => 
+
+        WithModerationServiceSetup(mock =>
         {
             mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
                 .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Valid message"));
             mock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(false);
         })
-        .WithBotSetup(mock => 
+        .WithBotSetup(mock =>
         {
             // Настраиваем GetChat для корректной работы HandleChannelMessageAsync
             mock.Setup(x => x.GetChat(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(chat);
         });
-        
+
         return this;
     }
 
@@ -958,7 +958,7 @@ public class MessageHandlerTestFactory
         // Настраиваем AiCascadeServiceMock (стабильное поле фабрики) чтобы always true и отправлять сообщение
         AiCascadeServiceMock
             .Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
-            .Callback<Message,User,Chat,CancellationToken>((msg,user,chat,ct) =>
+            .Callback<Message, User, Chat, CancellationToken>((msg, user, chat, ct) =>
             {
                 // эмулируем отправку уведомления об анализе профиля
                 botClient.SendMessageAsync(appConfig.AdminChatId, $"AI анализ профиля (mock cascade) {user.FirstName} {user.LastName}");
@@ -985,7 +985,7 @@ public class MessageHandlerTestFactory
     /// </summary>
     public MessageHandlerTestFactory WithModerationFacadeMock(Action<Mock<IModerationFacade>> setup)
     {
-    setup(ModerationFacadeMock);
+        setup(ModerationFacadeMock);
         return this;
     }
 
@@ -1011,7 +1011,7 @@ public class MessageHandlerTestFactory
     /// </summary>
     public MessageHandlerTestFactory WithCommandRouterSetup(Action<Mock<ICommandRouter>> setup)
     {
-    setup(CommandRouterMock);
+        setup(CommandRouterMock);
         return this;
     }
 

@@ -20,7 +20,7 @@ public class ManualReviewEffectsTest
     {
         _notificationServiceMock = new Mock<INotificationService>();
         _loggerMock = new Mock<ILogger<RequireManualReviewEffect>>();
-        
+
         _testUser = new User { Id = 456, Username = "testuser" };
         _testMessage = new Message
         {

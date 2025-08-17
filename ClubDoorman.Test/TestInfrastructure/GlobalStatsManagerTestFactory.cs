@@ -66,4 +66,4 @@ public class GlobalStatsManagerTestFactory
     {
         return CreateGlobalStatsManager();
     }
-} 
+}

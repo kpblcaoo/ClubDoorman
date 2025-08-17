@@ -34,7 +34,7 @@ public class BotPermissionsServiceTests : TestBase
     public void Constructor_WithNullBot_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
+        var exception = Assert.Throws<ArgumentNullException>(() =>
             new BotPermissionsService(null!, _mockLogger.Object));
         Assert.That(exception.ParamName, Is.EqualTo("bot"));
     }
@@ -43,7 +43,7 @@ public class BotPermissionsServiceTests : TestBase
     public void Constructor_WithNullLogger_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
+        var exception = Assert.Throws<ArgumentNullException>(() =>
             new BotPermissionsService(_mockBot.Object, null!));
         Assert.That(exception.ParamName, Is.EqualTo("logger"));
     }
@@ -74,7 +74,7 @@ public class BotPermissionsServiceTests : TestBase
             ChatMemberStatus.Creator => new ChatMemberOwner(),
             _ => new ChatMemberMember()
         };
-        
+
         _mockBot.Setup(x => x.BotId).Returns(456L);
         _mockBot.Setup(x => x.GetChatMember(chatId, 456L, It.IsAny<CancellationToken>()))
             .ReturnsAsync(chatMember);
@@ -93,7 +93,7 @@ public class BotPermissionsServiceTests : TestBase
         // Arrange
         var chatId = 2000L;
         var exception = new Exception("Test exception");
-        
+
         _mockBot.Setup(x => x.BotId).Returns(456L);
         _mockBot.Setup(x => x.GetChatMember(chatId, 456L, It.IsAny<CancellationToken>()))
             .ThrowsAsync(exception);
@@ -121,7 +121,7 @@ public class BotPermissionsServiceTests : TestBase
         // Arrange
         var chat = new Chat { Id = chatId, Type = ChatType.Group };
         var chatMember = new ChatMemberMember();
-        
+
         _mockBot.Setup(x => x.GetChat(chatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);
         _mockBot.Setup(x => x.BotId).Returns(456L);
         _mockBot.Setup(x => x.GetChatMember(chatId, 456L, It.IsAny<CancellationToken>()))
@@ -168,7 +168,7 @@ public class BotPermissionsServiceTests : TestBase
         // Arrange
         var chatId = 4000L;
         var chat = new Chat { Id = chatId, Type = ChatType.Private };
-        
+
         _mockBot.Setup(x => x.GetChat(chatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);
 
         // Act
@@ -187,7 +187,7 @@ public class BotPermissionsServiceTests : TestBase
         // Arrange
         var chatId = 5000L;
         var exception = new Exception("Test exception");
-        
+
         _mockBot.Setup(x => x.GetChat(chatId, It.IsAny<CancellationToken>())).ThrowsAsync(exception);
 
         // Act
@@ -212,7 +212,7 @@ public class BotPermissionsServiceTests : TestBase
         var chatId = 6000L;
         var chat = new Chat { Id = chatId, Type = ChatType.Group };
         var chatMember = new ChatMemberAdministrator();
-        
+
         _mockBot.Setup(x => x.GetChat(chatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);
         _mockBot.Setup(x => x.BotId).Returns(456L);
         _mockBot.Setup(x => x.GetChatMember(chatId, 456L, It.IsAny<CancellationToken>()))
@@ -232,7 +232,7 @@ public class BotPermissionsServiceTests : TestBase
         var chatId = 7000L;
         var chat = new Chat { Id = chatId, Type = ChatType.Group };
         var chatMember = new ChatMemberMember();
-        
+
         _mockBot.Setup(x => x.GetChat(chatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);
         _mockBot.Setup(x => x.BotId).Returns(456L);
         _mockBot.Setup(x => x.GetChatMember(chatId, 456L, It.IsAny<CancellationToken>()))
@@ -252,7 +252,7 @@ public class BotPermissionsServiceTests : TestBase
         var chatId = 8000L;
         var botId = 456L;
         var chatMember = new ChatMemberAdministrator();
-        
+
         _mockBot.Setup(x => x.BotId).Returns(botId);
         _mockBot.Setup(x => x.GetChatMember(chatId, botId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(chatMember);
@@ -281,14 +281,14 @@ public class BotPermissionsServiceTests : TestBase
         var chatId = 9000L;
         var botId = 456L;
         var chatMember = new ChatMemberAdministrator();
-        
+
         _mockBot.Setup(x => x.BotId).Returns(botId);
         _mockBot.Setup(x => x.GetChatMember(chatId, botId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(chatMember);
 
         // Act - первый вызов для кэширования
         await _service.GetBotChatMemberAsync(chatId);
-        
+
         // Второй вызов должен использовать кэш
         var result = await _service.GetBotChatMemberAsync(chatId);
 
@@ -305,7 +305,7 @@ public class BotPermissionsServiceTests : TestBase
         var botId = 456L;
         var chatMember = new ChatMemberAdministrator();
         var cancellationToken = new CancellationToken();
-        
+
         _mockBot.Setup(x => x.BotId).Returns(botId);
         _mockBot.Setup(x => x.GetChatMember(chatId, botId, cancellationToken))
             .ReturnsAsync(chatMember);
@@ -317,4 +317,4 @@ public class BotPermissionsServiceTests : TestBase
         Assert.That(result, Is.EqualTo(chatMember));
         _mockBot.Verify(x => x.GetChatMember(chatId, botId, cancellationToken), Times.Once);
     }
-} 
+}

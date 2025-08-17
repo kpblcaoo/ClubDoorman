@@ -37,7 +37,7 @@ public class CaptchaServiceExtendedTests
     public void Setup()
     {
         _factory = new CaptchaServiceTestFactory()
-            .WithAppConfigSetup(mock => 
+            .WithAppConfigSetup(mock =>
             {
                 mock.Setup(x => x.NoCaptchaGroups).Returns(new HashSet<long>());
                 mock.Setup(x => x.NoVpnAdGroups).Returns(new HashSet<long>());
@@ -46,8 +46,8 @@ public class CaptchaServiceExtendedTests
             .WithMessageServiceSetup(mock =>
             {
                 mock.Setup(x => x.SendCaptchaMessageAsync(It.IsAny<SendCaptchaMessageRequest>()))
-                    .ReturnsAsync(new Message 
-                    { 
+                    .ReturnsAsync(new Message
+                    {
                         Chat = new Chat { Id = 123456 },
                         Date = DateTime.UtcNow
                     });
@@ -57,7 +57,7 @@ public class CaptchaServiceExtendedTests
                 mock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>()))
                     .Returns(false);
             });
-        
+
         _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CaptchaServiceExtendedTests>();
     }
 
@@ -183,10 +183,10 @@ public class CaptchaServiceExtendedTests
         var request1 = new CreateCaptchaRequest(chat, user1, null);
         var request2 = new CreateCaptchaRequest(chat, user2, null);
         var result1 = await service.CreateCaptchaAsync(request1);
-        
+
         // Увеличиваем задержку для более надежного изменения seed генератора случайных чисел
         await Task.Delay(10);
-        
+
         var result2 = await service.CreateCaptchaAsync(request2);
 
         // Assert
@@ -194,25 +194,25 @@ public class CaptchaServiceExtendedTests
         Assert.That(result2, Is.Not.Null);
         Assert.That(result1.User.Id, Is.EqualTo(1));
         Assert.That(result2.User.Id, Is.EqualTo(2));
-        
+
         // Проверяем, что капчи созданы для разных пользователей
         Assert.That(result1.User.Id, Is.Not.EqualTo(result2.User.Id));
-        
+
         // Проверяем, что правильные ответы разные (с повторными попытками для надежности)
         var attempts = 0;
         const int maxAttempts = 3;
-        
+
         while (attempts < maxAttempts && result1.CorrectAnswer == result2.CorrectAnswer)
         {
             attempts++;
             _logger.LogInformation($"Попытка {attempts}: одинаковые ответы капчи ({result1.CorrectAnswer}), повторяем...");
-            
+
             // Создаем новую капчу для второго пользователя
             await Task.Delay(50 * attempts); // Увеличиваем задержку с каждой попыткой
             result2 = await service.CreateCaptchaAsync(request2);
         }
-        
-        Assert.That(result1.CorrectAnswer, Is.Not.EqualTo(result2.CorrectAnswer), 
+
+        Assert.That(result1.CorrectAnswer, Is.Not.EqualTo(result2.CorrectAnswer),
             $"После {maxAttempts} попыток капчи все еще имеют одинаковые ответы: {result1.CorrectAnswer}");
     }
 
@@ -521,7 +521,8 @@ public class CaptchaServiceExtendedTests
         // Act & Assert
         // Этот тест может падать из-за реальных вызовов Telegram API
         // В реальном проекте нужно мокировать TelegramBotClient
-        Assert.DoesNotThrowAsync(() => {
+        Assert.DoesNotThrowAsync(() =>
+        {
             var request = new CreateCaptchaRequest(chat, user, null);
             return service.CreateCaptchaAsync(request);
         });
@@ -586,7 +587,8 @@ public class CaptchaServiceExtendedTests
         cts.Cancel();
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(() => {
+        Assert.DoesNotThrowAsync(() =>
+        {
             var request = new CreateCaptchaRequest(chat, user, null);
             return service.CreateCaptchaAsync(request);
         });
@@ -659,7 +661,7 @@ public class CaptchaServiceExtendedTests
         var chat = CreateTestChat();
         var user = CreateTestUser();
         var joinMessage = CreateTestMessage();
-        
+
         // Создаем капчу с истекшим временем
         var expiredTime = DateTime.UtcNow.AddMinutes(-2);
         var captchaInfo = new CaptchaInfo(
@@ -671,14 +673,14 @@ public class CaptchaServiceExtendedTests
             new CancellationTokenSource(),
             joinMessage
         );
-        
+
         // Добавляем капчу напрямую в сервис (через reflection для тестирования)
-        var captchaNeededUsersField = typeof(CaptchaService).GetField("_captchaNeededUsers", 
+        var captchaNeededUsersField = typeof(CaptchaService).GetField("_captchaNeededUsers",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var captchaNeededUsers = (System.Collections.Concurrent.ConcurrentDictionary<string, CaptchaInfo>)captchaNeededUsersField!.GetValue(service)!;
         var key = service.GenerateKey(chat.Id, user.Id);
         captchaNeededUsers.TryAdd(key, captchaInfo);
-        
+
         // Настраиваем моки
         _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<ChatId>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
@@ -692,7 +694,7 @@ public class CaptchaServiceExtendedTests
 
         // Assert
         _factory.ViolationTrackerMock.Verify(
-            x => x.RegisterViolation(user.Id, chat.Id, ViolationType.CaptchaFailed), 
+            x => x.RegisterViolation(user.Id, chat.Id, ViolationType.CaptchaFailed),
             Times.Once);
     }
 
@@ -704,7 +706,7 @@ public class CaptchaServiceExtendedTests
         var chat = CreateTestChat();
         var user = CreateTestUser();
         var joinMessage = CreateTestMessage();
-        
+
         // Создаем капчу с истекшим временем
         var expiredTime = DateTime.UtcNow.AddMinutes(-2);
         var captchaInfo = new CaptchaInfo(
@@ -716,14 +718,14 @@ public class CaptchaServiceExtendedTests
             new CancellationTokenSource(),
             joinMessage
         );
-        
+
         // Добавляем капчу напрямую в сервис (через reflection для тестирования)
-        var captchaNeededUsersField = typeof(CaptchaService).GetField("_captchaNeededUsers", 
+        var captchaNeededUsersField = typeof(CaptchaService).GetField("_captchaNeededUsers",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var captchaNeededUsers = (System.Collections.Concurrent.ConcurrentDictionary<string, CaptchaInfo>)captchaNeededUsersField!.GetValue(service)!;
         var key = service.GenerateKey(chat.Id, user.Id);
         captchaNeededUsers.TryAdd(key, captchaInfo);
-        
+
         // Настраиваем моки
         _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<ChatId>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
@@ -749,7 +751,7 @@ public class CaptchaServiceExtendedTests
         var chat = CreateTestChat();
         var user = CreateTestUser();
         var joinMessage = CreateTestMessage();
-        
+
         // Создаем капчу с истекшим временем
         var expiredTime = DateTime.UtcNow.AddMinutes(-2);
         var captchaInfo = new CaptchaInfo(
@@ -761,14 +763,14 @@ public class CaptchaServiceExtendedTests
             new CancellationTokenSource(),
             joinMessage
         );
-        
+
         // Добавляем капчу напрямую в сервис (через reflection для тестирования)
-        var captchaNeededUsersField = typeof(CaptchaService).GetField("_captchaNeededUsers", 
+        var captchaNeededUsersField = typeof(CaptchaService).GetField("_captchaNeededUsers",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var captchaNeededUsers = (System.Collections.Concurrent.ConcurrentDictionary<string, CaptchaInfo>)captchaNeededUsersField!.GetValue(service)!;
         var key = service.GenerateKey(chat.Id, user.Id);
         captchaNeededUsers.TryAdd(key, captchaInfo);
-        
+
         // Настраиваем моки
         _factory.BotMock.Setup(x => x.BanChatMemberAsync(It.IsAny<ChatId>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
@@ -819,4 +821,4 @@ public class CaptchaServiceExtendedTests
     }
 
     #endregion
-} 
+}

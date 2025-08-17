@@ -19,34 +19,34 @@ public static class TestKitMockBuilders
     /// <tags>builders, moderation-service, mocks, fluent-api</tags>
     /// </summary>
     public static ModerationServiceMockBuilder CreateModerationServiceMock() => new();
-    
+
     /// <summary>
     /// Создает билдер для мока IUserManager
     /// <tags>builders, user-manager, mocks, fluent-api</tags>
     /// </summary>
     public static UserManagerMockBuilder CreateUserManagerMock() => new();
-    
+
     /// <summary>
     /// Создает билдер для мока ICaptchaService
     /// <tags>builders, captcha-service, mocks, fluent-api</tags>
     /// </summary>
     public static CaptchaServiceMockBuilder CreateCaptchaServiceMock() => new();
-    
+
     /// <summary>
     /// Создает билдер для мока IAiChecks
     /// <tags>builders, ai-checks, mocks, fluent-api</tags>
     /// </summary>
     public static AiChecksMockBuilder CreateAiChecksMock() => new();
-    
+
     /// <summary>
     /// Создает билдер для мока ITelegramBotClientWrapper
     /// <tags>builders, telegram-bot, mocks, fluent-api</tags>
     /// </summary>
     public static TelegramBotMockBuilder CreateTelegramBotMock() => new();
-    
+
     /// <summary>
     /// Создает билдер для мока IMessageService
     /// <tags>builders, message-service, mocks, fluent-api</tags>
     /// </summary>
     public static MessageServiceMockBuilder CreateMessageServiceMock() => new();
-} 
+}

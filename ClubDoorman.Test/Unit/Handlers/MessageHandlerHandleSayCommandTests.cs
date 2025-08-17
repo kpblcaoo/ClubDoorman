@@ -35,11 +35,11 @@ public class MessageHandlerHandleSayCommandTests
     public void Setup()
     {
         _factory = new MessageHandlerTestFactory();
-        
+
         // Настраиваем AppConfig для разрешения команды /say из тестового чата
         _factory.AppConfigMock.Setup(x => x.AdminChatId).Returns(-1001234567890); // ID тестового чата
         _factory.AppConfigMock.Setup(x => x.LogAdminChatId).Returns(-1001234567890);
-        
+
         // Настраиваем CommandRouter для обработки /say команд через SayCommandHandler
         var sayCommandHandler = new SayCommandHandler(
             _factory.BotMock.Object,
@@ -47,22 +47,22 @@ public class MessageHandlerHandleSayCommandTests
             _factory.AppConfigMock.Object,
             NullLogger<SayCommandHandler>.Instance
         );
-        
+
         _factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
-            It.Is<Message>(m => m.Text != null && m.Text.StartsWith("/say")), 
+            It.Is<Message>(m => m.Text != null && m.Text.StartsWith("/say")),
             It.IsAny<CancellationToken>()))
-            .Returns<Message, CancellationToken>(async (message, ct) => 
+            .Returns<Message, CancellationToken>(async (message, ct) =>
             {
                 await sayCommandHandler.HandleAsync(message, ct);
                 return true; // Возвращаем true, что команда обработана
             });
-        
+
         // Добавляем отдельный setup для null или не-/say сообщений
         _factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
-            It.Is<Message>(m => m.Text == null || !m.Text.StartsWith("/say")), 
+            It.Is<Message>(m => m.Text == null || !m.Text.StartsWith("/say")),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(false); // Команда не обработана
-        
+
         _messageHandler = _factory.CreateMessageHandler();
     }
 
@@ -298,7 +298,7 @@ public class MessageHandlerHandleSayCommandTests
         message.Text = null;
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
+        Assert.DoesNotThrowAsync(async () =>
             await _messageHandler.HandleCommandAsync(message, CancellationToken.None),
             "Метод должен обрабатывать null сообщение без исключений"
         );
@@ -313,7 +313,7 @@ public class MessageHandlerHandleSayCommandTests
         message.Text = "/say 12345 Привет!";
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
+        Assert.DoesNotThrowAsync(async () =>
             await _messageHandler.HandleCommandAsync(message, CancellationToken.None),
             "Метод должен обрабатывать null пользователя без исключений"
         );

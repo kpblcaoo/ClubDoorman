@@ -180,10 +180,10 @@ public class ErrorHandlingTests : TestBase
         // Arrange
         var logger = new Mock<ILogger<SpamHamClassifier>>().Object;
         var classifier = new SpamHamClassifier(logger);
-        
+
         // Act & Assert - должен вернуть fallback результат без зависания
         var result = await classifier.IsSpam("test message").WaitAsync(TimeSpan.FromSeconds(20));
-        
+
         // Должен вернуть результат (даже если fallback)
         Assert.That(result.Spam, Is.TypeOf<bool>());
         Assert.That(result.Score, Is.TypeOf<float>());
@@ -200,15 +200,15 @@ public class ErrorHandlingTests : TestBase
     {
         // Создаем мок фасада напрямую с настройкой исключений
         var mockFacade = new Mock<ClubDoorman.Features.Moderation.IModerationFacade>();
-        
+
         // Настраиваем CheckMessageAsync для выброса исключений
         mockFacade.Setup(f => f.CheckMessageAsync(null!))
             .ThrowsAsync(new ArgumentNullException("message", "Сообщение не может быть null"));
-        
+
         // Настраиваем CheckUserNameAsync для выброса исключений
         mockFacade.Setup(f => f.CheckUserNameAsync(null!))
             .ThrowsAsync(new ArgumentNullException("user", "Пользователь не может быть null"));
-            
+
         // Настраиваем специально для пользователей с пустым именем, избегая проблемы с null в лямбде
         mockFacade.Setup(f => f.CheckUserNameAsync(It.Is<User>(u => u != null && string.IsNullOrEmpty(u.FirstName))))
             .ThrowsAsync(new ModerationException("Имя пользователя не может быть пустым"));
@@ -216,10 +216,10 @@ public class ErrorHandlingTests : TestBase
         // Настраиваем IncrementGoodMessageCountAsync для выброса исключений
         mockFacade.Setup(f => f.IncrementGoodMessageCountAsync(null!, It.IsAny<Chat>(), It.IsAny<string>()))
             .ThrowsAsync(new ArgumentNullException("user", "Пользователь не может быть null"));
-            
+
         mockFacade.Setup(f => f.IncrementGoodMessageCountAsync(It.IsAny<User>(), null!, It.IsAny<string>()))
             .ThrowsAsync(new ArgumentNullException("chat", "Чат не может быть null"));
-            
+
         mockFacade.Setup(f => f.IncrementGoodMessageCountAsync(It.IsAny<User>(), It.IsAny<Chat>(), ""))
             .ThrowsAsync(new ArgumentException("Текст сообщения не может быть пустым"));
 

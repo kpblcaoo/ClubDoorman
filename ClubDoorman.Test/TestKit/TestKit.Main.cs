@@ -16,7 +16,7 @@ namespace ClubDoorman.Test.TestKit
     /// </summary>
     public static partial class TestKit
     {
-        
+
 
         #region Basic Objects
 
@@ -302,4 +302,4 @@ namespace ClubDoorman.Test.TestKit
 
         #endregion
     }
-} 
+}
