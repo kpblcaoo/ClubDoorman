@@ -150,6 +150,8 @@ public interface IAppConfig
     /// </summary>
     bool ChannelAutoBan { get; }
 
+
+
     /// <summary>
     /// Автоматически банить пользователей с похожими именами
     /// </summary>

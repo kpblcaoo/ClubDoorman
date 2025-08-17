@@ -14,6 +14,14 @@ namespace ClubDoorman.Infrastructure
         /// </summary>
         public static bool BlacklistAutoBan { get; } = !GetEnvironmentBool("DOORMAN_BLACKLIST_AUTOBAN_DISABLE");
 
+    /// <summary>
+    /// Включить эффекты модерации для каналов (этапная миграция на effects-пайплайн)
+    /// </summary>
+
+    /// <summary>
+    /// Включить режим двойного запуска (effects + legacy) для сравнения результатов по каналам
+    /// </summary>
+
         /// <summary>
         /// Автоматически банить каналы
         /// </summary>
