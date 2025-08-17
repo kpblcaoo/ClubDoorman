@@ -22,7 +22,6 @@ namespace ClubDoorman.Infrastructure
     /// <summary>
     /// Включить режим двойного запуска (effects + legacy) для сравнения результатов по каналам
     /// </summary>
-    public static bool ChannelEffectsDualRunEnabled { get; } = GetEnvironmentBool("DOORMAN_CHANNEL_EFFECTS_DUAL_RUN_ENABLE");
 
         /// <summary>
         /// Автоматически банить каналы

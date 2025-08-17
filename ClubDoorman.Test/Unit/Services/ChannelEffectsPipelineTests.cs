@@ -53,7 +53,7 @@ public class ChannelEffectsPipelineTests
         moderation.Setup(m => m.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
         builder.Setup(b => b.BuildChannelEffects(msg, result)).Returns(new IEffect[] { new FuncEffect(ct => Task.CompletedTask) });
 
-    var flags = new Test.TestInfrastructure.ChannelModeration.TestChannelEffectsFlags { EffectsEnabled = true, DualRunEnabled = false, ChannelAutoBanEnabled = false };
+    var flags = new Test.TestInfrastructure.ChannelModeration.TestChannelEffectsFlags { EffectsEnabled = true, ChannelAutoBanEnabled = false };
     var service = new ChannelModerationService(bot.Object, moderation.Object, userBan.Object, logger.Object, flags, builder.Object, effectBus.Object);
         await service.HandleChannelMessageAsync(msg);
 

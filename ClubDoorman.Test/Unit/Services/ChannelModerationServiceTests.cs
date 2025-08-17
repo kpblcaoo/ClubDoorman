@@ -33,7 +33,7 @@ public class ChannelModerationServiceTests
         _userBanServiceMock = new Mock<IUserBanService>();
         _loggerMock = new Mock<ILogger<ChannelModerationService>>();
 
-        var flags = new Test.TestInfrastructure.ChannelModeration.TestChannelEffectsFlags { EffectsEnabled = false, DualRunEnabled = false, ChannelAutoBanEnabled = false };
+    var flags = new Test.TestInfrastructure.ChannelModeration.TestChannelEffectsFlags { EffectsEnabled = false, ChannelAutoBanEnabled = false };
         _service = new ChannelModerationService(
             _botMock.Object,
             _moderationServiceMock.Object,

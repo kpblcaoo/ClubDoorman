@@ -8,6 +8,5 @@ namespace ClubDoorman.Services.ChannelModeration;
 internal sealed class ChannelEffectsFlags : IChannelEffectsFlags
 {
     public bool EffectsEnabled => Config.ChannelEffectsEnabled;
-    public bool DualRunEnabled => Config.ChannelEffectsDualRunEnabled;
     public bool ChannelAutoBanEnabled => Config.ChannelAutoBan;
 }

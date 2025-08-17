@@ -174,10 +174,6 @@ public class AppConfig : IAppConfig
     /// </summary>
     public bool ChannelEffectsEnabled => Config.ChannelEffectsEnabled;
 
-    /// <summary>
-    /// Включить двойной запуск (legacy+effects) для каналов
-    /// </summary>
-    public bool ChannelEffectsDualRunEnabled => Config.ChannelEffectsDualRunEnabled;
 
     /// <summary>
     /// Автоматически банить пользователей с похожими именами

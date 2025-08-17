@@ -155,10 +155,6 @@ public interface IAppConfig
     /// </summary>
     bool ChannelEffectsEnabled { get; }
 
-    /// <summary>
-    /// Включить двойной запуск (legacy+effects) для сравнения каналов
-    /// </summary>
-    bool ChannelEffectsDualRunEnabled { get; }
 
     /// <summary>
     /// Автоматически банить пользователей с похожими именами

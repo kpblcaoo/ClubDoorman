@@ -7,6 +7,5 @@ namespace ClubDoorman.Services.ChannelModeration;
 public interface IChannelEffectsFlags
 {
     bool EffectsEnabled { get; }
-    bool DualRunEnabled { get; }
     bool ChannelAutoBanEnabled { get; }
 }
