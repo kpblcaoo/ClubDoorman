@@ -32,7 +32,8 @@ public class EffectsConfigurationIntegrationTest
         Assert.That(effectsConfig.UseRealEffects, Is.True, "UseRealEffects should be true");
         Assert.That(effectsConfig.EnabledActions, Contains.Item("Delete"), "Delete should be in EnabledActions");
         Assert.That(effectsConfig.EnabledActions, Contains.Item("Report"), "Report should be in EnabledActions");
-        Assert.That(effectsConfig.LegacyFallback, Is.False, "LegacyFallback should be false for testing");
+        Assert.That(effectsConfig.EnabledActions, Contains.Item("Ban"), "Ban should be in EnabledActions");
+        Assert.That(effectsConfig.LegacyFallback, Is.True, "LegacyFallback should be true for safety");
         Assert.That(effectsConfig.LogComparison, Is.True, "LogComparison should be true");
     }
 
@@ -45,7 +46,8 @@ public class EffectsConfigurationIntegrationTest
         // Act & Assert
         Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Delete), Is.True, "Delete action should be enabled");
         Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Report), Is.True, "Report action should be enabled");
-        Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Ban), Is.False, "Ban action should not be enabled");
+        Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Ban), Is.True, "Ban action should be enabled");
+        Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Allow), Is.False, "Allow action should not be enabled");
     }
 
     [Test]

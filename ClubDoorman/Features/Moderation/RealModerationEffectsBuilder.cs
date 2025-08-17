@@ -1,9 +1,11 @@
 using ClubDoorman.Effects;
 using ClubDoorman.Effects.Delete;
 using ClubDoorman.Effects.Report;
+using ClubDoorman.Effects.Ban;
 using ClubDoorman.Models;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.UserFlow;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 using System.Collections.Generic;
@@ -71,6 +73,18 @@ public class RealModerationEffectsBuilder : IModerationEffectsBuilder
                                 message,
                                 message.From!,
                                 isSilentMode));
+                            break;
+
+                        case ModerationAction.Ban:
+                            _logger.LogInformation("Бан пользователя: {Reason}", result.Reason);
+                            effects.Add(new BanUserEffect(
+                                _serviceProvider.GetRequiredService<IUserBanService>(),
+                                _serviceProvider.GetRequiredService<IUserFlowLogger>(),
+                                _serviceProvider.GetRequiredService<ILogger<BanUserEffect>>(),
+                                message,
+                                message.From!,
+                                message.Chat,
+                                result.Reason));
                             break;
 
                         default:

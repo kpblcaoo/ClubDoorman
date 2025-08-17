@@ -46,6 +46,20 @@ public static class ServiceCollectionExtensions
     {
         // Регистрация конфигурации приложения (должна быть первой)
         services.AddConfigurationServices();
+        
+        // Регистрация инфраструктуры эффектов (должна быть перед AppConfig)
+        // Удалить после переноса всех эффектов в Effect Bus
+        services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration
+        {
+            UseRealEffects = true, // Включаем реальные эффекты
+            EnabledActions = new[] { "Delete", "Report", "Ban" }, // Включаем Delete, Report и Ban Actions
+            LegacyFallback = true, // Включаем fallback для безопасности
+            LogComparison = true // Включено сравнение логов
+        });
+        services.AddSingleton<IEffectBus, EffectBus>();
+        services.AddSingleton<LoggingModerationEffectsBuilder>();
+        services.AddSingleton<RealModerationEffectsBuilder>();
+        services.AddSingleton<IModerationEffectsBuilder, HybridModerationEffectsBuilder>();
 
         // Регистрация основных сервисов в том же порядке, что и в Program.cs
         services.AddLinkFormattingServices();
@@ -100,20 +114,6 @@ public static class ServiceCollectionExtensions
         services.AddAIServices();
         services.AddUserManagementServices();
         services.AddMessagingServices();
-        
-        // Регистрация инфраструктуры эффектов
-        // Удалить после переноса всех эффектов в Effect Bus
-        services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration
-        {
-            UseRealEffects = true, // Включаем реальные эффекты
-            EnabledActions = new[] { "Delete", "Report" }, // Включаем Delete и Report Actions
-            LegacyFallback = true, // Включаем fallback для безопасности
-            LogComparison = true // Включено сравнение логов
-        });
-        services.AddSingleton<IEffectBus, EffectBus>();
-        services.AddSingleton<LoggingModerationEffectsBuilder>();
-        services.AddSingleton<RealModerationEffectsBuilder>();
-        services.AddSingleton<IModerationEffectsBuilder, HybridModerationEffectsBuilder>();
         services.AddTextProcessingServices();
         services.AddCaptchaServices();
         services.AddHandlersServices();

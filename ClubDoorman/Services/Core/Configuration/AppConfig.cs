@@ -236,11 +236,19 @@ public class AppConfig : IAppConfig
     /// <summary>
     /// Конфигурация эффектов модерации
     /// </summary>
-    public EffectsConfiguration Effects => new EffectsConfiguration
+    public EffectsConfiguration Effects { get; }
+
+    public AppConfig(
+        IOptions<AutoBanOptions> autoBanOptions,
+        IOptions<ViolationThresholdOptions> violationThresholdOptions,
+        IOptions<FeatureToggleOptions> featureToggleOptions,
+        IOptions<ChatFilteringOptions> chatFilteringOptions,
+        EffectsConfiguration effectsConfiguration) // Добавляем инъекцию
     {
-        UseRealEffects = false, // Пока отключено для безопасности
-        EnabledActions = Array.Empty<string>(), // Пока пустой список
-        LegacyFallback = true, // Включен fallback на старую логику
-        LogComparison = true // Включено сравнение логов
-    };
+        _autoBanOptions = autoBanOptions;
+        _violationThresholdOptions = violationThresholdOptions;
+        _featureToggleOptions = featureToggleOptions;
+        _chatFilteringOptions = chatFilteringOptions;
+        Effects = effectsConfiguration; // Используем DI конфигурацию
+    }
 }

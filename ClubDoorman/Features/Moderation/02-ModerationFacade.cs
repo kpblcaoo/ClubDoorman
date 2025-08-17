@@ -135,7 +135,13 @@ public class ModerationFacade : IModerationFacade
         await _effectBus.ExecuteAsync(effects, cancellationToken);
         
         // Проверяем, нужно ли выполнять старую логику для этого действия
-        if ((moderationResult.Action == ModerationAction.Delete || moderationResult.Action == ModerationAction.Report) && 
+        // Удалить после переноса всех эффектов в Effect Bus
+        _logger.LogDebug("Проверка LegacyFallback: Action={Action}, IsEnabled={IsEnabled}, LegacyFallback={LegacyFallback}", 
+            moderationResult.Action, 
+            _appConfig.Effects.IsActionEnabled(moderationResult.Action), 
+            _appConfig.Effects.LegacyFallback);
+            
+        if ((moderationResult.Action == ModerationAction.Delete || moderationResult.Action == ModerationAction.Report || moderationResult.Action == ModerationAction.Ban) && 
             _appConfig.Effects.IsActionEnabled(moderationResult.Action) && 
             !_appConfig.Effects.LegacyFallback)
         {
