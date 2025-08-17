@@ -24,6 +24,8 @@ using ClubDoorman.Models.Logging;
 using ClubDoorman.Effects;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -42,10 +44,23 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services">Коллекция сервисов</param>
     /// <returns>Коллекция сервисов для цепочки вызовов</returns>
-    public static IServiceCollection AddClubDoorman(this IServiceCollection services)
+    public static IServiceCollection AddClubDoorman(this IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration? configuration = null)
     {
         // Регистрация конфигурации приложения (должна быть первой)
         services.AddConfigurationServices();
+
+        // Logging / tracing flags (optional configuration section)
+        if (configuration != null)
+        {
+            services.Configure<LoggingFlagsOptions>(configuration.GetSection("LoggingFlags"));
+        }
+        else
+        {
+            services.Configure<LoggingFlagsOptions>(_ => { }); // defaults
+        }
+
+        // Golden Master recorder
+        services.AddSingleton<IGoldenMasterRecorder, GoldenMasterRecorder>();
 
         // Регистрация инфраструктуры эффектов (должна быть перед AppConfig)
         services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration

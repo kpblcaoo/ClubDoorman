@@ -76,10 +76,10 @@ public class Program
                         );
                 }
             )
-            .ConfigureServices(services =>
+            .ConfigureServices((ctx, services) =>
             {
                 // Единая точка регистрации всех сервисов ClubDoorman
-                services.AddClubDoorman();
+                services.AddClubDoorman(ctx.Configuration);
 
                 // Логируем статус AI и Mimicry систем после полной инициализации
                 services.PostConfigure<IAppConfig>(appConfig =>
