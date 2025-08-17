@@ -103,7 +103,7 @@ public static class ServiceCollectionExtensions
         
         // Регистрация инфраструктуры эффектов
         services.AddSingleton<EffectsConfiguration>();
-        services.AddSingleton<IEffectBus, LoggingEffectBus>();
+        services.AddSingleton<IEffectBus, EffectBus>();
         services.AddSingleton<LoggingModerationEffectsBuilder>();
         services.AddSingleton<RealModerationEffectsBuilder>();
         services.AddSingleton<IModerationEffectsBuilder, HybridModerationEffectsBuilder>();

@@ -34,6 +34,11 @@ public class HybridModerationEffectsBuilder : IModerationEffectsBuilder
     {
         var actionName = result.Action.ToString();
         
+        _logger.LogDebug("HybridModerationEffectsBuilder: UseRealEffects={UseRealEffects}, EnabledActions=[{EnabledActions}], Action={Action}", 
+            _config.UseRealEffects, 
+            string.Join(",", _config.EnabledActions), 
+            actionName);
+        
         if (_config.IsActionEnabled(result.Action))
         {
             _logger.LogDebug("Using real effects for action: {Action}", actionName);
