@@ -106,8 +106,8 @@ public class ChannelEffectsPipelineTests
 
         builder.Verify(b => b.BuildChannelEffects(msg, result), Times.Once);
         effectBus.Verify(b => b.ExecuteAsync(It.IsAny<IEffect[]>(), It.IsAny<CancellationToken>()), Times.Once);
-        // Legacy path should have attempted delete
-        bot.Verify(b => b.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+    // Legacy path side-effects suppressed in dual-run (executeSideEffects=false)
+    bot.Verify(b => b.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]
@@ -137,8 +137,8 @@ public class ChannelEffectsPipelineTests
 
         // Verify both paths executed
         effectBus.Verify(b => b.ExecuteAsync(It.IsAny<IEffect[]>(), It.IsAny<CancellationToken>()), Times.Once);
-        // Legacy delete action should have triggered delete
-    bot.Verify(b => b.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+        // Legacy side-effects suppressed; only effects path would act (we supplied no delete effect), so zero deletions
+    bot.Verify(b => b.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
 
     var mismatch = logger.Records.FirstOrDefault(r => r.Level == LogLevel.Warning && r.Template == "[ChannelEffects][DualRun][Mismatch] LegacyAction={Legacy} EffectsAction={Effects} ChannelId={ChannelId} ChatId={ChatId}");
     Assert.That(mismatch, Is.Not.Null, "Expected mismatch warning log not found");

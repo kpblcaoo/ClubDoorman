@@ -31,29 +31,29 @@ public class ChannelModerationEffectsBuilderTests
     }
 
     [Test]
-    public void Delete_Returns_LogPlusDeleteEffect()
+    public void Delete_Returns_DeleteEffect()
     {
         var bot = new Mock<ITelegramBotClientWrapper>();
         var b = new ChannelModerationEffectsBuilder(new LoggerFactory().CreateLogger<ChannelModerationEffectsBuilder>(), bot.Object);
         var effects = b.BuildChannelEffects(CreateMessage(), Res(ModerationAction.Delete));
-        Assert.That(effects.Length, Is.EqualTo(2));
+        Assert.That(effects.Length, Is.EqualTo(1));
     }
 
     [Test]
-    public void Ban_Returns_LogPlusBanEffect()
+    public void Ban_Returns_BanEffect()
     {
         var bot = new Mock<ITelegramBotClientWrapper>();
         var ban = new Mock<IUserBanService>();
         var b = new ChannelModerationEffectsBuilder(new LoggerFactory().CreateLogger<ChannelModerationEffectsBuilder>(), bot.Object, ban.Object);
         var effects = b.BuildChannelEffects(CreateMessage(), Res(ModerationAction.Ban));
-        Assert.That(effects.Length, Is.EqualTo(2));
+        Assert.That(effects.Length, Is.EqualTo(1));
     }
 
     [Test]
-    public void Report_Returns_LogPlusReportEffect()
+    public void Report_Returns_ReportEffect()
     {
         var b = new ChannelModerationEffectsBuilder(new LoggerFactory().CreateLogger<ChannelModerationEffectsBuilder>());
         var effects = b.BuildChannelEffects(CreateMessage(), Res(ModerationAction.Report));
-        Assert.That(effects.Length, Is.EqualTo(2));
+        Assert.That(effects.Length, Is.EqualTo(1));
     }
 }
