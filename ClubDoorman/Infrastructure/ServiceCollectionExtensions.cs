@@ -106,8 +106,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration
         {
             UseRealEffects = true, // Включаем реальные эффекты
-            EnabledActions = new[] { "Delete" }, // Включаем только Delete Action
-            LegacyFallback = false, // ВРЕМЕННО отключаем fallback для тестирования Delete Action
+            EnabledActions = new[] { "Delete", "Report" }, // Включаем Delete и Report Actions
+            LegacyFallback = true, // Включаем fallback для безопасности
             LogComparison = true // Включено сравнение логов
         });
         services.AddSingleton<IEffectBus, EffectBus>();

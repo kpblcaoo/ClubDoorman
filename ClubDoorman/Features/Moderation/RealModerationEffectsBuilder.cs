@@ -1,5 +1,6 @@
 using ClubDoorman.Effects;
 using ClubDoorman.Effects.Delete;
+using ClubDoorman.Effects.Report;
 using ClubDoorman.Models;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.UserBan;
@@ -54,17 +55,27 @@ public class RealModerationEffectsBuilder : IModerationEffectsBuilder
                         isSilentMode));
                 }
 
-                effects.Add(new TrackViolationEffect(
-                    _serviceProvider.GetRequiredService<IUserBanService>(),
-                    _serviceProvider.GetRequiredService<ILogger<TrackViolationEffect>>(),
-                    message,
-                    message.From!,
-                    result.Reason));
-                break;
+                                            effects.Add(new TrackViolationEffect(
+                                _serviceProvider.GetRequiredService<IUserBanService>(),
+                                _serviceProvider.GetRequiredService<ILogger<TrackViolationEffect>>(),
+                                message,
+                                message.From!,
+                                result.Reason));
+                            break;
 
-            default:
-                _logger.LogDebug("Real effects not implemented yet for action: {Action}", result.Action);
-                break;
+                        case ModerationAction.Report:
+                            _logger.LogInformation("Отправка в админ-чат: {Reason}", result.Reason);
+                            effects.Add(new ReportMessageEffect(
+                                _serviceProvider.GetRequiredService<INotificationService>(),
+                                _serviceProvider.GetRequiredService<ILogger<ReportMessageEffect>>(),
+                                message,
+                                message.From!,
+                                isSilentMode));
+                            break;
+
+                        default:
+                            _logger.LogDebug("Real effects not implemented yet for action: {Action}", result.Action);
+                            break;
         }
 
         return effects.ToArray();

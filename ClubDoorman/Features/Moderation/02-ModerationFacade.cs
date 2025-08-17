@@ -135,11 +135,11 @@ public class ModerationFacade : IModerationFacade
         await _effectBus.ExecuteAsync(effects, cancellationToken);
         
         // Проверяем, нужно ли выполнять старую логику для этого действия
-        if (moderationResult.Action == ModerationAction.Delete && 
-            _appConfig.Effects.IsActionEnabled(ModerationAction.Delete) && 
+        if ((moderationResult.Action == ModerationAction.Delete || moderationResult.Action == ModerationAction.Report) && 
+            _appConfig.Effects.IsActionEnabled(moderationResult.Action) && 
             !_appConfig.Effects.LegacyFallback)
         {
-            _logger.LogInformation("Пропускаем старую логику для Delete Action - используется новая архитектура эффектов");
+            _logger.LogInformation("Пропускаем старую логику для {Action} Action - используется новая архитектура эффектов", moderationResult.Action);
             return;
         }
         

@@ -31,20 +31,21 @@ public class EffectsConfigurationIntegrationTest
         // Assert
         Assert.That(effectsConfig.UseRealEffects, Is.True, "UseRealEffects should be true");
         Assert.That(effectsConfig.EnabledActions, Contains.Item("Delete"), "Delete should be in EnabledActions");
+        Assert.That(effectsConfig.EnabledActions, Contains.Item("Report"), "Report should be in EnabledActions");
         Assert.That(effectsConfig.LegacyFallback, Is.False, "LegacyFallback should be false for testing");
         Assert.That(effectsConfig.LogComparison, Is.True, "LogComparison should be true");
     }
 
     [Test]
-    public void EffectsConfiguration_ShouldEnableDeleteAction()
+    public void EffectsConfiguration_ShouldEnableDeleteAndReportActions()
     {
         // Arrange
         var effectsConfig = _serviceProvider.GetRequiredService<EffectsConfiguration>();
 
         // Act & Assert
         Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Delete), Is.True, "Delete action should be enabled");
+        Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Report), Is.True, "Report action should be enabled");
         Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Ban), Is.False, "Ban action should not be enabled");
-        Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Report), Is.False, "Report action should not be enabled");
     }
 
     [Test]
