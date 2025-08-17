@@ -20,17 +20,14 @@ public static class ChannelModerationModule
             // Пытаемся получить эффекты (могут отсутствовать если не зарегистрированы на раннем этапе)
             var channelEffectsBuilder = provider.GetService<IChannelModerationEffectsBuilder>();
             var effectBus = provider.GetService<IEffectBus>();
-            var flags = provider.GetRequiredService<IChannelEffectsFlags>();
             return new ChannelModerationService(
                 provider.GetRequiredService<ITelegramBotClientWrapper>(),
                 provider.GetRequiredService<IModerationService>(),
                 provider.GetRequiredService<IUserBanService>(),
                 provider.GetRequiredService<ILogger<ChannelModerationService>>(),
-                flags,
                 channelEffectsBuilder,
                 effectBus);
         });
-        services.AddSingleton<IChannelEffectsFlags, ChannelEffectsFlags>();
 
         return services;
     }

@@ -4,7 +4,6 @@ using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Telegram.Bot.Types;
@@ -33,13 +32,11 @@ public class ChannelModerationServiceTests
         _userBanServiceMock = new Mock<IUserBanService>();
         _loggerMock = new Mock<ILogger<ChannelModerationService>>();
 
-    var flags = new Test.TestInfrastructure.ChannelModeration.TestChannelEffectsFlags { EffectsEnabled = false, ChannelAutoBanEnabled = false };
         _service = new ChannelModerationService(
             _botMock.Object,
             _moderationServiceMock.Object,
             _userBanServiceMock.Object,
-            _loggerMock.Object,
-            flags);
+            _loggerMock.Object);
     }
 
     [Test]

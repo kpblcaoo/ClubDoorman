@@ -150,10 +150,6 @@ public interface IAppConfig
     /// </summary>
     bool ChannelAutoBan { get; }
 
-    /// <summary>
-    /// Включить effects-пайплайн для сообщений от каналов (этапная миграция)
-    /// </summary>
-    bool ChannelEffectsEnabled { get; }
 
 
     /// <summary>

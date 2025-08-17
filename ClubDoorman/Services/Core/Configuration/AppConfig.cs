@@ -169,10 +169,6 @@ public class AppConfig : IAppConfig
     /// </summary>
     public bool ChannelAutoBan => _autoBanOptions.Value.ChannelAutoBan;
 
-    /// <summary>
-    /// Включить effects-пайплайн для сообщений от каналов
-    /// </summary>
-    public bool ChannelEffectsEnabled => Config.ChannelEffectsEnabled;
 
 
     /// <summary>

@@ -7,6 +7,5 @@ namespace ClubDoorman.Services.ChannelModeration;
 /// </summary>
 internal sealed class ChannelEffectsFlags : IChannelEffectsFlags
 {
-    public bool EffectsEnabled => Config.ChannelEffectsEnabled;
     public bool ChannelAutoBanEnabled => Config.ChannelAutoBan;
 }

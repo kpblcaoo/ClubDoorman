@@ -25,7 +25,7 @@ public class ChannelModerationService : IChannelModerationService
     private readonly ILogger<ChannelModerationService> _logger;
     private readonly IChannelModerationEffectsBuilder? _channelEffectsBuilder;
     private readonly IEffectBus? _effectBus;
-    private readonly IChannelEffectsFlags _flags;
+    // Flags removed after migration; only ChannelAutoBan remained – now inlined from Config
 
     /// <summary>
     /// Создает экземпляр ChannelModerationService
@@ -40,7 +40,6 @@ public class ChannelModerationService : IChannelModerationService
         IModerationService moderationService,
         IUserBanService userBanService,
         ILogger<ChannelModerationService> logger,
-        IChannelEffectsFlags flags,
         IChannelModerationEffectsBuilder? channelEffectsBuilder = null,
         IEffectBus? effectBus = null)
     {
@@ -48,7 +47,6 @@ public class ChannelModerationService : IChannelModerationService
         _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
         _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    _flags = flags ?? throw new ArgumentNullException(nameof(flags));
     _channelEffectsBuilder = channelEffectsBuilder; // может быть null на ранних этапах миграции
     _effectBus = effectBus; // может быть null если эффекты отключены
     }
@@ -89,7 +87,7 @@ public class ChannelModerationService : IChannelModerationService
         }
 
         // Автобан каналов если включен
-    var channelAutoBan = _flags.ChannelAutoBanEnabled;
+    var channelAutoBan = Config.ChannelAutoBan;
     if (channelAutoBan)
         {
             _logger.LogInformation("🚫 Автобан канала {ChannelTitle} включен - баним", senderChat.Title);

@@ -17,7 +17,6 @@ namespace ClubDoorman.Infrastructure
     /// <summary>
     /// Включить эффекты модерации для каналов (этапная миграция на effects-пайплайн)
     /// </summary>
-    public static bool ChannelEffectsEnabled { get; } = GetEnvironmentBool("DOORMAN_CHANNEL_EFFECTS_ENABLE");
 
     /// <summary>
     /// Включить режим двойного запуска (effects + legacy) для сравнения результатов по каналам

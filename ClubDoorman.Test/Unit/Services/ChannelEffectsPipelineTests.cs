@@ -38,7 +38,7 @@ public class ChannelEffectsPipelineTests
 
 
     [Test]
-    public async Task EffectsPipeline_Executes()
+    public async Task AutoBanEnabled_SkipsEffectsPipeline()
     {
         var bot = new Mock<ITelegramBotClientWrapper>();
         var moderation = new Mock<IModerationService>();
@@ -47,18 +47,25 @@ public class ChannelEffectsPipelineTests
         var builder = new Mock<IChannelModerationEffectsBuilder>();
         var effectBus = new Mock<IEffectBus>();
 
-        var msg = CreateMessage(ModerationAction.Allow);
+    var msg = CreateMessage(ModerationAction.Allow);
+    // Simulate pure channel post: From is null so approved-user bypass won't trigger
+    msg.From = null;
+    // Ensure senderChat differs from chat (already) and not auto-forward to avoid early returns
+    msg.IsAutomaticForward = false;
         var result = CreateResult(ModerationAction.Allow);
         moderation.Setup(m => m.CheckMessageAsync(It.IsAny<Message>())).ReturnsAsync(result);
-        moderation.Setup(m => m.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
-        builder.Setup(b => b.BuildChannelEffects(msg, result)).Returns(new IEffect[] { new FuncEffect(ct => Task.CompletedTask) });
+    moderation.Setup(m => m.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
+        builder.Setup(b => b.BuildChannelEffects(It.IsAny<Message>(), It.IsAny<ModerationResult>()))
+            .Returns(new IEffect[] { new FuncEffect(ct => Task.CompletedTask) });
 
-    var flags = new Test.TestInfrastructure.ChannelModeration.TestChannelEffectsFlags { EffectsEnabled = true, ChannelAutoBanEnabled = false };
-    var service = new ChannelModerationService(bot.Object, moderation.Object, userBan.Object, logger.Object, flags, builder.Object, effectBus.Object);
-        await service.HandleChannelMessageAsync(msg);
+        // Arrange admin list empty so owner check fails
+        bot.Setup(b => b.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<ChatMember>());
+        var service = new ChannelModerationService(bot.Object, moderation.Object, userBan.Object, logger.Object, builder.Object, effectBus.Object);
+    await service.HandleChannelMessageAsync(msg);
 
-        builder.Verify(b => b.BuildChannelEffects(msg, result), Times.Once);
-        effectBus.Verify(b => b.ExecuteAsync(It.IsAny<IEffect[]>(), It.IsAny<CancellationToken>()), Times.Once);
+    builder.Verify(b => b.BuildChannelEffects(It.IsAny<Message>(), It.IsAny<ModerationResult>()), Times.Never, "With ChannelAutoBan enabled effects pipeline should be skipped");
+    effectBus.Verify(b => b.ExecuteAsync(It.IsAny<IEffect[]>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     // DualRun и legacy сценарии удалены – оставлены только актуальные тесты effects-enabled
