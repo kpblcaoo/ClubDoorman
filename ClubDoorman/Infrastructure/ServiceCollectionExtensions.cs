@@ -102,7 +102,13 @@ public static class ServiceCollectionExtensions
         services.AddMessagingServices();
         
         // Регистрация инфраструктуры эффектов
-        services.AddSingleton<EffectsConfiguration>();
+        services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration
+        {
+            UseRealEffects = true, // Включаем реальные эффекты
+            EnabledActions = new[] { "Delete" }, // Включаем только Delete Action
+            LegacyFallback = false, // ВРЕМЕННО отключаем fallback для тестирования Delete Action
+            LogComparison = true // Включено сравнение логов
+        });
         services.AddSingleton<IEffectBus, EffectBus>();
         services.AddSingleton<LoggingModerationEffectsBuilder>();
         services.AddSingleton<RealModerationEffectsBuilder>();
