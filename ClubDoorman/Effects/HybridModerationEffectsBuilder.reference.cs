@@ -1,10 +1,11 @@
 using ClubDoorman.Effects;
+using ClubDoorman.Features.Moderation;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Models;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 
-namespace ClubDoorman.Features.Moderation;
+namespace ClubDoorman.Effects;
 
 /// <summary>
 /// Гибридный билдер эффектов модерации
@@ -15,18 +16,15 @@ public class HybridModerationEffectsBuilder : IModerationEffectsBuilder
 {
     private readonly EffectsConfiguration _config;
     private readonly ILogger<HybridModerationEffectsBuilder> _logger;
-    private readonly LoggingModerationEffectsBuilder _loggingBuilder;
-    private readonly RealModerationEffectsBuilder _realBuilder;
+    private readonly ModerationEffectsBuilder _realBuilder;
 
     public HybridModerationEffectsBuilder(
         EffectsConfiguration config,
         ILogger<HybridModerationEffectsBuilder> logger,
-        LoggingModerationEffectsBuilder loggingBuilder,
-        RealModerationEffectsBuilder realBuilder)
+        ModerationEffectsBuilder realBuilder)
     {
         _config = config;
         _logger = logger;
-        _loggingBuilder = loggingBuilder;
         _realBuilder = realBuilder;
     }
 
@@ -46,8 +44,8 @@ public class HybridModerationEffectsBuilder : IModerationEffectsBuilder
         }
         else
         {
-            _logger.LogDebug("Using logging effects for action: {Action}", actionName);
-            return _loggingBuilder.BuildEffects(message, result, isSilentMode);
+            _logger.LogDebug("Using real effects for action: {Action} (fallback)", actionName);
+            return _realBuilder.BuildEffects(message, result, isSilentMode);
         }
     }
 }

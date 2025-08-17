@@ -48,7 +48,6 @@ public static class ServiceCollectionExtensions
         services.AddConfigurationServices();
         
         // Регистрация инфраструктуры эффектов (должна быть перед AppConfig)
-        // Удалить после переноса всех эффектов в Effect Bus
         services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration
         {
             UseRealEffects = true, // Включаем реальные эффекты
@@ -57,9 +56,8 @@ public static class ServiceCollectionExtensions
             LogComparison = true // Включено сравнение логов
         });
         services.AddSingleton<IEffectBus, EffectBus>();
-        services.AddSingleton<LoggingModerationEffectsBuilder>();
-        services.AddSingleton<RealModerationEffectsBuilder>();
-        services.AddSingleton<IModerationEffectsBuilder, HybridModerationEffectsBuilder>();
+        services.AddSingleton<ModerationEffectsBuilder>();
+        services.AddSingleton<IModerationEffectsBuilder, ModerationEffectsBuilder>();
 
         // Регистрация основных сервисов в том же порядке, что и в Program.cs
         services.AddLinkFormattingServices();

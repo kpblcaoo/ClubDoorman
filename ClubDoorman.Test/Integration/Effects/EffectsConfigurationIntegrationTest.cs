@@ -66,13 +66,13 @@ public class EffectsConfigurationIntegrationTest
     }
 
     [Test]
-    public void ModerationEffectsBuilder_ShouldBeHybridBuilder()
+    public void ModerationEffectsBuilder_ShouldBeRealBuilder()
     {
         // Arrange & Act
         var builder = _serviceProvider.GetRequiredService<IModerationEffectsBuilder>();
 
         // Assert
-        Assert.That(builder, Is.TypeOf<HybridModerationEffectsBuilder>(), "Should be HybridModerationEffectsBuilder");
+        Assert.That(builder, Is.TypeOf<ModerationEffectsBuilder>(), "Should be ModerationEffectsBuilder");
     }
 
     [TearDown]

@@ -17,18 +17,34 @@ using System.Collections.Generic;
 namespace ClubDoorman.Features.Moderation;
 
 /// <summary>
+/// Интерфейс для построения эффектов модерации
+/// <tags>effects, moderation, builder, interface</tags>
+/// </summary>
+public interface IModerationEffectsBuilder
+{
+    /// <summary>
+    /// Строит массив эффектов для обработки сообщения
+    /// </summary>
+    /// <param name="message">Сообщение для обработки</param>
+    /// <param name="result">Результат модерации</param>
+    /// <param name="isSilentMode">Тихий режим</param>
+    /// <returns>Массив эффектов для выполнения</returns>
+    IEffect[] BuildEffects(Message message, ModerationResult result, bool isSilentMode);
+}
+
+/// <summary>
 /// Реальный билдер эффектов модерации
 /// Будет заполняться по мере миграции действий
 /// <tags>effects, moderation, builder, real</tags>
 /// </summary>
-public class RealModerationEffectsBuilder : IModerationEffectsBuilder
+public class ModerationEffectsBuilder : IModerationEffectsBuilder
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<RealModerationEffectsBuilder> _logger;
+    private readonly ILogger<ModerationEffectsBuilder> _logger;
 
-    public RealModerationEffectsBuilder(
+    public ModerationEffectsBuilder(
         IServiceProvider serviceProvider,
-        ILogger<RealModerationEffectsBuilder> logger)
+        ILogger<ModerationEffectsBuilder> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
