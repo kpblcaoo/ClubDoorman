@@ -52,7 +52,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration
         {
             UseRealEffects = true, // Включаем реальные эффекты
-            EnabledActions = new[] { "Delete", "Report", "Ban", "Allow", "RequireManualReview" }, // Включаем Delete, Report, Ban, Allow и RequireManualReview Actions
+            EnabledActions = new[] { "Delete", "Report", "Ban", "Allow", "RequireManualReview", "RequireAiAnalysis" }, // Включаем все Actions
             LegacyFallback = true, // Включаем fallback для безопасности
             LogComparison = true // Включено сравнение логов
         });

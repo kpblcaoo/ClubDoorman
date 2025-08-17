@@ -35,6 +35,7 @@ public class EffectsConfigurationIntegrationTest
         Assert.That(effectsConfig.EnabledActions, Contains.Item("Ban"), "Ban should be in EnabledActions");
         Assert.That(effectsConfig.EnabledActions, Contains.Item("Allow"), "Allow should be in EnabledActions");
         Assert.That(effectsConfig.EnabledActions, Contains.Item("RequireManualReview"), "RequireManualReview should be in EnabledActions");
+        Assert.That(effectsConfig.EnabledActions, Contains.Item("RequireAiAnalysis"), "RequireAiAnalysis should be in EnabledActions");
         Assert.That(effectsConfig.LegacyFallback, Is.True, "LegacyFallback should be true for safety");
         Assert.That(effectsConfig.LogComparison, Is.True, "LogComparison should be true");
     }
@@ -51,7 +52,7 @@ public class EffectsConfigurationIntegrationTest
         Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Ban), Is.True, "Ban action should be enabled");
         Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Allow), Is.True, "Allow action should be enabled");
         Assert.That(effectsConfig.IsActionEnabled(ModerationAction.RequireManualReview), Is.True, "RequireManualReview action should be enabled");
-        Assert.That(effectsConfig.IsActionEnabled(ModerationAction.RequireAiAnalysis), Is.False, "RequireAiAnalysis action should not be enabled");
+        Assert.That(effectsConfig.IsActionEnabled(ModerationAction.RequireAiAnalysis), Is.True, "RequireAiAnalysis action should be enabled");
     }
 
     [Test]

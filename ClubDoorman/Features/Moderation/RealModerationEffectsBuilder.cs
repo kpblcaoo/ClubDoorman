@@ -4,10 +4,12 @@ using ClubDoorman.Effects.Report;
 using ClubDoorman.Effects.Ban;
 using ClubDoorman.Effects.Allow;
 using ClubDoorman.Effects.ManualReview;
+using ClubDoorman.Effects.AiAnalysis;
 using ClubDoorman.Models;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.AI;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 using System.Collections.Generic;
@@ -107,6 +109,17 @@ public class RealModerationEffectsBuilder : IModerationEffectsBuilder
                                 _serviceProvider.GetRequiredService<ILogger<RequireManualReviewEffect>>(),
                                 message,
                                 message.From!,
+                                isSilentMode));
+                            break;
+
+                        case ModerationAction.RequireAiAnalysis:
+                            _logger.LogInformation("ML не уверен, запускаем AI анализ: {Reason}", result.Reason);
+                            effects.Add(new RequireAiAnalysisEffect(
+                                _serviceProvider.GetRequiredService<IAiCascadeService>(),
+                                _serviceProvider.GetRequiredService<ILogger<RequireAiAnalysisEffect>>(),
+                                message,
+                                message.From!,
+                                result.Confidence ?? 0,
                                 isSilentMode));
                             break;
 
