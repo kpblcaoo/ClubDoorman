@@ -230,4 +230,25 @@ public class AppConfig : IAppConfig
         // Если чат в списке исключений - фильтрация отключена
         return MediaFilteringDisabledChats.Contains(chatId);
     }
+
+    // === КОНФИГУРАЦИЯ ЭФФЕКТОВ МОДЕРАЦИИ ===
+
+    /// <summary>
+    /// Конфигурация эффектов модерации
+    /// </summary>
+    public EffectsConfiguration Effects { get; }
+
+    public AppConfig(
+        IOptions<AutoBanOptions> autoBanOptions,
+        IOptions<ViolationThresholdOptions> violationThresholdOptions,
+        IOptions<FeatureToggleOptions> featureToggleOptions,
+        IOptions<ChatFilteringOptions> chatFilteringOptions,
+        EffectsConfiguration effectsConfiguration) // Добавляем инъекцию
+    {
+        _autoBanOptions = autoBanOptions;
+        _violationThresholdOptions = violationThresholdOptions;
+        _featureToggleOptions = featureToggleOptions;
+        _chatFilteringOptions = chatFilteringOptions;
+        Effects = effectsConfiguration; // Используем DI конфигурацию
+    }
 }

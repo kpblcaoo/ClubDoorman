@@ -22,6 +22,8 @@ using ClubDoorman.Services.UserJoin;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Models.Logging;
+using ClubDoorman.Effects;
+using ClubDoorman.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -44,6 +46,18 @@ public static class ServiceCollectionExtensions
     {
         // Регистрация конфигурации приложения (должна быть первой)
         services.AddConfigurationServices();
+        
+        // Регистрация инфраструктуры эффектов (должна быть перед AppConfig)
+        services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration
+        {
+            UseRealEffects = true, // Включаем реальные эффекты
+            EnabledActions = new[] { "Delete", "Report", "Ban", "Allow", "RequireManualReview", "RequireAiAnalysis" }, // Включаем все Actions
+            LegacyFallback = true, // Включаем fallback для безопасности
+            LogComparison = true // Включено сравнение логов
+        });
+        services.AddSingleton<IEffectBus, EffectBus>();
+        services.AddSingleton<ModerationEffectsBuilder>();
+        services.AddSingleton<IModerationEffectsBuilder, ModerationEffectsBuilder>();
 
         // Регистрация основных сервисов в том же порядке, что и в Program.cs
         services.AddLinkFormattingServices();

@@ -3,9 +3,11 @@ using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Core.Configuration;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 using ClubDoorman.Models;
+using ClubDoorman.Effects;
 
 namespace ClubDoorman.Features.Moderation;
 
@@ -16,29 +18,21 @@ namespace ClubDoorman.Features.Moderation;
 public class ModerationFacade : IModerationFacade
 {
     private readonly IModerationPolicy _moderationPolicy;
-    private readonly INotificationService _notificationService;
-    private readonly IAiCascadeService _aiCascadeService;
-    private readonly IUserBanService _userBanService;
-    private readonly IUserFlowLogger _userFlowLogger;
     private readonly ILogger<ModerationFacade> _logger;
-    private readonly IMessageService _messageService;
+    private readonly IModerationEffectsBuilder _moderationEffectsBuilder;
+    private readonly IEffectBus _effectBus;
+
 
     public ModerationFacade(
         IModerationPolicy moderationPolicy,
-        IUserBanService userBanService,
-        IUserFlowLogger userFlowLogger,
         ILogger<ModerationFacade> logger,
-        IMessageService messageService,
-        INotificationService notificationService,
-        IAiCascadeService aiCascadeService)
+        IModerationEffectsBuilder moderationEffectsBuilder,
+        IEffectBus effectBus)
     {
         _moderationPolicy = moderationPolicy;
-        _userBanService = userBanService;
-        _userFlowLogger = userFlowLogger;
         _logger = logger;
-        _messageService = messageService;
-        _notificationService = notificationService;
-        _aiCascadeService = aiCascadeService;
+        _moderationEffectsBuilder = moderationEffectsBuilder;
+        _effectBus = effectBus;
     }
 
     public Task<ModerationResult> CheckMessageAsync(Message message)
@@ -119,91 +113,9 @@ public class ModerationFacade : IModerationFacade
         bool isSilentMode,
         CancellationToken cancellationToken)
     {
-        switch (moderationResult.Action)
-        {
-            case ModerationAction.Allow:
-                _logger.LogDebug("Сообщение разрешено: {Reason}", moderationResult.Reason);
-                var allowedMessageText = message.Text ?? message.Caption ?? "";
-
-                // Проверяем AI детект для подозрительных пользователей
-                var aiDetectBlocked = await _moderationPolicy.CheckAiDetectAndNotifyAdminsAsync(user, chat, message);
-
-                // Засчитываем хорошее сообщение только если пользователь не был заблокирован AI детектом
-                if (!aiDetectBlocked)
-                {
-                    await _moderationPolicy.IncrementGoodMessageCountAsync(user, chat, allowedMessageText);
-                }
-                break;
-
-            case ModerationAction.Ban:
-                _userFlowLogger.LogUserBanned(user, chat, moderationResult.Reason);
-                await _userBanService.AutoBanAsync(message, moderationResult.Reason, cancellationToken);
-                break;
-
-            case ModerationAction.Delete:
-                _logger.LogInformation("Удаление сообщения: {Reason}", moderationResult.Reason);
-                try
-                {
-                    // Специальная обработка для ссылок и банальных приветствий - отправляем в лог-чат без предупреждения пользователю
-                    if (moderationResult.Reason.Contains("Ссылки запрещены") || moderationResult.Reason.Contains("Банальное приветствие"))
-                    {
-                        await DeleteAndReportToLogChat(message, moderationResult.Reason, cancellationToken);
-                    }
-                    else
-                    {
-                        await DeleteAndReportMessage(message, moderationResult.Reason, isSilentMode, cancellationToken);
-                    }
-                    _logger.LogInformation("Сообщение успешно обработано для удаления");
-
-                    // Отслеживаем нарушения для повторных банов
-                    await _userBanService.TrackViolationAndBanIfNeededAsync(message, user, moderationResult.Reason, cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Ошибка при удалении сообщения: {Reason}", moderationResult.Reason);
-                }
-                break;
-
-            case ModerationAction.Report:
-                _logger.LogInformation("Отправка в админ-чат: {Reason}", moderationResult.Reason);
-                await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
-                break;
-
-            case ModerationAction.RequireManualReview:
-                _logger.LogInformation("Требует ручной проверки: {Reason}", moderationResult.Reason);
-                await DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
-                break;
-
-            case ModerationAction.RequireAiAnalysis:
-                _logger.LogInformation("ML не уверен, запускаем AI анализ: {Reason}", moderationResult.Reason);
-                await HandleAiCascadeAnalysis(message, user, moderationResult.Confidence ?? 0, isSilentMode, cancellationToken);
-                break;
-        }
-    }
-
-    // Вспомогательные методы для обработки сообщений
-    public async Task DeleteAndReportToLogChat(Message message, string reason, CancellationToken cancellationToken)
-    {
-        // WRAP: delegated to NotificationService
-        await _notificationService.DeleteAndReportToLogChat(message, reason, cancellationToken);
+        var effects = _moderationEffectsBuilder.BuildEffects(message, moderationResult, isSilentMode);
+        await _effectBus.ExecuteAsync(effects, cancellationToken);
     }
 
 
-    public async Task DeleteAndReportMessage(Message message, string reason, bool isSilentMode, CancellationToken cancellationToken)
-    {
-        // WRAP: delegated to NotificationService
-        await _notificationService.DeleteAndReportMessage(message, reason, isSilentMode, cancellationToken);
-    }
-
-    public async Task DontDeleteButReportMessage(Message message, User user, bool isSilentMode, CancellationToken cancellationToken)
-    {
-        // WRAP: delegated to NotificationService
-        await _notificationService.DontDeleteButReportMessage(message, user, isSilentMode, cancellationToken);
-    }
-
-    internal async Task HandleAiCascadeAnalysis(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken)
-    {
-        // WRAP: delegated to AiCascadeService
-        await _aiCascadeService.HandleAiCascadeAnalysisAsync(message, user, mlScore, isSilentMode, cancellationToken);
-    }
 }
