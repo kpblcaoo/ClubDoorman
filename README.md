@@ -36,35 +36,6 @@
 Изначально разрабатывался чтобы решить проблему со спамерами в чатах Вастрик.Клуба, но может использоваться и в чатах других форков, да и просто в любых больших чатах.
 
 ### Принцип работы
-### Git hooks (форматирование и тесты)
-В репозитории есть папка `.githooks` с двумя hook'ами:
-
-| Hook | Действие |
-|------|----------|
-| pre-commit | `dotnet format --verify-no-changes` (при несоответствии автоматически форматирует и просит пересобрать commit) + опционально `gitleaks detect` |
-| pre-push | Запускает быстрый набор тестов: `dotnet test ClubDoorman.Test --filter "Category!=real-api&Category!=BDD&Category!=disabled&Category!=demo"` |
-
-Включить хуки локально:
-```bash
-git config core.hooksPath .githooks
-chmod +x .githooks/pre-commit .githooks/pre-push
-```
-
-Проверить работу:
-```bash
-echo "// test" >> dummy.cs
-git add dummy.cs
-git commit -m "test hooks"   # сработает pre-commit
-git push                      # сработает pre-push
-```
-
-Если нужно пропустить (не рекомендуется):
-```bash
-git commit -m "msg" --no-verify
-git push --no-verify
-```
-
-Требования: установлен .NET 9 SDK (см. раздел Build). Для ускорения тестов используйте предварительный `dotnet build`.
 - Пользователи Клуба с привязанным ботом автоматически добавляются в доверенные
 - При эвенте "пользователь вошёл в чат" выдаётся простенькая капча
 - Если пользователь уже в доверенных, то все проверки пропускаются
