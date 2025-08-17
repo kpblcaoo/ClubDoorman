@@ -36,6 +36,7 @@ public class ChatMemberHandler : IUpdateHandler
     private readonly IGoldenMasterRecorder _gm;
     private readonly LoggingFlagsOptions? _flags;
 
+    [Obsolete("Legacy constructor without Golden Master / flags. Use DI constructor with IGoldenMasterRecorder.")]
     public ChatMemberHandler(
         ITelegramBotClientWrapper bot,
         IUserManager userManager,
@@ -60,6 +61,7 @@ public class ChatMemberHandler : IUpdateHandler
         _flags = flagsOptions?.Value;
     }
 
+    [Obsolete("Legacy constructor without Golden Master / flags. Use DI constructor with IGoldenMasterRecorder.")]
     public ChatMemberHandler(
         ITelegramBotClientWrapper bot,
         IUserManager userManager,

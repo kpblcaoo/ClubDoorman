@@ -70,27 +70,32 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
         }
     }
 
-    private static object SimplifyUpdate(Update u) => new
+    private static object SimplifyUpdate(Update u)
     {
-        u.Id,
-        Type = u.Type.ToString(),
-        Message = u.Message == null ? null : new
+        string MaskUserId(long id) => "U" + Math.Abs(id % 10000).ToString("D4");
+        string? MaskUsername(string? username) => string.IsNullOrEmpty(username) ? null : ("u_" + username.GetHashCode().ToString("x"));
+        return new
         {
-            u.Message.MessageId,
-            ChatId = u.Message.Chat.Id,
-            u.Message.Chat.Type,
-            u.Message.Chat.Title,
-            From = u.Message.From == null ? null : new { u.Message.From.Id, u.Message.From.IsBot, u.Message.From.Username },
-            Text = Truncate(u.Message.Text ?? u.Message.Caption, 160)
-        },
-        ChatMember = u.ChatMember == null ? null : new
-        {
-            ChatId = u.ChatMember.Chat.Id,
-            u.ChatMember.Chat.Title,
-            NewStatus = u.ChatMember.NewChatMember.Status.ToString(),
-            User = new { u.ChatMember.NewChatMember.User.Id, u.ChatMember.NewChatMember.User.Username }
-        }
-    };
+            u.Id,
+            Type = u.Type.ToString(),
+            Message = u.Message == null ? null : new
+            {
+                u.Message.MessageId,
+                ChatId = u.Message.Chat.Id,
+                u.Message.Chat.Type,
+                u.Message.Chat.Title,
+                From = u.Message.From == null ? null : new { Id = MaskUserId(u.Message.From.Id), u.Message.From.IsBot, Username = MaskUsername(u.Message.From.Username) },
+                Text = Truncate(u.Message.Text ?? u.Message.Caption, 160)
+            },
+            ChatMember = u.ChatMember == null ? null : new
+            {
+                ChatId = u.ChatMember.Chat.Id,
+                u.ChatMember.Chat.Title,
+                NewStatus = u.ChatMember.NewChatMember.Status.ToString(),
+                User = new { Id = MaskUserId(u.ChatMember.NewChatMember.User.Id), Username = MaskUsername(u.ChatMember.NewChatMember.User.Username) }
+            }
+        };
+    }
 
     private static string Truncate(string? s, int max) => string.IsNullOrEmpty(s) ? s ?? "" : (s.Length <= max ? s : s.Substring(0, max));
 

@@ -41,6 +41,7 @@ public class MessageHandler : IUpdateHandler
     private readonly IGoldenMasterRecorder _gm;
     private readonly LoggingFlagsOptions? _flags; // optional for quick checks
 
+    [Obsolete("Legacy constructor without Golden Master / flags. Use DI constructor with IGoldenMasterRecorder.")]
     public MessageHandler(
         ITelegramBotClientWrapper bot,
         IUserManager userManager,
@@ -79,6 +80,7 @@ public class MessageHandler : IUpdateHandler
         _logger.LogDebug("MessageHandler constructed successfully");
     }
 
+    [Obsolete("Legacy constructor without Golden Master / flags. Use DI constructor with IGoldenMasterRecorder.")]
     public MessageHandler(
         ITelegramBotClientWrapper bot,
         IUserManager userManager,
