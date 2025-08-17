@@ -141,7 +141,7 @@ public class ModerationFacade : IModerationFacade
             _appConfig.Effects.IsActionEnabled(moderationResult.Action), 
             _appConfig.Effects.LegacyFallback);
             
-        if ((moderationResult.Action == ModerationAction.Delete || moderationResult.Action == ModerationAction.Report || moderationResult.Action == ModerationAction.Ban || moderationResult.Action == ModerationAction.Allow) && 
+        if ((moderationResult.Action == ModerationAction.Delete || moderationResult.Action == ModerationAction.Report || moderationResult.Action == ModerationAction.Ban || moderationResult.Action == ModerationAction.Allow || moderationResult.Action == ModerationAction.RequireManualReview) && 
             _appConfig.Effects.IsActionEnabled(moderationResult.Action) && 
             !_appConfig.Effects.LegacyFallback)
         {

@@ -3,6 +3,7 @@ using ClubDoorman.Effects.Delete;
 using ClubDoorman.Effects.Report;
 using ClubDoorman.Effects.Ban;
 using ClubDoorman.Effects.Allow;
+using ClubDoorman.Effects.ManualReview;
 using ClubDoorman.Models;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.UserBan;
@@ -97,6 +98,16 @@ public class RealModerationEffectsBuilder : IModerationEffectsBuilder
                                 message.From!,
                                 message.Chat,
                                 result.Reason));
+                            break;
+
+                        case ModerationAction.RequireManualReview:
+                            _logger.LogInformation("Требует ручной проверки: {Reason}", result.Reason);
+                            effects.Add(new RequireManualReviewEffect(
+                                _serviceProvider.GetRequiredService<INotificationService>(),
+                                _serviceProvider.GetRequiredService<ILogger<RequireManualReviewEffect>>(),
+                                message,
+                                message.From!,
+                                isSilentMode));
                             break;
 
                         default:
