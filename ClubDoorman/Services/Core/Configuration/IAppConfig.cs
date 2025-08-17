@@ -1,3 +1,5 @@
+using ClubDoorman.Infrastructure;
+
 namespace ClubDoorman.Services.Core.Configuration;
 
 /// <summary>
@@ -202,4 +204,11 @@ public interface IAppConfig
     /// Проверяет, отключена ли фильтрация медиа для данного чата
     /// </summary>
     bool IsMediaFilteringDisabledForChat(long chatId);
+
+    // === КОНФИГУРАЦИЯ ЭФФЕКТОВ МОДЕРАЦИИ ===
+
+    /// <summary>
+    /// Конфигурация эффектов модерации
+    /// </summary>
+    EffectsConfiguration Effects { get; }
 }

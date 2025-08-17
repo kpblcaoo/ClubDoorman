@@ -100,7 +100,9 @@ public static class ServiceCollectionExtensions
         services.AddUserManagementServices();
         services.AddMessagingServices();
         services.AddSingleton<IEffectBus, LoggingEffectBus>();
-        services.AddSingleton<IModerationEffectsBuilder, LoggingModerationEffectsBuilder>();
+        services.AddSingleton<LoggingModerationEffectsBuilder>();
+        services.AddSingleton<RealModerationEffectsBuilder>();
+        services.AddSingleton<IModerationEffectsBuilder, HybridModerationEffectsBuilder>();
         services.AddTextProcessingServices();
         services.AddCaptchaServices();
         services.AddHandlersServices();

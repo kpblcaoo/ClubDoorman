@@ -230,4 +230,17 @@ public class AppConfig : IAppConfig
         // Если чат в списке исключений - фильтрация отключена
         return MediaFilteringDisabledChats.Contains(chatId);
     }
+
+    // === КОНФИГУРАЦИЯ ЭФФЕКТОВ МОДЕРАЦИИ ===
+
+    /// <summary>
+    /// Конфигурация эффектов модерации
+    /// </summary>
+    public EffectsConfiguration Effects => new EffectsConfiguration
+    {
+        UseRealEffects = false, // Пока отключено для безопасности
+        EnabledActions = Array.Empty<string>(), // Пока пустой список
+        LegacyFallback = true, // Включен fallback на старую логику
+        LogComparison = true // Включено сравнение логов
+    };
 }
