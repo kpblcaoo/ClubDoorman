@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Telegram.Bot.Types;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ClubDoorman.Services.Logging;
 
@@ -95,8 +96,41 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
 
     private static object Canonicalize(object payload)
     {
-        // Тут можно внедрить сортировку коллекций / маскирование - пока минимально
-        return payload;
+        // Стабилизация и очистка: удаляем null, сортируем свойства по алфавиту для детерминированного diff.
+        var json = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            Formatting = Formatting.None
+        });
+        var token = JToken.Parse(json);
+        SortToken(token);
+        return token; // JObject/JArray вернёт отсортированный детерминированный вид
+    }
+
+    private static void SortToken(JToken token)
+    {
+        switch (token)
+        {
+            case JObject obj:
+                // Сортировка свойств
+                var props = obj.Properties().OrderBy(p => p.Name, StringComparer.Ordinal).ToList();
+                foreach (var p in props)
+                {
+                    p.Remove();
+                }
+                foreach (var p in props)
+                {
+                    obj.Add(p.Name, p.Value);
+                    SortToken(p.Value);
+                }
+                break;
+            case JArray arr:
+                foreach (var item in arr)
+                {
+                    SortToken(item);
+                }
+                break;
+        }
     }
 
     private static string GenerateCorrelationId(Update update, string handler)
