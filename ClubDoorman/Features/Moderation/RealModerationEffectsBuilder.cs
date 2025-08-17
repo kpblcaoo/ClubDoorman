@@ -2,6 +2,7 @@ using ClubDoorman.Effects;
 using ClubDoorman.Effects.Delete;
 using ClubDoorman.Effects.Report;
 using ClubDoorman.Effects.Ban;
+using ClubDoorman.Effects.Allow;
 using ClubDoorman.Models;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.UserBan;
@@ -81,6 +82,17 @@ public class RealModerationEffectsBuilder : IModerationEffectsBuilder
                                 _serviceProvider.GetRequiredService<IUserBanService>(),
                                 _serviceProvider.GetRequiredService<IUserFlowLogger>(),
                                 _serviceProvider.GetRequiredService<ILogger<BanUserEffect>>(),
+                                message,
+                                message.From!,
+                                message.Chat,
+                                result.Reason));
+                            break;
+
+                        case ModerationAction.Allow:
+                            _logger.LogDebug("Разрешение сообщения: {Reason}", result.Reason);
+                            effects.Add(new AllowMessageEffect(
+                                _serviceProvider.GetRequiredService<IModerationPolicy>(),
+                                _serviceProvider.GetRequiredService<ILogger<AllowMessageEffect>>(),
                                 message,
                                 message.From!,
                                 message.Chat,
