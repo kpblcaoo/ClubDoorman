@@ -14,4 +14,7 @@ public class LoggingFlagsOptions
 
     /// <summary>Доля (0..1) сообщений для выборки в Golden Master</summary>
     public double GoldenSampleRate { get; set; } = 0.1;
+
+    /// <summary>Базовый путь для записи Golden Master (по умолчанию "golden"). Позволяет изолировать тесты.</summary>
+    public string GoldenBasePath { get; set; } = "golden";
 }

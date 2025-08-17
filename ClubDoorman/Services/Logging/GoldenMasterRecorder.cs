@@ -147,7 +147,8 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
     private void WriteFile(string correlationId, string phase, object data)
     {
         var date = DateTime.UtcNow.ToString("yyyy-MM-dd");
-        var dir = Path.Combine("golden", date);
+        var basePath = _flags.Value.GoldenBasePath ?? "golden";
+        var dir = Path.Combine(basePath, date);
         Directory.CreateDirectory(dir);
         var path = Path.Combine(dir, $"{correlationId}.{phase}.json");
         var json = JsonConvert.SerializeObject(data, Formatting.Indented);
