@@ -13,56 +13,56 @@ public class AIModuleTests
     {
         // Arrange
         var services = new ServiceCollection();
-        
+
         // Act
         services.AddAIServices();
-        
+
         // Assert
         var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IAiChecks));
         Assert.That(descriptor, Is.Not.Null);
         Assert.That(descriptor!.ImplementationType, Is.EqualTo(typeof(AiChecks)));
     }
-    
+
     [Test]
     public void AddAIServices_ShouldRegisterISpamHamClassifier()
     {
         // Arrange
         var services = new ServiceCollection();
-        
+
         // Act
         services.AddAIServices();
-        
+
         // Assert
         var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(ISpamHamClassifier));
         Assert.That(descriptor, Is.Not.Null);
         Assert.That(descriptor!.ImplementationType, Is.EqualTo(typeof(SpamHamClassifier)));
     }
-    
+
     [Test]
     public void AddAIServices_ShouldRegisterIMimicryClassifier()
     {
         // Arrange
         var services = new ServiceCollection();
-        
+
         // Act
         services.AddAIServices();
-        
+
         // Assert
         var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IMimicryClassifier));
         Assert.That(descriptor, Is.Not.Null);
         Assert.That(descriptor!.ImplementationType, Is.EqualTo(typeof(MimicryClassifier)));
     }
-    
+
     [Test]
     public void AddAIServices_ShouldReturnServiceCollection()
     {
         // Arrange
         var services = new ServiceCollection();
-        
+
         // Act
         var result = services.AddAIServices();
-        
+
         // Assert
         Assert.That(result, Is.SameAs(services));
     }
-} 
+}

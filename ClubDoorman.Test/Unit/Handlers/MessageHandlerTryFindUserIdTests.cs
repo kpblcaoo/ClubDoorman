@@ -66,7 +66,7 @@ public class MessageHandlerTryFindUserIdTests
         var userId = 789012L;
         var cacheKey = $"{chatId}_{userId}";
         var cacheValue = $"Message from @{username}";
-        
+
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
@@ -86,7 +86,7 @@ public class MessageHandlerTryFindUserIdTests
     {
         // Arrange
         var username = "nonexistentuser2";
-        
+
         // Кэш пустой или содержит другие данные
         MemoryCache.Default.Add("123_456", "Message from @otheruser", new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
@@ -147,7 +147,7 @@ public class MessageHandlerTryFindUserIdTests
         var userId = 789012L;
         var cacheKey = $"{chatId}_{userId}";
         var cacheValue = $"Message from @{username.ToLower()}";
-        
+
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
@@ -172,7 +172,7 @@ public class MessageHandlerTryFindUserIdTests
         var chatId2 = 789012L;
         var userId1 = 111111L;
         var userId2 = 222222L;
-        
+
         MemoryCache.Default.Add($"{chatId1}_{userId1}", $"Message from @{targetUsername}", new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
         MemoryCache.Default.Add($"{chatId2}_{userId2}", $"Message from @{otherUsername}", new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
@@ -195,7 +195,7 @@ public class MessageHandlerTryFindUserIdTests
         var username = "testuser5";
         var invalidCacheKey = "invalid_key_format";
         var cacheValue = $"Message from @{username}";
-        
+
         MemoryCache.Default.Add(invalidCacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
@@ -219,7 +219,7 @@ public class MessageHandlerTryFindUserIdTests
         var invalidUserId = "invalid_user_id";
         var cacheKey = $"{chatId}_{invalidUserId}";
         var cacheValue = $"Message from @{username}";
-        
+
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
@@ -239,7 +239,7 @@ public class MessageHandlerTryFindUserIdTests
     {
         // Arrange
         var username = "testuser7";
-        
+
         // Кэш пустой
 
         // Act
@@ -263,7 +263,7 @@ public class MessageHandlerTryFindUserIdTests
         var userId = 789012L;
         var cacheKey = $"{chatId}_{userId}";
         var cacheValue = $"Message from {username}"; // Без @ символа
-        
+
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
@@ -286,19 +286,19 @@ public class MessageHandlerTryFindUserIdTests
         var userId = 789012L;
         var cacheKey = $"{chatId}_{userId}";
         var cacheValue = $"Message from @{username}";
-        
+
         // Добавляем в кэш
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
-        
+
         // Проверяем, что кэш содержит данные
         var cacheItem = MemoryCache.Default.Get(cacheKey);
         Assert.That(cacheItem, Is.Not.Null, "Кэш должен содержать добавленный элемент");
         Assert.That(cacheItem, Is.EqualTo(cacheValue), "Значение в кэше должно совпадать");
-        
+
         // Проверяем количество элементов в кэше
         var cacheCount = MemoryCache.Default.GetCount();
         Assert.That(cacheCount, Is.GreaterThan(0), "Кэш должен содержать элементы");
-        
+
         // Выводим все элементы кэша для отладки
         Console.WriteLine($"Количество элементов в кэше: {cacheCount}");
         foreach (var item in MemoryCache.Default)

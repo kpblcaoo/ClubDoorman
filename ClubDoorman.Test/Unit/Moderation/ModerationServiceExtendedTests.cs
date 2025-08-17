@@ -42,7 +42,7 @@ public class ModerationServiceExtendedTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<ArgumentNullException>(
             () => service.CheckUserNameAsync(null!));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("user"));
     }
 
@@ -56,7 +56,7 @@ public class ModerationServiceExtendedTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<ModerationException>(
             () => service.CheckUserNameAsync(user));
-        
+
         Assert.That(exception.Message, Does.Contain("пустым"));
     }
 
@@ -104,7 +104,7 @@ public class ModerationServiceExtendedTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<ArgumentNullException>(
             () => service.IncrementGoodMessageCountAsync(null!, chat, messageText));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("user"));
     }
 
@@ -119,7 +119,7 @@ public class ModerationServiceExtendedTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<ArgumentNullException>(
             () => service.IncrementGoodMessageCountAsync(user, null!, messageText));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("chat"));
     }
 
@@ -134,7 +134,7 @@ public class ModerationServiceExtendedTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<ArgumentException>(
             () => service.IncrementGoodMessageCountAsync(user, chat, ""));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("messageText"));
     }
 
@@ -162,10 +162,10 @@ public class ModerationServiceExtendedTests
     public async Task BanAndCleanupUserAsync_ValidParameters_ReturnsTrue()
     {
         // Arrange
-        _factory.WithBotClientSetup(mock => 
+        _factory.WithBotClientSetup(mock =>
             mock.Setup(x => x.SendRequest(It.IsAny<Telegram.Bot.Requests.BanChatMemberRequest>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(true)));
-        
+
         var service = _factory.CreateModerationService();
         var userId = 12345L;
         var chatId = 67890L;
@@ -182,10 +182,10 @@ public class ModerationServiceExtendedTests
     public async Task BanAndCleanupUserAsync_WithoutMessageId_OnlyBansUser()
     {
         // Arrange
-        _factory.WithBotClientSetup(mock => 
+        _factory.WithBotClientSetup(mock =>
             mock.Setup(x => x.SendRequest(It.IsAny<Telegram.Bot.Requests.BanChatMemberRequest>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(true)));
-        
+
         var service = _factory.CreateModerationService();
         var userId = 12345L;
         var chatId = 67890L;
@@ -201,10 +201,10 @@ public class ModerationServiceExtendedTests
     public async Task BanAndCleanupUserAsync_TelegramApiError_ReturnsFalse()
     {
         // Arrange
-        _factory.WithUserBanServiceSetup(mock => 
+        _factory.WithUserBanServiceSetup(mock =>
             mock.Setup(x => x.BanUserAsync(It.IsAny<Chat>(), It.IsAny<User>(), It.IsAny<BanTypeEnum>(), It.IsAny<string>(), It.IsAny<Message>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Telegram API error")));
-        
+
         var service = _factory.CreateModerationService();
         var userId = 12345L;
         var chatId = 67890L;
@@ -329,10 +329,10 @@ public class ModerationServiceExtendedTests
     public async Task CheckMessageAsync_UserWithoutFirstName_HandlesGracefully()
     {
         // Arrange
-        _factory.WithClassifierSetup(mock => 
+        _factory.WithClassifierSetup(mock =>
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
                 .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
-        
+
         var service = _factory.CreateModerationService();
         var message = new Message
         {
@@ -352,10 +352,10 @@ public class ModerationServiceExtendedTests
     public async Task CheckMessageAsync_ChatWithoutId_HandlesGracefully()
     {
         // Arrange
-        _factory.WithClassifierSetup(mock => 
+        _factory.WithClassifierSetup(mock =>
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
                 .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
-        
+
         var service = _factory.CreateModerationService();
         var message = new Message
         {
@@ -375,10 +375,10 @@ public class ModerationServiceExtendedTests
     public async Task CheckMessageAsync_ConcurrentCalls_HandlesCorrectly()
     {
         // Arrange
-        _factory.WithClassifierSetup(mock => 
+        _factory.WithClassifierSetup(mock =>
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
                 .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
-        
+
         var service = _factory.CreateModerationService();
         var message = TK.CreateValidMessage();
         var tasks = new List<Task<ModerationResult>>();
@@ -404,14 +404,14 @@ public class ModerationServiceExtendedTests
     public async Task CheckMessageAsync_WithMimicryDetection_ReturnsAllow()
     {
         // Arrange
-        _factory.WithClassifierSetup(mock => 
+        _factory.WithClassifierSetup(mock =>
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
                 .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
-        
-        _factory.WithMimicryClassifierSetup(mock => 
+
+        _factory.WithMimicryClassifierSetup(mock =>
             mock.Setup(x => x.AnalyzeMessages(It.IsAny<List<string>>()))
                 .Returns(0.9));
-        
+
         var service = _factory.CreateModerationService();
         var message = TK.CreateValidMessage();
 
@@ -426,10 +426,10 @@ public class ModerationServiceExtendedTests
     public async Task CheckMessageAsync_WithBadMessageManager_ReturnsBan()
     {
         // Arrange
-        _factory.WithBadMessageManagerSetup(mock => 
+        _factory.WithBadMessageManagerSetup(mock =>
             mock.Setup(x => x.KnownBadMessage(It.IsAny<string>()))
                 .Returns(true));
-        
+
         var service = _factory.CreateModerationService();
         var message = TK.CreateValidMessage();
 
@@ -442,4 +442,4 @@ public class ModerationServiceExtendedTests
     }
 
     #endregion
-} 
+}

@@ -73,7 +73,7 @@ public static class TestKitAutoFixture
     /// Создает тестовый сценарий с пользователем, чатом и сообщением
     /// <tags>autofixture, scenario, user-chat-message, test-infrastructure</tags>
     /// </summary>
-    public static (Telegram.Bot.Types.User User, Telegram.Bot.Types.Chat Chat, Telegram.Bot.Types.Message Message) CreateTestScenario() => 
+    public static (Telegram.Bot.Types.User User, Telegram.Bot.Types.Chat Chat, Telegram.Bot.Types.Message Message) CreateTestScenario() =>
         Infra.TestKitAutoFixture.CreateTestScenario();
 
     /// <summary>
@@ -105,57 +105,57 @@ public static class TestKitAutoFixture
     /// <tags>autofixture, inject, singleton, test-infrastructure</tags>
     /// </summary>
     public static void Inject<T>(T instance) => Infra.TestKitAutoFixture.Inject(instance);
-    
+
     #region Backward Compatibility Methods
-    
+
     /// <summary>
     /// Создает CaptchaService с автозависимостями
     /// <tags>autofixture, captcha-service, dependencies, test-infrastructure</tags>
     /// </summary>
     public static ICaptchaService CreateCaptchaService() => Infra.TestKitAutoFixture.CreateCaptchaService();
-    
+
     /// <summary>
     /// Создает UserManager с автозависимостями
     /// <tags>autofixture, user-manager, dependencies, test-infrastructure</tags>
     /// </summary>
     public static IUserManager CreateUserManager() => Infra.TestKitAutoFixture.CreateUserManager();
-    
+
     /// <summary>
     /// Создает Update объект
     /// <tags>autofixture, update, telegram, test-infrastructure</tags>
     /// </summary>
     public static Telegram.Bot.Types.Update CreateUpdate() => Infra.TestKitAutoFixture.CreateUpdate();
-    
+
     /// <summary>
     /// Создает MessageUpdate
     /// <tags>autofixture, message-update, telegram, test-infrastructure</tags>
     /// </summary>
     public static Telegram.Bot.Types.Update CreateMessageUpdate() => Infra.TestKitAutoFixture.CreateMessageUpdate();
-    
+
     /// <summary>
     /// Создает CallbackQueryUpdate
     /// <tags>autofixture, callback-query-update, telegram, test-infrastructure</tags>
     /// </summary>
     public static Telegram.Bot.Types.Update CreateCallbackQueryUpdate() => Infra.TestKitAutoFixture.CreateCallbackQueryUpdate();
-    
+
     /// <summary>
     /// Создает много сообщений
     /// <tags>autofixture, many-messages, collection, test-infrastructure</tags>
     /// </summary>
     public static List<Telegram.Bot.Types.Message> CreateManyMessages(int count = 3) => Infra.TestKitAutoFixture.CreateManyMessages(count);
-    
+
     /// <summary>
     /// Создает много пользователей
     /// <tags>autofixture, many-users, collection, test-infrastructure</tags>
     /// </summary>
     public static List<Telegram.Bot.Types.User> CreateManyUsers(int count = 3) => Infra.TestKitAutoFixture.CreateManyUsers(count);
-    
+
     /// <summary>
     /// Создает много спам-сообщений
     /// <tags>autofixture, many-spam-messages, collection, test-infrastructure</tags>
     /// </summary>
     public static List<Telegram.Bot.Types.Message> CreateManySpamMessages(int count = 3) => Infra.TestKitAutoFixture.CreateManySpamMessages(count);
-    
+
     /// <summary>
     /// Создает объект с фикстурой для кастомизации
     /// <tags>autofixture, customization, fixture, test-infrastructure</tags>

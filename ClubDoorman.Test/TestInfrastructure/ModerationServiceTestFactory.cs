@@ -50,7 +50,7 @@ public class ModerationServiceTestFactory
             UserBanServiceMock.Object,
             LoggerMock.Object
         );
-        
+
         return new ModerationServiceAdapter(fakeModerationService);
     }
 
@@ -121,7 +121,7 @@ public class ModerationServiceTestFactory
     #region Smart Methods Based on Business Logic
 
     public FakeTelegramClient FakeTelegramClient => FakeTelegramClientFactory.Create();
-    
+
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
     public IUserManager CreateUserManagerWithFake()

@@ -28,14 +28,14 @@ public class MessagingModuleTests
     public void Setup()
     {
         _services = new ServiceCollection();
-        
+
         // Добавляем необходимые зависимости для тестирования
         _services.AddSingleton(Mock.Of<ITelegramBotClientWrapper>());
         _services.AddSingleton(Mock.Of<IUpdateHandler>());
         _services.AddSingleton(Mock.Of<IOptions<LoggingConfiguration>>());
         _services.AddSingleton(Mock.Of<IAppConfig>());
         _services.AddSingleton(Mock.Of<IUserBanService>());
-        
+
         // Добавляем логгеры
         _services.AddLogging();
     }
@@ -165,4 +165,4 @@ public class MessagingModuleTests
         // Assert
         Assert.That(result, Is.SameAs(_services));
     }
-} 
+}

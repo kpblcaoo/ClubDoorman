@@ -25,7 +25,7 @@ public class BehaviorComparisonTestRunner<TRequest, TResponse>
         _logger = logger;
         _testName = testName;
         _outputDir = outputDir;
-        
+
         // Создаем директорию для результатов
         Directory.CreateDirectory(outputDir);
     }
@@ -67,9 +67,9 @@ public class BehaviorComparisonTestRunner<TRequest, TResponse>
             result.NewResponse = await newHandler(request, cancellationToken);
             result.NewExecutionTime = DateTime.UtcNow - newStartTime;
 
-                            // Сравниваем результаты
-                _logger.LogDebug("🔍 Сравниваем результаты...");
-                result.AreEquivalent = CompareResponses((TResponse)result.OldResponse!, (TResponse)result.NewResponse!);
+            // Сравниваем результаты
+            _logger.LogDebug("🔍 Сравниваем результаты...");
+            result.AreEquivalent = CompareResponses((TResponse)result.OldResponse!, (TResponse)result.NewResponse!);
 
             if (result.AreEquivalent)
             {
@@ -78,7 +78,7 @@ public class BehaviorComparisonTestRunner<TRequest, TResponse>
             else
             {
                 _logger.LogWarning("⚠️ Обнаружены различия в поведении для {TestName}", _testName);
-                                        result.Differences = FindDifferences((TResponse)result.OldResponse!, (TResponse)result.NewResponse!);
+                result.Differences = FindDifferences((TResponse)result.OldResponse!, (TResponse)result.NewResponse!);
             }
 
             // Сохраняем результаты
@@ -91,7 +91,7 @@ public class BehaviorComparisonTestRunner<TRequest, TResponse>
             _logger.LogError(ex, "❌ Ошибка при сравнении поведения для {TestName}", _testName);
             result.Error = ex.Message;
             result.HasError = true;
-            
+
             await SaveResultsAsync(result);
             throw;
         }
@@ -104,12 +104,12 @@ public class BehaviorComparisonTestRunner<TRequest, TResponse>
     {
         try
         {
-                                    oldResponse.Should().BeEquivalentTo(newResponse, options => options
-                            .IncludingAllRuntimeProperties()
-                            .IncludingAllDeclaredProperties()
-                            .RespectingRuntimeTypes()
-                            .WithAutoConversion());
-            
+            oldResponse.Should().BeEquivalentTo(newResponse, options => options
+    .IncludingAllRuntimeProperties()
+    .IncludingAllDeclaredProperties()
+    .RespectingRuntimeTypes()
+    .WithAutoConversion());
+
             return true;
         }
         catch (Exception ex)
@@ -128,12 +128,12 @@ public class BehaviorComparisonTestRunner<TRequest, TResponse>
 
         try
         {
-                                    // Используем FluentAssertions для получения детальных различий
-                        oldResponse.Should().BeEquivalentTo(newResponse, options => options
-                            .IncludingAllRuntimeProperties()
-                            .IncludingAllDeclaredProperties()
-                            .RespectingRuntimeTypes()
-                            .WithAutoConversion());
+            // Используем FluentAssertions для получения детальных различий
+            oldResponse.Should().BeEquivalentTo(newResponse, options => options
+                .IncludingAllRuntimeProperties()
+                .IncludingAllDeclaredProperties()
+                .RespectingRuntimeTypes()
+                .WithAutoConversion());
         }
         catch (FluentAssertions.Execution.AssertionFailedException ex)
         {
@@ -149,7 +149,7 @@ public class BehaviorComparisonTestRunner<TRequest, TResponse>
         {
             var oldJson = JsonConvert.SerializeObject(oldResponse, Formatting.Indented);
             var newJson = JsonConvert.SerializeObject(newResponse, Formatting.Indented);
-            
+
             if (oldJson != newJson)
             {
                 differences.Add("JSON представления различаются");
@@ -231,7 +231,7 @@ public static class BehaviorComparisonExtensions
     public static void ShouldBeEquivalent(this ComparisonResult result)
     {
         result.AreEquivalent.Should().BeTrue("Поведение должно быть идентично");
-        
+
         if (result.Differences.Any())
         {
             Assert.Fail($"Обнаружены различия:\n{string.Join("\n", result.Differences)}");
@@ -244,7 +244,7 @@ public static class BehaviorComparisonExtensions
     public static void ShouldBeFaster(this ComparisonResult result, double expectedImprovement = 0.1)
     {
         var improvement = (result.OldExecutionTime - result.NewExecutionTime) / result.OldExecutionTime;
-        improvement.Should().BeGreaterThan(expectedImprovement, 
+        improvement.Should().BeGreaterThan(expectedImprovement,
             $"Новая логика должна быть быстрее на {expectedImprovement:P0}");
     }
-} 
+}

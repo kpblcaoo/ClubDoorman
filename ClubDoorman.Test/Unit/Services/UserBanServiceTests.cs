@@ -39,7 +39,7 @@ public class UserBanServiceTests
     private Mock<IStatisticsService> _statisticsServiceMock = null!;
     private Mock<GlobalStatsManager> _globalStatsManagerMock = null!;
     private Mock<IUserManager> _userManagerMock = null!;
-    
+
     // Дополнительные моки для MessageHandler (эталонная версия)
     private Mock<ICaptchaService> _captchaServiceMock = null!;
     private Mock<ISpamHamClassifier> _classifierMock = null!;
@@ -47,7 +47,7 @@ public class UserBanServiceTests
     private Mock<IAiChecks> _aiServiceMock = null!;
     private Mock<IServiceProvider> _serviceProviderMock = null!;
     private Mock<IChatLinkFormatter> _chatLinkFormatterMock = null!;
-        private Mock<IBotPermissionsService> _botPermissionsServiceMock = null!;
+    private Mock<IBotPermissionsService> _botPermissionsServiceMock = null!;
 
 
     private IUserBanService _userBanService = null!;
@@ -64,7 +64,7 @@ public class UserBanServiceTests
         _statisticsServiceMock = new Mock<IStatisticsService>();
         _globalStatsManagerMock = new Mock<GlobalStatsManager>();
         _userManagerMock = new Mock<IUserManager>();
-        
+
         // Дополнительные моки для MessageHandler (эталонная версия)
         _captchaServiceMock = new Mock<ICaptchaService>();
         _classifierMock = new Mock<ISpamHamClassifier>();
@@ -76,7 +76,7 @@ public class UserBanServiceTests
 
 
         // MessageHandler больше не нужен в этих тестах - тестируем UserBanService напрямую
-        
+
         // UserBanService теперь содержит реальную логику
         _userBanService = new UserBanService(
             _botMock.Object,
@@ -373,9 +373,9 @@ public class UserBanServiceTests
 
         // Act & Assert
         // Ожидаем, что исключение будет проброшено (re-throw behavior)
-        var exception = Assert.ThrowsAsync<Exception>(async () => 
+        var exception = Assert.ThrowsAsync<Exception>(async () =>
             await _userBanService.BanBlacklistedUserAsync(message, user, CancellationToken.None));
-        
+
         Assert.That(exception.Message, Is.EqualTo("Test exception"));
     }
 
@@ -618,4 +618,4 @@ public class UserBanServiceTests
     }
 
     #endregion
-} 
+}

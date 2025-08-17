@@ -26,7 +26,7 @@ public class SimpleE2ETests
     private string? FindEnvFile()
     {
         var baseDir = AppContext.BaseDirectory;
-        
+
         // Пробуем разные пути относительно AppContext.BaseDirectory
         var possiblePaths = new[]
         {
@@ -41,7 +41,7 @@ public class SimpleE2ETests
             Path.Combine(baseDir, "../ClubDoorman/ClubDoorman/.env"),
             Path.Combine(baseDir, "ClubDoorman/ClubDoorman/.env")
         };
-        
+
         foreach (var path in possiblePaths)
         {
             if (File.Exists(path))
@@ -49,7 +49,7 @@ public class SimpleE2ETests
                 return path;
             }
         }
-        
+
         return null; // Файл не найден
     }
 
@@ -58,7 +58,7 @@ public class SimpleE2ETests
     {
         _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AiChecks>();
         _fakeBot = FakeTelegramClientFactory.Create();
-        
+
         // Загружаем .env файл
         var envPath = FindEnvFile();
         if (envPath == null)
@@ -66,24 +66,24 @@ public class SimpleE2ETests
             Assert.Ignore("Файл .env не найден, пропускаем E2E тесты");
         }
         DotNetEnv.Env.Load(envPath);
-        
+
         // Загружаем переменные в Environment для Config.cs
         var apiKey = DotNetEnv.Env.GetString("DOORMAN_OPENROUTER_API");
         var botToken = DotNetEnv.Env.GetString("DOORMAN_BOT_API");
         var adminChat = DotNetEnv.Env.GetString("DOORMAN_ADMIN_CHAT");
-        
+
         Environment.SetEnvironmentVariable("DOORMAN_OPENROUTER_API", apiKey);
         Environment.SetEnvironmentVariable("DOORMAN_BOT_API", botToken);
         Environment.SetEnvironmentVariable("DOORMAN_ADMIN_CHAT", adminChat);
-        
+
         // Проверяем наличие API ключей для E2E тестов
         if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(botToken))
         {
             Assert.Ignore("API ключи не настроены, пропускаем E2E тесты");
         }
-        
 
-        
+
+
         // Инициализируем сервисы с правильными логгерами
         _aiChecks = new AiChecks(_fakeBot, _logger, AppConfigTestFactory.CreateDefault());
         _spamHamClassifier = new SpamHamClassifier(LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<SpamHamClassifier>());
@@ -102,7 +102,7 @@ public class SimpleE2ETests
         // Assert
         Assert.That(result.Score, Is.GreaterThan(0.5), "Спам сообщение должно иметь высокую вероятность");
         Assert.That(result.Spam, Is.True, "Сообщение должно быть классифицировано как спам");
-        
+
         Console.WriteLine($"E2E тест: Спам сообщение классифицировано с вероятностью {result.Score}");
     }
 
@@ -118,7 +118,7 @@ public class SimpleE2ETests
         // Assert
         Assert.That(result.Score, Is.LessThan(0.5), "Нормальное сообщение должно иметь низкую вероятность спама");
         Assert.That(result.Spam, Is.False, "Сообщение должно быть классифицировано как не спам");
-        
+
         Console.WriteLine($"E2E тест: Нормальное сообщение классифицировано с вероятностью {result.Score}");
     }
 
@@ -138,7 +138,7 @@ public class SimpleE2ETests
 
         // Assert
         Assert.That(result, Is.GreaterThan(0.3), "Подозрительные сообщения должны иметь повышенную вероятность");
-        
+
         Console.WriteLine($"E2E тест: Mimicry анализ показал вероятность {result}");
     }
 
@@ -173,7 +173,7 @@ public class SimpleE2ETests
 
         // Act - AI анализ фото
         var photoResult = await _aiChecks.GetAttentionBaitProbability(user);
-        
+
         // Act - анализ текста
         var textMessage = "Привет! Как дела?";
         var textResult = await _spamHamClassifier.IsSpam(textMessage);
@@ -181,11 +181,11 @@ public class SimpleE2ETests
         // Assert
         Assert.That(photoResult.Photo.Length, Is.GreaterThan(0), "Фото должно быть загружено");
         Assert.That(photoResult.SpamProbability, Is.Not.Null);
-        
+
         Assert.That(textResult.Spam, Is.False, "Нормальный текст не должен быть спамом");
-        
+
         Console.WriteLine($"E2E тест: Полный AI анализ завершен");
         Console.WriteLine($"  - Фото: {photoResult.Photo.Length} байт, вероятность спама: {photoResult.SpamProbability.Probability}");
         Console.WriteLine($"  - Текст: вероятность спама: {textResult.Score}");
     }
-} 
+}

@@ -1,6 +1,4 @@
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Test.TestInfrastructure;
 using Microsoft.Extensions.Logging;
@@ -23,7 +21,7 @@ public class AiChecksPhotoLoggingTest
         var currentDir = Directory.GetCurrentDirectory();
         Console.WriteLine($"AppContext.BaseDirectory: {baseDir}");
         Console.WriteLine($"Current directory: {currentDir}");
-        
+
         // Пробуем разные пути относительно AppContext.BaseDirectory
         var possiblePaths = new[]
         {
@@ -38,7 +36,7 @@ public class AiChecksPhotoLoggingTest
             Path.Combine(baseDir, "../ClubDoorman/ClubDoorman/.env"),
             Path.Combine(baseDir, "ClubDoorman/ClubDoorman/.env")
         };
-        
+
         foreach (var path in possiblePaths)
         {
             var fullPath = Path.GetFullPath(path);
@@ -49,7 +47,7 @@ public class AiChecksPhotoLoggingTest
                 return path;
             }
         }
-        
+
         return null; // Файл не найден
     }
     private ILogger<AiChecks> _logger = null!;
@@ -61,7 +59,7 @@ public class AiChecksPhotoLoggingTest
     {
         _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AiChecks>();
         _fakeBot = FakeTelegramClientFactory.Create();
-        
+
         // Загружаем .env файл
         var envPath = FindEnvFile();
         if (envPath == null)
@@ -69,26 +67,27 @@ public class AiChecksPhotoLoggingTest
             Assert.Ignore("Файл .env не найден, пропускаем интеграционный тест");
         }
         DotNetEnv.Env.Load(envPath);
-        
+
         // Загружаем переменные в Environment для Config.cs
         var apiKey = DotNetEnv.Env.GetString("DOORMAN_OPENROUTER_API");
         var botToken = DotNetEnv.Env.GetString("DOORMAN_BOT_API");
         var adminChat = DotNetEnv.Env.GetString("DOORMAN_ADMIN_CHAT");
-        
+
         Environment.SetEnvironmentVariable("DOORMAN_OPENROUTER_API", apiKey);
         Environment.SetEnvironmentVariable("DOORMAN_BOT_API", botToken);
         Environment.SetEnvironmentVariable("DOORMAN_ADMIN_CHAT", adminChat);
-        
-        // Отладочная информация
-        Console.WriteLine($"DotNetEnv API Key: {apiKey}");
-        Console.WriteLine($"Environment API Key: {Environment.GetEnvironmentVariable("DOORMAN_OPENROUTER_API")}");
-        
+
+        // Отладочная информация (секреты маскируем)
+        string Mask(string? v) => string.IsNullOrEmpty(v) ? "<empty>" : (v!.Length <= 6 ? "******" : v[..3] + "***" + v[^3..]);
+        Console.WriteLine($"DotNetEnv API Key: {Mask(apiKey)}");
+        Console.WriteLine($"Environment API Key: {Mask(Environment.GetEnvironmentVariable("DOORMAN_OPENROUTER_API"))}");
+
         // Проверяем наличие API ключа
         if (string.IsNullOrEmpty(apiKey))
         {
             Assert.Ignore("DOORMAN_OPENROUTER_API не установлен, пропускаем интеграционный тест");
         }
-        
+
         _aiChecks = new AiChecks(_fakeBot, _logger, AppConfigTestFactory.CreateDefault());
     }
 
@@ -128,7 +127,7 @@ public class AiChecksPhotoLoggingTest
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Photo.Length, Is.GreaterThan(0), "Фото должно быть загружено");
         Assert.That(result.SpamProbability, Is.Not.Null);
-        
+
         Console.WriteLine($"Результат: вероятность={result.SpamProbability.Probability}, причина={result.SpamProbability.Reason}");
         Console.WriteLine($"Размер фото: {result.Photo.Length} байт");
     }

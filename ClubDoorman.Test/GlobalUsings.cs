@@ -24,4 +24,4 @@ global using TK = ClubDoorman.Test.TestKit.TestKit;
 global using ClubDoorman.Services.Handlers;
 global using ClubDoorman.Features.UserJoin;
 global using ClubDoorman.Features.Moderation;
-global using ClubDoorman.Features.AdminOps; 
+global using ClubDoorman.Features.AdminOps;

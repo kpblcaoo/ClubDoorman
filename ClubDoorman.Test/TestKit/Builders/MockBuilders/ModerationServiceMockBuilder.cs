@@ -88,7 +88,7 @@ public class ModerationServiceMockBuilder
     {
         _mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
             .ReturnsAsync(new ModerationResult(_defaultAction, _defaultReason, _defaultConfidence));
-        
+
         return _mock;
     }
 

@@ -42,10 +42,10 @@ public class ModerationServiceTests
     public async Task CheckMessageAsync_ValidMessage_ReturnsAllow()
     {
         // Arrange
-        _factory.WithClassifierSetup(mock => 
+        _factory.WithClassifierSetup(mock =>
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
                 .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
-        
+
         var service = _factory.CreateModerationService();
         var message = new Message
         {
@@ -66,7 +66,7 @@ public class ModerationServiceTests
     public async Task CheckMessageAsync_SpamMessage_ReturnsDelete()
     {
         // Arrange
-        _factory.WithClassifierSetup(mock => 
+        _factory.WithClassifierSetup(mock =>
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
                 .ReturnsAsync((true, 0.9f)));
         var service = _factory.CreateModerationService();
@@ -89,7 +89,7 @@ public class ModerationServiceTests
     public async Task CheckMessageAsync_BannedUser_ReturnsBan()
     {
         // Arrange
-        _factory.WithUserManagerSetup(mock => 
+        _factory.WithUserManagerSetup(mock =>
             mock.Setup(x => x.InBanlist(It.IsAny<long>()))
                 .ReturnsAsync(true));
         var service = _factory.CreateModerationService();
@@ -117,7 +117,7 @@ public class ModerationServiceTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<ArgumentNullException>(
             () => service.CheckMessageAsync(null!));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("message"));
     }
 
@@ -144,7 +144,7 @@ public class ModerationServiceTests
     public async Task CheckMessageAsync_ClassifierException_ThrowsException()
     {
         // Arrange
-        _factory.WithClassifierSetup(mock => 
+        _factory.WithClassifierSetup(mock =>
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
                 .ThrowsAsync(new Exception("Classifier error")));
         var service = _factory.CreateModerationService();
@@ -156,9 +156,9 @@ public class ModerationServiceTests
         };
 
         // Act & Assert
-        var exception = Assert.ThrowsAsync<Exception>(async () => 
+        var exception = Assert.ThrowsAsync<Exception>(async () =>
             await service.CheckMessageAsync(message));
-        
+
         Assert.That(exception.Message, Is.EqualTo("Classifier error"));
     }
 
@@ -189,4 +189,4 @@ public class ModerationServiceTests
         Assert.That(_factory.BotClientMock, Is.Not.Null);
         Assert.That(_factory.LoggerMock, Is.Not.Null);
     }
-} 
+}

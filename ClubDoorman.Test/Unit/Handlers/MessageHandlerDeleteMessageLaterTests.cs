@@ -78,7 +78,7 @@ public class MessageHandlerDeleteMessageLaterTests
 
         // Act
         _messageHandler.DeleteMessageLater(message, timeout, cancellationToken);
-        
+
         // Отменяем операцию сразу
         cancellationTokenSource.Cancel();
 
@@ -208,7 +208,7 @@ public class MessageHandlerDeleteMessageLaterTests
 
         // Act
         _messageHandler.DeleteMessageLater(message, timeout, cancellationToken);
-        
+
         // Отменяем операцию сразу
         cancellationTokenSource.Cancel();
 
@@ -235,4 +235,4 @@ public class MessageHandlerDeleteMessageLaterTests
         Assert.DoesNotThrow(() => _messageHandler.DeleteMessageLater(message, timeout, cancellationToken),
             "Метод должен обрабатывать сообщение корректно");
     }
-} 
+}

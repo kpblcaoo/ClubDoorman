@@ -30,7 +30,7 @@ public class EffectsMonitoringService
             return;
 
         var status = success ? "SUCCESS" : "FAILED";
-        _logger.LogInformation("[EFFECTS_MONITOR] {Action}: {Status} in {Duration}ms", 
+        _logger.LogInformation("[EFFECTS_MONITOR] {Action}: {Status} in {Duration}ms",
             actionName, status, duration.TotalMilliseconds);
     }
 
@@ -44,13 +44,13 @@ public class EffectsMonitoringService
 
         var areIdentical = beforeLogs.Equals(afterLogs, StringComparison.OrdinalIgnoreCase);
         var status = areIdentical ? "IDENTICAL" : "DIFFERENT";
-        
-        _logger.LogInformation("[EFFECTS_MONITOR] {Action} logs comparison: {Status}", 
+
+        _logger.LogInformation("[EFFECTS_MONITOR] {Action} logs comparison: {Status}",
             actionName, status);
 
         if (!areIdentical)
         {
-            _logger.LogWarning("[EFFECTS_MONITOR] {Action} logs differ - potential regression detected", 
+            _logger.LogWarning("[EFFECTS_MONITOR] {Action} logs differ - potential regression detected",
                 actionName);
         }
     }
@@ -65,8 +65,8 @@ public class EffectsMonitoringService
 
         var isValid = Equals(expectedResult, actualResult);
         var status = isValid ? "VALID" : "INVALID";
-        
-        _logger.LogInformation("[EFFECTS_MONITOR] {Action} validation: {Status}", 
+
+        _logger.LogInformation("[EFFECTS_MONITOR] {Action} validation: {Status}",
             actionName, status);
 
         return isValid;

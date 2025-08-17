@@ -43,14 +43,14 @@ public class MessageHandlerStatsCommandTests
         // Arrange
         var message = TK.CreateStatsCommandMessage();
         var factory = new MessageHandlerTestFactory();
-        
+
         factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         var handler = factory.CreateMessageHandler();
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
+        Assert.DoesNotThrowAsync(async () =>
             await handler.HandleCommandAsync(message, CancellationToken.None));
     }
 
@@ -64,13 +64,13 @@ public class MessageHandlerStatsCommandTests
         // Arrange
         var message = TK.CreateStatsCommandMessage();
         var factory = new MessageHandlerTestFactory();
-        
+
         // Настройка CommandRouter для возврата true (команда обработана)
         factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
-            It.IsAny<Message>(), 
+            It.IsAny<Message>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        
+
         var handler = factory.CreateMessageHandler();
 
         // Act
@@ -79,7 +79,7 @@ public class MessageHandlerStatsCommandTests
         // Проверяем что команда передана в CommandRouter
         factory.CommandRouterMock.Verify(
             x => x.HandleCommandAsync(
-                It.IsAny<Message>(), 
+                It.IsAny<Message>(),
                 It.IsAny<CancellationToken>()),
             Times.Once,
             "CommandRouter должен вызываться для /stats");
@@ -95,13 +95,13 @@ public class MessageHandlerStatsCommandTests
         // Arrange
         var message = TK.CreateStatsCommandMessage();
         var factory = new MessageHandlerTestFactory();
-        
+
         // Настройка CommandRouter для возврата true (команда обработана)
         factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
-            It.IsAny<Message>(), 
+            It.IsAny<Message>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        
+
         var handler = factory.CreateMessageHandler();
 
         // Act
@@ -110,7 +110,7 @@ public class MessageHandlerStatsCommandTests
         // Assert - проверяем, что CommandRouter был вызван
         factory.CommandRouterMock.Verify(
             x => x.HandleCommandAsync(
-                It.IsAny<Message>(), 
+                It.IsAny<Message>(),
                 It.IsAny<CancellationToken>()),
             Times.Once,
             "CommandRouter должен вызываться для /stats (пустые данные тоже обрабатываются)");
@@ -126,13 +126,13 @@ public class MessageHandlerStatsCommandTests
         // Arrange
         var message = TK.CreateStatsCommandMessage();
         var factory = new MessageHandlerTestFactory();
-        
+
         // Настройка CommandRouter для возврата false (команда не обработана)
         factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
-            It.IsAny<Message>(), 
+            It.IsAny<Message>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-        
+
         var handler = factory.CreateMessageHandler();
 
         // Act
@@ -141,7 +141,7 @@ public class MessageHandlerStatsCommandTests
         // Assert - router вызывается (он пробует обработать и возвращает false)
         factory.CommandRouterMock.Verify(
             x => x.HandleCommandAsync(
-                It.IsAny<Message>(), 
+                It.IsAny<Message>(),
                 It.IsAny<CancellationToken>()),
             Times.Once,
             "CommandRouter должен вызываться даже если вернёт false");
@@ -158,7 +158,7 @@ public class MessageHandlerStatsCommandTests
         // Arrange
         var message = TK.CreateStatsCommandMessage();
         var factory = new MessageHandlerTestFactory();
-        
+
         factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
@@ -170,7 +170,7 @@ public class MessageHandlerStatsCommandTests
         // Assert – убеждаемся что CommandRouter вызывался
         factory.CommandRouterMock.Verify(
             x => x.HandleCommandAsync(
-                It.IsAny<Message>(), 
+                It.IsAny<Message>(),
                 It.IsAny<CancellationToken>()),
             Times.Once,
             "CommandRouter должен вызываться – /stats идёт через общий механизм маршрутизации");
@@ -186,13 +186,13 @@ public class MessageHandlerStatsCommandTests
         // Arrange
         var message = TK.CreateStatsCommandMessage();
         var factory = new MessageHandlerTestFactory();
-        
+
         // Настройка CommandRouter для возврата true (команда обработана)
         factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
-            It.IsAny<Message>(), 
+            It.IsAny<Message>(),
             It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        
+
         var handler = factory.CreateMessageHandler();
 
         // Act
@@ -201,9 +201,9 @@ public class MessageHandlerStatsCommandTests
         // Assert - router вызывается
         factory.CommandRouterMock.Verify(
             x => x.HandleCommandAsync(
-                It.IsAny<Message>(), 
+                It.IsAny<Message>(),
                 It.IsAny<CancellationToken>()),
             Times.Once,
             "CommandRouter должен вызываться – логирование фиксирует успешную обработку");
     }
-} 
+}

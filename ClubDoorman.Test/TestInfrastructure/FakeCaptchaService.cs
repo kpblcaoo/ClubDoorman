@@ -131,7 +131,7 @@ public class FakeCaptchaService : ICaptchaService
             null
         );
 
-        _logger.LogInformation("FakeCaptchaService: создана капча для пользователя {UserId} в чате {ChatId}", 
+        _logger.LogInformation("FakeCaptchaService: создана капча для пользователя {UserId} в чате {ChatId}",
             request.User.Id, request.Chat.Id);
 
         return captchaInfo;
@@ -186,4 +186,4 @@ public record CaptchaRequest
     public long UserId { get; init; }
     public long ChatId { get; init; }
     public DateTime Timestamp { get; init; }
-} 
+}

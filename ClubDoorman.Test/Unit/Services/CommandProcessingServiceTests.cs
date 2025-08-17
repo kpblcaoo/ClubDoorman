@@ -50,4 +50,4 @@ public class CommandProcessingServiceTests
         // Assert
         _commandRouterMock.Verify(x => x.HandleCommandAsync(message, cancellationToken), Times.Once);
     }
-} 
+}

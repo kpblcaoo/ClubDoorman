@@ -34,7 +34,7 @@ public class MessageHandlerMutationCoverageTests
     private Mock<ILogger<MessageHandler>> _loggerMock;
     private MessageHandlerTestFactory _factory;
     private IUserBanService _userBanService;
-    
+
     [SetUp]
     public void Setup()
     {
@@ -43,9 +43,9 @@ public class MessageHandlerMutationCoverageTests
             .WithBotSetup(mock => _botMock = mock)
             .WithMessageServiceSetup(mock => _messageServiceMock = mock)
             .WithLoggerSetup(mock => _loggerMock = mock);
-            
+
         _messageHandler = _factory.CreateMessageHandlerWithRealUserBanService();
-        
+
         // Создаем UserBanService с моком BotMock вместо реального ITelegramBotClientWrapper
         _userBanService = new UserBanService(
             _botMock.Object, // Используем мок вместо реального клиента
@@ -80,7 +80,7 @@ public class MessageHandlerMutationCoverageTests
             .FromUser(user)
             .InChat(chat)
             .Build();
-        
+
         // Создаем обычный Chat - убираем проблемный тест с моком
         var messageWithProblematicChat = TestKitBuilders.CreateMessage()
             .FromUser(user)
@@ -89,8 +89,8 @@ public class MessageHandlerMutationCoverageTests
 
         // Act & Assert
         // Вызываем метод через UserBanService - он должен работать нормально
-        await _userBanService.Invoking(h => 
-                h.BanUserForLongNameAsync(messageWithProblematicChat, user, "Test ban", 
+        await _userBanService.Invoking(h =>
+                h.BanUserForLongNameAsync(messageWithProblematicChat, user, "Test ban",
                     TimeSpan.FromMinutes(10), CancellationToken.None))
             .Should().NotThrowAsync();
 

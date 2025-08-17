@@ -35,7 +35,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         private string? FindEnvFile()
         {
             var baseDir = AppContext.BaseDirectory;
-            
+
             // Пробуем разные пути относительно AppContext.BaseDirectory
             var possiblePaths = new[]
             {
@@ -50,7 +50,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 Path.Combine(baseDir, "../ClubDoorman/ClubDoorman/.env"),
                 Path.Combine(baseDir, "ClubDoorman/ClubDoorman/.env")
             };
-            
+
             foreach (var path in possiblePaths)
             {
                 if (File.Exists(path))
@@ -58,7 +58,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                     return path;
                 }
             }
-            
+
             return null; // Файл не найден
         }
 
@@ -66,7 +66,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void BeforeScenario()
         {
             _fakeBot = new FakeTelegramClient();
-            _loggerFactory = LoggerFactory.Create(builder => 
+            _loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddConsole();
                 builder.SetMinimumLevel(LogLevel.Debug);
@@ -77,12 +77,12 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             if (envPath != null)
             {
                 DotNetEnv.Env.Load(envPath);
-                
+
                 // Загружаем переменные в Environment для Config.cs
                 var apiKey = DotNetEnv.Env.GetString("DOORMAN_OPENROUTER_API");
                 var botToken = DotNetEnv.Env.GetString("DOORMAN_BOT_API");
                 var adminChat = DotNetEnv.Env.GetString("DOORMAN_ADMIN_CHAT");
-                
+
                 Environment.SetEnvironmentVariable("DOORMAN_OPENROUTER_API", apiKey);
                 Environment.SetEnvironmentVariable("DOORMAN_BOT_API", botToken);
                 Environment.SetEnvironmentVariable("DOORMAN_ADMIN_CHAT", adminChat);
@@ -92,7 +92,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             var botClient = new TelegramBotClient("1234567890:TEST_TOKEN_FOR_TESTS");
             var telegramWrapper = new TelegramBotClientWrapper(botClient);
             var approvedUsersStorage = new ApprovedUsersStorage(_loggerFactory.CreateLogger<ApprovedUsersStorage>());
-            
+
             _aiChecks = new AiChecks(telegramWrapper, _loggerFactory.CreateLogger<AiChecks>(), appConfig);
             _userManager = new UserManager(_loggerFactory.CreateLogger<UserManager>(), approvedUsersStorage, appConfig);
         }
@@ -122,11 +122,11 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void WhenNotificationIsSentToAdminChatWithProfilePhoto()
         {
             // Проверяем, что уведомление было отправлено в админский чат
-            var wasNotificationSent = _fakeBot.SentMessages.Any(m => 
+            var wasNotificationSent = _fakeBot.SentMessages.Any(m =>
                 m.Text.Contains("AI анализ профиля"));
-            
+
             wasNotificationSent.Should().BeTrue("Уведомление должно быть отправлено в админский чат");
-            
+
             // Симулируем админское сообщение для дальнейших тестов
             var adminMessage = new Message
             {
@@ -143,9 +143,9 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void WhenNotificationIsSentToAdminChat()
         {
             // Проверяем, что уведомление было отправлено в админский чат
-            var wasNotificationSent = _fakeBot.SentMessages.Any(m => 
+            var wasNotificationSent = _fakeBot.SentMessages.Any(m =>
                 m.Text.Contains("AI анализ профиля"));
-            
+
             wasNotificationSent.Should().BeTrue("Уведомление должно быть отправлено в админский чат");
         }
 
@@ -153,7 +153,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void WhenButtonIsClicked(string buttonText)
         {
             var adminMessage = (Message)ScenarioContext.Current["AdminNotification"];
-            
+
             string callbackData = buttonText switch
             {
                 "🥰 own" => "approve_user",
@@ -245,7 +245,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // Сообщение уже создано в Given, здесь можно добавить дополнительную логику
             ScenarioContext.Current["FirstMessage"] = _testMessage;
-            
+
             // Симулируем ограничение пользователя
             _fakeBot.RestrictedUsers.Add(new RestrictedUser(
                 _testMessage.Chat.Id,
@@ -295,7 +295,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // В тестовой среде симулируем бан пользователя
             _thrownException.Should().BeNull();
-            
+
             // Для демонстрации - симулируем успешный бан
             // Используем тестовый ID пользователя, так как _testMessage может быть null
             var userId = 12345; // Тестовый ID пользователя
@@ -308,7 +308,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // В тестовой среде симулируем добавление пользователя в список одобренных
             _thrownException.Should().BeNull();
-            
+
             // Для демонстрации - симулируем успешное одобрение
             // Используем тестовый ID пользователя, так как _testMessage может быть null
             var userId = 12345; // Тестовый ID пользователя
@@ -321,7 +321,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // В тестовой среде симулируем выполнение AI анализа профиля
             _thrownException.Should().BeNull();
-            
+
             // Для демонстрации - симулируем успешный AI анализ
             // В реальной реализации здесь была бы проверка, что AI анализ был выполнен
             // и что результат был обработан корректно
@@ -332,7 +332,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // В тестовой среде симулируем удаление сообщений пользователя
             _thrownException.Should().BeNull();
-            
+
             // Для демонстрации - симулируем успешное удаление
             // В реальной реализации здесь была бы проверка, что сообщения были удалены
         }
@@ -360,7 +360,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // Комментарий уже создан в Given
             ScenarioContext.Current["ChannelComment"] = _testMessage;
-            
+
             // Симулируем отправку уведомления об AI анализе
             var aiNotification = new SentMessage(
                 _testMessage.Chat.Id,
@@ -376,7 +376,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void ThenTheCaptchaIsNotShownChannelsDontSupportCaptcha()
         {
             // В каналах капча не показывается, но AI анализ выполняется
-            var wasNotificationSent = _fakeBot.SentMessages.Any(m => 
+            var wasNotificationSent = _fakeBot.SentMessages.Any(m =>
                 m.Text.Contains("AI анализ профиля"));
             wasNotificationSent.Should().BeTrue("AI анализ должен выполняться даже в каналах");
         }
@@ -395,4 +395,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             // Assert.Pass("Notification with profile photo sent to admin chat");
         }
     }
-} 
+}

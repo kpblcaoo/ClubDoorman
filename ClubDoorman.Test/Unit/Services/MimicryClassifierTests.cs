@@ -108,11 +108,11 @@ public class MimicryClassifierTests
     public void AnalyzeMessages_TemplatePhrases_ReturnsHighScore()
     {
         // Arrange
-        var messages = new List<string> 
-        { 
-            "привет всем", 
-            "как у кого дела", 
-            "всем хай" 
+        var messages = new List<string>
+        {
+            "привет всем",
+            "как у кого дела",
+            "всем хай"
         };
 
         // Act
@@ -126,11 +126,11 @@ public class MimicryClassifierTests
     public void AnalyzeMessages_NormalMessages_ReturnsLowScore()
     {
         // Arrange
-        var messages = new List<string> 
-        { 
-            "Сегодня отличная погода для прогулки", 
-            "Я думаю, что этот проект очень интересный", 
-            "Давайте обсудим детали реализации" 
+        var messages = new List<string>
+        {
+            "Сегодня отличная погода для прогулки",
+            "Я думаю, что этот проект очень интересный",
+            "Давайте обсудим детали реализации"
         };
 
         // Act
@@ -144,8 +144,8 @@ public class MimicryClassifierTests
     public void AnalyzeMessages_LongMessages_ReturnsLowScore()
     {
         // Arrange
-        var messages = new List<string> 
-        { 
+        var messages = new List<string>
+        {
             "Это очень длинное сообщение с множеством слов и детальным описанием ситуации",
             "Еще одно длинное сообщение, которое содержит много информации и контекста",
             "Третье сообщение тоже довольно длинное и информативное"
@@ -162,8 +162,8 @@ public class MimicryClassifierTests
     public void AnalyzeMessages_DiverseMessages_ReturnsLowScore()
     {
         // Arrange
-        var messages = new List<string> 
-        { 
+        var messages = new List<string>
+        {
             "Программирование на C# очень интересно",
             "Сегодня я изучал паттерны проектирования",
             "Unit-тестирование помогает писать качественный код"
@@ -180,11 +180,11 @@ public class MimicryClassifierTests
     public void AnalyzeMessages_RepetitiveMessages_ReturnsHighScore()
     {
         // Arrange
-        var messages = new List<string> 
-        { 
-            "привет", 
-            "привет", 
-            "привет" 
+        var messages = new List<string>
+        {
+            "привет",
+            "привет",
+            "привет"
         };
 
         // Act
@@ -198,8 +198,8 @@ public class MimicryClassifierTests
     public void AnalyzeMessages_ContextualMessages_ReturnsLowScore()
     {
         // Arrange
-        var messages = new List<string> 
-        { 
+        var messages = new List<string>
+        {
             "Я согласен с вашим мнением о тестировании",
             "Действительно, TDD подход очень эффективен",
             "Давайте добавим больше интеграционных тестов"
@@ -216,11 +216,11 @@ public class MimicryClassifierTests
     public void AnalyzeMessages_MixedQualityMessages_ReturnsMediumScore()
     {
         // Arrange
-        var messages = new List<string> 
-        { 
-            "привет", 
-            "Сегодня изучал новую технологию", 
-            "спасибо" 
+        var messages = new List<string>
+        {
+            "привет",
+            "Сегодня изучал новую технологию",
+            "спасибо"
         };
 
         // Act
@@ -298,4 +298,4 @@ public class MimicryClassifierTests
         Assert.That(result, Is.GreaterThanOrEqualTo(0.0));
         Assert.That(result, Is.LessThanOrEqualTo(1.0));
     }
-} 
+}

@@ -24,7 +24,7 @@ public class AppConfig : IAppConfig
         _violationThresholdOptions = violationThresholdOptions;
         _featureToggleOptions = featureToggleOptions;
         _chatFilteringOptions = chatFilteringOptions;
-    Effects = new EffectsConfiguration();
+        Effects = new EffectsConfiguration();
     }
 
     /// <summary>

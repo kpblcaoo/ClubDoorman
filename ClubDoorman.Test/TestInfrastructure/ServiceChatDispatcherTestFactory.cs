@@ -161,4 +161,4 @@ public class ServiceChatDispatcherTestFactory
             CreateTestUser(userId),
             CreateTestChat());
     }
-} 
+}

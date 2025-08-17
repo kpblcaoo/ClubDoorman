@@ -65,7 +65,7 @@ public class TelegramBotClientWrapperTests
     {
         // Arrange
         var chatId = new ChatId(123456789);
-        
+
         // Создаем тестовый Chat с Photo
         var testPhoto = new ChatPhoto
         {
@@ -78,17 +78,17 @@ public class TelegramBotClientWrapperTests
         // Act & Assert
         // Этот тест проверяет, что метод GetChatFullInfo правильно копирует Photo
         // Мы не можем вызвать реальный API, но можем проверить структуру кода
-        
+
         // Проверяем, что в TelegramBotClientWrapper.GetChatFullInfo есть строка Photo = chat.Photo
         var wrapperCode = File.ReadAllText("../../../../ClubDoorman/Services/Telegram/TelegramBotClientWrapper.cs");
-        Assert.That(wrapperCode, Does.Contain("Photo = chat.Photo"), 
+        Assert.That(wrapperCode, Does.Contain("Photo = chat.Photo"),
             "TelegramBotClientWrapper.GetChatFullInfo должен копировать Photo из Chat");
-        
+
         // Проверяем, что ChatFullInfo имеет свойство Photo
         var chatFullInfoType = typeof(ChatFullInfo);
         var photoProperty = chatFullInfoType.GetProperty("Photo");
         Assert.That(photoProperty, Is.Not.Null, "ChatFullInfo должен иметь свойство Photo");
-        Assert.That(photoProperty!.PropertyType, Is.EqualTo(typeof(ChatPhoto)), 
+        Assert.That(photoProperty!.PropertyType, Is.EqualTo(typeof(ChatPhoto)),
             "Свойство Photo должно быть типа ChatPhoto");
     }
 
@@ -98,4 +98,4 @@ public class TelegramBotClientWrapperTests
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => new TelegramBotClientWrapper(null!));
     }
-} 
+}

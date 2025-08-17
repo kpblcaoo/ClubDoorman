@@ -27,10 +27,10 @@ public class CommandRouterTests
         _loggerMock = new Mock<ILogger<CommandRouter>>();
         _commandHandler1Mock = new Mock<ICommandHandler>();
         _commandHandler1Mock.Setup(x => x.CommandName).Returns("test1");
-        
+
         _commandHandler2Mock = new Mock<ICommandHandler>();
         _commandHandler2Mock.Setup(x => x.CommandName).Returns("test2");
-        
+
         var handlers = new List<ICommandHandler> { _commandHandler1Mock.Object, _commandHandler2Mock.Object };
         _commandRouter = new CommandRouter(handlers, _loggerMock.Object);
     }

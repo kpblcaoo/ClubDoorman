@@ -8,7 +8,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
-using ClubDoorman.Effects.Channel;
+// Builder now resides in the same namespace folder (no .Effects subfolder)
 using ClubDoorman.Effects;
 
 namespace ClubDoorman.Services.ChannelModeration;
@@ -47,8 +47,8 @@ public class ChannelModerationService : IChannelModerationService
         _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
         _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    _channelEffectsBuilder = channelEffectsBuilder; // может быть null на ранних этапах миграции
-    _effectBus = effectBus; // может быть null если эффекты отключены
+        _channelEffectsBuilder = channelEffectsBuilder; // может быть null на ранних этапах миграции
+        _effectBus = effectBus; // может быть null если эффекты отключены
     }
 
     /// <summary>
@@ -87,8 +87,8 @@ public class ChannelModerationService : IChannelModerationService
         }
 
         // Автобан каналов если включен
-    var channelAutoBan = Config.ChannelAutoBan;
-    if (channelAutoBan)
+        var channelAutoBan = Config.ChannelAutoBan;
+        if (channelAutoBan)
         {
             _logger.LogInformation("🚫 Автобан канала {ChannelTitle} включен - баним", senderChat.Title);
             await _userBanService.AutoBanChannelAsync(message, cancellationToken);
@@ -107,25 +107,25 @@ public class ChannelModerationService : IChannelModerationService
             _logger.LogInformation("🔍 Модерация содержимого сообщения от канала {ChannelTitle} в чате {ChatTitle}",
                 senderChat.Title, chat.Title);
 
-                // Модерация содержимого (теперь только через effects pipeline; legacy switch удалён)
-                _logger.LogInformation("🔍 Модерируем (effects) сообщение от канала {ChannelTitle} в чате {ChatTitle}",
-                    senderChat.Title, chat.Title);
-                if (_channelEffectsBuilder == null || _effectBus == null)
-                {
-                    _logger.LogError("[ChannelEffects] Builder или EffectBus не зарегистрированы – действие проигнорировано (legacy switch удалён)");
-                    return;
-                }
-                try
-                {
-                    var moderationResult = await _moderationService.CheckMessageAsync(message);
-                    var effects = _channelEffectsBuilder.BuildChannelEffects(message, moderationResult);
-                    _logger.LogInformation("[ChannelEffects] Executing {Count} effect(s) (Action={Action})", effects.Length, moderationResult.Action);
-                    await _effectBus.ExecuteAsync(effects, cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "[ChannelEffects] Ошибка при модерации канала (legacy path недоступен)");
-                }
+            // Модерация содержимого (теперь только через effects pipeline; legacy switch удалён)
+            _logger.LogInformation("🔍 Модерируем (effects) сообщение от канала {ChannelTitle} в чате {ChatTitle}",
+                senderChat.Title, chat.Title);
+            if (_channelEffectsBuilder == null || _effectBus == null)
+            {
+                _logger.LogError("[ChannelEffects] Builder или EffectBus не зарегистрированы – действие проигнорировано (legacy switch удалён)");
+                return;
+            }
+            try
+            {
+                var moderationResult = await _moderationService.CheckMessageAsync(message);
+                var effects = _channelEffectsBuilder.BuildChannelEffects(message, moderationResult);
+                _logger.LogInformation("[ChannelEffects] Executing {Count} effect(s) (Action={Action})", effects.Length, moderationResult.Action);
+                await _effectBus.ExecuteAsync(effects, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[ChannelEffects] Ошибка при модерации канала (legacy path недоступен)");
+            }
         }
     }
 

@@ -20,7 +20,7 @@ public class ReportEffectsTest
     {
         _notificationServiceMock = new Mock<INotificationService>();
         _loggerMock = new Mock<ILogger<ReportMessageEffect>>();
-        
+
         _testUser = new User { Id = 456, Username = "testuser" };
         _testMessage = new Message
         {

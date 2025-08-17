@@ -216,11 +216,11 @@ public static class TestKitAutoFixture
         var user = TestKitBogus.CreateRealisticUser();
         var chat = TestKitBogus.CreateRealisticGroup();
         var message = TestKitBogus.CreateRealisticMessage();
-        
+
         // Связываем объекты
         message.From = user;
         message.Chat = chat;
-        
+
         return (user, chat, message);
     }
 
@@ -232,7 +232,7 @@ public static class TestKitAutoFixture
     /// Создает произвольное количество объектов (от 1 до 5)
     /// <tags>autofixture, random-count, flexible, test-infrastructure</tags>
     /// </summary>
-    public static IEnumerable<T> CreateSome<T>() 
+    public static IEnumerable<T> CreateSome<T>()
     {
         var count = new Random().Next(1, 6); // 1-5 объектов
         return CreateMany<T>(count);
@@ -281,27 +281,27 @@ public static class TestKitAutoFixture
     }
 
     #endregion
-    
+
     #region Backward Compatibility Methods
-    
+
     /// <summary>
     /// Создает CaptchaService с автозависимостями
     /// <tags>autofixture, captcha-service, dependencies, test-infrastructure</tags>
     /// </summary>
     public static ICaptchaService CreateCaptchaService() => _fixture.Create<ICaptchaService>();
-    
+
     /// <summary>
     /// Создает UserManager с автозависимостями
     /// <tags>autofixture, user-manager, dependencies, test-infrastructure</tags>
     /// </summary>
     public static IUserManager CreateUserManager() => _fixture.Create<IUserManager>();
-    
+
     /// <summary>
     /// Создает Update объект
     /// <tags>autofixture, update, telegram, test-infrastructure</tags>
     /// </summary>
     public static Telegram.Bot.Types.Update CreateUpdate() => _fixture.Create<Telegram.Bot.Types.Update>();
-    
+
     /// <summary>
     /// Создает MessageUpdate
     /// <tags>autofixture, message-update, telegram, test-infrastructure</tags>
@@ -312,7 +312,7 @@ public static class TestKitAutoFixture
         update.Message = TestKitBogus.CreateRealisticMessage();
         return update;
     }
-    
+
     /// <summary>
     /// Создает CallbackQueryUpdate
     /// <tags>autofixture, callback-query-update, telegram, test-infrastructure</tags>
@@ -323,28 +323,28 @@ public static class TestKitAutoFixture
         update.CallbackQuery = _fixture.Create<Telegram.Bot.Types.CallbackQuery>();
         return update;
     }
-    
+
     /// <summary>
     /// Создает много сообщений
     /// <tags>autofixture, many-messages, collection, test-infrastructure</tags>
     /// </summary>
-    public static List<Telegram.Bot.Types.Message> CreateManyMessages(int count = 3) => 
+    public static List<Telegram.Bot.Types.Message> CreateManyMessages(int count = 3) =>
         Enumerable.Range(0, count).Select(_ => TestKitBogus.CreateRealisticMessage()).ToList();
-    
+
     /// <summary>
     /// Создает много пользователей
     /// <tags>autofixture, many-users, collection, test-infrastructure</tags>
     /// </summary>
-    public static List<Telegram.Bot.Types.User> CreateManyUsers(int count = 3) => 
+    public static List<Telegram.Bot.Types.User> CreateManyUsers(int count = 3) =>
         Enumerable.Range(0, count).Select(_ => TestKitBogus.CreateRealisticUser()).ToList();
-    
+
     /// <summary>
     /// Создает много спам-сообщений
     /// <tags>autofixture, many-spam-messages, collection, test-infrastructure</tags>
     /// </summary>
-    public static List<Telegram.Bot.Types.Message> CreateManySpamMessages(int count = 3) => 
+    public static List<Telegram.Bot.Types.Message> CreateManySpamMessages(int count = 3) =>
         Enumerable.Range(0, count).Select(_ => TestKitBogus.CreateSpamMessage()).ToList();
-    
+
     /// <summary>
     /// Создает объект с фикстурой для кастомизации
     /// <tags>autofixture, customization, fixture, test-infrastructure</tags>

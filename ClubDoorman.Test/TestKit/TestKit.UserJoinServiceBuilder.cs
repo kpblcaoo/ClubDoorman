@@ -54,7 +54,7 @@ public class UserJoinServiceBuilder
     private readonly Mock<IUserBanService> _userBanServiceMock = new();
     private readonly Mock<ILogger<UserJoinFacade>> _loggerMock = new();
     private readonly Mock<IUserJoinPolicy> _userJoinPolicyMock = new();
-    
+
     private Mock<IUpdateHandler> _messageHandlerMock = new();
 
     /// <summary>
@@ -67,9 +67,9 @@ public class UserJoinServiceBuilder
         var messageHandlerMock = TK.CreateMessageHandlerBuilder()
             .WithStandardMocks()
             .BuildMock();
-            
+
         _messageHandlerMock = messageHandlerMock;
-        
+
         return this;
     }
 
@@ -86,9 +86,9 @@ public class UserJoinServiceBuilder
             .WithCaptchaService(builder => builder.ThatSucceeds())
             .WithTelegramBot(builder => builder.ThatSendsMessageSuccessfully())
             .BuildMock();
-            
+
         _messageHandlerMock = messageHandlerMock;
-        
+
         return this;
     }
 
@@ -104,9 +104,9 @@ public class UserJoinServiceBuilder
             .WithUserManager(builder => builder.ThatIsInBanlist(It.IsAny<long>()))
             .WithTelegramBot(builder => builder.ThatSendsMessageSuccessfully())
             .BuildMock();
-            
+
         _messageHandlerMock = messageHandlerMock;
-        
+
         return this;
     }
 
@@ -123,9 +123,9 @@ public class UserJoinServiceBuilder
             .WithCaptchaService(builder => builder.ThatSucceeds())
             .WithTelegramBot(builder => builder.ThatSendsMessageSuccessfully())
             .BuildMock();
-            
+
         _messageHandlerMock = messageHandlerMock;
-        
+
         return this;
     }
 
@@ -140,9 +140,9 @@ public class UserJoinServiceBuilder
             .WithStandardMocks()
             .WithTelegramBot(builder => builder.ThatSendsMessageSuccessfully())
             .BuildMock();
-            
+
         _messageHandlerMock = messageHandlerMock;
-        
+
         return this;
     }
 
@@ -158,9 +158,9 @@ public class UserJoinServiceBuilder
             .WithUserManager(builder => builder.ThatApprovesUser(It.IsAny<long>()))
             .WithTelegramBot(builder => builder.ThatSendsMessageSuccessfully())
             .BuildMock();
-            
+
         _messageHandlerMock = messageHandlerMock;
-        
+
         return this;
     }
 
@@ -175,9 +175,9 @@ public class UserJoinServiceBuilder
             .WithStandardMocks()
             .WithTelegramBot(builder => builder.ThatSendsMessageSuccessfully())
             .BuildMock();
-            
+
         _messageHandlerMock = messageHandlerMock;
-        
+
         return this;
     }
 
@@ -190,37 +190,37 @@ public class UserJoinServiceBuilder
         var messageHandlerMock = TK.CreateMessageHandlerBuilder()
             .WithStandardMocks()
             .BuildMock();
-            
+
         customSetup?.Invoke(messageHandlerMock);
         _messageHandlerMock = messageHandlerMock;
-        
+
         return this;
     }
 
     /// <summary>
     /// Создает UserJoinFacade с настроенными зависимостями
-/// <tags>builders, user-join-service, build, fluent-api</tags>
-/// </summary>
-public UserJoinFacade Build()
-{
-    return new UserJoinFacade(_userJoinPolicyMock.Object, _loggerMock.Object);
-}
+    /// <tags>builders, user-join-service, build, fluent-api</tags>
+    /// </summary>
+    public UserJoinFacade Build()
+    {
+        return new UserJoinFacade(_userJoinPolicyMock.Object, _loggerMock.Object);
+    }
 
     /// <summary>
     /// Возвращает мок IUpdateHandler для дополнительной настройки
-/// <tags>builders, user-join-service, message-handler-mock, fluent-api</tags>
-/// </summary>
-public Mock<IUpdateHandler> MessageHandlerMock => _messageHandlerMock;
+    /// <tags>builders, user-join-service, message-handler-mock, fluent-api</tags>
+    /// </summary>
+    public Mock<IUpdateHandler> MessageHandlerMock => _messageHandlerMock;
 
     /// <summary>
     /// Возвращает мок IUserJoinPolicy для дополнительной настройки
-/// <tags>builders, user-join-service, user-join-policy-mock, fluent-api</tags>
-/// </summary>
-public Mock<IUserJoinPolicy> UserJoinPolicyMock => _userJoinPolicyMock;
+    /// <tags>builders, user-join-service, user-join-policy-mock, fluent-api</tags>
+    /// </summary>
+    public Mock<IUserJoinPolicy> UserJoinPolicyMock => _userJoinPolicyMock;
 
     /// <summary>
     /// Возвращает мок логгера для дополнительной настройки
-/// <tags>builders, user-join-service, logger-mock, fluent-api</tags>
-/// </summary>
-public Mock<ILogger<UserJoinFacade>> LoggerMock => _loggerMock;
-} 
+    /// <tags>builders, user-join-service, logger-mock, fluent-api</tags>
+    /// </summary>
+    public Mock<ILogger<UserJoinFacade>> LoggerMock => _loggerMock;
+}

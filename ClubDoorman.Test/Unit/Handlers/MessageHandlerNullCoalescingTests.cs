@@ -34,10 +34,10 @@ namespace ClubDoorman.Test.Unit.Handlers
         public void Setup()
         {
             _factory = new MessageHandlerTestFactory();
-            
+
             // Настраиваем фабрику для тестов null coalescing
             _factory.WithStandardMocks();
-            
+
             _messageHandler = _factory.CreateMessageHandler();
             _loggerMock = _factory.LoggerMock;
         }
@@ -191,7 +191,7 @@ namespace ClubDoorman.Test.Unit.Handlers
             message.Chat = chat;
             message.Text = "";
             message.Caption = null;
-            
+
             var update = new Update { Message = message };
 
             // Act
@@ -224,7 +224,7 @@ namespace ClubDoorman.Test.Unit.Handlers
             message.Chat = chat;
             message.Text = "   ";
             message.Caption = null;
-            
+
             var update = new Update { Message = message };
 
             // Act
@@ -261,7 +261,7 @@ namespace ClubDoorman.Test.Unit.Handlers
             message.Chat = chat;
             message.Text = new string('A', 100); // Ровно 100 символов
             message.Caption = null;
-            
+
             var update = new Update { Message = message };
 
             // Act
@@ -294,7 +294,7 @@ namespace ClubDoorman.Test.Unit.Handlers
             message.Chat = chat;
             message.Text = new string('B', 99); // 99 символов
             message.Caption = null;
-            
+
             var update = new Update { Message = message };
 
             // Act
@@ -327,7 +327,7 @@ namespace ClubDoorman.Test.Unit.Handlers
             message.Chat = chat;
             message.Text = new string('C', 101); // 101 символ
             message.Caption = null;
-            
+
             var update = new Update { Message = message };
 
             // Act
@@ -339,7 +339,7 @@ namespace ClubDoorman.Test.Unit.Handlers
                 x => x.Log(
                     LogLevel.Information,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => 
+                    It.Is<It.IsAnyType>((v, t) =>
                         v.ToString()!.Contains(new string('C', 100))),
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
@@ -348,4 +348,4 @@ namespace ClubDoorman.Test.Unit.Handlers
 
         #endregion
     }
-} 
+}

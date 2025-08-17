@@ -114,10 +114,10 @@ public class AiChecksExtendedTests
     {
         // Arrange
         var service = _factory.CreateAiChecks();
-        var user = new User 
-        { 
-            Id = 123, 
-            FirstName = "Test", 
+        var user = new User
+        {
+            Id = 123,
+            FirstName = "Test",
             LastName = "User",
             Username = null
         };
@@ -135,10 +135,10 @@ public class AiChecksExtendedTests
     {
         // Arrange
         var service = _factory.CreateAiChecks();
-        var user = new User 
-        { 
-            Id = 123, 
-            FirstName = "Test", 
+        var user = new User
+        {
+            Id = 123,
+            FirstName = "Test",
             LastName = null,
             Username = "testuser"
         };
@@ -158,7 +158,7 @@ public class AiChecksExtendedTests
         var service = _factory.CreateAiChecks();
         var user = TK.CreateValidUser();
         var callbackCalled = false;
-        Func<string, Task> callback = async (reason) => 
+        Func<string, Task> callback = async (reason) =>
         {
             callbackCalled = true;
             await Task.CompletedTask;
@@ -186,7 +186,7 @@ public class AiChecksExtendedTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<ArgumentNullException>(
             async () => await service.GetSpamProbability(null!));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("message"));
     }
 
@@ -499,4 +499,4 @@ public class AiChecksExtendedTests
     }
 
     #endregion
-} 
+}

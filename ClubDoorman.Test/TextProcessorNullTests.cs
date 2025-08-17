@@ -13,9 +13,9 @@ public class TextProcessorNullTests
     public void NormalizeText_WithNullInput_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
+        var exception = Assert.Throws<ArgumentNullException>(() =>
             TextProcessor.NormalizeText(null!));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("input"));
     }
 
@@ -24,7 +24,7 @@ public class TextProcessorNullTests
     {
         // Act
         var result = TextProcessor.NormalizeText("");
-        
+
         // Assert
         Assert.That(result, Is.EqualTo(""));
     }
@@ -34,10 +34,10 @@ public class TextProcessorNullTests
     {
         // Arrange
         var input = "Hello, World! 🌍";
-        
+
         // Act
         var result = TextProcessor.NormalizeText(input);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("hello world "));
     }
@@ -47,10 +47,10 @@ public class TextProcessorNullTests
     {
         // Arrange
         var input = "Привет, мир! 🌍";
-        
+
         // Act
         var result = TextProcessor.NormalizeText(input);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("привет мир "));
     }
@@ -60,10 +60,10 @@ public class TextProcessorNullTests
     {
         // Arrange
         var input = "Line 1\nLine 2\r\nLine 3";
-        
+
         // Act
         var result = TextProcessor.NormalizeText(input);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("line 1 line 2 line 3"));
     }
@@ -73,11 +73,11 @@ public class TextProcessorNullTests
     {
         // Arrange
         var input = "  Multiple    spaces  ";
-        
+
         // Act
         var result = TextProcessor.NormalizeText(input);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo(" multiple spaces "));
     }
-} 
+}

@@ -59,7 +59,7 @@ public class FakeServicesFactory
     {
         var messageService = new Mock<IMessageService>().Object;
         var logger = _loggerFactory.CreateLogger<FakeCaptchaService>();
-        
+
         return new FakeCaptchaService(_fakeBot, logger, messageService, _appConfig, new Mock<IViolationTracker>().Object);
     }
 
@@ -70,7 +70,7 @@ public class FakeServicesFactory
     {
         var userManager = new Mock<IUserManager>().Object;
         var logger = _loggerFactory.CreateLogger<FakeCallbackQueryHandler>();
-        
+
         return new FakeCallbackQueryHandler(_fakeBot, logger, userManager, _appConfig);
     }
 
@@ -87,10 +87,10 @@ public class FakeServicesFactory
         var suspiciousUsersStorage = new Mock<ISuspiciousUsersStorage>().Object;
         var messageService = new Mock<IMessageService>().Object;
         var logger = _loggerFactory.CreateLogger<FakeModerationService>();
-        
+
         return new FakeModerationService(
             classifier, mimicryClassifier, badMessageManager, userManager,
-            aiChecks, suspiciousUsersStorage, _fakeBot, messageService, 
+            aiChecks, suspiciousUsersStorage, _fakeBot, messageService,
             new Mock<IUserBanService>().Object, logger);
     }
 
@@ -108,7 +108,7 @@ public class FakeServicesFactory
             .ReturnsAsync(false)
             .Callback<long>(userId => Console.WriteLine($"🔍 TRACE: [Mock] InBanlist вызван для userId={userId}"));
         userManagerMock.Setup(x => x.Approve(It.IsAny<long>(), null)).Returns(ValueTask.CompletedTask);
-        
+
         // Настраиваем мок для IModerationService
         var moderationServiceMock = new Mock<IModerationService>();
         moderationServiceMock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
@@ -119,36 +119,36 @@ public class FakeServicesFactory
         moderationFacadeMock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
         moderationFacadeMock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
             .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Allow for AI analysis"));
-        
+
         var classifierMock = new Mock<ISpamHamClassifier>();
         classifierMock.Setup(x => x.IsSpam(It.IsAny<string>())).ReturnsAsync((false, 0.5f));
-        
+
         var badMessageManagerMock = new Mock<IBadMessageManager>();
         badMessageManagerMock.Setup(x => x.KnownBadMessage(It.IsAny<string>())).Returns(false);
-        
+
         var aiChecksMock = new Mock<IAiChecks>();
         aiChecksMock.Setup(x => x.GetAttentionBaitProbability(It.IsAny<User>(), It.IsAny<Func<string, Task>>()))
             .ReturnsAsync(new SpamPhotoBio(new SpamProbability { Probability = 0.9, Reason = "Test suspicious profile" }, new byte[0], "Test bio"));
         aiChecksMock.Setup(x => x.GetAttentionBaitProbability(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<Func<string, Task>>()))
             .ReturnsAsync(new SpamPhotoBio(new SpamProbability { Probability = 0.9, Reason = "Test suspicious profile with message" }, new byte[0], "Test bio"));
-        
+
         var globalStatsManager = new GlobalStatsManager();
-        
+
         var appConfigMock = new Mock<IAppConfig>();
         var violationTrackerMock = new Mock<IViolationTracker>();
         var statisticsServiceMock = new Mock<IStatisticsService>();
         var globalStatsManagerMock = new Mock<GlobalStatsManager>();
-        
-        
+
+
 
         statisticsServiceMock.Setup(x => x.GetAllStats()).Returns(new Dictionary<long, ChatStats>());
-        
+
         var serviceProviderMock = new Mock<IServiceProvider>();
         serviceProviderMock.Setup(x => x.GetService(It.IsAny<Type>())).Returns(null);
-        
+
         var userFlowLoggerMock = new Mock<IUserFlowLogger>();
         userFlowLoggerMock.Setup(x => x.LogFirstMessage(It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<string>()));
-        
+
         var messageServiceMock = new Mock<IMessageService>();
         messageServiceMock.Setup(x => x.SendWelcomeMessageAsync(It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Telegram.Bot.Types.Message());
@@ -158,7 +158,7 @@ public class FakeServicesFactory
             .Callback<AiProfileAnalysisData, CancellationToken>((data, token) =>
             {
                 // Отправляем реальное сообщение через FakeTelegramClient
-                _fakeBot.SendMessageAsync(_appConfig.AdminChatId, 
+                _fakeBot.SendMessageAsync(_appConfig.AdminChatId,
                     $"AI анализ профиля пользователя {data.User.FirstName} {data.User.LastName} (@{data.User.Username})");
             })
             .Returns(Task.CompletedTask);
@@ -183,19 +183,19 @@ public class FakeServicesFactory
                 messageServiceMock.Object.SendAiProfileAnalysisAsync(data, ct);
             })
             .ReturnsAsync(true);
-        
+
         var chatLinkFormatterMock = new Mock<IChatLinkFormatter>();
         chatLinkFormatterMock.Setup(x => x.GetChatLink(It.IsAny<long>(), It.IsAny<string>())).Returns("https://t.me/test");
-        
+
         var botPermissionsServiceMock = new Mock<IBotPermissionsService>();
         botPermissionsServiceMock.Setup(x => x.IsBotAdminAsync(It.IsAny<long>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
         botPermissionsServiceMock.Setup(x => x.IsSilentModeAsync(It.IsAny<long>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
         botPermissionsServiceMock.Setup(x => x.GetBotChatMemberAsync(It.IsAny<long>(), It.IsAny<CancellationToken>())).ReturnsAsync((ChatMember?)null);
-        
+
         // Настраиваем ServiceProvider для возврата IChannelModerationService
         serviceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
             .Returns(new Mock<IChannelModerationService>().Object);
-        
+
         var logger = _loggerFactory.CreateLogger<MessageHandler>();
 
         return new MessageHandler(
@@ -293,4 +293,4 @@ public class FakeServicesFactory
                 .SetResult(new ModerationResult(ModerationAction.Report, "Обнаружена мимикрия", 0.8));
         }
     }
-} 
+}

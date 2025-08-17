@@ -91,7 +91,7 @@ public static class TestKitBogus
     /// Создает историю сообщений для чата
     /// <tags>bogus, message-history, conversation, faker</tags>
     /// </summary>
-    public static List<Message> CreateConversation(Chat chat, List<User> participants, int messageCount = 10) => 
+    public static List<Message> CreateConversation(Chat chat, List<User> participants, int messageCount = 10) =>
         Infra.TestKitBogus.CreateConversation(chat, participants, messageCount);
 
     #endregion
@@ -123,21 +123,21 @@ public static class TestKitBogus
     public static DateTime CreateRandomDate(int daysBack = 30) => Infra.TestKitBogus.CreateRandomDate(daysBack);
 
     #endregion
-    
+
     #region Backward Compatibility Methods
-    
+
     /// <summary>
     /// Создает спам-сообщение с реалистичными паттернами (alias)
     /// <tags>bogus, spam-message, realistic, faker</tags>
     /// </summary>
     public static Message CreateRealisticSpamMessage(User? from = null, Chat? chat = null) => Infra.TestKitBogus.CreateRealisticSpamMessage(from, chat);
-    
+
     /// <summary>
     /// Создает реалистичный канал
     /// <tags>bogus, channel, realistic, faker</tags>
     /// </summary>
     public static Chat CreateRealisticChannel(long? chatId = null) => Infra.TestKitBogus.CreateRealisticChannel(chatId);
-    
+
     /// <summary>
     /// Проверяет, содержит ли текст спам-паттерны
     /// <tags>bogus, spam-check, utility</tags>
@@ -145,4 +145,4 @@ public static class TestKitBogus
     public static bool IsSpamText(string? text) => Infra.TestKitBogus.IsSpamText(text);
 
     #endregion
-} 
+}

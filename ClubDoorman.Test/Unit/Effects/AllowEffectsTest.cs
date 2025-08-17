@@ -21,7 +21,7 @@ public class AllowEffectsTest
     {
         _moderationPolicyMock = new Mock<IModerationPolicy>();
         _loggerMock = new Mock<ILogger<AllowMessageEffect>>();
-        
+
         _testUser = new User { Id = 456, Username = "testuser" };
         _testChat = new Chat { Id = 789, Title = "Test Chat" };
         _testMessage = new Message
@@ -55,7 +55,7 @@ public class AllowEffectsTest
         _moderationPolicyMock.Verify(
             x => x.CheckAiDetectAndNotifyAdminsAsync(_testUser, _testChat, _testMessage),
             Times.Once);
-            
+
         _moderationPolicyMock.Verify(
             x => x.IncrementGoodMessageCountAsync(_testUser, _testChat, "test message"),
             Times.Once);
@@ -84,7 +84,7 @@ public class AllowEffectsTest
         _moderationPolicyMock.Verify(
             x => x.CheckAiDetectAndNotifyAdminsAsync(_testUser, _testChat, _testMessage),
             Times.Once);
-            
+
         _moderationPolicyMock.Verify(
             x => x.IncrementGoodMessageCountAsync(It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<string>()),
             Times.Never);
@@ -97,7 +97,7 @@ public class AllowEffectsTest
         var reason = "Test allow reason";
         _testMessage.Text = null;
         _testMessage.Caption = "test caption";
-        
+
         _moderationPolicyMock.Setup(x => x.CheckAiDetectAndNotifyAdminsAsync(_testUser, _testChat, _testMessage))
             .ReturnsAsync(false);
 

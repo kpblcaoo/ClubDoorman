@@ -31,10 +31,10 @@ public class WorkerGetChatLinkTests
     {
         // Arrange
         var chat = new Chat { Id = 123456789, Username = "testgroup", Title = "Test Group" };
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chat);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("[Test Group](https://t.me/testgroup)"));
     }
@@ -44,10 +44,10 @@ public class WorkerGetChatLinkTests
     {
         // Arrange
         var chat = new Chat { Id = -100123456789, Title = "Super Group" };
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chat);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("[Super Group](https://t.me/c/123456789)"));
     }
@@ -57,10 +57,10 @@ public class WorkerGetChatLinkTests
     {
         // Arrange
         var chat = new Chat { Id = -123456789, Title = "Regular Group" };
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chat);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("*Regular Group*"));
     }
@@ -70,10 +70,10 @@ public class WorkerGetChatLinkTests
     {
         // Arrange
         var chat = new Chat { Id = 123456789, Title = "Test Channel" };
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chat);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("*Test Channel*"));
     }
@@ -83,10 +83,10 @@ public class WorkerGetChatLinkTests
     {
         // Arrange
         var chat = new Chat { Id = 123456789, Username = "testgroup", Title = null };
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chat);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("[Неизвестный чат](https://t.me/testgroup)"));
     }
@@ -96,10 +96,10 @@ public class WorkerGetChatLinkTests
     {
         // Arrange
         var chat = new Chat { Id = 123456789, Username = "testgroup", Title = "" };
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chat);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("[](https://t.me/testgroup)"));
     }
@@ -109,10 +109,10 @@ public class WorkerGetChatLinkTests
     {
         // Arrange
         var chat = new Chat { Id = 123456789, Username = "testgroup", Title = "Test *Bold* _Italic_ [Link]" };
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chat);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("[Test \\*Bold\\* \\_Italic\\_ \\[Link\\]](https://t.me/testgroup)"));
     }
@@ -124,10 +124,10 @@ public class WorkerGetChatLinkTests
         // Arrange
         var chatId = 123456789L;
         var chatTitle = "@testgroup";
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chatId, chatTitle);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("[@testgroup](https://t.me/testgroup)"));
     }
@@ -138,10 +138,10 @@ public class WorkerGetChatLinkTests
         // Arrange
         var chatId = -100123456789L;
         var chatTitle = "Super Group";
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chatId, chatTitle);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("[Super Group](https://t.me/c/123456789)"));
     }
@@ -152,10 +152,10 @@ public class WorkerGetChatLinkTests
         // Arrange
         var chatId = -123456789L;
         var chatTitle = "Regular Group";
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chatId, chatTitle);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("*Regular Group*"));
     }
@@ -166,10 +166,10 @@ public class WorkerGetChatLinkTests
         // Arrange
         var chatId = 123456789L;
         var chatTitle = "Test Channel";
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chatId, chatTitle);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("*Test Channel*"));
     }
@@ -180,10 +180,10 @@ public class WorkerGetChatLinkTests
         // Arrange
         var chatId = 123456789L;
         string? chatTitle = null;
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chatId, chatTitle);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("*Неизвестный чат*"));
     }
@@ -194,10 +194,10 @@ public class WorkerGetChatLinkTests
         // Arrange
         var chatId = 123456789L;
         var chatTitle = "";
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chatId, chatTitle);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("**"));
     }
@@ -208,11 +208,11 @@ public class WorkerGetChatLinkTests
         // Arrange
         var chatId = 123456789L;
         var chatTitle = "Test *Bold* _Italic_ [Link]";
-        
+
         // Act
         var result = _chatLinkFormatter.GetChatLink(chatId, chatTitle);
-        
+
         // Assert
         Assert.That(result, Is.EqualTo("*Test \\*Bold\\* \\_Italic\\_ \\[Link\\]*"));
     }
-} 
+}

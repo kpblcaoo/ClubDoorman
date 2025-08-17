@@ -31,21 +31,21 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
     public List<EditedMessage> EditedMessages { get; } = new();
     public List<SentPhoto> SentPhotos { get; } = new();
     public List<RestrictedUser> RestrictedUsers { get; } = new();
-    
+
     // Для проверки порядка операций
     public List<string> OperationLog { get; } = new();
-    
+
     public bool ShouldThrowException { get; set; } = false;
     public Exception? ExceptionToThrow { get; set; }
     public long BotId => 123456789;
-    
+
     // Для интеграционных тестов
     private Dictionary<long, ChatFullInfo> _chatFullInfos = new();
     private Dictionary<string, string> _filePaths = new();
     private int _nextMessageId = 1;
     // Настраиваемые администраторы для конкретных чатов (если заданы - переопределяют дефолтный список)
     private readonly Dictionary<long, ChatMember[]> _customAdmins = new();
-    
+
     // MessageEnvelope для тестовых сценариев
     private Dictionary<int, MessageEnvelope> _messageEnvelopes = new();
 
@@ -58,7 +58,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
         CancellationToken cancellationToken = default)
     {
         Console.WriteLine($"DEBUG: FakeTelegramClient.SendMessageAsync called: chatId={chatId.Identifier}, text='{text}'");
-        
+
         if (ShouldThrowException)
             throw ExceptionToThrow ?? new Exception("Fake exception");
 
@@ -76,7 +76,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
             replyMarkup,
             message
         ));
-        
+
         Console.WriteLine($"DEBUG: FakeTelegramClient.SendMessageAsync added message, SentMessages count: {SentMessages.Count}");
         OperationLog.Add($"SendMessageAsync: chatId={chatId.Identifier}, text={text}");
 
@@ -89,7 +89,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
         CancellationToken cancellationToken = default)
     {
         Console.WriteLine($"DEBUG: DeleteMessageAsync called: chatId={chatId.Identifier}, messageId={messageId}");
-        
+
         if (ShouldThrowException)
             throw ExceptionToThrow ?? new Exception("Fake exception");
 
@@ -100,7 +100,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
         {
             Console.WriteLine($"DEBUG: messageId is 0, searching for envelope in chat {chatId.Identifier}");
             Console.WriteLine($"DEBUG: Available envelopes: {string.Join(", ", _messageEnvelopes.Values.Select(e => $"ChatId={e.ChatId}, MessageId={e.MessageId}"))}");
-            
+
             // Ищем MessageEnvelope по ChatId
             var envelope = _messageEnvelopes.Values.FirstOrDefault(e => e.ChatId == (chatId.Identifier ?? 0));
             if (envelope != null)
@@ -261,7 +261,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
             permissions,
             untilDate
         ));
-        
+
         OperationLog.Add($"RestrictChatMember: chatId={chatId.Identifier}, userId={userId}, untilDate={untilDate}");
 
         return Task.CompletedTask;
@@ -294,7 +294,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
             replyMarkup,
             message
         ));
-        
+
         OperationLog.Add($"SendPhoto: chatId={chatId.Identifier}, caption={caption}");
 
         return Task.FromResult(message);
@@ -330,7 +330,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
 
         return Task.FromResult(chatFullInfo);
     }
-    
+
     public void SetupGetChatFullInfo(long chatId, ChatFullInfo chatFullInfo)
     {
         _chatFullInfos[chatId] = chatFullInfo;
@@ -340,7 +340,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
     {
         _chatFullInfos[chatFullInfo.Id] = chatFullInfo;
     }
-    
+
     public void SetupGetFile(string fileId, string filePath)
     {
         _filePaths[fileId] = filePath;
@@ -411,7 +411,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
             url,
             cacheTime
         ));
-        
+
         OperationLog.Add($"AnswerCallbackQuery: {callbackQueryId}, text: {text}, showAlert: {showAlert}");
 
         return Task.CompletedTask;
@@ -428,7 +428,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
             null, // text
             replyMarkup
         ));
-        
+
         OperationLog.Add($"EditMessageReplyMarkup: chatId={chatId.Identifier}, messageId={messageId}");
 
         return Task.CompletedTask;
@@ -453,7 +453,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
             text,
             replyMarkup
         ));
-        
+
         OperationLog.Add($"EditMessageText: chatId={chatId.Identifier}, messageId={messageId}, text={text}");
 
         return Task.FromResult(message);
@@ -480,7 +480,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
 
         // По умолчанию возвращаем бота как администратора
         ChatMember chatMember;
-        
+
         if (userId == BotId)
         {
             // Создаем базовый ChatMember и приводим к нужному типу
@@ -527,7 +527,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
         if (_customAdmins.TryGetValue(chatKey, out var custom))
         {
             // Используем только явно заданный список
-            OperationLog.Add($"GetChatAdministratorsAsync(custom): chatId={chatKey}; admins=[{string.Join(',', custom.Select(a=>a.User.Id))}]");
+            OperationLog.Add($"GetChatAdministratorsAsync(custom): chatId={chatKey}; admins=[{string.Join(',', custom.Select(a => a.User.Id))}]");
             return Task.FromResult(custom);
         }
 
@@ -625,8 +625,8 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
 
     public bool WasMessageSentTo(long chatId, string? textContains = null)
     {
-        return SentMessages.Any(m => 
-            m.ChatId == chatId && 
+        return SentMessages.Any(m =>
+            m.ChatId == chatId &&
             (textContains == null || m.Text.Contains(textContains)));
     }
 
@@ -639,39 +639,39 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
     {
         return DeletedMessages.Any(d => d.ChatId == chatId && d.MessageId == messageId);
     }
-    
+
     // Методы для проверки порядка операций
     public bool WasCallbackQueryAnswered(string callbackQueryId)
     {
         return AnsweredCallbackQueries.Any(acq => acq.CallbackQueryId == callbackQueryId);
     }
-    
+
     public bool WasMessageEdited(long chatId, int messageId)
     {
         return EditedMessages.Any(em => em.ChatId == chatId && em.MessageId == messageId);
     }
-    
+
     public bool WasPhotoSent(long chatId, string? captionContains = null)
     {
-        return SentPhotos.Any(sp => sp.ChatId == chatId && 
+        return SentPhotos.Any(sp => sp.ChatId == chatId &&
             (captionContains == null || (sp.Caption?.Contains(captionContains) ?? false)));
     }
-    
+
     public bool WasUserRestricted(long chatId, long userId)
     {
         return RestrictedUsers.Any(ru => ru.ChatId == chatId && ru.UserId == userId);
     }
-    
+
     public List<string> GetOperationLog()
     {
         return new List<string>(OperationLog);
     }
-    
+
     public void ClearOperationLog()
     {
         OperationLog.Clear();
     }
-    
+
     /// <summary>
     /// Регистрирует MessageEnvelope для тестовых сценариев
     /// </summary>
@@ -679,7 +679,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
     {
         _messageEnvelopes[envelope.MessageId] = envelope;
     }
-    
+
     /// <summary>
     /// Проверяет, было ли удалено сообщение по MessageEnvelope
     /// </summary>
@@ -687,7 +687,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
     {
         return WasMessageDeleted(envelope.ChatId, envelope.MessageId);
     }
-    
+
     /// <summary>
     /// Создает Message из MessageEnvelope для тестов
     /// ВНИМАНИЕ: MessageId всегда будет 0 из-за ограничений Telegram.Bot
@@ -696,27 +696,27 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
     public Message CreateMessageFromEnvelope(MessageEnvelope envelope)
     {
         var message = TK.CreateValidMessage();
-        message.Chat = new Chat 
-        { 
-            Id = envelope.ChatId, 
+        message.Chat = new Chat
+        {
+            Id = envelope.ChatId,
             Type = ChatType.Group,
             Title = envelope.ChatTitle ?? "Test Chat",
             Username = envelope.ChatUsername
         };
-        message.From = new User 
-        { 
-            Id = envelope.UserId, 
-            IsBot = envelope.IsBot, 
+        message.From = new User
+        {
+            Id = envelope.UserId,
+            IsBot = envelope.IsBot,
             FirstName = envelope.FirstName,
             LastName = envelope.LastName,
             Username = envelope.Username
         };
         message.Text = envelope.Text;
         message.Date = envelope.Date ?? DateTime.UtcNow;
-        
+
         // ВНИМАНИЕ: message.MessageId останется 0 из-за ограничений Telegram.Bot
         // Используйте envelope.MessageId для проверок в тестах
-        
+
         return message;
     }
 
@@ -725,7 +725,7 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
     /// </summary>
     public void SetupChatAdministrators(long chatId, params ChatMember[] administrators)
     {
-    _customAdmins[chatId] = administrators;
+        _customAdmins[chatId] = administrators;
     }
 }
 
@@ -785,4 +785,4 @@ public record RestrictedUser(
     long UserId,
     ChatPermissions Permissions,
     DateTime? UntilDate
-); 
+);

@@ -128,7 +128,7 @@ public class CallbackQueryHandlerTestFactory
     #region Smart Methods Based on Business Logic
 
     public FakeTelegramClient FakeTelegramClient => FakeTelegramClientFactory.Create();
-    
+
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
     public ModerationServiceAdapter CreateModerationServiceWithFake()
@@ -138,17 +138,17 @@ public class CallbackQueryHandlerTestFactory
         );
     }
 
-            public CaptchaService CreateCaptchaServiceWithFake()
-        {
-            return new CaptchaService(
-                new Mock<ITelegramBotClientWrapper>().Object,
-                new Mock<ILogger<CaptchaService>>().Object,
-                new Mock<IMessageService>().Object,
-                AppConfigTestFactory.CreateDefault(),
-                new Mock<IViolationTracker>().Object,
-                new Mock<IUserBanService>().Object
-            );
-        }
+    public CaptchaService CreateCaptchaServiceWithFake()
+    {
+        return new CaptchaService(
+            new Mock<ITelegramBotClientWrapper>().Object,
+            new Mock<ILogger<CaptchaService>>().Object,
+            new Mock<IMessageService>().Object,
+            AppConfigTestFactory.CreateDefault(),
+            new Mock<IViolationTracker>().Object,
+            new Mock<IUserBanService>().Object
+        );
+    }
 
     public IUserManager CreateUserManagerWithFake()
     {

@@ -47,10 +47,10 @@ public class MessageHandlerBanBasicTests
         _factory = new MessageHandlerTestFactory()
             .WithStandardMocks()
             .WithBanMocks();
-            
+
         _botMock = _factory.BotMock;
         _moderationServiceMock = _factory.ModerationServiceMock;
-        
+
         _handler = _factory.CreateMessageHandler();
     }
 

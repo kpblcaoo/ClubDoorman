@@ -68,11 +68,11 @@ public class ModerationServiceSimpleTests : TestBase
     public async Task CheckUserName_WithNullUser_ThrowsArgumentNullException()
     {
         Console.WriteLine("Starting CheckUserName_WithNullUser_ThrowsArgumentNullException");
-        
+
         // Act & Assert
-        var exception = Assert.ThrowsAsync<ArgumentNullException>(async () => 
+        var exception = Assert.ThrowsAsync<ArgumentNullException>(async () =>
             await _moderationService.CheckUserNameAsync(null!));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("user"));
         Console.WriteLine("Completed CheckUserName_WithNullUser_ThrowsArgumentNullException");
     }
@@ -81,10 +81,10 @@ public class ModerationServiceSimpleTests : TestBase
     public async Task CheckUserName_WithNormalName_ReturnsAllow()
     {
         Console.WriteLine("Starting CheckUserName_WithNormalName_ReturnsAllow");
-        
+
         // Arrange
-    var user = new User { FirstName = "John", LastName = "Doe" };
-    _fakePolicy.SetResult(new ModerationResult(ModerationAction.Allow, "Имя пользователя корректно"));
+        var user = new User { FirstName = "John", LastName = "Doe" };
+        _fakePolicy.SetResult(new ModerationResult(ModerationAction.Allow, "Имя пользователя корректно"));
 
         // Act
         var result = await _moderationService.CheckUserNameAsync(user);
@@ -99,10 +99,10 @@ public class ModerationServiceSimpleTests : TestBase
     public async Task CheckUserName_WithLongName_ReturnsReport()
     {
         Console.WriteLine("Starting CheckUserName_WithLongName_ReturnsReport");
-        
+
         // Arrange
-    var user = new User { FirstName = new string('A', 50), LastName = "Doe" };
-    _fakePolicy.SetResult(new ModerationResult(ModerationAction.Report, "Подозрительно длинное имя"));
+        var user = new User { FirstName = new string('A', 50), LastName = "Doe" };
+        _fakePolicy.SetResult(new ModerationResult(ModerationAction.Report, "Подозрительно длинное имя"));
 
         // Act
         var result = await _moderationService.CheckUserNameAsync(user);
@@ -117,10 +117,10 @@ public class ModerationServiceSimpleTests : TestBase
     public async Task CheckUserName_WithExtremelyLongName_ReturnsBan()
     {
         Console.WriteLine("Starting CheckUserName_WithExtremelyLongName_ReturnsBan");
-        
+
         // Arrange
-    var user = new User { FirstName = new string('A', 100), LastName = "Doe" };
-    _fakePolicy.SetResult(new ModerationResult(ModerationAction.Ban, "Экстремально длинное имя"));
+        var user = new User { FirstName = new string('A', 100), LastName = "Doe" };
+        _fakePolicy.SetResult(new ModerationResult(ModerationAction.Ban, "Экстремально длинное имя"));
 
         // Act
         var result = await _moderationService.CheckUserNameAsync(user);
@@ -135,11 +135,11 @@ public class ModerationServiceSimpleTests : TestBase
     public async Task CheckMessage_WithNullMessage_ThrowsArgumentNullException()
     {
         Console.WriteLine("Starting CheckMessage_WithNullMessage_ThrowsArgumentNullException");
-        
+
         // Act & Assert
-        var exception = Assert.ThrowsAsync<ArgumentNullException>(async () => 
+        var exception = Assert.ThrowsAsync<ArgumentNullException>(async () =>
             await _moderationService.CheckMessageAsync(null!));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("message"));
         Console.WriteLine("Completed CheckMessage_WithNullMessage_ThrowsArgumentNullException");
     }
@@ -148,12 +148,12 @@ public class ModerationServiceSimpleTests : TestBase
     public async Task CheckMessage_WithBannedUser_ReturnsBan()
     {
         Console.WriteLine("Starting CheckMessage_WithBannedUser_ReturnsBan");
-        
+
         // Arrange
-    var user = new User { Id = 123, FirstName = "Test" };
+        var user = new User { Id = 123, FirstName = "Test" };
         var chat = new Chat { Id = 456, Type = ChatType.Group };
         var message = new Message { From = user, Chat = chat, Text = "Hello" };
-    _fakePolicy.SetResult(new ModerationResult(ModerationAction.Ban, "Пользователь в блэклисте спамеров"));
+        _fakePolicy.SetResult(new ModerationResult(ModerationAction.Ban, "Пользователь в блэклисте спамеров"));
 
         // Act
         var result = await _moderationService.CheckMessageAsync(message);

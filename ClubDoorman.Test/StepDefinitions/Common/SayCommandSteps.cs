@@ -37,16 +37,16 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             _factory = new MessageHandlerTestFactory();
             _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
             _fakeBot = new FakeTelegramClient();
-            
+
             // Настраиваем моки для работы команд
-            _factory.WithAppConfigSetup(mock => 
+            _factory.WithAppConfigSetup(mock =>
             {
                 mock.Setup(x => x.AdminChatId).Returns(-1001234567890);
                 mock.Setup(x => x.LogAdminChatId).Returns(-1001234567890);
                 mock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
                 mock.Setup(x => x.DisabledChats).Returns(new HashSet<long>());
             });
-            
+
             // Настраиваем MemoryCache для поиска пользователей
             MemoryCache.Default.Set("-1001234567890_123456789", "testuser", DateTimeOffset.Now.AddMinutes(5));
         }
@@ -71,7 +71,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             try
             {
                 // Создаем MessageHandler с правильным FakeTelegramClient
-                _factory.WithBotSetup(mock => 
+                _factory.WithBotSetup(mock =>
                 {
                     mock.Setup(x => x.BotId).Returns(_fakeBot.BotId);
                     mock.Setup(x => x.SendMessageAsync(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), It.IsAny<ReplyParameters>(), It.IsAny<ReplyMarkup>(), It.IsAny<CancellationToken>()))
@@ -79,7 +79,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                     mock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                         .Returns<ChatId, int, CancellationToken>((chatId, messageId, token) => _fakeBot.DeleteMessageAsync(chatId, messageId, token));
                 });
-                
+
                 _messageHandler = (MessageHandler)_factory.CreateMessageHandler();
                 Console.WriteLine($"[DEBUG] Sending message: {_testMessage.Text}");
                 Console.WriteLine($"[DEBUG] Chat ID: {_testMessage.Chat.Id}");
@@ -223,4 +223,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             lastMessage.Text.Should().Contain("@username");
         }
     }
-} 
+}

@@ -77,71 +77,71 @@ public class ModerationEffectsBuilder : IModerationEffectsBuilder
                         isSilentMode));
                 }
 
-                                            effects.Add(new TrackViolationEffect(
-                                _serviceProvider.GetRequiredService<IUserBanService>(),
-                                _serviceProvider.GetRequiredService<ILogger<TrackViolationEffect>>(),
-                                message,
-                                message.From!,
-                                result.Reason));
-                            break;
+                effects.Add(new TrackViolationEffect(
+    _serviceProvider.GetRequiredService<IUserBanService>(),
+    _serviceProvider.GetRequiredService<ILogger<TrackViolationEffect>>(),
+    message,
+    message.From!,
+    result.Reason));
+                break;
 
-                        case ModerationAction.Report:
-                            _logger.LogInformation("Отправка в админ-чат: {Reason}", result.Reason);
-                            effects.Add(new ReportMessageEffect(
-                                _serviceProvider.GetRequiredService<INotificationService>(),
-                                _serviceProvider.GetRequiredService<ILogger<ReportMessageEffect>>(),
-                                message,
-                                message.From!,
-                                isSilentMode));
-                            break;
+            case ModerationAction.Report:
+                _logger.LogInformation("Отправка в админ-чат: {Reason}", result.Reason);
+                effects.Add(new ReportMessageEffect(
+                    _serviceProvider.GetRequiredService<INotificationService>(),
+                    _serviceProvider.GetRequiredService<ILogger<ReportMessageEffect>>(),
+                    message,
+                    message.From!,
+                    isSilentMode));
+                break;
 
-                        case ModerationAction.Ban:
-                            _logger.LogInformation("Бан пользователя: {Reason}", result.Reason);
-                            effects.Add(new BanUserEffect(
-                                _serviceProvider.GetRequiredService<IUserBanService>(),
-                                _serviceProvider.GetRequiredService<IUserFlowLogger>(),
-                                _serviceProvider.GetRequiredService<ILogger<BanUserEffect>>(),
-                                message,
-                                message.From!,
-                                message.Chat,
-                                result.Reason));
-                            break;
+            case ModerationAction.Ban:
+                _logger.LogInformation("Бан пользователя: {Reason}", result.Reason);
+                effects.Add(new BanUserEffect(
+                    _serviceProvider.GetRequiredService<IUserBanService>(),
+                    _serviceProvider.GetRequiredService<IUserFlowLogger>(),
+                    _serviceProvider.GetRequiredService<ILogger<BanUserEffect>>(),
+                    message,
+                    message.From!,
+                    message.Chat,
+                    result.Reason));
+                break;
 
-                        case ModerationAction.Allow:
-                            _logger.LogDebug("Разрешение сообщения: {Reason}", result.Reason);
-                            effects.Add(new AllowMessageEffect(
-                                _serviceProvider.GetRequiredService<IModerationPolicy>(),
-                                _serviceProvider.GetRequiredService<ILogger<AllowMessageEffect>>(),
-                                message,
-                                message.From!,
-                                message.Chat,
-                                result.Reason));
-                            break;
+            case ModerationAction.Allow:
+                _logger.LogDebug("Разрешение сообщения: {Reason}", result.Reason);
+                effects.Add(new AllowMessageEffect(
+                    _serviceProvider.GetRequiredService<IModerationPolicy>(),
+                    _serviceProvider.GetRequiredService<ILogger<AllowMessageEffect>>(),
+                    message,
+                    message.From!,
+                    message.Chat,
+                    result.Reason));
+                break;
 
-                        case ModerationAction.RequireManualReview:
-                            _logger.LogInformation("Требует ручной проверки: {Reason}", result.Reason);
-                            effects.Add(new RequireManualReviewEffect(
-                                _serviceProvider.GetRequiredService<INotificationService>(),
-                                _serviceProvider.GetRequiredService<ILogger<RequireManualReviewEffect>>(),
-                                message,
-                                message.From!,
-                                isSilentMode));
-                            break;
+            case ModerationAction.RequireManualReview:
+                _logger.LogInformation("Требует ручной проверки: {Reason}", result.Reason);
+                effects.Add(new RequireManualReviewEffect(
+                    _serviceProvider.GetRequiredService<INotificationService>(),
+                    _serviceProvider.GetRequiredService<ILogger<RequireManualReviewEffect>>(),
+                    message,
+                    message.From!,
+                    isSilentMode));
+                break;
 
-                        case ModerationAction.RequireAiAnalysis:
-                            _logger.LogInformation("ML не уверен, запускаем AI анализ: {Reason}", result.Reason);
-                            effects.Add(new RequireAiAnalysisEffect(
-                                _serviceProvider.GetRequiredService<IAiCascadeService>(),
-                                _serviceProvider.GetRequiredService<ILogger<RequireAiAnalysisEffect>>(),
-                                message,
-                                message.From!,
-                                result.Confidence ?? 0,
-                                isSilentMode));
-                            break;
+            case ModerationAction.RequireAiAnalysis:
+                _logger.LogInformation("ML не уверен, запускаем AI анализ: {Reason}", result.Reason);
+                effects.Add(new RequireAiAnalysisEffect(
+                    _serviceProvider.GetRequiredService<IAiCascadeService>(),
+                    _serviceProvider.GetRequiredService<ILogger<RequireAiAnalysisEffect>>(),
+                    message,
+                    message.From!,
+                    result.Confidence ?? 0,
+                    isSilentMode));
+                break;
 
-                        default:
-                            _logger.LogDebug("Real effects not implemented yet for action: {Action}", result.Action);
-                            break;
+            default:
+                _logger.LogDebug("Real effects not implemented yet for action: {Action}", result.Action);
+                break;
         }
 
         return effects.ToArray();
