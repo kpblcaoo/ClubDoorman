@@ -23,7 +23,6 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Models.Logging;
 using ClubDoorman.Effects;
-using ClubDoorman.Effects.Delete;
 using ClubDoorman.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -108,11 +107,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<LoggingModerationEffectsBuilder>();
         services.AddSingleton<RealModerationEffectsBuilder>();
         services.AddSingleton<IModerationEffectsBuilder, HybridModerationEffectsBuilder>();
-
-        // Регистрация эффектов для Delete Action
-        services.AddTransient<DeleteToLogEffect>();
-        services.AddTransient<DeleteWithReportEffect>();
-        services.AddTransient<TrackViolationEffect>();
         services.AddTextProcessingServices();
         services.AddCaptchaServices();
         services.AddHandlersServices();
