@@ -238,9 +238,9 @@ public class AppConfig : IAppConfig
     /// </summary>
     public EffectsConfiguration Effects => new EffectsConfiguration
     {
-        UseRealEffects = false, // Пока отключено для безопасности
-        EnabledActions = Array.Empty<string>(), // Пока пустой список
-        LegacyFallback = true, // Включен fallback на старую логику
+        UseRealEffects = true, // Включаем реальные эффекты
+        EnabledActions = new[] { "Delete" }, // Включаем только Delete Action
+        LegacyFallback = false, // ВРЕМЕННО отключаем fallback для тестирования Delete Action
         LogComparison = true // Включено сравнение логов
     };
 }

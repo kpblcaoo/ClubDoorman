@@ -3,6 +3,7 @@ using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Core.Configuration;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 using ClubDoorman.Models;
@@ -25,6 +26,7 @@ public class ModerationFacade : IModerationFacade
     private readonly IMessageService _messageService;
     private readonly IModerationEffectsBuilder _moderationEffectsBuilder;
     private readonly IEffectBus _effectBus;
+    private readonly IAppConfig _appConfig;
 
 
     public ModerationFacade(
@@ -36,7 +38,8 @@ public class ModerationFacade : IModerationFacade
         IModerationEffectsBuilder moderationEffectsBuilder,
         IEffectBus effectBus,
         INotificationService notificationService,
-        IAiCascadeService aiCascadeService)
+        IAiCascadeService aiCascadeService,
+        IAppConfig appConfig)
     {
         _moderationPolicy = moderationPolicy;
         _userBanService = userBanService;
@@ -47,6 +50,7 @@ public class ModerationFacade : IModerationFacade
         _effectBus = effectBus;
         _notificationService = notificationService;
         _aiCascadeService = aiCascadeService;
+        _appConfig = appConfig;
     }
 
     public Task<ModerationResult> CheckMessageAsync(Message message)
@@ -129,6 +133,16 @@ public class ModerationFacade : IModerationFacade
     {
         var effects = _moderationEffectsBuilder.BuildEffects(message, moderationResult, isSilentMode);
         await _effectBus.ExecuteAsync(effects, cancellationToken);
+        
+        // Проверяем, нужно ли выполнять старую логику для этого действия
+        if (moderationResult.Action == ModerationAction.Delete && 
+            _appConfig.Effects.IsActionEnabled(ModerationAction.Delete) && 
+            !_appConfig.Effects.LegacyFallback)
+        {
+            _logger.LogInformation("Пропускаем старую логику для Delete Action - используется новая архитектура эффектов");
+            return;
+        }
+        
         switch (moderationResult.Action)
         {
 
