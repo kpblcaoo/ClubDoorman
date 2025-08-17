@@ -102,6 +102,7 @@ public static class ServiceCollectionExtensions
         services.AddMessagingServices();
         
         // Регистрация инфраструктуры эффектов
+        // Удалить после переноса всех эффектов в Effect Bus
         services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration
         {
             UseRealEffects = true, // Включаем реальные эффекты

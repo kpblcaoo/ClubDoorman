@@ -1,0 +1,78 @@
+using ClubDoorman.Effects;
+using ClubDoorman.Features.Moderation;
+using ClubDoorman.Infrastructure;
+using ClubDoorman.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NUnit.Framework;
+
+namespace ClubDoorman.Test.Integration.Effects;
+
+[TestFixture]
+public class EffectsConfigurationIntegrationTest
+{
+    private IServiceProvider _serviceProvider;
+
+    [SetUp]
+    public void Setup()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging(builder => builder.AddConsole());
+        services.AddClubDoorman();
+        _serviceProvider = services.BuildServiceProvider();
+    }
+
+    [Test]
+    public void EffectsConfiguration_ShouldBeProperlyConfigured()
+    {
+        // Arrange & Act
+        var effectsConfig = _serviceProvider.GetRequiredService<EffectsConfiguration>();
+
+        // Assert
+        Assert.That(effectsConfig.UseRealEffects, Is.True, "UseRealEffects should be true");
+        Assert.That(effectsConfig.EnabledActions, Contains.Item("Delete"), "Delete should be in EnabledActions");
+        Assert.That(effectsConfig.LegacyFallback, Is.False, "LegacyFallback should be false for testing");
+        Assert.That(effectsConfig.LogComparison, Is.True, "LogComparison should be true");
+    }
+
+    [Test]
+    public void EffectsConfiguration_ShouldEnableDeleteAction()
+    {
+        // Arrange
+        var effectsConfig = _serviceProvider.GetRequiredService<EffectsConfiguration>();
+
+        // Act & Assert
+        Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Delete), Is.True, "Delete action should be enabled");
+        Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Ban), Is.False, "Ban action should not be enabled");
+        Assert.That(effectsConfig.IsActionEnabled(ModerationAction.Report), Is.False, "Report action should not be enabled");
+    }
+
+    [Test]
+    public void EffectBus_ShouldBeRealEffectBus()
+    {
+        // Arrange & Act
+        var effectBus = _serviceProvider.GetRequiredService<IEffectBus>();
+
+        // Assert
+        Assert.That(effectBus, Is.TypeOf<EffectBus>(), "EffectBus should be real EffectBus, not LoggingEffectBus");
+    }
+
+    [Test]
+    public void ModerationEffectsBuilder_ShouldBeHybridBuilder()
+    {
+        // Arrange & Act
+        var builder = _serviceProvider.GetRequiredService<IModerationEffectsBuilder>();
+
+        // Assert
+        Assert.That(builder, Is.TypeOf<HybridModerationEffectsBuilder>(), "Should be HybridModerationEffectsBuilder");
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        if (_serviceProvider is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+    }
+}
