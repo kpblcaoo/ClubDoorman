@@ -65,8 +65,9 @@ public static class ServiceCollectionExtensions
         var logger = sp.GetRequiredService<ILogger<ChannelModerationEffectsBuilder>>();
         var bot = sp.GetRequiredService<ITelegramBotClientWrapper>();
         var ban = sp.GetRequiredService<IUserBanService>();
-        logger.LogInformation("[ChannelEffects][Init] Builder factory invoked (bot+ban injected)");
-        return new ChannelModerationEffectsBuilder(logger, bot, ban);
+        var moderation = sp.GetRequiredService<IModerationService>();
+        logger.LogInformation("[ChannelEffects][Init] Builder factory invoked (bot+ban+moderation injected)");
+        return new ChannelModerationEffectsBuilder(logger, bot, ban, moderation);
     });
 
         // Регистрация основных сервисов в том же порядке, что и в Program.cs
