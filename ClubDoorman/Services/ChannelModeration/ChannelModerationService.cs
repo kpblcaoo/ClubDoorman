@@ -109,52 +109,25 @@ public class ChannelModerationService : IChannelModerationService
             _logger.LogInformation("🔍 Модерация содержимого сообщения от канала {ChannelTitle} в чате {ChatTitle}",
                 senderChat.Title, chat.Title);
 
-            // Новый путь: effects-пайплайн для каналов (этапная миграция)
-    var effectsEnabled = _flags.EffectsEnabled;
-    var dualRunEnabled = _flags.DualRunEnabled;
-
-        if (effectsEnabled && _channelEffectsBuilder != null && _effectBus != null)
-            {
+                // Модерация содержимого (теперь только через effects pipeline; legacy switch удалён)
+                _logger.LogInformation("🔍 Модерируем (effects) сообщение от канала {ChannelTitle} в чате {ChatTitle}",
+                    senderChat.Title, chat.Title);
+                if (_channelEffectsBuilder == null || _effectBus == null)
+                {
+                    _logger.LogError("[ChannelEffects] Builder или EffectBus не зарегистрированы – действие проигнорировано (legacy switch удалён)");
+                    return;
+                }
                 try
                 {
-                    var effectsResult = await _moderationService.CheckMessageAsync(message);
-
-            if (dualRunEnabled)
-                    {
-                        // Выполняем legacy модерацию отдельно (без повторных side-effects — пока legacy внутри всё ещё делает действия)
-                        // Получаем legacy результат без выполнения сайд-эффектов, чтобы не дублировать действия (ban/delete) в dual-run
-                        var legacyResult = await ModerateChannelMessageContentAsync(message, cancellationToken, executeSideEffects: false);
-                        var effects = _channelEffectsBuilder.BuildChannelEffects(message, effectsResult);
-                        _logger.LogInformation("[ChannelEffects][DualRun] Executing {Count} effect(s) (Action={Action})", effects.Length, effectsResult.Action);
-                        await _effectBus.ExecuteAsync(effects, cancellationToken);
-
-                        // Сравниваем результаты
-                        if (legacyResult != null && legacyResult.Action != effectsResult.Action)
-                        {
-                            _logger.LogWarning("[ChannelEffects][DualRun][Mismatch] LegacyAction={Legacy} EffectsAction={Effects} ChannelId={ChannelId} ChatId={ChatId}", legacyResult.Action, effectsResult.Action, message.SenderChat?.Id, message.Chat.Id);
-                        }
-                        else
-                        {
-                            _logger.LogDebug("[ChannelEffects][DualRun][Match] Action={Action} ChannelId={ChannelId} ChatId={ChatId}", effectsResult.Action, message.SenderChat?.Id, message.Chat.Id);
-                        }
-                    }
-                    else
-                    {
-                        var effects = _channelEffectsBuilder.BuildChannelEffects(message, effectsResult);
-                        _logger.LogInformation("[ChannelEffects] Executing {Count} effect(s) for channel message (Action={Action})", effects.Length, effectsResult.Action);
-                        await _effectBus.ExecuteAsync(effects, cancellationToken);
-                    }
+                    var moderationResult = await _moderationService.CheckMessageAsync(message);
+                    var effects = _channelEffectsBuilder.BuildChannelEffects(message, moderationResult);
+                    _logger.LogInformation("[ChannelEffects] Executing {Count} effect(s) (Action={Action})", effects.Length, moderationResult.Action);
+                    await _effectBus.ExecuteAsync(effects, cancellationToken);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "[ChannelEffects] Ошибка при выполнении effects-пайплайна, fallback к legacy логике");
-                    await ModerateChannelMessageContentAsync(message, cancellationToken);
+                    _logger.LogError(ex, "[ChannelEffects] Ошибка при модерации канала (legacy path недоступен)");
                 }
-            }
-            else
-            {
-                await ModerateChannelMessageContentAsync(message, cancellationToken);
-            }
         }
     }
 
@@ -274,82 +247,4 @@ public class ChannelModerationService : IChannelModerationService
         return false;
     }
 
-    /// <summary>
-    /// Модерирует содержимое сообщения от канала
-    /// <tags>channel, moderation, content</tags>
-    /// </summary>
-    /// <param name="message">Сообщение от канала</param>
-    /// <param name="cancellationToken">Токен отмены</param>
-    private async Task<ModerationResult?> ModerateChannelMessageContentAsync(Message message, CancellationToken cancellationToken = default, bool executeSideEffects = true)
-    {
-        try
-        {
-            var senderChat = message.SenderChat!;
-            var chat = message.Chat;
-
-            _logger.LogInformation("🔍 Модерируем содержимое сообщения от канала {ChannelTitle} в чате {ChatTitle}",
-                senderChat.Title, chat.Title);
-
-            // Проверяем содержимое сообщения через ModerationService
-            var moderationResult = await _moderationService.CheckMessageAsync(message);
-
-            // Если мы в режиме dual-run и не должны выполнять сайд-эффекты, просто возвращаем результат без логики legacy
-            if (!executeSideEffects)
-            {
-                return moderationResult;
-            }
-
-            switch (moderationResult.Action)
-            {
-                case ModerationAction.Allow:
-                    _logger.LogDebug("✅ Содержимое сообщения от канала {ChannelTitle} разрешено: {Reason}",
-                        senderChat.Title, moderationResult.Reason);
-
-                    // Засчитываем хорошее сообщение для одобрения пользователя
-                    if (message.From != null)
-                    {
-                        var allowedMessageText = message.Text ?? message.Caption ?? "";
-
-                        // Проверяем AI детект для подозрительных пользователей
-                        var aiDetectBlocked = await _moderationService.CheckAiDetectAndNotifyAdminsAsync(message.From, chat, message);
-
-                        // Засчитываем хорошее сообщение только если пользователь не был заблокирован AI детектом
-                        if (!aiDetectBlocked)
-                        {
-                            await _moderationService.IncrementGoodMessageCountAsync(message.From, chat, allowedMessageText);
-                        }
-                    }
-                    return moderationResult;
-
-                case ModerationAction.Delete:
-                    _logger.LogInformation("🗑️ Удаляем сообщение от канала {ChannelTitle}: {Reason}",
-                        senderChat.Title, moderationResult.Reason);
-                    await _bot.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
-                    return moderationResult;
-
-                case ModerationAction.Report:
-                    _logger.LogInformation("📋 Отправляем сообщение от канала {ChannelTitle} в админ-чат: {Reason}",
-                        senderChat.Title, moderationResult.Reason);
-                    // Здесь можно добавить отправку в админ-чат
-                    return moderationResult;
-
-                case ModerationAction.Ban:
-                    _logger.LogWarning("🚫 Баним канал {ChannelTitle} за содержимое: {Reason}",
-                        senderChat.Title, moderationResult.Reason);
-                    await _userBanService.AutoBanChannelAsync(message, cancellationToken);
-                    return moderationResult;
-
-                default:
-                    _logger.LogInformation("❓ Неизвестное действие модерации для канала {ChannelTitle}: {Action}",
-                        senderChat.Title, moderationResult.Action);
-                    return moderationResult;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "❌ Ошибка при модерации содержимого сообщения от канала {ChannelTitle}",
-                message.SenderChat?.Title);
-        }
-        return null;
-    }
 }
