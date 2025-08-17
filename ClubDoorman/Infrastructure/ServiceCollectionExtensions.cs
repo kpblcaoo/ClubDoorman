@@ -5,7 +5,6 @@ using ClubDoorman.Services;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Captcha;
-using ClubDoorman.Services.ChannelModeration;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Dispatcher;
 using ClubDoorman.Services.Handlers;
@@ -24,7 +23,7 @@ using ClubDoorman.Services.Violation;
 using ClubDoorman.Models.Logging;
 using ClubDoorman.Effects;
 using ClubDoorman.Infrastructure;
-using ClubDoorman.Effects.Channel;
+using ClubDoorman.Services.ChannelModeration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -59,16 +58,15 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEffectBus, EffectBus>();
         services.AddSingleton<ModerationEffectsBuilder>();
         services.AddSingleton<IModerationEffectsBuilder, ModerationEffectsBuilder>();
-    // Channel moderation effects (Stage 1 scaffold)
-    services.AddSingleton<IChannelModerationEffectsBuilder>(sp =>
-    {
-        var logger = sp.GetRequiredService<ILogger<ChannelModerationEffectsBuilder>>();
-        var bot = sp.GetRequiredService<ITelegramBotClientWrapper>();
-        var ban = sp.GetRequiredService<IUserBanService>();
-        var moderation = sp.GetRequiredService<IModerationService>();
-        logger.LogInformation("[ChannelEffects][Init] Builder factory invoked (bot+ban+moderation injected)");
-        return new ChannelModerationEffectsBuilder(logger, bot, ban, moderation);
-    });
+        services.AddSingleton<IChannelModerationEffectsBuilder>(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger<ChannelModerationEffectsBuilder>>();
+            return new ChannelModerationEffectsBuilder(
+                logger,
+                sp.GetRequiredService<ITelegramBotClientWrapper>(),
+                sp.GetRequiredService<IUserBanService>(),
+                sp.GetRequiredService<IModerationService>());
+        });
 
         // Регистрация основных сервисов в том же порядке, что и в Program.cs
         services.AddLinkFormattingServices();

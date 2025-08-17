@@ -8,7 +8,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
-using ClubDoorman.Effects.Channel;
+// Builder now resides in the same namespace folder (no .Effects subfolder)
 using ClubDoorman.Effects;
 
 namespace ClubDoorman.Services.ChannelModeration;

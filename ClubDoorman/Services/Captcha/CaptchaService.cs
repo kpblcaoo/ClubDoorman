@@ -79,7 +79,8 @@ public class CaptchaService : ICaptchaService
         // Отключение капчи для определённых групп
         if (_appConfig.NoCaptchaGroups.Contains(request.Chat.Id))
         {
-            _logger.LogInformation($"[NO_CAPTCHA] Капча отключена для чата {request.Chat.Id}");
+            // Лог опущен до Debug: финальный пользовательский инфо-лог формируется в IntroFlow / Policy
+            _logger.LogDebug("[NO_CAPTCHA] Капча отключена для чата {ChatId}", request.Chat.Id);
             return null;
         }
 
