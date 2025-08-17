@@ -25,6 +25,7 @@ public class ChannelModerationService : IChannelModerationService
     private readonly ILogger<ChannelModerationService> _logger;
     private readonly IChannelModerationEffectsBuilder? _channelEffectsBuilder;
     private readonly IEffectBus? _effectBus;
+    private readonly IChannelEffectsFlags _flags;
 
     /// <summary>
     /// Создает экземпляр ChannelModerationService
@@ -39,6 +40,7 @@ public class ChannelModerationService : IChannelModerationService
         IModerationService moderationService,
         IUserBanService userBanService,
         ILogger<ChannelModerationService> logger,
+        IChannelEffectsFlags flags,
         IChannelModerationEffectsBuilder? channelEffectsBuilder = null,
         IEffectBus? effectBus = null)
     {
@@ -46,8 +48,9 @@ public class ChannelModerationService : IChannelModerationService
         _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
         _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _channelEffectsBuilder = channelEffectsBuilder; // может быть null на ранних этапах миграции
-        _effectBus = effectBus; // может быть null если эффекты отключены
+    _flags = flags ?? throw new ArgumentNullException(nameof(flags));
+    _channelEffectsBuilder = channelEffectsBuilder; // может быть null на ранних этапах миграции
+    _effectBus = effectBus; // может быть null если эффекты отключены
     }
 
     /// <summary>
@@ -78,15 +81,16 @@ public class ChannelModerationService : IChannelModerationService
             return;
         }
 
-        // Проверяем, следует ли разрешить сообщение без модерации
+        // Проверяем, следует ли разрешить сообщение без модерации (legacy bypass – сохраняем без изменений логики)
         if (await ShouldAllowChannelMessageAsync(message, cancellationToken))
         {
             _logger.LogDebug("✅ Сообщение от канала {ChannelTitle} разрешено без модерации", senderChat.Title);
-            return;
+            return; // В legacy не выполнялись side-effects / модерация для таких сообщений
         }
 
         // Автобан каналов если включен
-        if (Config.ChannelAutoBan)
+    var channelAutoBan = _flags.ChannelAutoBanEnabled;
+    if (channelAutoBan)
         {
             _logger.LogInformation("🚫 Автобан канала {ChannelTitle} включен - баним", senderChat.Title);
             await _userBanService.AutoBanChannelAsync(message, cancellationToken);
@@ -106,14 +110,40 @@ public class ChannelModerationService : IChannelModerationService
                 senderChat.Title, chat.Title);
 
             // Новый путь: effects-пайплайн для каналов (этапная миграция)
-            if (Config.ChannelEffectsEnabled && _channelEffectsBuilder != null && _effectBus != null)
+    var effectsEnabled = _flags.EffectsEnabled;
+    var dualRunEnabled = _flags.DualRunEnabled;
+
+        if (effectsEnabled && _channelEffectsBuilder != null && _effectBus != null)
             {
                 try
                 {
-                    var moderationResult = await _moderationService.CheckMessageAsync(message);
-                    var effects = _channelEffectsBuilder.BuildChannelEffects(message, moderationResult);
-                    _logger.LogInformation("[ChannelEffects] Executing {Count} effect(s) for channel message (Action={Action})", effects.Length, moderationResult.Action);
-                    await _effectBus.ExecuteAsync(effects, cancellationToken);
+                    var effectsResult = await _moderationService.CheckMessageAsync(message);
+
+            if (dualRunEnabled)
+                    {
+                        // Выполняем legacy модерацию отдельно (без повторных side-effects — пока legacy внутри всё ещё делает действия)
+                        // Получаем legacy результат без выполнения сайд-эффектов, чтобы не дублировать действия (ban/delete) в dual-run
+                        var legacyResult = await ModerateChannelMessageContentAsync(message, cancellationToken, executeSideEffects: false);
+                        var effects = _channelEffectsBuilder.BuildChannelEffects(message, effectsResult);
+                        _logger.LogInformation("[ChannelEffects][DualRun] Executing {Count} effect(s) (Action={Action})", effects.Length, effectsResult.Action);
+                        await _effectBus.ExecuteAsync(effects, cancellationToken);
+
+                        // Сравниваем результаты
+                        if (legacyResult != null && legacyResult.Action != effectsResult.Action)
+                        {
+                            _logger.LogWarning("[ChannelEffects][DualRun][Mismatch] LegacyAction={Legacy} EffectsAction={Effects} ChannelId={ChannelId} ChatId={ChatId}", legacyResult.Action, effectsResult.Action, message.SenderChat?.Id, message.Chat.Id);
+                        }
+                        else
+                        {
+                            _logger.LogDebug("[ChannelEffects][DualRun][Match] Action={Action} ChannelId={ChannelId} ChatId={ChatId}", effectsResult.Action, message.SenderChat?.Id, message.Chat.Id);
+                        }
+                    }
+                    else
+                    {
+                        var effects = _channelEffectsBuilder.BuildChannelEffects(message, effectsResult);
+                        _logger.LogInformation("[ChannelEffects] Executing {Count} effect(s) for channel message (Action={Action})", effects.Length, effectsResult.Action);
+                        await _effectBus.ExecuteAsync(effects, cancellationToken);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -250,7 +280,7 @@ public class ChannelModerationService : IChannelModerationService
     /// </summary>
     /// <param name="message">Сообщение от канала</param>
     /// <param name="cancellationToken">Токен отмены</param>
-    private async Task ModerateChannelMessageContentAsync(Message message, CancellationToken cancellationToken = default)
+    private async Task<ModerationResult?> ModerateChannelMessageContentAsync(Message message, CancellationToken cancellationToken = default, bool executeSideEffects = true)
     {
         try
         {
@@ -262,6 +292,12 @@ public class ChannelModerationService : IChannelModerationService
 
             // Проверяем содержимое сообщения через ModerationService
             var moderationResult = await _moderationService.CheckMessageAsync(message);
+
+            // Если мы в режиме dual-run и не должны выполнять сайд-эффекты, просто возвращаем результат без логики legacy
+            if (!executeSideEffects)
+            {
+                return moderationResult;
+            }
 
             switch (moderationResult.Action)
             {
@@ -283,30 +319,30 @@ public class ChannelModerationService : IChannelModerationService
                             await _moderationService.IncrementGoodMessageCountAsync(message.From, chat, allowedMessageText);
                         }
                     }
-                    break;
+                    return moderationResult;
 
                 case ModerationAction.Delete:
                     _logger.LogInformation("🗑️ Удаляем сообщение от канала {ChannelTitle}: {Reason}",
                         senderChat.Title, moderationResult.Reason);
                     await _bot.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
-                    break;
+                    return moderationResult;
 
                 case ModerationAction.Report:
                     _logger.LogInformation("📋 Отправляем сообщение от канала {ChannelTitle} в админ-чат: {Reason}",
                         senderChat.Title, moderationResult.Reason);
                     // Здесь можно добавить отправку в админ-чат
-                    break;
+                    return moderationResult;
 
                 case ModerationAction.Ban:
                     _logger.LogWarning("🚫 Баним канал {ChannelTitle} за содержимое: {Reason}",
                         senderChat.Title, moderationResult.Reason);
                     await _userBanService.AutoBanChannelAsync(message, cancellationToken);
-                    break;
+                    return moderationResult;
 
                 default:
                     _logger.LogInformation("❓ Неизвестное действие модерации для канала {ChannelTitle}: {Action}",
                         senderChat.Title, moderationResult.Action);
-                    break;
+                    return moderationResult;
             }
         }
         catch (Exception ex)
@@ -314,5 +350,6 @@ public class ChannelModerationService : IChannelModerationService
             _logger.LogError(ex, "❌ Ошибка при модерации содержимого сообщения от канала {ChannelTitle}",
                 message.SenderChat?.Title);
         }
+        return null;
     }
 }

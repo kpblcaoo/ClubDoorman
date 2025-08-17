@@ -60,8 +60,14 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ModerationEffectsBuilder>();
         services.AddSingleton<IModerationEffectsBuilder, ModerationEffectsBuilder>();
     // Channel moderation effects (Stage 1 scaffold)
-    services.AddSingleton<ChannelModerationEffectsBuilder>();
-    services.AddSingleton<IChannelModerationEffectsBuilder, ChannelModerationEffectsBuilder>();
+    services.AddSingleton<IChannelModerationEffectsBuilder>(sp =>
+    {
+        var logger = sp.GetRequiredService<ILogger<ChannelModerationEffectsBuilder>>();
+        var bot = sp.GetRequiredService<ITelegramBotClientWrapper>();
+        var ban = sp.GetRequiredService<IUserBanService>();
+        logger.LogInformation("[ChannelEffects][Init] Builder factory invoked (bot+ban injected)");
+        return new ChannelModerationEffectsBuilder(logger, bot, ban);
+    });
 
         // Регистрация основных сервисов в том же порядке, что и в Program.cs
         services.AddLinkFormattingServices();

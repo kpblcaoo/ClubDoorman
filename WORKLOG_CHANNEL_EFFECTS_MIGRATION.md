@@ -14,12 +14,12 @@ Purpose: Safe, staged migration of channel moderation path to unified effects pi
    - Wired DI registrations.
    - Added conditional branch in `ChannelModerationService` (effects path when flag ON, legacy fallback otherwise).
    - Verified build + filtered test suite (886 passed / 1 skipped / 0 failed).
-2. [ ] Stage 2: Flag-enabled tests
-   - Add focused unit/integration tests with flag ON asserting logging effect invocation & parity (no side-effects change).  
-   - Golden master style test capturing moderation decisions both paths.
-3. [ ] Stage 3: Dual-run & log comparison
-   - Introduce dual-execution mode (run legacy + effects; apply side-effects only once).
-   - Structured diff logging (action/result parity; timings).
+2. [~] Stage 2: Flag-enabled tests
+   - (Pending) Add focused unit/integration tests with flag ON asserting logging effect invocation & parity.
+   - (Pending) Golden master style test capturing moderation decisions both paths.
+3. [~] Stage 3: Dual-run & log comparison
+   - Dual-run flag `DOORMAN_CHANNEL_EFFECTS_DUAL_RUN_ENABLE` added & implemented (comparison logs + mismatch warning).
+   - (Pending) Tests asserting log match / mismatch scenarios (synthetic) & metrics aggregation.
 4. [ ] Stage 4: Real channel effects
    - Replace logging stub with real effect mapping (Delete, Ban, Report placeholder, Allow, etc.) reusing existing effect classes where applicable.
    - Add idempotency safeguards (e.g., ensure message deletion/ban executed at most once across dual-run).

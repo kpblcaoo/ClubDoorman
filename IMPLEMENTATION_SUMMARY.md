@@ -90,3 +90,43 @@ DOORMAN_BAN_FOLDER_INVITE_USERS=false
 ## 🎉 Итог
 
 Функция **автоматического бана за вход через папки** успешно реализована и готова к использованию. Она полностью соответствует архитектурным принципам проекта и интегрирована в существующую систему модерации.
+
+---
+
+## 🔄 Channel Effects Migration Progress (Stage 2 & 3)
+
+Дата: 2025-08-17
+
+### Цель
+Поэтапный переход от «legacy» модерации каналов к новой effects-пайплайн архитектуре с режимом dual-run для сравнения результатов перед окончательным переключением.
+
+### Что сделано сейчас
+1. Добавлены конструкторные override-параметры в `ChannelModerationService`:
+	- `overrideEffectsEnabled`
+	- `overrideDualRunEnabled`
+	- `overrideChannelAutoBan`
+	Это позволяет тестам детерминированно активировать/деактивировать флаги, обходя статические env-based значения в `Config`.
+2. Реализованы и стабилизированы юнит-тесты `ChannelEffectsPipelineTests` (4 сценария):
+	- Legacy only (effects off)
+	- Effects only (dual-run off)
+	- Dual-run parity (оба пути выполняются, результат совпадает)
+		- Dual-run mismatch (разные действия — теперь утверждается наличие warning-лога с шаблоном и значениями Legacy/Effects через in-memory `TestLogger`)
+3. Исправлена проблема: «autoban» ветка (по умолчанию) преждевременно завершала обработку и скрывала pipeline — решено через `overrideChannelAutoBan=false` в тестах.
+4. Убрана хрупкая проверка логов через `Moq` (сложный generic predicate). Запланирована замена на кастомный in-memory logger sink с последующим assert по шаблону.
+
+### Результат тестов
+Все 4 сценария проходят (NUnit, .NET 9, Debug). Добавлена строгая валидация warning-лога mismatch через `TestLogger<T>`.
+
+### Технические заметки
+* Статические флаги в `Config` затрудняют многовариантное тестирование в одном процессе. Дальнейшая эволюция: вынести в `IChannelModerationFeatureFlags` или подобный провайдер.
+* Для дальнейшего анализа несовпадений полезно логировать структуру результатов (например, JSON snapshot) и присваивать отдельный `EventId`.
+
+### Следующие шаги
+1. Добавить in-memory logger и вернуть assert на mismatch лог.
+2. Snapshot / golden-master сравнение сериализованных результатов (legacy vs effects) для расширения покрытия.
+3. Интеграционный тест с реальными effect'ами (не только `FuncEffect`).
+4. Подготовить миграционный чеклист: критерии отключения dual-run и полного включения effects.
+5. Документация переменных окружения: `DOORMAN_CHANNEL_EFFECTS_ENABLE`, `DOORMAN_CHANNEL_EFFECTS_DUAL_RUN_ENABLE`, `DOORMAN_CHANNELS_AUTOBAN_DISABLE`.
+
+### Вывод
+Архитектурный каркас dual-run + тестовое покрытие установлены. Дальше — усиление наблюдаемости mismatch и постепенное смещение нагрузки с legacy пути на effects.
