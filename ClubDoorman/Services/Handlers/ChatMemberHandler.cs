@@ -14,6 +14,9 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services.UserJoin;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -30,6 +33,32 @@ public class ChatMemberHandler : IUpdateHandler
     private readonly IAppConfig _appConfig;
     private readonly IUserCleanupService _userCleanupService;
     private readonly IFolderInviteService _folderInviteService;
+    private readonly IGoldenMasterRecorder _gm;
+    private readonly LoggingFlagsOptions? _flags;
+
+    public ChatMemberHandler(
+        ITelegramBotClientWrapper bot,
+        IUserManager userManager,
+        ILogger<ChatMemberHandler> logger,
+        IntroFlowService introFlowService,
+        IMessageService messageService,
+        IAppConfig appConfig,
+        IUserCleanupService userCleanupService,
+    IFolderInviteService folderInviteService,
+    IGoldenMasterRecorder gm,
+    IOptions<LoggingFlagsOptions> flagsOptions)
+    {
+        _bot = bot;
+        _userManager = userManager;
+        _logger = logger;
+        _introFlowService = introFlowService;
+        _messageService = messageService;
+        _appConfig = appConfig;
+        _userCleanupService = userCleanupService;
+        _folderInviteService = folderInviteService;
+        _gm = gm;
+        _flags = flagsOptions?.Value;
+    }
 
     public ChatMemberHandler(
         ITelegramBotClientWrapper bot,
@@ -40,21 +69,34 @@ public class ChatMemberHandler : IUpdateHandler
         IAppConfig appConfig,
         IUserCleanupService userCleanupService,
         IFolderInviteService folderInviteService)
-    {
-        _bot = bot;
-        _userManager = userManager;
-        _logger = logger;
-        _introFlowService = introFlowService;
-        _messageService = messageService;
-        _appConfig = appConfig;
-        _userCleanupService = userCleanupService;
-        _folderInviteService = folderInviteService;
-    }
+        : this(
+            bot,
+            userManager,
+            logger,
+            introFlowService,
+            messageService,
+            appConfig,
+            userCleanupService,
+            folderInviteService,
+            NullGoldenMasterRecorder.Instance,
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions()))
+    { }
 
     public bool CanHandle(Update update) => update.Type == UpdateType.ChatMember;
 
     public async Task HandleAsync(Update update, CancellationToken cancellationToken = default)
     {
+        using var scope = _logger.BeginScope(new Dictionary<string, object>
+        {
+            ["opId"] = Guid.NewGuid(),
+            ["updateType"] = update.Type.ToString()
+        });
+        string? gmCorrelation = null;
+        try
+        {
+            gmCorrelation = _gm.TryRecordInput(update, nameof(ChatMemberHandler), update.ChatMember?.Chat.Id, update.ChatMember?.From?.Id);
+        }
+        catch { }
         var chatMember = update.ChatMember;
         Debug.Assert(chatMember != null);
         var newChatMember = chatMember.NewChatMember;
@@ -64,6 +106,7 @@ public class ChatMemberHandler : IUpdateHandler
         if (!_appConfig.IsChatAllowed(chatMember.Chat.Id))
         {
             _logger.LogDebug("Чат {ChatId} ({ChatTitle}) не в whitelist - игнорируем изменение участника", chatMember.Chat.Id, chatMember.Chat.Title);
+            _gm.TryRecordOutput(gmCorrelation, new { kind = "not_allowed_chat" });
             return;
         }
 
@@ -71,6 +114,7 @@ public class ChatMemberHandler : IUpdateHandler
         if (chatMember.From?.Id == _bot.BotId)
         {
             _logger.LogDebug("Игнорируем изменение статуса участника, сделанное самим ботом");
+            _gm.TryRecordOutput(gmCorrelation, new { kind = "self_change_ignore" });
             return;
         }
 
@@ -99,6 +143,7 @@ public class ChatMemberHandler : IUpdateHandler
                             });
                         }
                     }
+                    _gm.TryRecordOutput(gmCorrelation, new { kind = "new_member", userId = newChatMember.User.Id });
                     break;
                 }
             case ChatMemberStatus.Kicked
@@ -123,14 +168,16 @@ public class ChatMemberHandler : IUpdateHandler
                 }
 
                 var restrictedData = new UserRestrictedNotificationData(
-                    user, chatMember.Chat, "пользователь получил ограничения", 0, lastMessage, chatMember.Chat.Title ?? "");
+                    user, chatMember.Chat, "пользователь получил ограничения", 0, lastMessage ?? string.Empty, chatMember.Chat.Title ?? "");
                 await _messageService.SendAdminNotificationAsync(
                     AdminNotificationType.UserRestricted,
                     restrictedData,
                     cancellationToken
                 );
+                _gm.TryRecordOutput(gmCorrelation, new { kind = "restricted", userId = user.Id });
                 break;
         }
+        _gm.TryRecordOutput(gmCorrelation, new { kind = "other_status", status = newChatMember.Status.ToString() });
     }
 
     private static string FullName(string firstName, string? lastName) =>

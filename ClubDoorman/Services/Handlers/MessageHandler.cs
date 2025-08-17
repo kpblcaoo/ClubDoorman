@@ -14,6 +14,8 @@ using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Features.Moderation;
 using ClubDoorman.Services.Notifications;
 using ClubDoorman.Services.AI;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -36,6 +38,8 @@ public class MessageHandler : IUpdateHandler
     private readonly IUserFlowLogger _userFlowLogger;
     private readonly IForwardingService _forwardingService;
     private readonly IAiCascadeService _aiCascadeService;
+    private readonly IGoldenMasterRecorder _gm;
+    private readonly LoggingFlagsOptions? _flags; // optional for quick checks
 
     public MessageHandler(
         ITelegramBotClientWrapper bot,
@@ -51,7 +55,9 @@ public class MessageHandler : IUpdateHandler
         ICaptchaService captchaService,
         IUserFlowLogger userFlowLogger,
         IForwardingService forwardingService,
-        IAiCascadeService aiCascadeService)
+    IAiCascadeService aiCascadeService,
+    IGoldenMasterRecorder gm,
+    Microsoft.Extensions.Options.IOptions<LoggingFlagsOptions> flagsOptions)
     {
         _logger?.LogDebug("MessageHandler constructor called");
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
@@ -68,8 +74,44 @@ public class MessageHandler : IUpdateHandler
         _userFlowLogger = userFlowLogger ?? throw new ArgumentNullException(nameof(userFlowLogger));
         _forwardingService = forwardingService ?? throw new ArgumentNullException(nameof(forwardingService));
         _aiCascadeService = aiCascadeService ?? throw new ArgumentNullException(nameof(aiCascadeService));
+        _gm = gm ?? throw new ArgumentNullException(nameof(gm));
+        _flags = flagsOptions?.Value;
         _logger.LogDebug("MessageHandler constructed successfully");
     }
+
+    public MessageHandler(
+        ITelegramBotClientWrapper bot,
+        IUserManager userManager,
+        IAppConfig appConfig,
+        IUserBanService userBanService,
+        IChannelModerationService channelModerationService,
+        ICommandRouter commandRouter,
+        IUserJoinFacade userJoinFacade,
+        IModerationFacade moderationFacade,
+        ILogger<MessageHandler> logger,
+        IBotPermissionsService botPermissionsService,
+        ICaptchaService captchaService,
+        IUserFlowLogger userFlowLogger,
+        IForwardingService forwardingService,
+        IAiCascadeService aiCascadeService)
+        : this(
+            bot,
+            userManager,
+            appConfig,
+            userBanService,
+            channelModerationService,
+            commandRouter,
+            userJoinFacade,
+            moderationFacade,
+            logger,
+            botPermissionsService,
+            captchaService,
+            userFlowLogger,
+            forwardingService,
+            aiCascadeService,
+            NullGoldenMasterRecorder.Instance,
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions()))
+    { }
 
     public bool CanHandle(Update update)
     {
@@ -83,11 +125,22 @@ public class MessageHandler : IUpdateHandler
     public async Task HandleAsync(Update update, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("HandleAsync called");
+        var opId = Guid.NewGuid();
         using var scope = _logger.BeginScope(new Dictionary<string, object>
         {
-            ["opId"] = Guid.NewGuid(),
+            ["opId"] = opId,
             ["updateType"] = update?.Type.ToString() ?? "null"
         });
+
+        string? gmCorrelation = null;
+        if (update != null)
+        {
+            try
+            {
+                gmCorrelation = _gm.TryRecordInput(update, nameof(MessageHandler), update.Message?.Chat.Id ?? update.EditedMessage?.Chat.Id, update.Message?.From?.Id ?? update.EditedMessage?.From?.Id);
+            }
+            catch { /* swallow - instrumentation must not fail */ }
+        }
 
         try
         {
@@ -128,8 +181,10 @@ public class MessageHandler : IUpdateHandler
                 return;
             }
 
+            if (_flags?.TraceEnabled == true) _logger.LogInformation("[Trace] checking silent mode for chat {ChatId}", chat.Id);
             _logger.LogTrace("Checking silent mode for chat {ChatId}", chat.Id);
             var isSilentMode = await _botPermissionsService.IsSilentModeAsync(chat.Id, cancellationToken);
+            if (_flags?.TraceEnabled == true) _logger.LogInformation("[Trace] silent mode resolved chat {ChatId}: {IsSilent}", chat.Id, isSilentMode);
             _logger.LogTrace("Silent mode for chat {ChatId}: {IsSilentMode}", chat.Id, isSilentMode);
             if (isSilentMode)
             {
@@ -144,6 +199,7 @@ public class MessageHandler : IUpdateHandler
                 _logger.LogDebug("Handling command '{Command}' in chat {ChatId}", message.Text, chat.Id);
                 await HandleCommandAsync(message, cancellationToken);
                 _logger.LogDebug("HandleAsync: Command handled, returning");
+                _gm.TryRecordOutput(gmCorrelation, new { kind = "command", messageId = message.MessageId });
                 return;
             }
 
@@ -153,6 +209,7 @@ public class MessageHandler : IUpdateHandler
             {
                 _logger.LogDebug("Private chat {ChatId}, only commands processed", chat.Id);
                 _logger.LogInformation("HandleAsync: Private chat, only commands processed, returning");
+                _gm.TryRecordOutput(gmCorrelation, new { kind = "private_skip" });
                 return;
             }
 
@@ -162,6 +219,7 @@ public class MessageHandler : IUpdateHandler
                     chat.Id, string.Join(", ", message.NewChatMembers.Select(m => $"{m.Id} ({m.Username})")));
                 await _userJoinFacade.HandleNewMembersAsync(message, cancellationToken);
                 _logger.LogDebug("HandleAsync: New chat members handled, returning");
+                _gm.TryRecordOutput(gmCorrelation, new { kind = "new_members", count = message.NewChatMembers.Length });
                 return;
             }
 
@@ -180,6 +238,7 @@ public class MessageHandler : IUpdateHandler
                     _logger.LogWarning(e, "Не удалось удалить сообщение о бане/исключении (UserId: {UserId})", message.LeftChatMember.Id);
                     _logger.LogError(e, "HandleAsync: Exception while deleting left chat member message. MessageId: {MessageId}", message.MessageId);
                 }
+                _gm.TryRecordOutput(gmCorrelation, new { kind = "left_member_cleanup" });
                 return;
             }
 
@@ -189,12 +248,14 @@ public class MessageHandler : IUpdateHandler
                     message.SenderChat.Id, message.SenderChat.Title);
                 await HandleChannelMessageAsync(message, cancellationToken);
                 _logger.LogDebug("HandleAsync: Channel message handled, returning");
+                _gm.TryRecordOutput(gmCorrelation, new { kind = "channel_message" });
                 return;
             }
 
             _logger.LogDebug("Processing user message in chat {ChatId}, messageId: {MessageId}", chat.Id, message.MessageId);
-            await HandleUserMessageAsync(message, isSilentMode, cancellationToken);
+            var userResult = await HandleUserMessageWithResultAsync(message, isSilentMode, gmCorrelation, cancellationToken);
             _logger.LogDebug("HandleAsync: User message handled, returning");
+            _gm.TryRecordOutput(gmCorrelation, userResult);
         }
         catch (Exception ex)
         {
@@ -242,7 +303,7 @@ public class MessageHandler : IUpdateHandler
         _logger.LogDebug("HandleChannelMessageAsync: Channel message processed. MessageId: {MessageId}", message.MessageId);
     }
 
-    internal async Task HandleUserMessageAsync(Message message, bool isSilentMode, CancellationToken cancellationToken)
+    internal async Task<object?> HandleUserMessageWithResultAsync(Message message, bool isSilentMode, string? gmCorrelation, CancellationToken cancellationToken)
     {
         _logger.LogDebug("HandleUserMessageAsync called. MessageId: {MessageId}, IsSilentMode: {IsSilentMode}",
             message.MessageId, isSilentMode);
@@ -256,7 +317,7 @@ public class MessageHandler : IUpdateHandler
             _logger.LogDebug("Игнорируем системное сообщение без пользователя. MessageId: {MessageId}, ChatId: {ChatId}",
                 message.MessageId, chat.Id);
             _logger.LogInformation("HandleUserMessageAsync: System message without user, returning. MessageId: {MessageId}", message.MessageId);
-            return;
+            return new { kind = "system_no_user" };
         }
 
         if (user.IsBot)
@@ -264,7 +325,7 @@ public class MessageHandler : IUpdateHandler
             _logger.LogDebug("Игнорируем сообщение от бота {BotId}. MessageId: {MessageId}, ChatId: {ChatId}",
                 user.Id, message.MessageId, chat.Id);
             _logger.LogInformation("HandleUserMessageAsync: Message from bot {BotId}, returning. MessageId: {MessageId}", user.Id, message.MessageId);
-            return;
+            return new { kind = "bot_message" };
         }
 
         if (message.LeftChatMember != null)
@@ -272,7 +333,7 @@ public class MessageHandler : IUpdateHandler
             _logger.LogDebug("Игнорируем системное сообщение о выходе пользователя. MessageId: {MessageId}, LeftUserId: {LeftUserId}, ChatId: {ChatId}",
                 message.MessageId, message.LeftChatMember.Id, chat.Id);
             _logger.LogInformation("HandleUserMessageAsync: System message about left user, returning. MessageId: {MessageId}", message.MessageId);
-            return;
+            return new { kind = "left_user_system" };
         }
 
         var captchaKey = _captchaService.GenerateKey(chat.Id, user.Id);
@@ -295,7 +356,7 @@ public class MessageHandler : IUpdateHandler
                     user.Id, message.MessageId, chat.Id);
                 _logger.LogError(ex, "HandleUserMessageAsync: Exception while deleting message for captcha. UserId: {UserId}, MessageId: {MessageId}", user.Id, message.MessageId);
             }
-            return;
+            return new { kind = "captcha_pending" };
         }
 
         _logger.LogDebug("🔍 Проверяем пользователя {UserId} по блэклисту lols.bot", user.Id);
@@ -305,7 +366,7 @@ public class MessageHandler : IUpdateHandler
                 user.Id, chat.Id, message.MessageId);
             _logger.LogInformation("HandleUserMessageAsync: User {UserId} found in banlist, banning. MessageId: {MessageId}", user.Id, message.MessageId);
             await _userBanService.HandleBlacklistBanAsync(message, user, chat, cancellationToken);
-            return;
+            return new { kind = "banlist_ban" };
         }
         _logger.LogDebug("✅ Пользователь {UserId} не найден в блэклисте", user.Id);
         _logger.LogTrace("HandleUserMessageAsync: User {UserId} not in banlist", user.Id);
@@ -316,7 +377,7 @@ public class MessageHandler : IUpdateHandler
                 user.Id, chat.Id, message.MessageId);
             _logger.LogInformation("HandleUserMessageAsync: User {UserId} already approved in chat {ChatId}, skipping moderation. MessageId: {MessageId}",
                 user.Id, chat.Id, message.MessageId);
-            return;
+            return new { kind = "already_approved" };
         }
 
         var messageText = message.Text ?? message.Caption ?? "[медиа/стикер/файл]";
@@ -341,7 +402,7 @@ public class MessageHandler : IUpdateHandler
             _logger.LogDebug("User is {Name} from club. UserId: {UserId}, ChatId: {ChatId}", clubName, user.Id, chat.Id);
             _logger.LogInformation("HandleUserMessageAsync: User {UserId} is a club member ({ClubName}), skipping moderation. MessageId: {MessageId}",
                 user.Id, clubName, message.MessageId);
-            return;
+            return new { kind = "club_member_skip" };
         }
 
         ModerationResult moderationResult;
@@ -384,7 +445,7 @@ public class MessageHandler : IUpdateHandler
                 _logger.LogWarning("Пользователь {UserId} получил ограничения за подозрительный профиль. ChatId: {ChatId}, MessageId: {MessageId}",
                     user.Id, chat.Id, message.MessageId);
                 _logger.LogInformation("HandleUserMessageAsync: User {UserId} restricted due to suspicious profile. MessageId: {MessageId}", user.Id, message.MessageId);
-                return;
+                return new { kind = "ai_profile_restricted" };
             }
         }
 
@@ -392,8 +453,11 @@ public class MessageHandler : IUpdateHandler
             user.Id, chat.Id, message.MessageId, moderationResult.Action);
         await _moderationFacade.HandleUserMessageAsync(message, user, chat, moderationResult, isSilentMode, cancellationToken);
         _logger.LogTrace("HandleUserMessageAsync: Message passed to ModerationFacade. UserId: {UserId}, MessageId: {MessageId}", user.Id, message.MessageId);
-        return;
+        return new { kind = "moderated", action = moderationResult.Action.ToString(), reason = moderationResult.Reason };
     }
+
+    internal async Task HandleUserMessageAsync(Message message, bool isSilentMode, CancellationToken cancellationToken)
+        => await HandleUserMessageWithResultAsync(message, isSilentMode, null, cancellationToken);
 
     public void DeleteMessageLater(Message message, TimeSpan after = default, CancellationToken cancellationToken = default)
     {
