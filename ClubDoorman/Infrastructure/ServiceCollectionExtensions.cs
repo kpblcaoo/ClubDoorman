@@ -24,6 +24,7 @@ using ClubDoorman.Services.Violation;
 using ClubDoorman.Models.Logging;
 using ClubDoorman.Effects;
 using ClubDoorman.Effects.Delete;
+using ClubDoorman.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -100,6 +101,9 @@ public static class ServiceCollectionExtensions
         services.AddAIServices();
         services.AddUserManagementServices();
         services.AddMessagingServices();
+        
+        // Регистрация инфраструктуры эффектов
+        services.AddSingleton<EffectsConfiguration>();
         services.AddSingleton<IEffectBus, LoggingEffectBus>();
         services.AddSingleton<LoggingModerationEffectsBuilder>();
         services.AddSingleton<RealModerationEffectsBuilder>();
