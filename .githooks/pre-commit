@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Pre-commit hook: formats code (dotnet format) and runs gitleaks if configured
+set -euo pipefail
+
+# Ensure dotnet 9 in PATH if using local install script
+if ! command -v dotnet >/dev/null 2>&1; then
+  echo "[pre-commit] dotnet не найден в PATH" >&2
+  exit 1
+fi
+
+echo "[pre-commit] dotnet format (в режиме проверки)"
+dotnet format --verify-no-changes || {
+  echo "[pre-commit] Неконсистентное форматирование. Исправляю..." >&2
+  dotnet format
+  echo "[pre-commit] Пожалуйста, добавьте отформатированные файлы и повторите commit." >&2
+  exit 1
+}
+
+# Optional: gitleaks baseline check (если пользователь установил gitleaks)
+if command -v gitleaks >/dev/null 2>&1; then
+  if [ -f .gitleaks.toml ]; then
+    echo "[pre-commit] gitleaks scan"
+    if ! gitleaks detect --no-git --verbose --source . --redact --report-format json --report-path /tmp/gitleaks-precommit.json; then
+      echo "[pre-commit] gitleaks обнаружил возможные секреты. Проверьте отчёт /tmp/gitleaks-precommit.json" >&2
+      exit 1
+    fi
+  fi
+fi
+
+exit 0

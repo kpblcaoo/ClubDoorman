@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Pre-push hook: run fast test suite before push
+set -euo pipefail
+
+if ! command -v dotnet >/dev/null 2>&1; then
+  echo "[pre-push] dotnet не найден в PATH" >&2
+  exit 1
+fi
+
+# Use minimal filter (exclude real-api, BDD, disabled, demo)
+echo "[pre-push] dotnet test (быстрые тесты)"
+dotnet test ClubDoorman.Test --filter "Category!=real-api&Category!=BDD&Category!=disabled&Category!=demo" --no-build --verbosity minimal || {
+  echo "[pre-push] Тесты упали. Push остановлен." >&2
+  exit 1
+}
+
+exit 0
