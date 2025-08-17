@@ -151,6 +151,11 @@ public interface IAppConfig
     bool ChannelAutoBan { get; }
 
     /// <summary>
+    /// Включить effects-пайплайн для сообщений от каналов (этапная миграция)
+    /// </summary>
+    bool ChannelEffectsEnabled { get; }
+
+    /// <summary>
     /// Автоматически банить пользователей с похожими именами
     /// </summary>
     bool LookAlikeAutoBan { get; }

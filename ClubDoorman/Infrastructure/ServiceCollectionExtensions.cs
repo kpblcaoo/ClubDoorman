@@ -24,6 +24,7 @@ using ClubDoorman.Services.Violation;
 using ClubDoorman.Models.Logging;
 using ClubDoorman.Effects;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Effects.Channel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -58,6 +59,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEffectBus, EffectBus>();
         services.AddSingleton<ModerationEffectsBuilder>();
         services.AddSingleton<IModerationEffectsBuilder, ModerationEffectsBuilder>();
+    // Channel moderation effects (Stage 1 scaffold)
+    services.AddSingleton<ChannelModerationEffectsBuilder>();
+    services.AddSingleton<IChannelModerationEffectsBuilder, ChannelModerationEffectsBuilder>();
 
         // Регистрация основных сервисов в том же порядке, что и в Program.cs
         services.AddLinkFormattingServices();

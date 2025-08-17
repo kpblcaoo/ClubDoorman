@@ -8,6 +8,8 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Effects.Channel;
+using ClubDoorman.Effects;
 
 namespace ClubDoorman.Services.ChannelModeration;
 
@@ -21,6 +23,8 @@ public class ChannelModerationService : IChannelModerationService
     private readonly IModerationService _moderationService;
     private readonly IUserBanService _userBanService;
     private readonly ILogger<ChannelModerationService> _logger;
+    private readonly IChannelModerationEffectsBuilder? _channelEffectsBuilder;
+    private readonly IEffectBus? _effectBus;
 
     /// <summary>
     /// Создает экземпляр ChannelModerationService
@@ -34,12 +38,16 @@ public class ChannelModerationService : IChannelModerationService
         ITelegramBotClientWrapper bot,
         IModerationService moderationService,
         IUserBanService userBanService,
-        ILogger<ChannelModerationService> logger)
+        ILogger<ChannelModerationService> logger,
+        IChannelModerationEffectsBuilder? channelEffectsBuilder = null,
+        IEffectBus? effectBus = null)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
         _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _channelEffectsBuilder = channelEffectsBuilder; // может быть null на ранних этапах миграции
+        _effectBus = effectBus; // может быть null если эффекты отключены
     }
 
     /// <summary>
@@ -97,7 +105,26 @@ public class ChannelModerationService : IChannelModerationService
             _logger.LogInformation("🔍 Модерация содержимого сообщения от канала {ChannelTitle} в чате {ChatTitle}",
                 senderChat.Title, chat.Title);
 
-            await ModerateChannelMessageContentAsync(message, cancellationToken);
+            // Новый путь: effects-пайплайн для каналов (этапная миграция)
+            if (Config.ChannelEffectsEnabled && _channelEffectsBuilder != null && _effectBus != null)
+            {
+                try
+                {
+                    var moderationResult = await _moderationService.CheckMessageAsync(message);
+                    var effects = _channelEffectsBuilder.BuildChannelEffects(message, moderationResult);
+                    _logger.LogInformation("[ChannelEffects] Executing {Count} effect(s) for channel message (Action={Action})", effects.Length, moderationResult.Action);
+                    await _effectBus.ExecuteAsync(effects, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[ChannelEffects] Ошибка при выполнении effects-пайплайна, fallback к legacy логике");
+                    await ModerateChannelMessageContentAsync(message, cancellationToken);
+                }
+            }
+            else
+            {
+                await ModerateChannelMessageContentAsync(message, cancellationToken);
+            }
         }
     }
 

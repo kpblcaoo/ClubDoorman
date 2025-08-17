@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
+using ClubDoorman.Effects.Channel;
+using ClubDoorman.Effects;
 
 namespace ClubDoorman.Services.ChannelModeration;
 
@@ -15,11 +17,16 @@ public static class ChannelModerationModule
         {
             var logger = provider.GetRequiredService<ILogger<ChannelModerationService>>();
             logger.LogDebug("[DI] IChannelModerationService factory called");
+            // Пытаемся получить эффекты (могут отсутствовать если не зарегистрированы на раннем этапе)
+            var channelEffectsBuilder = provider.GetService<IChannelModerationEffectsBuilder>();
+            var effectBus = provider.GetService<IEffectBus>();
             return new ChannelModerationService(
                 provider.GetRequiredService<ITelegramBotClientWrapper>(),
                 provider.GetRequiredService<IModerationService>(),
                 provider.GetRequiredService<IUserBanService>(),
-                provider.GetRequiredService<ILogger<ChannelModerationService>>());
+                provider.GetRequiredService<ILogger<ChannelModerationService>>(),
+                channelEffectsBuilder,
+                effectBus);
         });
 
         return services;

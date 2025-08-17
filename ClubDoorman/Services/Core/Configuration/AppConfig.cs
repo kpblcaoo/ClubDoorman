@@ -24,6 +24,7 @@ public class AppConfig : IAppConfig
         _violationThresholdOptions = violationThresholdOptions;
         _featureToggleOptions = featureToggleOptions;
         _chatFilteringOptions = chatFilteringOptions;
+    Effects = new EffectsConfiguration();
     }
 
     /// <summary>
@@ -167,6 +168,11 @@ public class AppConfig : IAppConfig
     /// Автоматически банить каналы
     /// </summary>
     public bool ChannelAutoBan => _autoBanOptions.Value.ChannelAutoBan;
+
+    /// <summary>
+    /// Включить effects-пайплайн для сообщений от каналов
+    /// </summary>
+    public bool ChannelEffectsEnabled => Config.ChannelEffectsEnabled;
 
     /// <summary>
     /// Автоматически банить пользователей с похожими именами
