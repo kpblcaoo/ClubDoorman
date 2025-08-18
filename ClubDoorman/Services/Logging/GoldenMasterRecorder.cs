@@ -138,17 +138,25 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
         }
     }
 
-    private static string GenerateCorrelationId(Update update, string handler)
+    private string GenerateCorrelationId(Update update, string handler)
     {
+        var f = _flags.Value;
+        if (f.GoldenDeterministicIds)
+        {
+            // Детерминированный id только на основе стабильных свойств.
+            var rawStable = $"{update.Id}:{handler}:{update.Type}:{update.Message?.Chat.Id}:{update.Message?.From?.Id}";
+            return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(rawStable))).Substring(0, 16);
+        }
         var raw = $"{update.Id}:{handler}:{DateTime.UtcNow:yyyyMMddHHmmssfff}:{Guid.NewGuid()}";
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(raw))).Substring(0, 16);
     }
 
     private void WriteFile(string correlationId, string phase, object data)
     {
-        var date = DateTime.UtcNow.ToString("yyyy-MM-dd");
-        var basePath = _flags.Value.GoldenBasePath ?? "golden";
-        var dir = Path.Combine(basePath, date);
+        var f = _flags.Value;
+        var dateFolder = f.GoldenFixedDateFolder ?? DateTime.UtcNow.ToString("yyyy-MM-dd");
+        var basePath = f.GoldenBasePath ?? "golden";
+        var dir = Path.Combine(basePath, dateFolder);
         Directory.CreateDirectory(dir);
         var path = Path.Combine(dir, $"{correlationId}.{phase}.json");
         var json = JsonConvert.SerializeObject(data, Formatting.Indented);

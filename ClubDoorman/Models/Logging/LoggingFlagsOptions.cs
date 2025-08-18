@@ -17,4 +17,16 @@ public class LoggingFlagsOptions
 
     /// <summary>Базовый путь для записи Golden Master (по умолчанию "golden"). Позволяет изолировать тесты.</summary>
     public string GoldenBasePath { get; set; } = "golden";
+
+    /// <summary>
+    /// Включить детерминированные correlationId (без компонента времени/Guid) — используется для генерации baseline.
+    /// По умолчанию выключено, чтобы рабочие снапшоты имели уникальные имена.
+    /// </summary>
+    public bool GoldenDeterministicIds { get; set; } = false;
+
+    /// <summary>
+    /// Если указано, вместо папки с датой будет использовано фиксированное имя (например, "baseline").
+    /// Это позволяет хранить один стабильный baseline в репозитории без ежедневных подпапок.
+    /// </summary>
+    public string? GoldenFixedDateFolder { get; set; } = null;
 }
