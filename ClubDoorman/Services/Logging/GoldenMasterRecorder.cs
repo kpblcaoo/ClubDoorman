@@ -37,11 +37,17 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
         try
         {
             var simplified = SimplifyUpdate(update);
+            // Mask raw user id to avoid leaking PII into Golden Master snapshots (test enforces this)
+            string? maskedUserId = null;
+            if (userId.HasValue)
+            {
+                maskedUserId = "U" + Math.Abs(userId.Value % 10000).ToString("D4");
+            }
             var sanitized = Canonicalize(new
             {
                 Type = update.Type.ToString(),
                 ChatId = chatId,
-                UserId = userId,
+                UserId = maskedUserId,
                 handler = handlerName,
                 Payload = simplified
             });
