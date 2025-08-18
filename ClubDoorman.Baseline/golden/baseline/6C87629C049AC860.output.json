@@ -1,0 +1,7 @@
+{
+  "Output": {
+    "kind": "moderated",
+    "action": "RequireManualReview",
+    "reason": "Ошибка модерации - требуется ручной анализ"
+  }
+}
