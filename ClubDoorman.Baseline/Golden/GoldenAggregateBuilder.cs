@@ -18,8 +18,8 @@ internal static class GoldenAggregateBuilder
         public int Schema { get; init; } = 5;
         public string Variant { get; init; } = string.Empty;
         public int Total { get; init; }
-        public Dictionary<string,string> ActionCounts { get; init; } = new(); // value stored as string for stable JSON lexical ordering (we will format externally)
-        public Dictionary<string,string> RuleCodeCounts { get; init; } = new();
+        public Dictionary<string, string> ActionCounts { get; init; } = new(); // value stored as string for stable JSON lexical ordering (we will format externally)
+        public Dictionary<string, string> RuleCodeCounts { get; init; } = new();
         public string RuleCodesFingerprint { get; init; } = string.Empty; // sorted pipe-joined list of distinct codes
     }
 

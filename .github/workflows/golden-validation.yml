@@ -25,12 +25,20 @@ jobs:
         run: dotnet restore
 
       - name: Build (Release)
-        run: dotnet build --configuration Release --no-restore
+        run: |
+          if [ -f ClubDoorman.sln ]; then
+            echo "Building solution (without Baseline project yet)"
+            dotnet build ClubDoorman.sln --configuration Release --no-restore || true
+          fi
+          echo "Building main and baseline projects explicitly"
+            dotnet build ClubDoorman/ClubDoorman.csproj --configuration Release --no-restore
+            dotnet build ClubDoorman.Baseline/ClubDoorman.Baseline.csproj --configuration Release --no-restore
 
       - name: Run baseline harness (regenerates golden layers)
         run: |
           echo "Running baseline harness to regenerate golden artifacts"
-          dotnet run --project ClubDoorman.Baseline/ClubDoorman.Baseline.csproj -c Release --no-build
+          ls -la ClubDoorman.Baseline/ || true
+          dotnet run --project ClubDoorman.Baseline/ClubDoorman.Baseline.csproj -c Release --no-launch-profile
 
       - name: Detect unintended golden diffs
         id: diffcheck

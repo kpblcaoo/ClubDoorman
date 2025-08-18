@@ -78,7 +78,7 @@ static async Task RunBaselineVariantAsync(string variantName, bool disableMediaF
     // Phase 2: Manifest generation (only for main baseline variant)
     try
     {
-    Console.WriteLine($"[DEBUG] Manifest generation block entered for variant {variantName}");
+        Console.WriteLine($"[DEBUG] Manifest generation block entered for variant {variantName}");
         var f = hostLocal.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<LoggingFlagsOptions>>().Value;
         var goldenRoot = f.GoldenBasePath ?? Path.Combine(AppContext.BaseDirectory, "golden");
         ClubDoorman.Baseline.Golden.GoldenManifestBuilder.Build(goldenRoot, variantName);

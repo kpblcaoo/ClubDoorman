@@ -46,7 +46,7 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
         Update Make(int id, long userId, string text) => new() { Id = id, Message = CreateMsg(MakeUser(userId), text) };
 
         // Deterministic scenario set:
-    // 1: Previously greeting; now tweak to avoid boring greeting deletion to keep only dedicated greeting scenarios if needed.
+        // 1: Previously greeting; now tweak to avoid boring greeting deletion to keep only dedicated greeting scenarios if needed.
         // 2: Normal informative message -> Allow
         // 3: Stop-words / earning spam phrase -> expect Delete/Report depending on rules
         // 4: Message containing a link -> expect Delete/Report (link policy)
@@ -67,8 +67,8 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
         // 10: Mixed stop-word + link (priority check). Text contains stop phrase + URL
         var upd10 = Make(10, 900000009, "ищу партнеров https://spam.example для удаленного заработка");
 
-    // 11: Media without text in default chat.
-    // Expected Delete ("В первых трёх сообщениях нельзя отправлять картинки или видео").
+        // 11: Media without text in default chat.
+        // Expected Delete ("В первых трёх сообщениях нельзя отправлять картинки или видео").
         var mediaUser = MakeUser(900000010);
         var mediaMsg = new Message
         {
@@ -116,7 +116,7 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
         };
         var upd18 = new Update { Id = 18, Message = mediaAnnouncementMsg };
 
-    var updates = new List<Update>
+        var updates = new List<Update>
         {
             Make(1, 900000001, "Baseline message one"),
             Make(2, 900000002, "Second baseline message about normal workflow"),
@@ -127,8 +127,8 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
             upd7, upd8, upd9, upd10, upd11, upd12, upd13, upd14, upd15, upd16, upd17
         };
 
-    // Add selective feature-toggle scenario at the end (media in announcement chat -> manual review/report)
-    updates.Add(upd18);
+        // Add selective feature-toggle scenario at the end (media in announcement chat -> manual review/report)
+        updates.Add(upd18);
 
         foreach (var u in updates)
             await dispatcher.DispatchAsync(u, cancellationToken);

@@ -107,8 +107,8 @@ internal static class GoldenManifestBuilder
 
         var manifestPath = Path.Combine(goldenRoot, "manifest.json");
         var json = JsonSerializer.Serialize(manifest, Options);
-    File.WriteAllText(manifestPath, json);
-    Console.WriteLine($"[GoldenManifest] Written {entries.Count} entries to {manifestPath}");
+        File.WriteAllText(manifestPath, json);
+        Console.WriteLine($"[GoldenManifest] Written {entries.Count} entries to {manifestPath}");
     }
 
     private sealed class ManifestRoot
