@@ -3,5 +3,6 @@
   "Id": 12,
   "CorrelationId": "69E2E8CA2B7A6103",
   "ShortName": "CommandStart",
+  "Action": "Allow",
   "RuleCode": "Command"
 }

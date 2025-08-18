@@ -3,9 +3,9 @@
   "Variant": "baseline",
   "Total": 15,
   "ActionCounts": {
-  "Allow": "5",
-  "Delete": "9",
-  "Report": "1"
+    "Allow": "5",
+    "Delete": "9",
+    "Report": "1"
   },
   "RuleCodeCounts": {
     "Banlist": "1",
