@@ -16,6 +16,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Detect local act
+        id: detect_act
+        run: |
+          if [ "${ACT:-}" = "true" ]; then
+            echo "Detected local act run (ACT=true)";
+            echo "skip_upload=true" >> $GITHUB_OUTPUT
+          else
+            echo "Running on GitHub (ACT not true)";
+            echo "skip_upload=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup .NET 9
         uses: actions/setup-dotnet@v3
         with:
@@ -66,23 +77,23 @@ jobs:
             --verbosity minimal \
             --logger "trx;LogFileName=golden-tests.trx"
 
-      - name: Upload golden directory (always)
-        if: always()
+      # Real artifact uploads only on GitHub (skip under act where ACTIONS_RUNTIME_TOKEN is missing)
+      - name: Upload golden directory
+        if: always() && steps.detect_act.outputs.skip_upload == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: golden-artifacts
-          path: ClubDoorman.Baseline/golden/
-          if-no-files-found: warn
+          path: ClubDoorman.Baseline/golden
+          if-no-files-found: error
           retention-days: 7
 
-      - name: Upload test results (always)
-        if: always()
+      - name: Upload golden test results
+        if: always() && steps.detect_act.outputs.skip_upload == 'false'
         uses: actions/upload-artifact@v4
         with:
-          name: golden-test-results
-          path: | 
-            **/golden-tests.trx
-            ClubDoorman.Test/TestResults/
+          name: golden-tests-trx
+          path: |
+            ClubDoorman.Test/TestResults/golden-tests.trx
           if-no-files-found: warn
           retention-days: 7
 
