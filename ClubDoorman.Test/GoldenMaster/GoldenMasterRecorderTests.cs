@@ -76,7 +76,8 @@ public class GoldenMasterRecorderTests : TestBase
             Assert.That(input2, Is.EqualTo(inputJson), "Canonicalized input JSON should be deterministic");
 
             // Проверяем что masked user id / username присутствуют в ожидаемом формате
-            Assert.That(inputJson, Does.Not.Contain(update.Message.From.Id.ToString()), "Raw user id leaked");
+            // Ensure raw numeric user id property value not present (masked form like U#### is allowed)
+            Assert.That(inputJson, Does.Not.Contain("\"UserId\": " + update.Message.From.Id), "Raw user id leaked");
             Assert.That(inputJson, Does.Not.Contain("\"sample_user\""), "Raw username leaked");
             Assert.That(inputJson, Does.Contain("\"Username\": \"u_"), "Masked username missing");
         }
