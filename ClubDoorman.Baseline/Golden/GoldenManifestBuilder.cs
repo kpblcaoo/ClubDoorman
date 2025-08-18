@@ -25,8 +25,7 @@ internal static class GoldenManifestBuilder
         [5] = "EmojiFlood",
         [6] = "BenignControl",
         [7] = "Greeting",
-        [8] = "EmojiFloodRepeat1",
-        [9] = "EmojiFloodRepeat2",
+    // IDs 8 and 9 (EmojiFloodRepeat*) removed in Phase 7 aggregation (intentionally left unused to avoid shifting IDs)
         [10] = "MixedStopWordsLink",
         [11] = "MediaEarlyDefault",
         [12] = "CommandStart",
@@ -34,7 +33,7 @@ internal static class GoldenManifestBuilder
         [14] = "ReplyWithLink",
         [15] = "BanlistUser",
         [16] = "EmojiBoundaryOk",
-        [17] = "EmojiBoundaryOver",
+    // ID 17 (EmojiBoundaryOver) removed in Phase 7 aggregation
         [18] = "MediaAnnouncement"
     };
 

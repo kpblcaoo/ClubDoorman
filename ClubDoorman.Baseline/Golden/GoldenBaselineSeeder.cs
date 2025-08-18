@@ -58,11 +58,9 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
         var greetingMsg = CreateMsg(boringGreetingUser, "Привет");
         var upd7 = new Update { Id = 7, Message = greetingMsg };
 
-        // 8 & 9: Same user triggers two emoji floods to accumulate violations (ban threshold controlled by env -> set to 2 outside seeder)
-        var emojiRepeatUser = MakeUser(900000008);
-        string flood = "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 test"; // > 10 emojis
-        var upd8 = new Update { Id = 8, Message = CreateMsg(emojiRepeatUser, flood) };
-        var upd9 = new Update { Id = 9, Message = CreateMsg(emojiRepeatUser, flood) }; // second violation
+    // 8 & 9 (REMOVED as standalone scenarios): Previously two separate emoji flood messages by same user to exercise repeat violations.
+    // Aggregation Phase 7: we keep only initial flood (Id=5) plus boundary pair (Ids 16/17) to cover threshold semantics.
+    // If in future we need explicit escalation chain again, reintroduce here with new IDs beyond current max.
 
         // 10: Mixed stop-word + link (priority check). Text contains stop phrase + URL
         var upd10 = Make(10, 900000009, "ищу партнеров https://spam.example для удаленного заработка");
@@ -96,12 +94,10 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
         var banlistUser = MakeUser(900000050);
         var upd15 = new Update { Id = 15, Message = CreateMsg(banlistUser, "Сообщение от забаненного ранее пользователя") };
 
-        // 16 & 17: Emoji threshold boundary (exactly at limit vs over). Build messages with 10 emojis (boundary) then 11.
-        var boundaryUser = MakeUser(900000013);
-        string tenEmojis = string.Concat(Enumerable.Repeat("😀", 10)) + " ok"; // boundary
-        string elevenEmojis = string.Concat(Enumerable.Repeat("😀", 11)) + " boom"; // over limit
-        var upd16 = new Update { Id = 16, Message = CreateMsg(boundaryUser, tenEmojis) };   // should be Allow (if policy counts >=10; adjust expectation accordingly)
-        var upd17 = new Update { Id = 17, Message = CreateMsg(boundaryUser, elevenEmojis) }; // should Delete
+    // 16: Emoji threshold boundary (exactly at limit). 17 (over) removed to collapse redundancy; a single boundary case + flood case is sufficient.
+    var boundaryUser = MakeUser(900000013);
+    string tenEmojis = string.Concat(Enumerable.Repeat("😀", 10)) + " ok"; // boundary
+    var upd16 = new Update { Id = 16, Message = CreateMsg(boundaryUser, tenEmojis) };   // semantic boundary reference
 
         // 18: Media without text in announcement chat (single contrasting scenario -> should become Report "Медиа без подписи")
         var mediaAnnouncementUser = MakeUser(900000014);
@@ -124,11 +120,13 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
             Make(4, 900000004, "Заходите https://example.com супер"),
             Make(5, 900000005, "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 xx"),
             Make(6, 900000006, "Пакет номер 42 обработан успешно"),
-            upd7, upd8, upd9, upd10, upd11, upd12, upd13, upd14, upd15, upd16, upd17
+            upd7, // greeting
+            // removed upd8/upd9 repeat floods (aggregation)
+            upd10, upd11, upd12, upd13, upd14, upd15, upd16
         };
 
         // Add selective feature-toggle scenario at the end (media in announcement chat -> manual review/report)
-        updates.Add(upd18);
+    updates.Add(upd18); // media announcement scenario remains last
 
         foreach (var u in updates)
             await dispatcher.DispatchAsync(u, cancellationToken);

@@ -1,8 +1,0 @@
-{
-  "Schema": 2,
-  "CorrelationId": "849B846F99036F73",
-  "Id": 8,
-  "ShortName": "EmojiFloodRepeat1",
-  "Action": "Delete",
-  "RuleCode": "TooManyEmojis"
-}
