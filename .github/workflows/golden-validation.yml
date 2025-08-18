@@ -51,7 +51,7 @@ jobs:
           ls -la ClubDoorman.Baseline/ || true
           dotnet run --project ClubDoorman.Baseline/ClubDoorman.Baseline.csproj -c Release --no-launch-profile
 
-      - name: Detect unintended golden diffs
+      - name: Detect unintended golden diffs (no fail yet)
         id: diffcheck
         run: |
           echo "Checking for diffs/untracked files inside golden directory after regeneration"
@@ -59,13 +59,44 @@ jobs:
           if [ -n "$status" ]; then
             echo "Golden artifacts changed (including possible untracked files):" | tee -a $GITHUB_STEP_SUMMARY
             echo "$status" | tee -a $GITHUB_STEP_SUMMARY
-            # Show detailed diff (may be empty for new files)
-            git diff -- ClubDoorman.Baseline/golden || true
+            git diff --name-status -- ClubDoorman.Baseline/golden || true
             echo "golden_diff=1" >> $GITHUB_OUTPUT
-            exit 1
+            git diff -- ClubDoorman.Baseline/golden > golden.patch || true
           else
             echo "No golden diffs detected." >> $GITHUB_STEP_SUMMARY
           fi
+
+      - name: Generate golden diff summary
+        if: steps.diffcheck.outputs.golden_diff == '1'
+        run: |
+          chmod +x scripts/golden_diff_summary.sh
+          ./scripts/golden_diff_summary.sh
+          cat golden-diff-summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload diff summary artifacts
+        if: steps.diffcheck.outputs.golden_diff == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-diff-summary
+          path: |
+            golden-diff-summary.json
+            golden-diff-summary.md
+            golden.patch
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Add PR label (golden-change)
+        if: steps.diffcheck.outputs.golden_diff == '1' && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pr_number=${{ github.event.pull_request.number }}
+          echo "Applying label golden-change to PR #$pr_number"
+          gh pr edit "$pr_number" --add-label golden-change || {
+            echo "gh CLI not available, fallback to REST";
+            curl -s -X POST -H "Authorization: token $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/$pr_number/labels" \
+              -d '{"labels":["golden-change"]}' || true; }
 
       - name: Run Golden tests only
         run: |
@@ -107,3 +138,13 @@ jobs:
             echo '*Status:* ✅ No diffs in golden artifacts.' >> $GITHUB_STEP_SUMMARY
           fi
           echo '*Golden tests:* Completed (see artifacts for detailed results).' >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.diffcheck.outputs.golden_diff }}" = "1" ]; then
+            echo '' >> $GITHUB_STEP_SUMMARY
+            echo 'A detailed diff summary was generated (see golden-diff-summary artifact).' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail on golden diff
+        if: steps.diffcheck.outputs.golden_diff == '1'
+        run: |
+          echo "Failing job due to golden diff (after labeling & summary)." >&2
+          exit 1
