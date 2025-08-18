@@ -40,7 +40,7 @@ DOORMAN_ADMIN_CHAT=123456789
 
 ## 6. Git hooks (форматирование + тесты)
 Хуки лежат в `.githooks/`:
-- `pre-commit`: `dotnet format --verify-no-changes` (при несовпадении — автоформат и отказ коммита)
+- `pre-commit`: автоформат временно отключен. Включить для конкретного коммита: `PRECOMMIT_FORMAT=1 git commit -m "msg"`
 - `pre-push`: быстрые тесты (фильтр категорий)
 
 Включить:
@@ -51,7 +51,7 @@ chmod +x .githooks/pre-commit .githooks/pre-push
 Пропустить (не рекомендуется): `--no-verify`
 
 ## 7. Стиль и форматирование
-Используем стандартный `dotnet format`. Перед крупным PR запускайте:
+Используем стандартный `dotnet format`. Сейчас он НЕ запускается автоматически в pre-commit — гоняйте вручную перед крупным PR или периодически:
 ```bash
 dotnet format
 ```
@@ -72,7 +72,7 @@ dotnet format
 git pull --rebase
 # 2. Изменения
 <edit>
-# 3. Формат
+# 3. Формат (ручной)
 dotnet format
 # 4. Тесты
 ./scripts/run_tests_without_demos.sh
@@ -86,7 +86,7 @@ dotnet format
 | NETSDK1045 / не видит .NET 9 | Установить SDK через `dotnet-install.sh` и PATH |
 | Долгий restore | Первый раз до ~70s — норма |
 | Падают real-api тесты | Исключить фильтром или задать валидные ключи |
-| Форматирование валится в pre-commit | Запустите `dotnet format`, добавьте изменения |
+| Форматирование валится в pre-commit | (Если включили PRECOMMIT_FORMAT=1) Запустите `dotnet format`, добавьте изменения |
 
 ## 12. Создание веток
 Всегда от `next` или указанной интеграционной ветки (например, `next-lab`).
@@ -111,3 +111,10 @@ git checkout -b feature/<short-name>
 
 ---
 Минимум онбординга — максимум пользы. Удачной охоты на спам.
+
+### Дополнительно: локальный запуск golden workflow
+Для проверки golden baseline перед пушем можно локально прогнать GitHub Actions через `act`:
+```bash
+scripts/run_act_golden.sh
+```
+Требуется установленный `act`.
