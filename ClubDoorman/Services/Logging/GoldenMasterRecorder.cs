@@ -78,10 +78,19 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
         }
     }
 
+    private static string StableUsernameHash(string username)
+    {
+        // Deterministic, cross-process stable hash (first 8 hex chars of SHA256)
+        using var sha = SHA256.Create();
+        var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(username));
+        var hex = Convert.ToHexString(bytes, 0, 4); // 8 hex chars
+        return hex.ToLowerInvariant();
+    }
+
     private static object SimplifyUpdate(Update u)
     {
         string MaskUserId(long id) => "U" + Math.Abs(id % 10000).ToString("D4");
-        string? MaskUsername(string? username) => string.IsNullOrEmpty(username) ? null : ("u_" + username.GetHashCode().ToString("x"));
+        string? MaskUsername(string? username) => string.IsNullOrEmpty(username) ? null : ("u_" + StableUsernameHash(username));
         string? mediaKind = null;
         var hasText = !string.IsNullOrWhiteSpace(u.Message?.Text) || !string.IsNullOrWhiteSpace(u.Message?.Caption);
         if (u.Message != null && !hasText)
