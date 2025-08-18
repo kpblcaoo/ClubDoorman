@@ -1,7 +1,7 @@
 {
   "ChatId": -1001234567890,
   "Payload": {
-    "Id": 1,
+    "Id": 13,
     "Type": "Message",
     "Message": {
       "MessageId": 0,
@@ -9,14 +9,14 @@
       "Type": 2,
       "Title": "GoldenBaselineChat",
       "From": {
-        "Id": "U0001",
+        "Id": "U0012",
         "IsBot": false,
-        "Username": "u_c54ddd7e"
+        "Username": "u_43fb2a39"
       },
-      "Text": "Baseline message one"
+      "Text": "Первое обычное сообщение цепочки"
     }
   },
   "Type": "Message",
-  "UserId": 900000001,
+  "UserId": 900000012,
   "handler": "MessageHandler"
 }

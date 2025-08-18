@@ -32,6 +32,9 @@ Environment.SetEnvironmentVariable("DOORMAN_ADMIN_CHAT", "123456789");
 Environment.SetEnvironmentVariable("DOORMAN_OPENROUTER_API", "baseline-dummy-key");
 Environment.SetEnvironmentVariable("DOORMAN_TEXT_MENTION_FILTER_ENABLE", "true"); // enable link filter for scenarios
 Environment.SetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE", "1"); // signal DI to use dummy Telegram client
+// Fast-mode / scenario tuning
+Environment.SetEnvironmentVariable("DOORMAN_EMOJI_VIOLATIONS_BEFORE_BAN", "2"); // allow observing escalation if needed
+Environment.SetEnvironmentVariable("DOORMAN_TEST_BLACKLIST_IDS", "900000050"); // banlist scenario user
 
 // Redirect data writes (approved users, etc.) into baseline sandbox directory (created after build dir known)
 var baselineDataRoot = Path.Combine(assemblyDir, "baseline-data");

@@ -6,6 +6,12 @@
       "Members": 5,
       "CaptchaShown": 1,
       "Bans": 12
+    },
+    "-1001234567890": {
+      "Title": "GoldenBaselineChat",
+      "Members": 0,
+      "CaptchaShown": 0,
+      "Bans": 1
     }
   }
 }

@@ -26,21 +26,69 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
         // 4: Message containing a link -> expect Delete/Report (link policy)
         // 5: Emoji flood (no greeting word) -> expect Delete (В этом сообщении многовато эмоджи)
         // 6: Mixed benign content with number & cyrillic (control Allow)
-        var updates = new[]
+        // Extended scenarios start at id 7
+        // 7: Boring greeting to explicitly capture greeting deletion
+        var boringGreetingUser = MakeUser(900000007);
+        var greetingMsg = CreateMsg(boringGreetingUser, "Привет");
+        var upd7 = new Update { Id = 7, Message = greetingMsg };
+
+        // 8 & 9: Same user triggers two emoji floods to accumulate violations (ban threshold controlled by env -> set to 2 outside seeder)
+        var emojiRepeatUser = MakeUser(900000008);
+        string flood = "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 test"; // > 10 emojis
+        var upd8 = new Update { Id = 8, Message = CreateMsg(emojiRepeatUser, flood) };
+        var upd9 = new Update { Id = 9, Message = CreateMsg(emojiRepeatUser, flood) }; // second violation
+
+        // 10: Mixed stop-word + link (priority check). Text contains stop phrase + URL
+        var upd10 = Make(10, 900000009, "ищу партнеров https://spam.example для удаленного заработка");
+
+        // 11: Media without text (should go to manual review). Photo array with null text.
+        var mediaUser = MakeUser(900000010);
+        var mediaMsg = new Message
         {
-            Make(1, 900000001, "Baseline message one"),                   // neutral (was greeting)
-            Make(2, 900000002, "Second baseline message about normal workflow"), // normal -> Allow
-            Make(3, 900000003, "ищу партнеров для удаленного заработка"),   // stop-words -> Delete
-            Make(4, 900000004, "Заходите https://example.com супер"),       // link -> should Delete when filter enabled
-            // Use 16 emojis + short tail, avoid greeting words to trigger emoji filter only
-            Make(5, 900000005, "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 xx"), // emoji flood -> Delete (many emojis)
-            Make(6, 900000006, "Пакет номер 42 обработан успешно")          // normal -> Allow
+            Date = now,
+            Chat = chat,
+            From = mediaUser,
+            Photo = new[] { new PhotoSize { FileId = "file-id-1", Width = 10, Height = 10, FileSize = 123 } },
+            Caption = null,
+            Text = null
+        };
+        var upd11 = new Update { Id = 11, Message = mediaMsg };
+
+        // 12: Command /start from not-approved user (first message)
+        var upd12 = Make(12, 900000011, "/start");
+
+        // 13 & 14: Reply chain. First normal message allowed, second is a reply containing link (should still delete)
+        var replyUser = MakeUser(900000012);
+        var firstReplyBase = CreateMsg(replyUser, "Первое обычное сообщение цепочки");
+        var upd13 = new Update { Id = 13, Message = firstReplyBase };
+        var replyWithLink = CreateMsg(replyUser, "Ответ с ссылкой http://malicious.ru");
+        replyWithLink.ReplyToMessage = firstReplyBase;
+        var upd14 = new Update { Id = 14, Message = replyWithLink };
+
+        // 15: User from banlist immediate reaction (user id chosen to match DOORMAN_TEST_BLACKLIST_IDS value set in Program)
+        var banlistUser = MakeUser(900000050);
+        var upd15 = new Update { Id = 15, Message = CreateMsg(banlistUser, "Сообщение от забаненного ранее пользователя") };
+
+        // 16 & 17: Emoji threshold boundary (exactly at limit vs over). Build messages with 10 emojis (boundary) then 11.
+        var boundaryUser = MakeUser(900000013);
+        string tenEmojis = string.Concat(Enumerable.Repeat("😀", 10)) + " ok"; // boundary
+        string elevenEmojis = string.Concat(Enumerable.Repeat("😀", 11)) + " boom"; // over limit
+        var upd16 = new Update { Id = 16, Message = CreateMsg(boundaryUser, tenEmojis) };   // should be Allow (if policy counts >=10; adjust expectation accordingly)
+        var upd17 = new Update { Id = 17, Message = CreateMsg(boundaryUser, elevenEmojis) }; // should Delete
+
+        var updates = new List<Update>
+        {
+            Make(1, 900000001, "Baseline message one"),
+            Make(2, 900000002, "Second baseline message about normal workflow"),
+            Make(3, 900000003, "ищу партнеров для удаленного заработка"),
+            Make(4, 900000004, "Заходите https://example.com супер"),
+            Make(5, 900000005, "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 xx"),
+            Make(6, 900000006, "Пакет номер 42 обработан успешно"),
+            upd7, upd8, upd9, upd10, upd11, upd12, upd13, upd14, upd15, upd16, upd17
         };
 
         foreach (var u in updates)
-        {
             await dispatcher.DispatchAsync(u, cancellationToken);
-        }
 
         await Task.Delay(150, cancellationToken);
         logger.LogInformation("Golden baseline seeder: completed feed");
