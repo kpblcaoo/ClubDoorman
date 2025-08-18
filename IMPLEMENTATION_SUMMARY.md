@@ -105,6 +105,7 @@ DOORMAN_BAN_FOLDER_INVITE_USERS=false
 | 3 | Упрощённый слой (Schema=2) | `golden/baseline_v2/*.v2.json` | Биекция RuleCode множеств (manifest ↔ v2), паритет Action |
 | 4 | Нормализованный слой (Schema=4) | `golden/baseline_norm/*.norm.json` | Schema=4 маркер, паритет RuleCode с manifest, Action совпадает при наличии |
 | 5 | Агрегаты (Schema=5) | `golden/aggregates.json` | Totals, ActionCounts, RuleCodeCounts, RuleCodesFingerprint согласованы с manifest |
+| 6 (CI Gate) | Валидация стабильности | GitHub Action `golden-validation` | Отсутствие diff после регенерации + прохождение Golden-* тестов |
 
 ### Phase 4 (Schema=4) Детали
 Цель: предоставить «самый тонкий» стабильный слой для будущего сравнения без шума. Поля: `Schema`, `Id`, `CorrelationId`, `ShortName`, `Action`, `RuleCode`.
@@ -124,9 +125,31 @@ DOORMAN_BAN_FOLDER_INVITE_USERS=false
 - Возможность убрать громоздкие v1 `*.output.json` после стабилизации следующих фаз (предположительно Phase 6+).
 
 След. шаги (план):
-1. Phase 6 — автоматический diff gate (использовать Schema=4 + aggregates fingerprint).
-2. Phase 7 — постепенное «soft delete» v1 (legacy *.output.json) при подтверждённой стабильности.
-3. Phase 8 — Mutation/chaos проверки стабильности (опционально) + hash цепочка для quick integrity check.
+1. Phase 7 — постепенное «soft delete» v1 (legacy *.output.json) при подтверждённой стабильности.
+2. Phase 8 — Mutation/chaos проверки стабильности (опционально) + hash цепочка для quick integrity check.
+
+### Phase 6 (CI Gate) Детали
+Добавлен workflow `golden-validation.yml`, который на каждом PR:
+1. Собирает проект (Release).
+2. Запускает baseline harness (`ClubDoorman.Baseline`) для регенерации всех фаз (0–5).
+3. Выполняет проверку `git status --porcelain -- ClubDoorman.Baseline/golden` и падает, если есть изменённые или новые файлы.
+4. Запускает селективные Golden-тесты (категории: GoldenManifest, GoldenV2, GoldenNorm, GoldenAgg).
+5. Публикует артефакты (golden файлы + результаты тестов) для ревью.
+
+Цель: мгновенно подсветить любые непреднамеренные изменения семантики модерации. Если изменение осознанное — разработчик обновляет golden baseline локально и коммитит.
+
+Локальный прогон через act (пример):
+```
+act pull_request -j golden-validation -W .github/workflows/golden-validation.yml
+```
+Перед запуском убедитесь в наличии .NET 9 (см. скрипт `./dotnet-install.sh`).
+
+Процедура осознанного обновления golden:
+1. Изменить код.
+2. `dotnet run --project ClubDoorman.Baseline/ClubDoorman.Baseline.csproj` (Release не обязателен локально).
+3. Просмотреть `git diff ClubDoorman.Baseline/golden`.
+4. Если корректно — добавить/коммитить изменения.
+5. Убедиться, что workflow golden-validation проходит без дальнейших диффов.
 
 ## 🔄 Channel Effects Migration Progress (Stage 2 & 3) — HISTORICAL (migration completed, scaffolding removed)
 

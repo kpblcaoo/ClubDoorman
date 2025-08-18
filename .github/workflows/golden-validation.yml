@@ -1,0 +1,89 @@
+name: Golden Baseline Validation
+
+on:
+  pull_request:
+    branches: [ "*" ]
+  workflow_dispatch: {}
+
+jobs:
+  golden-validation:
+    runs-on: ubuntu-latest
+    env:
+      MSBUILDTERMINALLOGGER: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build (Release)
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run baseline harness (regenerates golden layers)
+        run: |
+          echo "Running baseline harness to regenerate golden artifacts"
+          dotnet run --project ClubDoorman.Baseline/ClubDoorman.Baseline.csproj -c Release --no-build
+
+      - name: Detect unintended golden diffs
+        id: diffcheck
+        run: |
+          echo "Checking for diffs/untracked files inside golden directory after regeneration"
+          status=$(git status --porcelain -- ClubDoorman.Baseline/golden)
+          if [ -n "$status" ]; then
+            echo "Golden artifacts changed (including possible untracked files):" | tee -a $GITHUB_STEP_SUMMARY
+            echo "$status" | tee -a $GITHUB_STEP_SUMMARY
+            # Show detailed diff (may be empty for new files)
+            git diff -- ClubDoorman.Baseline/golden || true
+            echo "golden_diff=1" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "No golden diffs detected." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Run Golden tests only
+        run: |
+          echo "Executing Golden category tests (schema + invariants)"
+          dotnet test ClubDoorman.Test/ClubDoorman.Test.csproj \
+            --no-restore --no-build \
+            --filter "(Category=GoldenManifest|Category=GoldenV2|Category=GoldenNorm|Category=GoldenAgg)" \
+            --verbosity minimal \
+            --logger "trx;LogFileName=golden-tests.trx"
+
+      - name: Upload golden directory (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-artifacts
+          path: ClubDoorman.Baseline/golden/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload test results (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-test-results
+          path: | 
+            **/golden-tests.trx
+            ClubDoorman.Test/TestResults/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Summary
+        if: always()
+        run: |
+          echo '### Golden Validation Summary' >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.diffcheck.outputs.golden_diff }}" = "1" ]; then
+            echo '*Status:* ❌ Diff detected in golden artifacts.' >> $GITHUB_STEP_SUMMARY
+          else
+            echo '*Status:* ✅ No diffs in golden artifacts.' >> $GITHUB_STEP_SUMMARY
+          fi
+          echo '*Golden tests:* Completed (see artifacts for detailed results).' >> $GITHUB_STEP_SUMMARY
