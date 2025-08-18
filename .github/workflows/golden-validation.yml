@@ -73,7 +73,7 @@ jobs:
           dotnet test ClubDoorman.Test/ClubDoorman.Test.csproj \
             --no-restore --no-build \
             --configuration Release \
-            --filter "(Category=GoldenManifest|Category=GoldenV2|Category=GoldenNorm|Category=GoldenAgg)" \
+            --filter "(Category=GoldenManifest|Category=GoldenV2|Category=GoldenNorm|Category=GoldenAgg|Category=GoldenHygiene)" \
             --verbosity minimal \
             --logger "trx;LogFileName=golden-tests.trx"
 
