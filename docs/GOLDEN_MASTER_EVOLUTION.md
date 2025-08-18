@@ -7,6 +7,24 @@ This document captures the phased plan to evolve the current synthetic Golden Ma
 - Invasiveness (prod impact): Low / Med / High (affects production runtime behavior vs. test-only infra)
 - Confidence: Estimated probability of smooth delivery
 
+## Phase 0 – Baseline Check‑In (Current State Freeze)
+Establish an immutable reference of the existing Golden Master before semantic refactors (Phases 1+).
+
+Goals:
+- Capture an authoritative snapshot bundle (all current *.output.json + any inputs) with a manifest of file hashes.
+- Tag or branch this state so future semantic migrations can diff against a known pre-normalization baseline.
+
+Tasks:
+1. Create lightweight script `scripts/baseline_freeze.sh` that enumerates current golden snapshot files and produces `golden/freeze-manifest.json` with `{ path, sha256 }[]`.
+2. Commit manifest; create git tag `gm-freeze-0` (or branch `baseline-freeze` if tag policy restricted).
+3. (Optional) Add NUnit test that, when `FREEZE_ENFORCE=1`, validates files still match freeze manifest (used only during migration window).
+4. (Optional) Helper `tools/diff_freeze.py` summarizing changed actions / reason texts vs freeze manifest.
+
+Complexity: S | Invasiveness: None | Confidence: 99%
+Risks: Forget to execute before Phase 1. Mitigation: Add checklist item to PR template.
+
+Rationale: Provides a clean “before” for auditing semantic compression effects (ensuring no silent behavioral drift from RuleCode mapping / text normalization).
+
 ## Phase 1 – Semantic Core (RuleCode + mediaKind + noise pruning)
 Introduce a stable semantic layer so snapshots depend on codes, not brittle free‑text.
 
@@ -81,8 +99,21 @@ Tasks:
 1. Merge emoji 9/10/11 into one scenario with sequential messages.
 2. Remove redundant snapshots; update manifest.
 
+Aggregation Criteria (merge when):
+- Sequential escalation of the same rule (e.g., emoji threshold walk) where only numeric progression differs.
+- Temporal progression toward an action (warn → delete → ban) without introducing a new RuleCode.
+- Variants whose only distinction is a trivial numeric boundary (N vs N+1) and not historically fragile.
+
+Keep Separate when:
+- A variant exercises a different RuleCode or feature toggle / chat type branch.
+- Text variation stresses parsing/tokenization differences (e.g., stop-words+link vs pure link).
+- Scenario is a minimal reproducer for a previously regressed bug (acts as regression sentinel).
+- Preconditions materially differ (e.g., pre-banned user vs clean state) such that merging would obscure setup.
+
+Heuristic: If diagnosing a failure would force mentally replaying internal message indices to isolate one boundary, keep it separate; otherwise aggregate.
+
 Complexity: S | Invasiveness: Low | Confidence: 95%
-Risk: Loss of fine-grained diff clarity. Mitigation: Keep internal message index in scenario output.
+Risk: Loss of fine-grained diff clarity. Mitigation: Include per-message sub-index in aggregated scenario output metadata.
 
 ## Phase 8 – CI Enforcement
 Fail fast on unintended drift.
@@ -144,6 +175,7 @@ Risk: Staleness. Mitigation: PR template checkbox referencing doc updated.
 
 | Phase | Name                         | Cmplx | Inv | Conf | Primary Risk |
 |------:|------------------------------|:-----:|:---:|:----:|--------------|
+| 0 | Baseline Check-in            | S | None | 99% | Missed freeze step |
 | 1 | Semantic Core                | M | Low | 95% | Missing mapping |
 | 2 | Manifest                     | S | Low | 98% | Drift vs files |
 | 3 | Snapshot v2 DTO              | M | Med | 90% | Dual format linger |
@@ -159,12 +191,14 @@ Risk: Staleness. Mitigation: PR template checkbox referencing doc updated.
 
 ---
 ## Quick Wins (Recommended First)
-1. Phase 1 + Phase 2 (semantic + manifest) → immediate stability & diff clarity.
-2. Phase 6 (pull invariant logic out of GM) → slows scenario growth.
-3. Phase 3+4 (v2 + normalization) once existing snapshots stable for 1–2 PRs.
+1. Phase 0 (freeze) → safe historical baseline for auditing.
+2. Phase 1 + Phase 2 (semantic + manifest) → immediate stability & diff clarity.
+3. Phase 6 (pull invariant logic out of GM) → slows scenario growth.
+4. Phase 3+4 (v2 + normalization) once existing snapshots stable for 1–2 PRs.
 
 ---
 ## Acceptance Criteria (Key Early Phases)
+- P0: `freeze-manifest.json` committed; hashes stable for current baseline set.
 - P1: Each snapshot has non-null RuleCode; zero negative/meaningless confidence values.
 - P2: Manifest test fails on missing/extra snapshot.
 - P3: Both v1 & v2 written; SCHEMA_VERSION=2 file present.
@@ -174,6 +208,7 @@ Risk: Staleness. Mitigation: PR template checkbox referencing doc updated.
 ## Risk Mitigation Matrix (Condensed)
 | Risk | Phase | Mitigation |
 |------|-------|-----------|
+| Missed freeze step | 0 | Add checklist item in PR template |
 | Unknown Rule | 1 | Log + fallback Unknown; audit before merge |
 | Drift (files) | 2/8 | CI diff gating |
 | Dual format drag | 3 | Timebox removal milestone |
@@ -193,3 +228,6 @@ Risk: Staleness. Mitigation: PR template checkbox referencing doc updated.
 - Update Flow: Change → run baseline → update manifest → CI green → human review sign-off (label `baseline-approved`).
 
 End of roadmap.
+
+## Recommended Execution Order vs Numbering
+Numbering reflects conceptual dependency layers (semantic foundation → structural tooling → cleanup), not strict chronological execution. Practical early value favors executing phases in this order: 0, 1, 2, 6, 3, 4, 5, 7, 8, 9, 10, 11, 12. Numeric IDs stay stable to avoid churn in references (docs, issues, PRs); this section documents pragmatic sequencing.
