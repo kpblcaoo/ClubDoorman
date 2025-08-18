@@ -1,0 +1,8 @@
+{
+  "Schema": 2,
+  "CorrelationId": "6C17E39564C2DED7",
+  "Id": 7,
+  "ShortName": "Greeting",
+  "Action": "Delete",
+  "RuleCode": "Greeting"
+}

@@ -1,6 +1,6 @@
 {
   "Schema": 1,
-  "GeneratedAtUtc": "2025-08-18T16:25:39.0407079Z",
+  "GeneratedAtUtc": "2025-08-18T17:05:25.7505709Z",
   "Variant": "baseline",
   "Entries": [
     {
@@ -8,21 +8,21 @@
       "ShortName": "BaseMsg1",
       "CorrelationId": "43EB9B4811373E29",
       "ExpectedAction": "Allow",
-      "RuleCode": "Unknown"
+      "RuleCode": "Pass"
     },
     {
       "Id": 2,
       "ShortName": "BaseMsg2",
       "CorrelationId": "582B88BA8D301617",
       "ExpectedAction": "Allow",
-      "RuleCode": "Unknown"
+      "RuleCode": "Pass"
     },
     {
       "Id": 3,
       "ShortName": "StopWords",
       "CorrelationId": "404A7363FBF8785F",
       "ExpectedAction": "Delete",
-      "RuleCode": "Unknown"
+      "RuleCode": "StopWords"
     },
     {
       "Id": 4,
@@ -43,7 +43,7 @@
       "ShortName": "BenignControl",
       "CorrelationId": "A0FC50B1346FBFFD",
       "ExpectedAction": "Allow",
-      "RuleCode": "Unknown"
+      "RuleCode": "Pass"
     },
     {
       "Id": 7,
@@ -78,20 +78,20 @@
       "ShortName": "MediaEarlyDefault",
       "CorrelationId": "45C95440B2A59BAA",
       "ExpectedAction": "Delete",
-      "RuleCode": "Unknown"
+      "RuleCode": "MediaEarlyBlock"
     },
     {
       "Id": 12,
       "ShortName": "CommandStart",
       "CorrelationId": "69E2E8CA2B7A6103",
-      "RuleCode": "Unknown"
+      "RuleCode": "Command"
     },
     {
       "Id": 13,
       "ShortName": "ReplyBase",
       "CorrelationId": "0EABC0ECF91457C7",
       "ExpectedAction": "Allow",
-      "RuleCode": "Unknown"
+      "RuleCode": "Pass"
     },
     {
       "Id": 14,
@@ -104,7 +104,7 @@
       "Id": 15,
       "ShortName": "BanlistUser",
       "CorrelationId": "117EE796C2DB7D85",
-      "RuleCode": "Unknown"
+      "RuleCode": "Banlist"
     },
     {
       "Id": 16,

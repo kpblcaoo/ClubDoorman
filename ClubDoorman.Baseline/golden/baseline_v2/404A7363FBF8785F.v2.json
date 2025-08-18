@@ -1,0 +1,8 @@
+{
+  "Schema": 2,
+  "CorrelationId": "404A7363FBF8785F",
+  "Id": 3,
+  "ShortName": "StopWords",
+  "Action": "Delete",
+  "RuleCode": "StopWords"
+}

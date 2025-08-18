@@ -11,9 +11,10 @@
       "From": {
         "Id": "U0010",
         "IsBot": false,
-        "Username": "u_5f45e546"
+        "Username": "u_330dc070"
       },
-      "Text": ""
+      "Text": "",
+      "MediaKind": "photo"
     }
   },
   "Type": "Message",

@@ -93,6 +93,41 @@ DOORMAN_BAN_FOLDER_INVITE_USERS=false
 
 ---
 
+## 🧪 Golden Master Evolution (Phases 0–4) — Current Snapshot
+
+Ниже краткая фиксация состояния многофазной эволюции golden baseline (для разработчиков, работающих с тестовой семантикой модерации).
+
+| Phase | Цель | Артефакты | Ключевые инварианты |
+|-------|------|-----------|---------------------|
+| 0 | Дет. заморозка исходных v1 snapshot пар | `golden/baseline/*.input.json` + `*.output.json` | Стабильность хеша корреляции, неизменяемый набор сценариев |
+| 1 | Семантическое обогащение (RuleCode) | Расширенные `*.output.json` | Отсутствие `Unknown` в `ruleCode` |
+| 2 | Манифест (Schema=1) | `golden/manifest.json` | Непрерывные Id, нет сирот, `Pass ⇒ Allow` |
+| 3 | Упрощённый слой (Schema=2) | `golden/baseline_v2/*.v2.json` | Биекция RuleCode множеств (manifest ↔ v2), паритет Action |
+| 4 | Нормализованный слой (Schema=4) | `golden/baseline_norm/*.norm.json` | Schema=4 маркер, паритет RuleCode с manifest, Action совпадает при наличии |
+| 5 | Агрегаты (Schema=5) | `golden/aggregates.json` | Totals, ActionCounts, RuleCodeCounts, RuleCodesFingerprint согласованы с manifest |
+
+### Phase 4 (Schema=4) Детали
+Цель: предоставить «самый тонкий» стабильный слой для будущего сравнения без шума. Поля: `Schema`, `Id`, `CorrelationId`, `ShortName`, `Action`, `RuleCode`.
+
+Источник данных:
+1. Первично — V2 (`baseline_v2/*.v2.json`).
+2. Fallback — исходный v1 `*.output.json` (если вдруг V2 отсутствует — защитный механизм).
+
+Инварианты проверяются тестом `GoldenNormalizationTests` (Category=GoldenNorm):
+- Наличие файла для каждого manifest entry.
+- `Schema == 4`.
+- Совпадение `Id/CorrelationId/ShortName` и (если не null) `Action` / `RuleCode` с manifest.
+- Полное множество `RuleCode` идентично manifest.
+
+Назначение слоя Schema=4:
+- Будущая точка входа для дифф-валидации PR (CI gate) с минимальными ложными диффами.
+- Возможность убрать громоздкие v1 `*.output.json` после стабилизации следующих фаз (предположительно Phase 6+).
+
+След. шаги (план):
+1. Phase 6 — автоматический diff gate (использовать Schema=4 + aggregates fingerprint).
+2. Phase 7 — постепенное «soft delete» v1 (legacy *.output.json) при подтверждённой стабильности.
+3. Phase 8 — Mutation/chaos проверки стабильности (опционально) + hash цепочка для quick integrity check.
+
 ## 🔄 Channel Effects Migration Progress (Stage 2 & 3) — HISTORICAL (migration completed, scaffolding removed)
 
 Дата (историческая фиксация этапа): 2025-08-17

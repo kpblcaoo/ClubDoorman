@@ -83,6 +83,17 @@ static async Task RunBaselineVariantAsync(string variantName, bool disableMediaF
         var goldenRoot = f.GoldenBasePath ?? Path.Combine(AppContext.BaseDirectory, "golden");
         ClubDoorman.Baseline.Golden.GoldenManifestBuilder.Build(goldenRoot, variantName);
         loggerLocal.LogInformation("Golden manifest generated for variant {Variant}", variantName);
+        if (string.Equals(variantName, "baseline", StringComparison.OrdinalIgnoreCase))
+        {
+            ClubDoorman.Baseline.Golden.GoldenV2Exporter.Export(goldenRoot);
+            loggerLocal.LogInformation("Golden V2 export completed for variant {Variant}", variantName);
+            ClubDoorman.Baseline.Golden.GoldenNormalizationBuilder.Build(goldenRoot);
+            loggerLocal.LogInformation("Golden normalization export (Phase 4) completed for variant {Variant}", variantName);
+            Console.WriteLine("[DEBUG] Entering aggregate builder Phase 5");
+            ClubDoorman.Baseline.Golden.GoldenAggregateBuilder.Build(goldenRoot, variantName);
+            Console.WriteLine("[DEBUG] Exited aggregate builder Phase 5");
+            loggerLocal.LogInformation("Golden aggregate export (Phase 5) completed for variant {Variant}", variantName);
+        }
     }
     catch (Exception ex)
     {

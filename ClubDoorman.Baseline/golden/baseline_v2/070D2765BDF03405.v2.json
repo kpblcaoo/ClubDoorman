@@ -1,0 +1,8 @@
+{
+  "Schema": 2,
+  "CorrelationId": "070D2765BDF03405",
+  "Id": 16,
+  "ShortName": "EmojiBoundaryOk",
+  "Action": "Delete",
+  "RuleCode": "TooManyEmojis"
+}

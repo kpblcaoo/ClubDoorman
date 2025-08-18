@@ -1,0 +1,23 @@
+{
+  "Schema": 5,
+  "Variant": "baseline",
+  "Total": 18,
+  "ActionCounts": {
+    "(null)": "2",
+    "Allow": "4",
+    "Delete": "11",
+    "Report": "1"
+  },
+  "RuleCodeCounts": {
+    "Banlist": "1",
+    "Command": "1",
+    "Greeting": "1",
+    "Links": "3",
+    "MediaEarlyBlock": "1",
+    "MediaNoCaption": "1",
+    "Pass": "4",
+    "StopWords": "1",
+    "TooManyEmojis": "5"
+  },
+  "RuleCodesFingerprint": "Banlist|Command|Greeting|Links|MediaEarlyBlock|MediaNoCaption|Pass|StopWords|TooManyEmojis"
+}

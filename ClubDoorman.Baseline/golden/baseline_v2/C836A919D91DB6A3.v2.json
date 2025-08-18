@@ -1,0 +1,8 @@
+{
+  "Schema": 2,
+  "CorrelationId": "C836A919D91DB6A3",
+  "Id": 18,
+  "ShortName": "MediaAnnouncement",
+  "Action": "Report",
+  "RuleCode": "MediaNoCaption"
+}
