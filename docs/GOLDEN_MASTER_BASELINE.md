@@ -11,7 +11,8 @@ Golden Master (GM) подсистема решает три задачи:
 ## Что пишется
 Для каждого сэмпла (по выборке `GoldenSampleRate`) пишутся два JSON файла:
 - `<correlationId>.input.json` — нормализованное входное Update (маскированы userId / username, усечён текст, null'ы удалены, свойства отсортированы).
-- `<correlationId>.output.json` — результат высокоуровневой обработки (то что передали в `TryRecordOutput`).
+- (Удалено в Phase 9) `<correlationId>.output.json` — прежний детальный v1 вывод.
+- `<correlationId>.sem.json` — легковесная семантика (action, ruleCode), НЕ коммитится; используется билдерами для восстановления семантики после удаления v1.
 
 ## Маскирование и приватность
 - UserId → `Uxxxx` (остаток mod 10000, с ведущими нулями)
@@ -39,10 +40,10 @@ Golden Master (GM) подсистема решает три задачи:
  golden/
    2025-08-18/          # обычные ежедневные (рабочий режим)
      ab12cd34ef56.input.json
-     ab12cd34ef56.output.json
+  ab12cd34ef56.sem.json   # локальная семантика (может присутствовать)
    baseline/            # фиксированная подпапка с эталоном
      9f3a0b1c2d3e.input.json
-     9f3a0b1c2d3e.output.json
+  9f3a0b1c2d3e.sem.json
 ```
 
 ## Снятие baseline

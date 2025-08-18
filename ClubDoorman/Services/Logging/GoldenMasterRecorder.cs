@@ -63,18 +63,25 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
 
     public void TryRecordOutput(string? correlationId, object? resultPayload)
     {
-        if (correlationId == null) return;
+        if (correlationId == null) return; // semantics keyed by correlation
         var f = _flags.Value;
         if (!f.GoldenMasterEnabled) return;
         try
         {
-            var enriched = EnrichOutput(resultPayload);
-            var sanitized = Canonicalize(new { Output = enriched });
-            WriteFile(correlationId, "output", sanitized);
+            // Extract minimal semantics (action + ruleCode) for downstream manifest/V2 export.
+            var (action, ruleCode) = ExtractSemantics(resultPayload);
+            if (action == null && ruleCode == null) return; // nothing to persist
+            var dateFolder = f.GoldenFixedDateFolder ?? DateTime.UtcNow.ToString("yyyy-MM-dd");
+            var basePath = f.GoldenBasePath ?? "golden";
+            var dir = Path.Combine(basePath, dateFolder);
+            Directory.CreateDirectory(dir);
+            var semPath = Path.Combine(dir, correlationId + ".sem.json");
+            var json = JsonConvert.SerializeObject(new { action, ruleCode }, Formatting.Indented);
+            File.WriteAllText(semPath, json);
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "GoldenMasterRecorder: failed to record output");
+            _logger.LogDebug(ex, "GoldenMasterRecorder: failed to record semantics");
         }
     }
 
@@ -124,9 +131,9 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
         };
     }
 
-    private static object? EnrichOutput(object? payload)
+    private static (string? action, string? ruleCode) ExtractSemantics(object? payload)
     {
-        if (payload == null) return null;
+        if (payload == null) return (null, null);
         try
         {
             var json = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
@@ -137,20 +144,22 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
             var token = JToken.Parse(json);
             if (token is JObject obj)
             {
-                var reason = obj.Property("reason")?.Value?.ToString();
-                var kind = obj.Property("kind")?.Value?.ToString();
-                var code = ReasonCodeMapper.MapReason(reason, kind);
-                if (obj.Property("ruleCode") == null)
+                string? action = obj.Property("action")?.Value?.ToString();
+                string? reason = obj.Property("reason")?.Value?.ToString();
+                string? kind = obj.Property("kind")?.Value?.ToString();
+                string? ruleCode = obj.Property("ruleCode")?.Value?.ToString();
+                if (ruleCode == null)
                 {
-                    obj.Add("ruleCode", code.ToString());
+                    var code = ReasonCodeMapper.MapReason(reason, kind);
+                    ruleCode = code.ToString();
                 }
-                return obj;
+                return (action, ruleCode);
             }
-            return token;
+            return (null, null);
         }
         catch
         {
-            return payload;
+            return (null, null);
         }
     }
 

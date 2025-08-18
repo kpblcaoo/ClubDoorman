@@ -81,19 +81,16 @@ internal static class GoldenNormalizationBuilder
                         if (root.TryGetProperty("Action", out var a)) action = a.GetString();
                         if (root.TryGetProperty("RuleCode", out var r)) ruleCode = r.GetString();
                     }
-                    else
+                    // If semantics still missing in V2, try .sem.json as last resort
+                    if ((string.IsNullOrWhiteSpace(action) || string.IsNullOrWhiteSpace(ruleCode)) && File.Exists(Path.Combine(goldenRoot, "baseline", e.CorrelationId + ".sem.json")))
                     {
-                        // Fallback read original output for action / ruleCode consistency
-                        var outPath = Path.Combine(goldenRoot, "baseline", e.CorrelationId + ".output.json");
-                        if (File.Exists(outPath))
+                        try
                         {
-                            using var outDoc = JsonDocument.Parse(File.ReadAllText(outPath));
-                            if (outDoc.RootElement.TryGetProperty("Output", out var outRoot))
-                            {
-                                if (outRoot.TryGetProperty("action", out var a)) action = a.GetString();
-                                if (outRoot.TryGetProperty("ruleCode", out var r)) ruleCode = r.GetString();
-                            }
+                            using var semDoc = JsonDocument.Parse(File.ReadAllText(Path.Combine(goldenRoot, "baseline", e.CorrelationId + ".sem.json")));
+                            if (string.IsNullOrWhiteSpace(action) && semDoc.RootElement.TryGetProperty("action", out var a)) action = a.GetString();
+                            if (string.IsNullOrWhiteSpace(ruleCode) && semDoc.RootElement.TryGetProperty("ruleCode", out var r)) ruleCode = r.GetString();
                         }
+                        catch { /* ignore */ }
                     }
 
                     var norm = new NormalizedSnapshot

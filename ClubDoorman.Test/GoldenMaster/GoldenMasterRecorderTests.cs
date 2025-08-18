@@ -44,7 +44,7 @@ public class GoldenMasterRecorderTests : TestBase
     }
 
     [Test]
-    public void Recorder_WritesInputAndOutput_FilesDeterministic()
+    public void Recorder_WritesInputAndOptionalSemantics_AfterV1Removal()
     {
         var tmpDir = Path.Combine(Path.GetTempPath(), "gm_test_" + Path.GetRandomFileName());
         Directory.CreateDirectory(tmpDir);
@@ -54,17 +54,19 @@ public class GoldenMasterRecorderTests : TestBase
             var update = CreateSampleUpdate();
             var correlation = recorder.TryRecordInput(update, "MessageHandler", update.Message!.Chat.Id, update.Message.From!.Id);
             Assert.That(correlation, Is.Not.Null, "correlationId null - запись не произошла");
-            recorder.TryRecordOutput(correlation, new { kind = "test", value = 123 });
+            recorder.TryRecordOutput(correlation, new { kind = "test", value = 123 }); // no-op now
 
-            // Проверяем существование файлов
+            // Проверяем существование input файла и допускаем появление дополнительного .sem.json (семантика)
             var date = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
             var dayDir = Path.Combine(tmpDir, date);
             Assert.That(Directory.Exists(dayDir), Is.True, "Day directory not created");
             var files = Directory.GetFiles(dayDir, correlation + "*.json").OrderBy(f => f).ToArray();
-            Assert.That(files.Length, Is.EqualTo(2), "Expected input and output files");
+            Assert.That(files.Any(f => f.EndsWith("input.json")), Is.True, "Input file missing");
+            // Допускаем 1 файл (только input) или 2 файла (input + sem)
+            Assert.That(files.Length == 1 || (files.Length == 2 && files.Any(f => f.EndsWith(".sem.json"))), Is.True,
+                $"Unexpected file set: {string.Join(", ", files.Select(Path.GetFileName))}");
 
             var inputJson = File.ReadAllText(files.First(f => f.EndsWith("input.json")));
-            var outputJson = File.ReadAllText(files.First(f => f.EndsWith("output.json")));
 
             // Повторно вызовем Canonicalize (через второй recorder) и убедимся что содержимое input не меняется при повторной записи с тем же Update
             var recorder2 = new GoldenMasterRecorder(CreateFlags(tmpDir), new NullLogger<GoldenMasterRecorder>());

@@ -4,7 +4,7 @@ This document describes the multilayer golden baseline system used to gate moder
 
 ## Overview
 Phases:
-- Phase 0 (Raw v1): `golden/baseline/*.input.json` + `*.output.json`
+- Phase 0 (Raw v1): `golden/baseline/*.input.json` + `*.output.json` (устарело, удалено в Phase 9)
 - Phase 1 (Semantic Enrichment): ruleCode annotated in output
 - Phase 2 (Manifest, Schema=1): `golden/manifest.json`
 - Phase 3 (V2 Export, Schema=2): `golden/baseline_v2/*.v2.json`
@@ -45,7 +45,8 @@ Workflow regenerates artifacts and fails if any diff appears under `ClubDoorman.
 Golden tests (Manifest/V2/Norm/Agg) validate phase invariants.
 
 ## Future Roadmap
-- Phase 7: Drop legacy v1 `*.output.json` post confidence window.
+- Phase 7: (переименовано) Подготовка к удалению.
+- Phase 9: Полное удаление v1 `*.output.json`; добавлен невесомый слой `*.sem.json` (не в Git) для сохранения action/ruleCode.
 - Phase 8: Hash-chain integrity + mutation fuzz checks.
 - Selective ignore / allowlist mechanism for fields if additional low-signal volatility appears.
 

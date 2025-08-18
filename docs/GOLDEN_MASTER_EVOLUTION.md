@@ -11,7 +11,7 @@ This document captures the phased plan to evolve the current synthetic Golden Ma
 Establish an immutable reference of the existing Golden Master before semantic refactors (Phases 1+).
 
 Goals:
-- Capture an authoritative snapshot bundle (all current *.output.json + any inputs) with a manifest of file hashes.
+- (Historical) Capture an authoritative snapshot bundle (all *.output.json + inputs) — заменено на inputs + manifest + локальная semantics.
 - Tag or branch this state so future semantic migrations can diff against a known pre-normalization baseline.
 
 Tasks:

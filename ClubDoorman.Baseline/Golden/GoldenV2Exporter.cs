@@ -66,13 +66,6 @@ internal static class GoldenV2Exporter
                 return;
             }
 
-            var baselineDir = Path.Combine(goldenRoot, "baseline");
-            if (!Directory.Exists(baselineDir))
-            {
-                Console.WriteLine("[GoldenV2] Baseline directory missing; skipping");
-                return;
-            }
-
             var v2Dir = Path.Combine(goldenRoot, "baseline_v2");
             Directory.CreateDirectory(v2Dir);
 
@@ -81,23 +74,21 @@ internal static class GoldenV2Exporter
             {
                 try
                 {
-                    var outputPath = Path.Combine(baselineDir, e.CorrelationId + ".output.json");
-                    if (!File.Exists(outputPath))
-                    {
-                        Console.WriteLine($"[GoldenV2] Missing output snapshot for CorrelationId={e.CorrelationId}; skipping entry");
-                        continue;
-                    }
-
-                    string? action = e.ExpectedAction; // default from manifest
+                    string? action = e.ExpectedAction;
                     string? ruleCode = e.RuleCode;
-
-                    // For robustness re-read source file to verify / override (source of truth)
-                    using (var outDoc = JsonDocument.Parse(File.ReadAllText(outputPath)))
+                    // If manifest lacks semantics attempt to read .sem.json (not committed) for richer info.
+                    if (string.IsNullOrWhiteSpace(action) || string.IsNullOrWhiteSpace(ruleCode))
                     {
-                        if (outDoc.RootElement.TryGetProperty("Output", out var outRoot))
+                        var semPath = Path.Combine(goldenRoot, "baseline", e.CorrelationId + ".sem.json");
+                        if (File.Exists(semPath))
                         {
-                            if (outRoot.TryGetProperty("action", out var aProp)) action = aProp.GetString();
-                            if (outRoot.TryGetProperty("ruleCode", out var rProp)) ruleCode = rProp.GetString();
+                            try
+                            {
+                                using var semDoc = JsonDocument.Parse(File.ReadAllText(semPath));
+                                if (string.IsNullOrWhiteSpace(action) && semDoc.RootElement.TryGetProperty("action", out var a)) action = a.GetString();
+                                if (string.IsNullOrWhiteSpace(ruleCode) && semDoc.RootElement.TryGetProperty("ruleCode", out var rc)) ruleCode = rc.GetString();
+                            }
+                            catch { /* ignore */ }
                         }
                     }
 

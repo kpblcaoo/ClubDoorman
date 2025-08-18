@@ -6,7 +6,7 @@
 | Фаза | Суть | Артефакты |
 |------|------|-----------|
 | 0 | Freeze первичного набора сценариев | `golden/freeze-manifest.json` |
-| 1 | Семантическое обогащение: добавление `ruleCode` (детерминированная классификация причин) | Обновлённые `*.output.json` |
+| 1 | Семантическое обогащение: добавление `ruleCode` | (Legacy) `*.output.json` → теперь `*.sem.json` (локально) |
 | 2 | Манифест сценариев (детерминированная индексация) | `golden/manifest.json` (Schema=1) |
 | 3 | Параллельный экспорт упрощённых V2 снапшотов | `golden/baseline_v2/*.v2.json` (Schema=2) |
 
@@ -27,7 +27,8 @@ dotnet run --project ClubDoorman.Baseline
 ## Результат
 В каталоге `golden/`:
 * `baseline/*.input.json` – входные апдейты
-* `baseline/*.output.json` – детальный v1 вывод
+* (Удалено) `baseline/*.output.json` – детальный v1 вывод
+* `baseline/*.sem.json` – (локально) семантика action/ruleCode (не входит в репозиторий)
 * `manifest.json` – список сценариев (Schema=1)
 * `baseline_v2/*.v2.json` – упрощённые v2 снапшоты (Schema=2)
 

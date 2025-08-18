@@ -52,23 +52,26 @@ internal static class GoldenManifestBuilder
             try
             {
                 var correlationId = Path.GetFileName(inputPath)!.Split('.')[0];
-                var outputPath = Path.Combine(variantDir, correlationId + ".output.json");
-                if (!File.Exists(outputPath)) continue;
+                // V1 output snapshot removed (Phase 9); rely solely on input + deterministic mapping.
 
                 using var inputDoc = JsonDocument.Parse(File.ReadAllText(inputPath));
                 var payload = inputDoc.RootElement.GetProperty("Payload");
                 var updateId = payload.TryGetProperty("Id", out var idProp) && idProp.TryGetInt32(out var uid) ? uid : -1;
                 if (updateId <= 0) continue;
 
+                // Attempt to read semantics file (written by GoldenMasterRecorder) to populate action / ruleCode.
                 string? ruleCode = null;
                 string? expectedAction = null;
-                using (var outputDoc = JsonDocument.Parse(File.ReadAllText(outputPath)))
+                var semPath = Path.Combine(variantDir, correlationId + ".sem.json");
+                if (File.Exists(semPath))
                 {
-                    if (outputDoc.RootElement.TryGetProperty("Output", out var outCore))
+                    try
                     {
-                        if (outCore.TryGetProperty("ruleCode", out var rProp)) ruleCode = rProp.GetString();
-                        if (outCore.TryGetProperty("action", out var aProp)) expectedAction = aProp.GetString();
+                        using var semDoc = JsonDocument.Parse(File.ReadAllText(semPath));
+                        if (semDoc.RootElement.TryGetProperty("action", out var a)) expectedAction = a.GetString();
+                        if (semDoc.RootElement.TryGetProperty("ruleCode", out var rc)) ruleCode = rc.GetString();
                     }
+                    catch { /* ignore */ }
                 }
 
                 ShortNames.TryGetValue(updateId, out var shortName);

@@ -101,8 +101,8 @@ DOORMAN_BAN_FOLDER_INVITE_USERS=false
 
 | Phase | Цель | Артефакты | Ключевые инварианты |
 |-------|------|-----------|---------------------|
-| 0 | Дет. заморозка исходных v1 snapshot пар | `golden/baseline/*.input.json` + `*.output.json` | Стабильность хеша корреляции, неизменяемый набор сценариев |
-| 1 | Семантическое обогащение (RuleCode) | Расширенные `*.output.json` | Отсутствие `Unknown` в `ruleCode` |
+| 0 | Дет. заморозка исходных v1 snapshot пар | `golden/baseline/*.input.json` + (legacy) `*.output.json` | Стабильность хеша корреляции, неизменяемый набор сценариев |
+| 1 | Семантическое обогащение (RuleCode) | Расширенные `*.output.json` (устарело) → теперь легковес `*.sem.json` | Отсутствие `Unknown` в `ruleCode` |
 | 2 | Манифест (Schema=1) | `golden/manifest.json` | Непрерывные Id, нет сирот, `Pass ⇒ Allow` |
 | 3 | Упрощённый слой (Schema=2) | `golden/baseline_v2/*.v2.json` | Биекция RuleCode множеств (manifest ↔ v2), паритет Action |
 | 4 | Нормализованный слой (Schema=4) | `golden/baseline_norm/*.norm.json` | Schema=4 маркер, паритет RuleCode с manifest, Action совпадает при наличии |
@@ -114,7 +114,8 @@ DOORMAN_BAN_FOLDER_INVITE_USERS=false
 
 Источник данных:
 1. Первично — V2 (`baseline_v2/*.v2.json`).
-2. Fallback — исходный v1 `*.output.json` (если вдруг V2 отсутствует — защитный механизм).
+2. (Удалено) Fallback — исходный v1 `*.output.json`.
+2*. Новый fallback: локальный `*.sem.json` (не коммитится).
 
 Инварианты проверяются тестом `GoldenNormalizationTests` (Category=GoldenNorm):
 - Наличие файла для каждого manifest entry.
@@ -124,10 +125,10 @@ DOORMAN_BAN_FOLDER_INVITE_USERS=false
 
 Назначение слоя Schema=4:
 - Будущая точка входа для дифф-валидации PR (CI gate) с минимальными ложными диффами.
-- Возможность убрать громоздкие v1 `*.output.json` после стабилизации следующих фаз (предположительно Phase 6+).
+- (Сделано Phase 9) Убраны громоздкие v1 `*.output.json`.
 
 След. шаги (план):
-1. Phase 7 — постепенное «soft delete» v1 (legacy *.output.json) при подтверждённой стабильности.
+1. Phase 9 — окончательное удаление v1; введён локальный semantics слой (`*.sem.json`).
 2. Phase 8 — Mutation/chaos проверки стабильности (опционально) + hash цепочка для quick integrity check.
 
 ### Phase 6 (CI Gate) Детали
