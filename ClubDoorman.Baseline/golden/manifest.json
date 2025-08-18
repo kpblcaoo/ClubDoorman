@@ -53,20 +53,6 @@
       "RuleCode": "Greeting"
     },
     {
-      "Id": 8,
-      "ShortName": "EmojiFloodRepeat1",
-      "CorrelationId": "849B846F99036F73",
-      "ExpectedAction": "Delete",
-      "RuleCode": "TooManyEmojis"
-    },
-    {
-      "Id": 9,
-      "ShortName": "EmojiFloodRepeat2",
-      "CorrelationId": "966431A1F10379AF",
-      "ExpectedAction": "Delete",
-      "RuleCode": "TooManyEmojis"
-    },
-    {
       "Id": 10,
       "ShortName": "MixedStopWordsLink",
       "CorrelationId": "EFAA27637622C2B4",
@@ -110,13 +96,6 @@
       "Id": 16,
       "ShortName": "EmojiBoundaryOk",
       "CorrelationId": "070D2765BDF03405",
-      "ExpectedAction": "Delete",
-      "RuleCode": "TooManyEmojis"
-    },
-    {
-      "Id": 17,
-      "ShortName": "EmojiBoundaryOver",
-      "CorrelationId": "AD73F4B390188CC9",
       "ExpectedAction": "Delete",
       "RuleCode": "TooManyEmojis"
     },

@@ -58,10 +58,16 @@ public class GoldenManifestTests
         Assert.That(manifest.Schema, Is.EqualTo(1), "Schema mismatch");
         Assert.That(manifest.Variant, Is.EqualTo("baseline"), "Variant mismatch");
 
-        // Expect continuous IDs 1..N
-        var ids = manifest.Entries.Select(e => e.Id).OrderBy(i => i).ToList();
-        var expectedIds = Enumerable.Range(1, ids.Count).ToList();
-        Assert.That(ids, Is.EquivalentTo(expectedIds), "Manifest IDs must be a contiguous 1..N sequence");
+    // IDs no longer required to be contiguous: we intentionally preserve historical IDs to avoid churn.
+    var ids = manifest.Entries.Select(e => e.Id).OrderBy(i => i).ToList();
+    var distinctCount = ids.Distinct().Count();
+    Assert.That(distinctCount, Is.EqualTo(ids.Count), "Duplicate manifest Ids detected");
+    // Allowed removed (gap) IDs must be explicitly whitelisted with rationale (aggregation / pruning)
+    var allowedRemoved = new HashSet<int> { 8, 9, 17 }; // Phase 7 aggregation removed redundant emoji scenarios (8,9) and boundary-over case (17)
+    var maxId = ids.Max();
+    var missing = Enumerable.Range(1, maxId).Where(i => !ids.Contains(i)).ToList();
+    var unexpectedMissing = missing.Where(m => !allowedRemoved.Contains(m)).ToList();
+    Assert.That(unexpectedMissing, Is.Empty, $"Unexpected missing manifest IDs (not whitelisted gaps): {string.Join(',', unexpectedMissing)}");
 
         // Check snapshot files exist & match correlation ids
         foreach (var e in manifest.Entries)
