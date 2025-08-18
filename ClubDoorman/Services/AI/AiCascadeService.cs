@@ -56,6 +56,11 @@ public class AiCascadeService : IAiCascadeService
 
     public async Task<bool> PerformAiProfileAnalysisAsync(Message message, User user, Chat chat, CancellationToken cancellationToken)
     {
+        if (Environment.GetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE") == "1")
+        {
+            _logger.LogDebug("Fast baseline mode: skipping AI profile analysis");
+            return false; // treat as safe
+        }
         _logger.LogDebug("🤖 Запускаем AI анализ профиля пользователя {UserId} ({UserName})",
             user.Id, Utils.FullName(user.FirstName, user.LastName));
         _logger.LogDebug("🔍 TRACE: PerformAiProfileAnalysis начат для пользователя {UserId}", user.Id);
@@ -180,6 +185,13 @@ public class AiCascadeService : IAiCascadeService
     }
     public async Task HandleAiCascadeAnalysisAsync(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken)
     {
+        if (Environment.GetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE") == "1")
+        {
+            _logger.LogDebug("Fast baseline mode: skipping AI cascade analysis");
+            // Count as good message to keep stats consistent
+            await _moderationService.IncrementGoodMessageCountAsync(user, message.Chat, message.Text ?? message.Caption ?? "");
+            return;
+        }
         var messageText = message.Text ?? message.Caption ?? "";
         var chat = message.Chat;
 
