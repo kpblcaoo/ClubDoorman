@@ -20,29 +20,40 @@ if (Directory.Exists(mainProjectDir))
     Directory.SetCurrentDirectory(mainProjectDir);
 }
 
-var builder = Host.CreateApplicationBuilder(args);
+// IMPORTANT: set env vars BEFORE Host.CreateApplicationBuilder so configuration picks them up.
+// Telegram token validation in Telegram.Bot expects pattern like <digits>:<35 chars>.
+// Use an obviously fake placeholder that still matches the structural format to satisfy validation
+// but is unlikely to trip secret scanners (contains PLACEHOLDER marker, zeros, underscores).
+const string ValidPlaceholderToken = "000000000:PLACEHOLDER_PLACEHOLDER_PLACEHOLD"; // 9 digits + ':' + 35 chars
+// Force override even if variable already set (tests might export https://api.telegram.org etc.)
+Environment.SetEnvironmentVariable("DOORMAN_BOT_API", ValidPlaceholderToken);
+Environment.SetEnvironmentVariable("DOORMAN_ADMIN_CHAT", "123456789");
+// Disable external AI calls by providing local dummy key
+Environment.SetEnvironmentVariable("DOORMAN_OPENROUTER_API", "baseline-dummy-key");
+Environment.SetEnvironmentVariable("DOORMAN_TEXT_MENTION_FILTER_ENABLE", "true"); // enable link filter for scenarios
+Environment.SetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE", "1"); // signal DI to use dummy Telegram client
 
-// Provide required minimal environment variables for production registrations
-Environment.SetEnvironmentVariable("DOORMAN_BOT_API", Environment.GetEnvironmentVariable("DOORMAN_BOT_API") ?? "999999:baseline-token");
-Environment.SetEnvironmentVariable("DOORMAN_ADMIN_CHAT", Environment.GetEnvironmentVariable("DOORMAN_ADMIN_CHAT") ?? "123456789");
-// Enable link (text mention) filtering so link scenarios produce Delete
-Environment.SetEnvironmentVariable("DOORMAN_TEXT_MENTION_FILTER_ENABLE", "true");
-// Redirect data writes (approved users, etc.) into baseline sandbox directory
-var baselineDataRoot = Path.Combine(AppContext.BaseDirectory, "baseline-data");
+// Redirect data writes (approved users, etc.) into baseline sandbox directory (created after build dir known)
+var baselineDataRoot = Path.Combine(assemblyDir, "baseline-data");
 Directory.CreateDirectory(baselineDataRoot);
 Environment.SetEnvironmentVariable("DOORMAN_DATA_ROOT", baselineDataRoot);
 Console.WriteLine($"[DEBUG] DOORMAN_DATA_ROOT set to {baselineDataRoot}");
+
+var builder = Host.CreateApplicationBuilder(args);
 
 // Force logging flags (environment-independent)
 builder.Services.PostConfigure<LoggingFlagsOptions>(o =>
 {
     o.GoldenMasterEnabled = true;
     o.GoldenSampleRate = 1.0;
-    // Golden snapshots under solutionRoot/golden
-    var goldenRoot = Path.Combine(baselineProjectRoot, "golden");
+    // Place snapshots inside the baseline project to avoid cluttering repo root
+    var baselineProjectDir = Path.Combine(baselineProjectRoot, "ClubDoorman.Baseline");
+    var goldenRoot = Path.Combine(baselineProjectDir, "golden");
+    Directory.CreateDirectory(goldenRoot);
     o.GoldenBasePath = goldenRoot;
     o.GoldenDeterministicIds = true;
     o.GoldenFixedDateFolder = "baseline"; // stable folder name
+    Console.WriteLine($"[DEBUG] Golden baseline path set to {goldenRoot}");
 });
 
 // Reuse full main registration

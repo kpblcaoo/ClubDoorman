@@ -1,6 +1,7 @@
 {
   "-1001234567890": {
-    "type": "announcement"
+    "type": "default",
+    "title": "GoldenBaselineChat"
   },
   "-1009876543210": {
     "type": "default"

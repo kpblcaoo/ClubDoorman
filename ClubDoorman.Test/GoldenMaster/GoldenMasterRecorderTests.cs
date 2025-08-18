@@ -25,18 +25,22 @@ public class GoldenMasterRecorderTests : TestBase
 
     private static Update CreateSampleUpdate()
     {
-        return new Update
+        // NOTE: In updated Telegram.Bot library some properties (Type, MessageId) became read-only.
+        // We only need deterministic content; leaving MessageId default (0) is fine.
+        var message = new Message
+        {
+            // MessageId omitted (read-only)
+            Text = "Hello Test",
+            Chat = new Chat { Id = -100123456789, Title = "Test Chat", Type = ChatType.Supergroup },
+            From = new User { Id = 555123456, IsBot = false, Username = "sample_user" }
+        };
+        var update = new Update
         {
             Id = 42,
-            Type = UpdateType.Message,
-            Message = new Message
-            {
-                MessageId = 7,
-                Text = "Hello Test",
-                Chat = new Chat { Id = -100123456789, Title = "Test Chat", Type = ChatType.Supergroup },
-                From = new User { Id = 555123456, IsBot = false, Username = "sample_user" }
-            }
+            // Type is inferred from populated Message property in newer versions; do not set explicitly.
+            Message = message
         };
+        return update;
     }
 
     [Test]
@@ -49,13 +53,13 @@ public class GoldenMasterRecorderTests : TestBase
             var recorder = new GoldenMasterRecorder(CreateFlags(tmpDir), new NullLogger<GoldenMasterRecorder>());
             var update = CreateSampleUpdate();
             var correlation = recorder.TryRecordInput(update, "MessageHandler", update.Message!.Chat.Id, update.Message.From!.Id);
-            Assert.IsNotNull(correlation, "correlationId null - запись не произошла");
+            Assert.That(correlation, Is.Not.Null, "correlationId null - запись не произошла");
             recorder.TryRecordOutput(correlation, new { kind = "test", value = 123 });
 
             // Проверяем существование файлов
             var date = System.DateTime.UtcNow.ToString("yyyy-MM-dd");
             var dayDir = Path.Combine(tmpDir, date);
-            Assert.IsTrue(Directory.Exists(dayDir), "Day directory not created");
+            Assert.That(Directory.Exists(dayDir), Is.True, "Day directory not created");
             var files = Directory.GetFiles(dayDir, correlation + "*.json").OrderBy(f => f).ToArray();
             Assert.That(files.Length, Is.EqualTo(2), "Expected input and output files");
 
@@ -65,16 +69,16 @@ public class GoldenMasterRecorderTests : TestBase
             // Повторно вызовем Canonicalize (через второй recorder) и убедимся что содержимое input не меняется при повторной записи с тем же Update
             var recorder2 = new GoldenMasterRecorder(CreateFlags(tmpDir), new NullLogger<GoldenMasterRecorder>());
             var correlation2 = recorder2.TryRecordInput(update, "MessageHandler", update.Message.Chat.Id, update.Message.From.Id);
-            Assert.IsNotNull(correlation2);
+            Assert.That(correlation2, Is.Not.Null);
             var dateDir2 = Path.Combine(tmpDir, date);
             var input2 = File.ReadAllText(Directory.GetFiles(dateDir2, correlation2 + ".input.json").Single());
 
-            Assert.AreEqual(inputJson, input2, "Canonicalized input JSON should be deterministic");
+            Assert.That(input2, Is.EqualTo(inputJson), "Canonicalized input JSON should be deterministic");
 
             // Проверяем что masked user id / username присутствуют в ожидаемом формате
-            StringAssert.DoesNotContain(update.Message.From.Id.ToString(), inputJson, "Raw user id leaked");
-            StringAssert.DoesNotContain("\"sample_user\"", inputJson, "Raw username leaked");
-            StringAssert.Contains("\"Username\": \"u_", inputJson, "Masked username missing");
+            Assert.That(inputJson, Does.Not.Contain(update.Message.From.Id.ToString()), "Raw user id leaked");
+            Assert.That(inputJson, Does.Not.Contain("\"sample_user\""), "Raw username leaked");
+            Assert.That(inputJson, Does.Contain("\"Username\": \"u_"), "Masked username missing");
         }
         finally
         {

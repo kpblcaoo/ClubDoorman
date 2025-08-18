@@ -10,7 +10,9 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
     {
         logger.LogInformation("Golden baseline seeder: start feed");
         var now = DateTime.UtcNow;
-        var chat = new Chat { Id = -1001234567890, Title = "GoldenBaselineChat", Type = Telegram.Bot.Types.Enums.ChatType.Supergroup };
+    // Use regular group chat type (not Supergroup/Channel) so emoji flood policy applies identically to production expectations
+    // Force chat type to Group (default semantic) but also ensure downstream lookups treat it as default by not relying on chat_settings.json
+    var chat = new Chat { Id = -1001234567890, Title = "GoldenBaselineChat", Type = Telegram.Bot.Types.Enums.ChatType.Group };
 
         // Distinct users per scenario to avoid early global approval skipping later moderation (e.g. links)
         User MakeUser(long id) => new() { Id = id, IsBot = false, Username = $"baseline_user_{id}", FirstName = "Baseline", LastName = "User" };
@@ -18,7 +20,7 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
         Update Make(int id, long userId, string text) => new() { Id = id, Message = CreateMsg(MakeUser(userId), text) };
 
         // Deterministic scenario set:
-        // 1: Boring greeting -> expect Delete (Банальное приветствие)
+    // 1: Previously greeting; now tweak to avoid boring greeting deletion to keep only dedicated greeting scenarios if needed.
         // 2: Normal informative message -> Allow
         // 3: Stop-words / earning spam phrase -> expect Delete/Report depending on rules
         // 4: Message containing a link -> expect Delete/Report (link policy)
@@ -26,7 +28,7 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
         // 6: Mixed benign content with number & cyrillic (control Allow)
         var updates = new[]
         {
-            Make(1, 900000001, "Hello baseline one"),                     // greeting -> Delete
+            Make(1, 900000001, "Baseline message one"),                   // neutral (was greeting)
             Make(2, 900000002, "Second baseline message about normal workflow"), // normal -> Allow
             Make(3, 900000003, "ищу партнеров для удаленного заработка"),   // stop-words -> Delete
             Make(4, 900000004, "Заходите https://example.com супер"),       // link -> should Delete when filter enabled

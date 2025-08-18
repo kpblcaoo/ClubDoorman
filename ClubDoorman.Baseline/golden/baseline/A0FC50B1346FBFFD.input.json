@@ -1,7 +1,7 @@
 {
   "ChatId": -1001234567890,
   "Payload": {
-    "Id": 1,
+    "Id": 6,
     "Type": "Message",
     "Message": {
       "MessageId": 0,
@@ -9,14 +9,14 @@
       "Type": 2,
       "Title": "GoldenBaselineChat",
       "From": {
-        "Id": "U0001",
+        "Id": "U0006",
         "IsBot": false,
-        "Username": "u_c13ad752"
+        "Username": "u_b176e364"
       },
-      "Text": "Baseline message one"
+      "Text": "Пакет номер 42 обработан успешно"
     }
   },
   "Type": "Message",
-  "UserId": 900000001,
+  "UserId": 900000006,
   "handler": "MessageHandler"
 }
