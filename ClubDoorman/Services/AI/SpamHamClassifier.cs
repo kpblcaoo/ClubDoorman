@@ -34,7 +34,8 @@ public class SpamHamClassifier : ISpamHamClassifier
         _logger = logger;
         if (_fastMode)
         {
-            _logger.LogInformation("Fast baseline mode: skipping initial ML training & retrain loop");
+            _logger.LogInformation("Fast baseline mode: single initial ML training, retrain loop disabled");
+            Task.Run(Train); // still build model so predictions are realistic
         }
         else
         {
@@ -80,11 +81,6 @@ public class SpamHamClassifier : ISpamHamClassifier
 
     public async Task<(bool Spam, float Score)> IsSpam(string message)
     {
-        if (_fastMode)
-        {
-            // Constant non-spam result with representative negative score (matches observed range ~ -2.x)
-            return (false, -2.0f);
-        }
         using var token = await SemaphoreHelper.AwaitAsync(_predictionLock);
         var msg = new MessageData { Text = message.ReplaceLineEndings(" ") };
 
@@ -143,6 +139,11 @@ public class SpamHamClassifier : ISpamHamClassifier
     }
     private async Task AddSpamHam(string message, bool spam)
     {
+        if (_fastMode)
+        {
+            _logger.LogDebug("Fast mode: dataset append suppressed (spam={Spam})", spam);
+            return;
+        }
         message = message.ReplaceLineEndings(" ");
         message = message.Replace("\"", "\"\"");
         var csvLine = $"\"{message}\", {spam}";
