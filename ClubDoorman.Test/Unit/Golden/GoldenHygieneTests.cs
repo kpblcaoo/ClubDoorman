@@ -34,10 +34,53 @@ public class GoldenHygieneTests
             () => "Found forbidden legacy v1 output snapshot(s):\n" + string.Join('\n', legacyOutputs));
 
         // 2. Local semantics artifacts (*.sem.json) must NOT be committed (they are transient build-time aids).
-        var semFiles = Directory.GetFiles(root, "*.sem.json", SearchOption.AllDirectories)
+        // We allow their presence on disk during/after a local regeneration run, but they must not be tracked by git.
+        var allSemFiles = Directory.GetFiles(root, "*.sem.json", SearchOption.AllDirectories)
             .Where(p => !p.Contains("/obj/") && !p.Contains("/bin/"))
             .ToList();
-        Assert.That(semFiles, Is.Empty,
-            () => "Found committed semantics file(s) (*.sem.json) which must remain local-only: \n" + string.Join('\n', semFiles));
+
+        // Build a hash set of tracked repository files via 'git ls-files'. If git is unavailable, fall back to previous strict behavior.
+        HashSet<string> tracked = new(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "git",
+                Arguments = "ls-files -z",
+                WorkingDirectory = root,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using var proc = System.Diagnostics.Process.Start(psi)!;
+            var output = proc.StandardOutput.ReadToEnd();
+            proc.WaitForExit(5000);
+            if (proc.ExitCode == 0)
+            {
+                foreach (var rel in output.Split('\0', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    // Normalise to forward slashes for comparison with discovered paths
+                    var full = Path.GetFullPath(Path.Combine(root, rel));
+                    tracked.Add(full);
+                }
+            }
+        }
+        catch
+        {
+            // ignore - will treat as non-git environment
+        }
+
+        // Consider only semantics files that are tracked. Untracked transient files are acceptable.
+        var trackedSemFiles = allSemFiles.Where(f => tracked.Contains(f)).ToList();
+
+        if (tracked.Count == 0)
+        {
+            // Git detection failed; retain previous strict behaviour to stay safe in CI.
+            trackedSemFiles = allSemFiles;
+        }
+
+        Assert.That(trackedSemFiles, Is.Empty,
+            () => "Found tracked semantics file(s) (*.sem.json) which must remain local-only: \n" + string.Join('\n', trackedSemFiles));
     }
 }
