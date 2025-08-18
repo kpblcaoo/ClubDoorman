@@ -10,9 +10,35 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
     {
         logger.LogInformation("Golden baseline seeder: start feed");
         var now = DateTime.UtcNow;
-    // Use regular group chat type (not Supergroup/Channel) so emoji flood policy applies identically to production expectations
-    // Force chat type to Group (default semantic) but also ensure downstream lookups treat it as default by not relying on chat_settings.json
-    var chat = new Chat { Id = -1001234567890, Title = "GoldenBaselineChat", Type = Telegram.Bot.Types.Enums.ChatType.Group };
+        // Use regular group chat type (not Supergroup/Channel) so emoji flood policy applies identically to production expectations
+        // Force chat type to Group (default semantic) but also ensure downstream lookups treat it as default by not relying on chat_settings.json
+        var chat = new Chat { Id = -1001234567890, Title = "GoldenBaselineChat", Type = Telegram.Bot.Types.Enums.ChatType.Group };
+
+        // Additional chat configured as 'announcement' (through chat_settings.json) to simulate media filtering disabled effect for ONE scenario.
+        // This allows us to have a contrasting snapshot (Report instead of Delete) without toggling global env flags for entire baseline.
+        var announcementChat = new Chat { Id = -1001234567891, Title = "GoldenAnnouncementChat", Type = Telegram.Bot.Types.Enums.ChatType.Group };
+        try
+        {
+            var settingsPath = Path.Combine("data", "chat_settings.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(settingsPath)!);
+            // Build a minimal settings dictionary preserving default chat and marking second chat as announcement
+            var dict = new Dictionary<string, Dictionary<string, string>>
+            {
+                [chat.Id.ToString()] = new() { { "type", "default" }, { "title", chat.Title ?? "" } },
+                [announcementChat.Id.ToString()] = new() { { "type", "announcement" }, { "title", announcementChat.Title ?? "" } }
+            };
+            var json = System.Text.Json.JsonSerializer.Serialize(dict, new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
+            File.WriteAllText(settingsPath, json);
+            logger.LogInformation("Pre-seeded chat_settings.json with announcement chat for selective media scenario");
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to pre-seed chat_settings.json; announcement media scenario may not behave as expected");
+        }
 
         // Distinct users per scenario to avoid early global approval skipping later moderation (e.g. links)
         User MakeUser(long id) => new() { Id = id, IsBot = false, Username = $"baseline_user_{id}", FirstName = "Baseline", LastName = "User" };
@@ -41,7 +67,8 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
         // 10: Mixed stop-word + link (priority check). Text contains stop phrase + URL
         var upd10 = Make(10, 900000009, "ищу партнеров https://spam.example для удаленного заработка");
 
-        // 11: Media without text (should go to manual review). Photo array with null text.
+    // 11: Media without text in default chat.
+    // Expected Delete ("В первых трёх сообщениях нельзя отправлять картинки или видео").
         var mediaUser = MakeUser(900000010);
         var mediaMsg = new Message
         {
@@ -76,7 +103,20 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
         var upd16 = new Update { Id = 16, Message = CreateMsg(boundaryUser, tenEmojis) };   // should be Allow (if policy counts >=10; adjust expectation accordingly)
         var upd17 = new Update { Id = 17, Message = CreateMsg(boundaryUser, elevenEmojis) }; // should Delete
 
-        var updates = new List<Update>
+        // 18: Media without text in announcement chat (single contrasting scenario -> should become Report "Медиа без подписи")
+        var mediaAnnouncementUser = MakeUser(900000014);
+        var mediaAnnouncementMsg = new Message
+        {
+            Date = now,
+            Chat = announcementChat,
+            From = mediaAnnouncementUser,
+            Photo = new[] { new PhotoSize { FileId = "file-id-annc-1", Width = 10, Height = 10, FileSize = 111 } },
+            Caption = null,
+            Text = null
+        };
+        var upd18 = new Update { Id = 18, Message = mediaAnnouncementMsg };
+
+    var updates = new List<Update>
         {
             Make(1, 900000001, "Baseline message one"),
             Make(2, 900000002, "Second baseline message about normal workflow"),
@@ -86,6 +126,9 @@ internal sealed class GoldenBaselineSeeder(ILogger<GoldenBaselineSeeder> logger,
             Make(6, 900000006, "Пакет номер 42 обработан успешно"),
             upd7, upd8, upd9, upd10, upd11, upd12, upd13, upd14, upd15, upd16, upd17
         };
+
+    // Add selective feature-toggle scenario at the end (media in announcement chat -> manual review/report)
+    updates.Add(upd18);
 
         foreach (var u in updates)
             await dispatcher.DispatchAsync(u, cancellationToken);

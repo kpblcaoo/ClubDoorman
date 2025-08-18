@@ -10,71 +10,78 @@ using ClubDoorman.Models.Logging;
 // Baseline generation harness: builds DI container from main project, swaps Telegram client, seeds synthetic updates,
 // writes Golden Master snapshots then exits. Keeps production Program.cs clean.
 
-// Ensure working directory matches production expectations (relative data/* lookups)
-// AppContext.BaseDirectory = .../ClubDoorman.Baseline/bin/Release/net9.0/
-var assemblyDir = AppContext.BaseDirectory;
-var baselineProjectRoot = Path.GetFullPath(Path.Combine(assemblyDir, "..", "..", "..", "..")); // -> solution root
-var mainProjectDir = Path.Combine(baselineProjectRoot, "ClubDoorman");
-if (Directory.Exists(mainProjectDir))
+// Helper method to run one baseline variant (normal + optional media filtering disabled variant)
+static async Task RunBaselineVariantAsync(string variantName, bool disableMediaFiltering, string[] args)
 {
-    Directory.SetCurrentDirectory(mainProjectDir);
+    var assemblyDirLocal = AppContext.BaseDirectory;
+    var solutionRoot = Path.GetFullPath(Path.Combine(assemblyDirLocal, "..", "..", "..", ".."));
+    var mainProjectDirLocal = Path.Combine(solutionRoot, "ClubDoorman");
+    if (Directory.Exists(mainProjectDirLocal))
+        Directory.SetCurrentDirectory(mainProjectDirLocal);
+
+    // Base common env
+    const string ValidPlaceholderTokenInner = "000000000:PLACEHOLDER_PLACEHOLDER_PLACEHOLD";
+    Environment.SetEnvironmentVariable("DOORMAN_BOT_API", ValidPlaceholderTokenInner);
+    Environment.SetEnvironmentVariable("DOORMAN_ADMIN_CHAT", "123456789");
+    Environment.SetEnvironmentVariable("DOORMAN_OPENROUTER_API", "baseline-dummy-key");
+    Environment.SetEnvironmentVariable("DOORMAN_TEXT_MENTION_FILTER_ENABLE", "true");
+    Environment.SetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE", "1");
+    Environment.SetEnvironmentVariable("DOORMAN_EMOJI_VIOLATIONS_BEFORE_BAN", "2");
+    Environment.SetEnvironmentVariable("DOORMAN_TEST_BLACKLIST_IDS", "900000050");
+
+    // Variant-specific media filtering toggle
+    if (disableMediaFiltering)
+    {
+        Environment.SetEnvironmentVariable("DOORMAN_DISABLE_MEDIA_FILTERING", "1");
+    }
+    else
+    {
+        Environment.SetEnvironmentVariable("DOORMAN_DISABLE_MEDIA_FILTERING", null); // ensure not set
+    }
+
+    // Isolate data root per variant
+    var variantDataRoot = Path.Combine(assemblyDirLocal, $"baseline-data-{variantName}");
+    Directory.CreateDirectory(variantDataRoot);
+    Environment.SetEnvironmentVariable("DOORMAN_DATA_ROOT", variantDataRoot);
+    Console.WriteLine($"[DEBUG] ({variantName}) DOORMAN_DATA_ROOT = {variantDataRoot}");
+
+    var builderLocal = Host.CreateApplicationBuilder(args);
+    builderLocal.Services.PostConfigure<LoggingFlagsOptions>(o =>
+    {
+        o.GoldenMasterEnabled = true;
+        o.GoldenSampleRate = 1.0;
+        var baselineProjectDirLocal = Path.Combine(solutionRoot, "ClubDoorman.Baseline");
+        var goldenRoot = Path.Combine(baselineProjectDirLocal, "golden");
+        Directory.CreateDirectory(goldenRoot);
+        o.GoldenBasePath = goldenRoot;
+        o.GoldenDeterministicIds = true;
+        // Distinct folder per variant so snapshots coexist
+        o.GoldenFixedDateFolder = variantName; // e.g. "baseline" or "baseline_mediaoff"
+        Console.WriteLine($"[DEBUG] ({variantName}) Golden path root={goldenRoot}");
+    });
+
+    builderLocal.Services.AddClubDoorman(builderLocal.Configuration);
+    builderLocal.Services.AddSingleton<ITelegramBotClientWrapper, BaselineOfflineTelegramBotClientWrapper>();
+    builderLocal.Services.AddSingleton<IGoldenBaselineSeeder, GoldenBaselineSeeder>();
+
+    using var hostLocal = builderLocal.Build();
+    var loggerLocal = hostLocal.Services.GetRequiredService<ILoggerFactory>().CreateLogger($"Baseline[{variantName}]");
+    loggerLocal.LogInformation("Golden baseline variant '{Variant}' starting (MediaFilteringDisabled={MediaDisabled})", variantName, disableMediaFiltering);
+    var appConfigLocal = hostLocal.Services.GetRequiredService<IAppConfig>();
+    loggerLocal.LogInformation("Bot config loaded (TokenPrefix={Prefix})", appConfigLocal.BotApi?.Substring(0, Math.Min(6, appConfigLocal.BotApi.Length)) ?? "null");
+
+    using var scopeLocal = hostLocal.Services.CreateScope();
+    var seederLocal = scopeLocal.ServiceProvider.GetRequiredService<IGoldenBaselineSeeder>();
+    await seederLocal.SeedAsync();
+    loggerLocal.LogInformation("Golden baseline variant '{Variant}' finished", variantName);
 }
 
-// IMPORTANT: set env vars BEFORE Host.CreateApplicationBuilder so configuration picks them up.
-// Telegram token validation in Telegram.Bot expects pattern like <digits>:<35 chars>.
-// Use an obviously fake placeholder that still matches the structural format to satisfy validation
-// but is unlikely to trip secret scanners (contains PLACEHOLDER marker, zeros, underscores).
-const string ValidPlaceholderToken = "000000000:PLACEHOLDER_PLACEHOLDER_PLACEHOLD"; // 9 digits + ':' + 35 chars
-// Force override even if variable already set (tests might export https://api.telegram.org etc.)
-Environment.SetEnvironmentVariable("DOORMAN_BOT_API", ValidPlaceholderToken);
-Environment.SetEnvironmentVariable("DOORMAN_ADMIN_CHAT", "123456789");
-// Disable external AI calls by providing local dummy key
-Environment.SetEnvironmentVariable("DOORMAN_OPENROUTER_API", "baseline-dummy-key");
-Environment.SetEnvironmentVariable("DOORMAN_TEXT_MENTION_FILTER_ENABLE", "true"); // enable link filter for scenarios
-Environment.SetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE", "1"); // signal DI to use dummy Telegram client
-// Fast-mode / scenario tuning
-Environment.SetEnvironmentVariable("DOORMAN_EMOJI_VIOLATIONS_BEFORE_BAN", "2"); // allow observing escalation if needed
-Environment.SetEnvironmentVariable("DOORMAN_TEST_BLACKLIST_IDS", "900000050"); // banlist scenario user
+// Run main baseline
+await RunBaselineVariantAsync("baseline", disableMediaFiltering: false, args);
 
-// Redirect data writes (approved users, etc.) into baseline sandbox directory (created after build dir known)
-var baselineDataRoot = Path.Combine(assemblyDir, "baseline-data");
-Directory.CreateDirectory(baselineDataRoot);
-Environment.SetEnvironmentVariable("DOORMAN_DATA_ROOT", baselineDataRoot);
-Console.WriteLine($"[DEBUG] DOORMAN_DATA_ROOT set to {baselineDataRoot}");
-
-var builder = Host.CreateApplicationBuilder(args);
-
-// Force logging flags (environment-independent)
-builder.Services.PostConfigure<LoggingFlagsOptions>(o =>
+// If user sets env DOORMAN_BASELINE_MEDIA_OFF=1 produce second variant with media filtering disabled
+var produceMediaOff = Environment.GetEnvironmentVariable("DOORMAN_BASELINE_MEDIA_OFF");
+if (string.Equals(produceMediaOff, "1", StringComparison.OrdinalIgnoreCase) || string.Equals(produceMediaOff, "true", StringComparison.OrdinalIgnoreCase))
 {
-    o.GoldenMasterEnabled = true;
-    o.GoldenSampleRate = 1.0;
-    // Place snapshots inside the baseline project to avoid cluttering repo root
-    var baselineProjectDir = Path.Combine(baselineProjectRoot, "ClubDoorman.Baseline");
-    var goldenRoot = Path.Combine(baselineProjectDir, "golden");
-    Directory.CreateDirectory(goldenRoot);
-    o.GoldenBasePath = goldenRoot;
-    o.GoldenDeterministicIds = true;
-    o.GoldenFixedDateFolder = "baseline"; // stable folder name
-    Console.WriteLine($"[DEBUG] Golden baseline path set to {goldenRoot}");
-});
-
-// Reuse full main registration
-builder.Services.AddClubDoorman(builder.Configuration);
-
-// Replace Telegram wrapper with offline stub
-builder.Services.AddSingleton<ITelegramBotClientWrapper, BaselineOfflineTelegramBotClientWrapper>();
-// Add seeder
-builder.Services.AddSingleton<IGoldenBaselineSeeder, GoldenBaselineSeeder>();
-
-using var host = builder.Build();
-var logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Baseline");
-logger.LogInformation("Golden baseline tool starting");
-
-var appConfig = host.Services.GetRequiredService<IAppConfig>();
-logger.LogInformation("Bot config loaded (TokenPrefix={Prefix})", appConfig.BotApi?.Substring(0, Math.Min(6, appConfig.BotApi.Length)) ?? "null");
-
-using var scope = host.Services.CreateScope();
-var seeder = scope.ServiceProvider.GetRequiredService<IGoldenBaselineSeeder>();
-await seeder.SeedAsync();
-logger.LogInformation("Golden baseline generation finished");
+    await RunBaselineVariantAsync("baseline_mediaoff", disableMediaFiltering: true, args);
+}
