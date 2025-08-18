@@ -1,0 +1,131 @@
+{
+  "Schema": 1,
+  "GeneratedAtUtc": "2025-08-18T16:25:39.0407079Z",
+  "Variant": "baseline",
+  "Entries": [
+    {
+      "Id": 1,
+      "ShortName": "BaseMsg1",
+      "CorrelationId": "43EB9B4811373E29",
+      "ExpectedAction": "Allow",
+      "RuleCode": "Unknown"
+    },
+    {
+      "Id": 2,
+      "ShortName": "BaseMsg2",
+      "CorrelationId": "582B88BA8D301617",
+      "ExpectedAction": "Allow",
+      "RuleCode": "Unknown"
+    },
+    {
+      "Id": 3,
+      "ShortName": "StopWords",
+      "CorrelationId": "404A7363FBF8785F",
+      "ExpectedAction": "Delete",
+      "RuleCode": "Unknown"
+    },
+    {
+      "Id": 4,
+      "ShortName": "Link",
+      "CorrelationId": "67A3357198D9FFA2",
+      "ExpectedAction": "Delete",
+      "RuleCode": "Links"
+    },
+    {
+      "Id": 5,
+      "ShortName": "EmojiFlood",
+      "CorrelationId": "545161A2D7A573C3",
+      "ExpectedAction": "Delete",
+      "RuleCode": "TooManyEmojis"
+    },
+    {
+      "Id": 6,
+      "ShortName": "BenignControl",
+      "CorrelationId": "A0FC50B1346FBFFD",
+      "ExpectedAction": "Allow",
+      "RuleCode": "Unknown"
+    },
+    {
+      "Id": 7,
+      "ShortName": "Greeting",
+      "CorrelationId": "6C17E39564C2DED7",
+      "ExpectedAction": "Delete",
+      "RuleCode": "Greeting"
+    },
+    {
+      "Id": 8,
+      "ShortName": "EmojiFloodRepeat1",
+      "CorrelationId": "849B846F99036F73",
+      "ExpectedAction": "Delete",
+      "RuleCode": "TooManyEmojis"
+    },
+    {
+      "Id": 9,
+      "ShortName": "EmojiFloodRepeat2",
+      "CorrelationId": "966431A1F10379AF",
+      "ExpectedAction": "Delete",
+      "RuleCode": "TooManyEmojis"
+    },
+    {
+      "Id": 10,
+      "ShortName": "MixedStopWordsLink",
+      "CorrelationId": "EFAA27637622C2B4",
+      "ExpectedAction": "Delete",
+      "RuleCode": "Links"
+    },
+    {
+      "Id": 11,
+      "ShortName": "MediaEarlyDefault",
+      "CorrelationId": "45C95440B2A59BAA",
+      "ExpectedAction": "Delete",
+      "RuleCode": "Unknown"
+    },
+    {
+      "Id": 12,
+      "ShortName": "CommandStart",
+      "CorrelationId": "69E2E8CA2B7A6103",
+      "RuleCode": "Unknown"
+    },
+    {
+      "Id": 13,
+      "ShortName": "ReplyBase",
+      "CorrelationId": "0EABC0ECF91457C7",
+      "ExpectedAction": "Allow",
+      "RuleCode": "Unknown"
+    },
+    {
+      "Id": 14,
+      "ShortName": "ReplyWithLink",
+      "CorrelationId": "E0535B1530BC333C",
+      "ExpectedAction": "Delete",
+      "RuleCode": "Links"
+    },
+    {
+      "Id": 15,
+      "ShortName": "BanlistUser",
+      "CorrelationId": "117EE796C2DB7D85",
+      "RuleCode": "Unknown"
+    },
+    {
+      "Id": 16,
+      "ShortName": "EmojiBoundaryOk",
+      "CorrelationId": "070D2765BDF03405",
+      "ExpectedAction": "Delete",
+      "RuleCode": "TooManyEmojis"
+    },
+    {
+      "Id": 17,
+      "ShortName": "EmojiBoundaryOver",
+      "CorrelationId": "AD73F4B390188CC9",
+      "ExpectedAction": "Delete",
+      "RuleCode": "TooManyEmojis"
+    },
+    {
+      "Id": 18,
+      "ShortName": "MediaAnnouncement",
+      "CorrelationId": "C836A919D91DB6A3",
+      "ExpectedAction": "Report",
+      "RuleCode": "MediaNoCaption"
+    }
+  ]
+}

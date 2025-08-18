@@ -74,6 +74,20 @@ static async Task RunBaselineVariantAsync(string variantName, bool disableMediaF
     var seederLocal = scopeLocal.ServiceProvider.GetRequiredService<IGoldenBaselineSeeder>();
     await seederLocal.SeedAsync();
     loggerLocal.LogInformation("Golden baseline variant '{Variant}' finished", variantName);
+
+    // Phase 2: Manifest generation (only for main baseline variant)
+    try
+    {
+    Console.WriteLine($"[DEBUG] Manifest generation block entered for variant {variantName}");
+        var f = hostLocal.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<LoggingFlagsOptions>>().Value;
+        var goldenRoot = f.GoldenBasePath ?? Path.Combine(AppContext.BaseDirectory, "golden");
+        ClubDoorman.Baseline.Golden.GoldenManifestBuilder.Build(goldenRoot, variantName);
+        loggerLocal.LogInformation("Golden manifest generated for variant {Variant}", variantName);
+    }
+    catch (Exception ex)
+    {
+        loggerLocal.LogWarning(ex, "Golden manifest generation failed (non-fatal)");
+    }
 }
 
 // Run main baseline

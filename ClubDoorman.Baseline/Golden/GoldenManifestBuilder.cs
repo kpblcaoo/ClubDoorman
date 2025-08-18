@@ -1,0 +1,130 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace ClubDoorman.Baseline.Golden;
+
+/// <summary>
+/// Phase 2: Builds deterministic manifest for baseline snapshots.
+/// </summary>
+internal static class GoldenManifestBuilder
+{
+    private static readonly JsonSerializerOptions Options = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
+    private static readonly Dictionary<int, string> ShortNames = new()
+    {
+        [1] = "BaseMsg1",
+        [2] = "BaseMsg2",
+        [3] = "StopWords",
+        [4] = "Link",
+        [5] = "EmojiFlood",
+        [6] = "BenignControl",
+        [7] = "Greeting",
+        [8] = "EmojiFloodRepeat1",
+        [9] = "EmojiFloodRepeat2",
+        [10] = "MixedStopWordsLink",
+        [11] = "MediaEarlyDefault",
+        [12] = "CommandStart",
+        [13] = "ReplyBase",
+        [14] = "ReplyWithLink",
+        [15] = "BanlistUser",
+        [16] = "EmojiBoundaryOk",
+        [17] = "EmojiBoundaryOver",
+        [18] = "MediaAnnouncement"
+    };
+
+    public static void Build(string goldenRoot, string variantName)
+    {
+        if (!string.Equals(variantName, "baseline", StringComparison.OrdinalIgnoreCase))
+            return; // Only generate manifest once for primary variant
+
+        var variantDir = Path.Combine(goldenRoot, variantName);
+        if (!Directory.Exists(variantDir)) return;
+
+        var inputs = Directory.GetFiles(variantDir, "*.input.json", SearchOption.TopDirectoryOnly);
+        var entries = new List<ManifestEntry>();
+        foreach (var inputPath in inputs)
+        {
+            try
+            {
+                var correlationId = Path.GetFileName(inputPath)!.Split('.')[0];
+                var outputPath = Path.Combine(variantDir, correlationId + ".output.json");
+                if (!File.Exists(outputPath)) continue;
+
+                using var inputDoc = JsonDocument.Parse(File.ReadAllText(inputPath));
+                var payload = inputDoc.RootElement.GetProperty("Payload");
+                var updateId = payload.TryGetProperty("Id", out var idProp) && idProp.TryGetInt32(out var uid) ? uid : -1;
+                if (updateId <= 0) continue;
+
+                string? ruleCode = null;
+                string? expectedAction = null;
+                using (var outputDoc = JsonDocument.Parse(File.ReadAllText(outputPath)))
+                {
+                    if (outputDoc.RootElement.TryGetProperty("Output", out var outCore))
+                    {
+                        if (outCore.TryGetProperty("ruleCode", out var rProp)) ruleCode = rProp.GetString();
+                        if (outCore.TryGetProperty("action", out var aProp)) expectedAction = aProp.GetString();
+                    }
+                }
+
+                ShortNames.TryGetValue(updateId, out var shortName);
+                if (string.IsNullOrWhiteSpace(shortName))
+                    shortName = "Scenario" + updateId;
+
+                entries.Add(new ManifestEntry
+                {
+                    Id = updateId,
+                    ShortName = shortName,
+                    CorrelationId = correlationId,
+                    ExpectedAction = expectedAction,
+                    RuleCode = ruleCode
+                });
+            }
+            catch
+            {
+                // non-fatal
+            }
+        }
+
+        if (entries.Count == 0)
+        {
+            // Still write empty manifest for diagnostics.
+            Console.WriteLine("[GoldenManifest] No entries discovered in variant directory: " + variantDir);
+        }
+        entries = entries.OrderBy(e => e.Id).ToList();
+
+        var manifest = new ManifestRoot
+        {
+            Schema = 1,
+            GeneratedAtUtc = DateTime.UtcNow,
+            Variant = variantName,
+            Entries = entries
+        };
+
+        var manifestPath = Path.Combine(goldenRoot, "manifest.json");
+        var json = JsonSerializer.Serialize(manifest, Options);
+    File.WriteAllText(manifestPath, json);
+    Console.WriteLine($"[GoldenManifest] Written {entries.Count} entries to {manifestPath}");
+    }
+
+    private sealed class ManifestRoot
+    {
+        public int Schema { get; set; }
+        public DateTime GeneratedAtUtc { get; set; }
+        public string Variant { get; set; } = "baseline";
+        public List<ManifestEntry> Entries { get; set; } = new();
+    }
+
+    private sealed class ManifestEntry
+    {
+        public int Id { get; set; }
+        public string ShortName { get; set; } = string.Empty;
+        public string CorrelationId { get; set; } = string.Empty;
+        public string? ExpectedAction { get; set; }
+        public string? RuleCode { get; set; }
+    }
+}
