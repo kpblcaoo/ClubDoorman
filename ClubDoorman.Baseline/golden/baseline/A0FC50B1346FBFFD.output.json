@@ -2,6 +2,7 @@
   "Output": {
     "kind": "moderated",
     "action": "Allow",
-    "reason": "Сообщение прошло все проверки"
+    "reason": "Сообщение прошло все проверки",
+    "ruleCode": "Unknown"
   }
 }

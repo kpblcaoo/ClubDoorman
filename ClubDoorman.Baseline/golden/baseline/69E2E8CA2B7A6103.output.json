@@ -1,6 +1,7 @@
 {
   "Output": {
     "kind": "command",
-    "messageId": 0
+    "messageId": 0,
+    "ruleCode": "Unknown"
   }
 }

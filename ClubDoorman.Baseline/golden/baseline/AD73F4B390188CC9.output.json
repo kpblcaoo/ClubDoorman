@@ -2,6 +2,7 @@
   "Output": {
     "kind": "moderated",
     "action": "Delete",
-    "reason": "В этом сообщении многовато эмоджи"
+    "reason": "В этом сообщении многовато эмоджи",
+    "ruleCode": "TooManyEmojis"
   }
 }

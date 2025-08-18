@@ -2,6 +2,7 @@
   "Output": {
     "kind": "moderated",
     "action": "Delete",
-    "reason": "Ссылки запрещены"
+    "reason": "Ссылки запрещены",
+    "ruleCode": "Links"
   }
 }

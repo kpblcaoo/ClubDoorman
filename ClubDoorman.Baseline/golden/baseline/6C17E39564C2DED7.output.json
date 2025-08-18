@@ -2,6 +2,7 @@
   "Output": {
     "kind": "moderated",
     "action": "Delete",
-    "reason": "Банальное приветствие"
+    "reason": "Банальное приветствие",
+    "ruleCode": "Greeting"
   }
 }

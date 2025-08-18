@@ -36,13 +36,14 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
         var correlationId = GenerateCorrelationId(update, handlerName);
         try
         {
+            var simplified = SimplifyUpdate(update);
             var sanitized = Canonicalize(new
             {
                 Type = update.Type.ToString(),
                 ChatId = chatId,
                 UserId = userId,
                 handler = handlerName,
-                Payload = SimplifyUpdate(update)
+                Payload = simplified
             });
             WriteFile(correlationId, "input", sanitized);
             return correlationId;
@@ -61,7 +62,8 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
         if (!f.GoldenMasterEnabled) return;
         try
         {
-            var sanitized = Canonicalize(new { Output = resultPayload });
+            var enriched = EnrichOutput(resultPayload);
+            var sanitized = Canonicalize(new { Output = enriched });
             WriteFile(correlationId, "output", sanitized);
         }
         catch (Exception ex)
@@ -74,6 +76,15 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
     {
         string MaskUserId(long id) => "U" + Math.Abs(id % 10000).ToString("D4");
         string? MaskUsername(string? username) => string.IsNullOrEmpty(username) ? null : ("u_" + username.GetHashCode().ToString("x"));
+        string? mediaKind = null;
+        var hasText = !string.IsNullOrWhiteSpace(u.Message?.Text) || !string.IsNullOrWhiteSpace(u.Message?.Caption);
+        if (u.Message != null && !hasText)
+        {
+            if (u.Message.Photo != null && u.Message.Photo.Any()) mediaKind = "photo";
+            else if (u.Message.Video != null) mediaKind = "video";
+            else if (u.Message.Sticker != null) mediaKind = "sticker";
+            else if (u.Message.Document != null) mediaKind = "document";
+        }
         return new
         {
             u.Id,
@@ -85,7 +96,8 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
                 u.Message.Chat.Type,
                 u.Message.Chat.Title,
                 From = u.Message.From == null ? null : new { Id = MaskUserId(u.Message.From.Id), u.Message.From.IsBot, Username = MaskUsername(u.Message.From.Username) },
-                Text = Truncate(u.Message.Text ?? u.Message.Caption, 160)
+                Text = Truncate(u.Message.Text ?? u.Message.Caption, 160),
+                MediaKind = mediaKind
             },
             ChatMember = u.ChatMember == null ? null : new
             {
@@ -95,6 +107,36 @@ public class GoldenMasterRecorder : IGoldenMasterRecorder
                 User = new { Id = MaskUserId(u.ChatMember.NewChatMember.User.Id), Username = MaskUsername(u.ChatMember.NewChatMember.User.Username) }
             }
         };
+    }
+
+    private static object? EnrichOutput(object? payload)
+    {
+        if (payload == null) return null;
+        try
+        {
+            var json = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.None
+            });
+            var token = JToken.Parse(json);
+            if (token is JObject obj)
+            {
+                var reason = obj.Property("reason")?.Value?.ToString();
+                var kind = obj.Property("kind")?.Value?.ToString();
+                var code = ReasonCodeMapper.MapReason(reason, kind);
+                if (obj.Property("ruleCode") == null)
+                {
+                    obj.Add("ruleCode", code.ToString());
+                }
+                return obj;
+            }
+            return token;
+        }
+        catch
+        {
+            return payload;
+        }
     }
 
     private static string Truncate(string? s, int max) => string.IsNullOrEmpty(s) ? s ?? "" : (s.Length <= max ? s : s.Substring(0, max));

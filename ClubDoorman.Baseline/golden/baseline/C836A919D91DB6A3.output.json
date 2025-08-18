@@ -2,6 +2,7 @@
   "Output": {
     "kind": "moderated",
     "action": "Report",
-    "reason": "Медиа без подписи"
+    "reason": "Медиа без подписи",
+    "ruleCode": "MediaNoCaption"
   }
 }
