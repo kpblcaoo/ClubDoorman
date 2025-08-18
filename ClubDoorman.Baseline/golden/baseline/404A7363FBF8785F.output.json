@@ -3,6 +3,6 @@
     "kind": "moderated",
     "action": "Delete",
     "reason": "В этом сообщении есть стоп-слова",
-    "ruleCode": "Unknown"
+    "ruleCode": "StopWords"
   }
 }

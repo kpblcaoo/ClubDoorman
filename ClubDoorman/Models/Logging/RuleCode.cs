@@ -19,5 +19,6 @@ public enum RuleCode
     MixedLinkStopWords,
     EmojiEscalation,
     BanEscalation,
-    Boundary
+    Boundary,
+    Pass
 }

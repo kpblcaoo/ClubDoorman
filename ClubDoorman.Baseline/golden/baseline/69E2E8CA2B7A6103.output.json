@@ -2,6 +2,6 @@
   "Output": {
     "kind": "command",
     "messageId": 0,
-    "ruleCode": "Unknown"
+    "ruleCode": "Command"
   }
 }

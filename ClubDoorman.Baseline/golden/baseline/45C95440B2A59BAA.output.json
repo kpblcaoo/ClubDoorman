@@ -3,6 +3,6 @@
     "kind": "moderated",
     "action": "Delete",
     "reason": "В первых трёх сообщениях нельзя отправлять картинки или видео",
-    "ruleCode": "Unknown"
+    "ruleCode": "MediaEarlyBlock"
   }
 }
