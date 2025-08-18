@@ -11,13 +11,13 @@
       "From": {
         "Id": "U0010",
         "IsBot": false,
-        "Username": "u_330dc070"
+        "Username": "u_14a1e917"
       },
       "Text": "",
       "MediaKind": "photo"
     }
   },
   "Type": "Message",
-  "UserId": 900000010,
+  "UserId": "U0010",
   "handler": "MessageHandler"
 }

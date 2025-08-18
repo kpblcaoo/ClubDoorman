@@ -28,6 +28,8 @@ static async Task RunBaselineVariantAsync(string variantName, bool disableMediaF
     Environment.SetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE", "1");
     Environment.SetEnvironmentVariable("DOORMAN_EMOJI_VIOLATIONS_BEFORE_BAN", "2");
     Environment.SetEnvironmentVariable("DOORMAN_TEST_BLACKLIST_IDS", "900000050");
+    // Stabilize manifest timestamp for deterministic diffs. ISO 8601 UTC.
+    Environment.SetEnvironmentVariable("DOORMAN_GOLDEN_FIXED_TIMESTAMP", "2025-01-01T00:00:00Z");
 
     // Variant-specific media filtering toggle
     if (disableMediaFiltering)

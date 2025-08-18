@@ -11,12 +11,12 @@
       "From": {
         "Id": "U0008",
         "IsBot": false,
-        "Username": "u_3ec952c0"
+        "Username": "u_12b1a2ca"
       },
       "Text": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 test"
     }
   },
   "Type": "Message",
-  "UserId": 900000008,
+  "UserId": "U0008",
   "handler": "MessageHandler"
 }

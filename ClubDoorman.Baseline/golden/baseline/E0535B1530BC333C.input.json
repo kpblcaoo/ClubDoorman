@@ -11,12 +11,12 @@
       "From": {
         "Id": "U0012",
         "IsBot": false,
-        "Username": "u_add77093"
+        "Username": "u_22a57537"
       },
       "Text": "Ответ с ссылкой http://malicious.ru"
     }
   },
   "Type": "Message",
-  "UserId": 900000012,
+  "UserId": "U0012",
   "handler": "MessageHandler"
 }

@@ -11,12 +11,12 @@
       "From": {
         "Id": "U0009",
         "IsBot": false,
-        "Username": "u_20b4252a"
+        "Username": "u_e72e4268"
       },
       "Text": "ищу партнеров https://spam.example для удаленного заработка"
     }
   },
   "Type": "Message",
-  "UserId": 900000009,
+  "UserId": "U0009",
   "handler": "MessageHandler"
 }

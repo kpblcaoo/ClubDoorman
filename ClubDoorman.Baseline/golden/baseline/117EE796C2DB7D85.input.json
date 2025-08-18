@@ -11,12 +11,12 @@
       "From": {
         "Id": "U0050",
         "IsBot": false,
-        "Username": "u_e9be3a5c"
+        "Username": "u_42f51c04"
       },
       "Text": "Сообщение от забаненного ранее пользователя"
     }
   },
   "Type": "Message",
-  "UserId": 900000050,
+  "UserId": "U0050",
   "handler": "MessageHandler"
 }

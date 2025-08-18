@@ -11,12 +11,12 @@
       "From": {
         "Id": "U0002",
         "IsBot": false,
-        "Username": "u_74deb99e"
+        "Username": "u_f369fb36"
       },
       "Text": "Second baseline message about normal workflow"
     }
   },
   "Type": "Message",
-  "UserId": 900000002,
+  "UserId": "U0002",
   "handler": "MessageHandler"
 }

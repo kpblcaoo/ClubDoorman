@@ -11,12 +11,12 @@
       "From": {
         "Id": "U0006",
         "IsBot": false,
-        "Username": "u_b0ad636e"
+        "Username": "u_cec1c29c"
       },
       "Text": "Пакет номер 42 обработан успешно"
     }
   },
   "Type": "Message",
-  "UserId": 900000006,
+  "UserId": "U0006",
   "handler": "MessageHandler"
 }

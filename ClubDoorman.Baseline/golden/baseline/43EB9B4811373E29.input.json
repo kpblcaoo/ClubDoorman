@@ -11,12 +11,12 @@
       "From": {
         "Id": "U0001",
         "IsBot": false,
-        "Username": "u_14417c45"
+        "Username": "u_35b9f515"
       },
       "Text": "Baseline message one"
     }
   },
   "Type": "Message",
-  "UserId": 900000001,
+  "UserId": "U0001",
   "handler": "MessageHandler"
 }

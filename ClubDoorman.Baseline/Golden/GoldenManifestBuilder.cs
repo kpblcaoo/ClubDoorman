@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Globalization;
 
 namespace ClubDoorman.Baseline.Golden;
 
@@ -97,10 +98,23 @@ internal static class GoldenManifestBuilder
         }
         entries = entries.OrderBy(e => e.Id).ToList();
 
+        // Deterministic timestamp support: allow fixed timestamp via env to stabilize golden diffs.
+        // If DOORMAN_GOLDEN_FIXED_TIMESTAMP is set (ISO 8601), we use it; else fall back to current UTC.
+        var fixedTsEnv = Environment.GetEnvironmentVariable("DOORMAN_GOLDEN_FIXED_TIMESTAMP");
+        DateTime generatedAt;
+        if (!string.IsNullOrWhiteSpace(fixedTsEnv) && DateTime.TryParse(fixedTsEnv, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var parsed))
+        {
+            generatedAt = DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
+        }
+        else
+        {
+            generatedAt = DateTime.UtcNow;
+        }
+
         var manifest = new ManifestRoot
         {
             Schema = 1,
-            GeneratedAtUtc = DateTime.UtcNow,
+            GeneratedAtUtc = generatedAt,
             Variant = variantName,
             Entries = entries
         };
