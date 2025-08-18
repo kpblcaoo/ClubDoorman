@@ -70,7 +70,8 @@
       "Id": 12,
       "ShortName": "CommandStart",
       "CorrelationId": "69E2E8CA2B7A6103",
-      "RuleCode": "Command"
+  "ExpectedAction": "Allow",
+  "RuleCode": "Command"
     },
     {
       "Id": 13,
@@ -90,7 +91,8 @@
       "Id": 15,
       "ShortName": "BanlistUser",
       "CorrelationId": "117EE796C2DB7D85",
-      "RuleCode": "Banlist"
+  "ExpectedAction": "Delete",
+  "RuleCode": "Banlist"
     },
     {
       "Id": 16,

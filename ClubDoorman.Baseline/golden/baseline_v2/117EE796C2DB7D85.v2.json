@@ -3,5 +3,6 @@
   "CorrelationId": "117EE796C2DB7D85",
   "Id": 15,
   "ShortName": "BanlistUser",
+  "Action": "Delete",
   "RuleCode": "Banlist"
 }
