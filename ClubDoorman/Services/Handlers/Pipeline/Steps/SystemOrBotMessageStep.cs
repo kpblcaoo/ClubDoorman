@@ -29,7 +29,8 @@ public class SystemOrBotMessageStep : IMessageStep
         if (context.UserResultHandled) return Task.FromResult(StepResult.Continue());
         var msg = context.Message;
         var from = msg.From;
-        if (from == null)
+        // Treat as purely system message only when there's no user AND no SenderChat (exclude channel posts so ChannelMessageStep can process them)
+        if (from == null && msg.SenderChat == null)
         {
             _logger.LogDebug("[Pipeline] SystemOrBotMessageStep system_no_user messageId={MessageId}", msg.MessageId);
             context.UserResultHandled = true;
@@ -37,7 +38,7 @@ public class SystemOrBotMessageStep : IMessageStep
             _events.Publish(context.GmCorrelation, new ModerationEvent("system_no_user", Action: null, RuleCode: RuleCode.SystemNoUser));
             return Task.FromResult(StepResult.StopOk("system-no-user"));
         }
-    if (from.IsBot && msg.LeftChatMember == null) // allow LeftMemberCleanupStep to handle system left-member messages
+    if (from != null && from.IsBot && msg.LeftChatMember == null) // allow LeftMemberCleanupStep to handle system left-member messages
         {
             _logger.LogDebug("[Pipeline] SystemOrBotMessageStep bot_message userId={UserId} messageId={MessageId}", from.Id, msg.MessageId);
             context.UserResultHandled = true;
