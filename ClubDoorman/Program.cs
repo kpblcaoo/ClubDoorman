@@ -38,34 +38,45 @@ public class Program
                             Directory.CreateDirectory(logsDir);
                         }
 
-                        // Read dynamic logging configuration from environment.
-                        // DOORMAN_LOG_LEVEL: Verbose|Debug|Information|Warning|Error|Fatal  (default: Information unless DOORMAN_TRACE_ENABLE=true)
-                        // DOORMAN_TRACE_ENABLE: true/false (forces Verbose min level when true)
-                        var logLevelEnv = Environment.GetEnvironmentVariable("DOORMAN_LOG_LEVEL");
-                        var traceEnableEnv = Environment.GetEnvironmentVariable("DOORMAN_TRACE_ENABLE");
-                        var traceEnabled = bool.TryParse(traceEnableEnv, out var te) && te;
-                        LogEventLevel parsedLevel = LogEventLevel.Information;
-                        if (!string.IsNullOrWhiteSpace(logLevelEnv) && Enum.TryParse<LogEventLevel>(logLevelEnv, true, out var lvl))
+                        // Dynamic logging configuration from environment.
+                        // Base (legacy) var:
+                        //   DOORMAN_LOG_LEVEL: Verbose|Debug|Information|Warning|Error|Fatal  (default: Information)
+                        // New (optional, overrides DOORMAN_LOG_LEVEL for specific sinks):
+                        //   DOORMAN_LOG_LEVEL_CONSOLE
+                        //   DOORMAN_LOG_LEVEL_FILE
+                        // Trace booster:
+                        //   DOORMAN_TRACE_ENABLE=true  (forces FILE level to Verbose, leaves console as‑is)
+                        static LogEventLevel ParseLevel(string? value, LogEventLevel fallback)
                         {
-                            parsedLevel = lvl;
-                        }
-                        if (traceEnabled && parsedLevel > LogEventLevel.Verbose)
-                        {
-                            parsedLevel = LogEventLevel.Verbose; // escalate to max detail
+                            if (!string.IsNullOrWhiteSpace(value) && Enum.TryParse<LogEventLevel>(value, true, out var lvl))
+                                return lvl;
+                            return fallback;
                         }
 
+                        var baseLevel = ParseLevel(Environment.GetEnvironmentVariable("DOORMAN_LOG_LEVEL"), LogEventLevel.Information);
+                        var consoleLevel = ParseLevel(Environment.GetEnvironmentVariable("DOORMAN_LOG_LEVEL_CONSOLE"), baseLevel);
+                        var fileLevel = ParseLevel(Environment.GetEnvironmentVariable("DOORMAN_LOG_LEVEL_FILE"), baseLevel);
+                        var traceEnabled = bool.TryParse(Environment.GetEnvironmentVariable("DOORMAN_TRACE_ENABLE"), out var te) && te;
+                        if (traceEnabled && fileLevel > LogEventLevel.Verbose)
+                            fileLevel = LogEventLevel.Verbose; // escalate only file sink for deep diagnostics
+
+                        // Root minimum must be the lowest of all sink minima so that higher-verbosity sinks receive events.
+                        var rootMin = consoleLevel < fileLevel ? consoleLevel : fileLevel;
+
                         config
-                            .MinimumLevel.Is(parsedLevel)
+                            .MinimumLevel.Is(rootMin)
                             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                             .MinimumLevel.Override("System", LogEventLevel.Information)
                             .Enrich.FromLogContext()
                             .Enrich.WithProperty("Application", "ClubDoorman")
                             .Enrich.WithProperty("TraceEnabled", traceEnabled)
-                            .WriteTo.Async(a => a.Console())
+                            // Console sink with its own minimum level (can be higher than file level to reduce noise in stdout)
+                            .WriteTo.Async(a => a.Console(restrictedToMinimumLevel: consoleLevel))
                             .WriteTo.Async(a => a.File(
                                 path: Path.Combine(logsDir, "clubdoorman-.log"),
                                 rollingInterval: RollingInterval.Day,
                                 retainedFileCountLimit: 7,
+                                restrictedToMinimumLevel: fileLevel,
                                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
                             ))
                             .WriteTo.Async(a => a.File(

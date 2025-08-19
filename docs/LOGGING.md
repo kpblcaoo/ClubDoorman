@@ -10,8 +10,8 @@
 
 ## Текущая архитектура
 Serilog с несколькими sink:
-- Консоль (уровень = глобальный минимум)
-- `logs/clubdoorman-<date>.log` — общий поток
+- Консоль (собственный минимум через `DOORMAN_LOG_LEVEL_CONSOLE` или базовый `DOORMAN_LOG_LEVEL`)
+- `logs/clubdoorman-<date>.log` — общий поток (минимум через `DOORMAN_LOG_LEVEL_FILE` или базовый)
 - `logs/errors-<date>.log` — только Error+
 - `logs/system-<date>.log` — Information+ (системный слой Microsoft/System)
 - `logs/userflow-<date>.log` — события с добавленным свойством `UserFlow` (отдельный фильтр)
@@ -27,17 +27,23 @@ Serilog с несколькими sink:
 ## Переменные среды для управления логами
 | Переменная | Значение | По умолчанию | Описание |
 |-----------|----------|--------------|----------|
-| `DOORMAN_LOG_LEVEL` | Verbose|Debug|Information|Warning|Error|Fatal | Information | Базовый минимум логов приложения. |
-| `DOORMAN_TRACE_ENABLE` | true/false | false | Если true — принудительно включает Verbose (Trace) независимо от `DOORMAN_LOG_LEVEL` (если тот выше). |
+| `DOORMAN_LOG_LEVEL` | Verbose|Debug|Information|Warning|Error|Fatal | Information | Базовый минимум (используется по умолчанию всеми sink). |
+| `DOORMAN_LOG_LEVEL_CONSOLE` | Verbose..Fatal | (не задан) | Переопределяет уровень только для консоли. |
+| `DOORMAN_LOG_LEVEL_FILE` | Verbose..Fatal | (не задан) | Переопределяет уровень только для основного файлового лога. |
+| `DOORMAN_TRACE_ENABLE` | true/false | false | Если true — повышает детализацию файлового лога до Verbose (консоль не понижается, чтобы не зашумлять stdout). |
 
-Пример включения полного трассинга локально:
-```
-DOORMAN_LOG_LEVEL=Debug
-DOORMAN_TRACE_ENABLE=true
-```
-В продакшене обычно:
+Пример включения полного трассинга локально (файлы максимально подробные, консоль умеренно подробная):
 ```
 DOORMAN_LOG_LEVEL=Information
+DOORMAN_LOG_LEVEL_CONSOLE=Information
+DOORMAN_LOG_LEVEL_FILE=Debug
+DOORMAN_TRACE_ENABLE=true  # эскалирует FILE -> Verbose
+```
+В продакшене (умеренный шум в файлах, консоль только важное):
+```
+DOORMAN_LOG_LEVEL=Information
+DOORMAN_LOG_LEVEL_CONSOLE=Warning
+DOORMAN_LOG_LEVEL_FILE=Information
 DOORMAN_TRACE_ENABLE=false
 ```
 
@@ -81,12 +87,22 @@ Handlers добавляют в scope:
 - Использовать Warning для штатных веток.
 
 ## Как снизить шум без релиза кода
-Измените только переменные среды и перезапустите сервис:
+Измените только переменные среды и перезапустите сервис. Примеры:
+1) Урезать только консоль (оставив файлы подробными):
+```
+DOORMAN_LOG_LEVEL=Debug
+DOORMAN_LOG_LEVEL_CONSOLE=Warning
+```
+2) Урезать всё:
 ```
 DOORMAN_LOG_LEVEL=Warning
-DOORMAN_TRACE_ENABLE=false
 ```
-Это мгновенно сокращает объём файлов.
+3) Включить краткосрочный глубокий сбор в файлы:
+```
+DOORMAN_LOG_LEVEL_FILE=Debug
+DOORMAN_TRACE_ENABLE=true
+```
+Консоль при этом может остаться на Information/Warning.
 
 ## Отладка локально
 1. Поставьте `DOORMAN_TRACE_ENABLE=true` — получите полный Trace + JSON GM payload.
