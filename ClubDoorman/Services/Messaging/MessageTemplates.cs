@@ -2,6 +2,8 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Models.Notifications;
 using Telegram.Bot.Types;
 
+using ClubDoorman.Services.Core.Configuration;
+
 namespace ClubDoorman.Services.Messaging;
 
 /// <summary>
@@ -9,6 +11,12 @@ namespace ClubDoorman.Services.Messaging;
 /// </summary>
 public class MessageTemplates
 {
+    private readonly IAppConfig _appConfig;
+
+    public MessageTemplates(IAppConfig appConfig)
+    {
+        _appConfig = appConfig;
+    }
     private readonly Dictionary<AdminNotificationType, string> _adminTemplates = new()
     {
         [AdminNotificationType.AutoBanBlacklist] =
@@ -269,7 +277,7 @@ public class MessageTemplates
             result = result.Replace("{MimicryScore}", suspiciousData.MimicryScore.ToString("F2"));
             result = result.Replace("{SuspiciousAt}", suspiciousData.SuspiciousAt.ToString("yyyy-MM-dd HH:mm"));
             result = result.Replace("{FirstMessages}", FormatFirstMessages(suspiciousData.FirstMessages));
-            result = result.Replace("{RequiredMessages}", Config.SuspiciousToApprovedMessageCount.ToString());
+            result = result.Replace("{RequiredMessages}", _appConfig.SuspiciousToApprovedMessageCount.ToString());
         }
 
         else if (data is ErrorNotificationData errorData)

@@ -1,10 +1,10 @@
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using Telegram.Bot.Types;
 using ClubDoorman.Services.Messaging;
+using Moq;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Test.Unit.Services
 {
@@ -16,7 +16,9 @@ namespace ClubDoorman.Test.Unit.Services
         [SetUp]
         public void Setup()
         {
-            _templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            _templates = new MessageTemplates(appConfig.Object);
         }
 
         [Test]

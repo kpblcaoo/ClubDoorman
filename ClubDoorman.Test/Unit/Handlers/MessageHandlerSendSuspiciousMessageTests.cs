@@ -71,11 +71,13 @@ public class MessageHandlerSendSuspiciousMessageTests
                 .ReturnsAsync(new Message { Chat = new Chat { Id = 12345L } });
         });
 
-        _factory.WithMessageServiceSetup(mock =>
-        {
-            var templates = new MessageTemplates();
-            mock.Setup(x => x.GetTemplates()).Returns(templates);
-        });
+            _factory.WithMessageServiceSetup(mock =>
+            {
+                var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+                appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+                var templates = new MessageTemplates(appConfig.Object);
+                mock.Setup(x => x.GetTemplates()).Returns(templates);
+            });
 
         var service = CreateNotificationService();
         await service.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
@@ -105,7 +107,9 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
         _factory.WithMessageServiceSetup(mock =>
         {
-            var templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
             mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
         var service = CreateNotificationService();
@@ -137,7 +141,9 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
         _factory.WithMessageServiceSetup(mock =>
         {
-            var templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
             mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
         var service = CreateNotificationService();
@@ -167,7 +173,9 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
         _factory.WithMessageServiceSetup(mock =>
         {
-            var templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
             mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
         var service = CreateNotificationService();
@@ -241,7 +249,9 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
         _factory.WithMessageServiceSetup(mock =>
         {
-            var templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
             mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
         var service = CreateNotificationService();
@@ -269,7 +279,9 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
         _factory.WithMessageServiceSetup(mock =>
         {
-            var templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
             mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
         var service = CreateNotificationService();
@@ -297,7 +309,9 @@ public class MessageHandlerSendSuspiciousMessageTests
         });
         _factory.WithMessageServiceSetup(mock =>
         {
-            var templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
             mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
         var service = CreateNotificationService();
