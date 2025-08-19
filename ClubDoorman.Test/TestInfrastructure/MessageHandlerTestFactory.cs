@@ -139,11 +139,11 @@ public class MessageHandlerTestFactory
                 .ReturnsAsync((ChatId dest, ChatId src, int msgId, CancellationToken ct) => new Message { Chat = new Chat { Id = (long)dest.Identifier! } });
         }
 
-        // Если DeleteMessage не настроен – добавляем простую реализацию чтобы можно было Verify
-        if (!BotMock.Setups.Any(s => s.ToString().Contains("DeleteMessage")))
+        // Ensure DeleteMessageWithOutcomeAsync has a default implementation for verification
+        if (!BotMock.Setups.Any(s => s.ToString().Contains("DeleteMessageWithOutcomeAsync")))
         {
-            BotMock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
+            BotMock.Setup(x => x.DeleteMessageWithOutcomeAsync(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((ChatId chatId, int messageId, CancellationToken ct) => new DeleteMessageResult((long)chatId.Identifier!, messageId, DeleteMessageOutcome.Success, 1, null, null));
         }
 
         // Унифицированная эмуляция поведения ModerationFacade.HandleUserMessageAsync (для delete/ban тестов)
@@ -163,7 +163,11 @@ public class MessageHandlerTestFactory
                     {
                         if (result.Action == ModerationAction.Delete || result.Action == ModerationAction.Ban)
                         {
-                            BotMock.Object.DeleteMessage(chat.Id, msg.MessageId, ct);
+                            try
+                            {
+                                BotMock.Object.DeleteMessageWithOutcomeAsync(new ChatId(chat.Id), msg.MessageId, ct);
+                            }
+                            catch { /* ignore in test helper */ }
                             // Всегда регистрируем нарушение при Delete/Ban чтобы тесты повторных нарушений могли вызывать автобан
                             UserBanServiceMock.Object.TrackViolationAndBanIfNeededAsync(msg, user, result.Reason ?? "violation", ct);
                         }
@@ -556,10 +560,11 @@ public class MessageHandlerTestFactory
         }
 
         // Настраиваем мок для удаления сообщений
-        BotMock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Callback<ChatId, int, CancellationToken>((chatId, messageId, token) =>
+        BotMock.Setup(x => x.DeleteMessageWithOutcomeAsync(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ChatId chatId, int messageId, CancellationToken token) =>
             {
                 fakeClient.DeleteMessage(chatId, messageId, token);
+                return new DeleteMessageResult((long)chatId.Identifier!, messageId, DeleteMessageOutcome.Success, 1, null, null);
             });
 
         // Гарантируем что ModerationFacade возвращает валидный результат (иначе NullReference на .Action)
@@ -623,7 +628,7 @@ public class MessageHandlerTestFactory
                     // Эмуляция поведения настоящего фасада: при Delete/Ban удаляем сообщение
                     if (result.Action == ModerationAction.Delete || result.Action == ModerationAction.Ban)
                     {
-                        try { BotMock.Object.DeleteMessage(chat.Id, msg.MessageId, ct); } catch { /* ignore in test context */ }
+                        try { BotMock.Object.DeleteMessageWithOutcomeAsync(new ChatId(chat.Id), msg.MessageId, ct); } catch { /* ignore in test context */ }
                     }
                 })
                 .Returns(Task.CompletedTask);

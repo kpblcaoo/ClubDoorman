@@ -3,7 +3,6 @@ using NUnit.Framework;
 using TechTalk.SpecFlow;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.TestInfrastructure;
 using Telegram.Bot.Types;
@@ -90,7 +89,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             var appConfig = AppConfigTestFactory.CreateDefault();
             var botClient = new TelegramBotClient("1234567890:TEST_TOKEN_FOR_TESTS");
-            var telegramWrapper = new TelegramBotClientWrapper(botClient);
+            var telegramWrapper = new TelegramBotClientWrapper(botClient, _loggerFactory.CreateLogger<TelegramBotClientWrapper>());
             var approvedUsersStorage = new ApprovedUsersStorage(_loggerFactory.CreateLogger<ApprovedUsersStorage>());
 
             _aiChecks = new AiChecks(telegramWrapper, _loggerFactory.CreateLogger<AiChecks>(), appConfig);

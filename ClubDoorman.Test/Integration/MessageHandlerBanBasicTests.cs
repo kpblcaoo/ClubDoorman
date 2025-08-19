@@ -58,6 +58,8 @@ public class MessageHandlerBanBasicTests
     [Category("autofixture")]
     public async Task DeleteAndReportMessage_WhenModerationReturnsDelete_DeletesMessage()
     {
+    // This test asserts that a moderation Delete leads to exactly one call to DeleteMessageWithOutcomeAsync.
+    // Legacy DeleteMessage path is deprecated in this scenario.
         // Arrange - используем builders для читаемого создания тестовых данных
         var user = TestKitBuilders.CreateUser()
             .WithId(123456789)
@@ -86,6 +88,6 @@ public class MessageHandlerBanBasicTests
         await _handler.HandleAsync(update, CancellationToken.None);
 
         // Assert
-        _botMock.Verify(x => x.DeleteMessage(chat.Id, message.MessageId, It.IsAny<CancellationToken>()), Times.Once);
+    _botMock.Verify(x => x.DeleteMessageWithOutcomeAsync(new ChatId(chat.Id), message.MessageId, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

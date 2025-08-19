@@ -6,5 +6,9 @@
   "-1001234567891": {
     "type": "announcement",
     "title": "GoldenAnnouncementChat"
+  },
+  "-1002867169174": {
+    "type": "default",
+    "title": "test_group_001"
   }
 }

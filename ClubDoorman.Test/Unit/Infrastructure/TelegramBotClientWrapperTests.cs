@@ -1,6 +1,4 @@
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
@@ -24,8 +22,8 @@ public class TelegramBotClientWrapperTests
     {
         _factory = new TelegramBotClientWrapperTestFactory();
         // Создаем реальный TelegramBotClient для wrapper'а
-        var realBotClient = new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz");
-        _wrapper = new TelegramBotClientWrapper(realBotClient);
+    var realBotClient = new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz");
+    _wrapper = new TelegramBotClientWrapper(realBotClient, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance);
     }
 
     [Test]
@@ -33,7 +31,7 @@ public class TelegramBotClientWrapperTests
     {
         // Arrange & Act
         var botClient = new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz");
-        var wrapper = new TelegramBotClientWrapper(botClient);
+    var wrapper = new TelegramBotClientWrapper(botClient, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance);
 
         // Assert
         Assert.That(wrapper, Is.Not.Null);
@@ -43,7 +41,7 @@ public class TelegramBotClientWrapperTests
     public void TelegramBotClientWrapper_Constructor_ThrowsOnNullBot()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new TelegramBotClientWrapper(null!));
+    Assert.Throws<ArgumentNullException>(() => new TelegramBotClientWrapper(null!, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance));
     }
 
     [Test]
@@ -51,7 +49,7 @@ public class TelegramBotClientWrapperTests
     {
         // Arrange
         var botClient = new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz");
-        var wrapper = new TelegramBotClientWrapper(botClient);
+    var wrapper = new TelegramBotClientWrapper(botClient, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance);
 
         // Act
         var botId = wrapper.BotId;
@@ -96,6 +94,6 @@ public class TelegramBotClientWrapperTests
     public void TelegramBotClientWrapper_Constructor_ValidatesInput()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new TelegramBotClientWrapper(null!));
+    Assert.Throws<ArgumentNullException>(() => new TelegramBotClientWrapper(null!, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance));
     }
 }
