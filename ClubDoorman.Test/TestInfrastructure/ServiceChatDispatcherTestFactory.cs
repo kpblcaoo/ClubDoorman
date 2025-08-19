@@ -1,4 +1,3 @@
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models.Notifications;
@@ -9,6 +8,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -19,6 +19,7 @@ public class ServiceChatDispatcherTestFactory
 {
     public Mock<ITelegramBotClientWrapper> BotClientMock { get; }
     public Mock<ILogger<ServiceChatDispatcher>> LoggerMock { get; }
+    public Mock<IAppConfig> AppConfigMock { get; } = new();
 
     public ServiceChatDispatcherTestFactory()
     {
@@ -44,7 +45,10 @@ public class ServiceChatDispatcherTestFactory
     /// </summary>
     public ServiceChatDispatcher CreateServiceChatDispatcher()
     {
-        return new ServiceChatDispatcher(BotClientMock.Object, LoggerMock.Object);
+    // Provide default safe values for chat ids
+    AppConfigMock.SetupGet(x => x.AdminChatId).Returns(-1000);
+    AppConfigMock.SetupGet(x => x.LogAdminChatId).Returns(-1000);
+    return new ServiceChatDispatcher(BotClientMock.Object, LoggerMock.Object, AppConfigMock.Object);
     }
 
     /// <summary>

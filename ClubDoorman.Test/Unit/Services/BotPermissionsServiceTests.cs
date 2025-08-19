@@ -1,7 +1,5 @@
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -22,12 +20,18 @@ public class BotPermissionsServiceTests : TestBase
     private readonly Mock<ITelegramBotClientWrapper> _mockBot;
     private readonly Mock<ILogger<BotPermissionsService>> _mockLogger;
     private readonly BotPermissionsService _service;
+    private readonly Mock<IAppConfig> _mockAppConfig;
+    private const long AdminChatIdConst = 123456789; // formerly Config.AdminChatId test value
+    private const long LogAdminChatIdConst = 223456789; // deterministic test value
 
     public BotPermissionsServiceTests()
     {
         _mockBot = new Mock<ITelegramBotClientWrapper>();
         _mockLogger = new Mock<ILogger<BotPermissionsService>>();
-        _service = new BotPermissionsService(_mockBot.Object, _mockLogger.Object);
+    _mockAppConfig = new Mock<IAppConfig>();
+    _mockAppConfig.SetupGet(x => x.AdminChatId).Returns(AdminChatIdConst);
+    _mockAppConfig.SetupGet(x => x.LogAdminChatId).Returns(LogAdminChatIdConst);
+    _service = new BotPermissionsService(_mockBot.Object, _mockLogger.Object, _mockAppConfig.Object);
     }
 
     [Test]
@@ -35,7 +39,7 @@ public class BotPermissionsServiceTests : TestBase
     {
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            new BotPermissionsService(null!, _mockLogger.Object));
+            new BotPermissionsService(null!, _mockLogger.Object, _mockAppConfig.Object));
         Assert.That(exception.ParamName, Is.EqualTo("bot"));
     }
 
@@ -44,7 +48,7 @@ public class BotPermissionsServiceTests : TestBase
     {
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            new BotPermissionsService(_mockBot.Object, null!));
+            new BotPermissionsService(_mockBot.Object, null!, _mockAppConfig.Object));
         Assert.That(exception.ParamName, Is.EqualTo("logger"));
     }
 
@@ -52,7 +56,7 @@ public class BotPermissionsServiceTests : TestBase
     public void Constructor_WithValidParameters_CreatesInstance()
     {
         // Act
-        var service = new BotPermissionsService(_mockBot.Object, _mockLogger.Object);
+    var service = new BotPermissionsService(_mockBot.Object, _mockLogger.Object, _mockAppConfig.Object);
 
         // Assert
         Assert.That(service, Is.Not.Null);
@@ -138,10 +142,10 @@ public class BotPermissionsServiceTests : TestBase
     public async Task IsSilentModeAsync_ForAdminChat_ReturnsFalse()
     {
         // Arrange
-        var adminChatId = Config.AdminChatId;
+    var adminChatId = AdminChatIdConst;
 
         // Act
-        var result = await _service.IsSilentModeAsync(adminChatId);
+    var result = await _service.IsSilentModeAsync(adminChatId);
 
         // Assert
         Assert.That(result, Is.False);
@@ -152,10 +156,10 @@ public class BotPermissionsServiceTests : TestBase
     public async Task IsSilentModeAsync_ForLogAdminChat_ReturnsFalse()
     {
         // Arrange
-        var logAdminChatId = Config.LogAdminChatId;
+    var logAdminChatId = LogAdminChatIdConst;
 
         // Act
-        var result = await _service.IsSilentModeAsync(logAdminChatId);
+    var result = await _service.IsSilentModeAsync(logAdminChatId);
 
         // Assert
         Assert.That(result, Is.False);

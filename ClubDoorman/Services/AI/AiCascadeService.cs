@@ -56,7 +56,7 @@ public class AiCascadeService : IAiCascadeService
 
     public async Task<bool> PerformAiProfileAnalysisAsync(Message message, User user, Chat chat, CancellationToken cancellationToken)
     {
-        if (Environment.GetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE") == "1")
+    if (_appConfig.GoldenBaselineMode)
         {
             _logger.LogDebug("Fast baseline mode: skipping AI profile analysis");
             return false; // treat as safe
@@ -185,7 +185,7 @@ public class AiCascadeService : IAiCascadeService
     }
     public async Task HandleAiCascadeAnalysisAsync(Message message, User user, double mlScore, bool isSilentMode, CancellationToken cancellationToken)
     {
-        if (Environment.GetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE") == "1")
+    if (_appConfig.GoldenBaselineMode)
         {
             _logger.LogDebug("Fast baseline mode: skipping AI cascade analysis");
             // Count as good message to keep stats consistent

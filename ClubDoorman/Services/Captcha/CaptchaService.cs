@@ -353,8 +353,8 @@ public class CaptchaService : ICaptchaService
     /// </summary>
     /// <param name="chatId">ID чата</param>
     /// <returns>true, если группа без рекламы VPN</returns>
-    private static bool IsNoAdGroup(long chatId)
+    private bool IsNoAdGroup(long chatId)
     {
-        return Config.NoVpnAdGroups.Contains(chatId);
+        return _appConfig.NoVpnAdGroups.Contains(chatId);
     }
 }

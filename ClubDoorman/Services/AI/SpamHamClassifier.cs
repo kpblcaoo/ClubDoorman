@@ -8,6 +8,7 @@ using Microsoft.ML.Transforms.Text;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.TextProcessing;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Services.AI;
 
@@ -28,10 +29,11 @@ internal class MessagePrediction : MessageData
 
 public class SpamHamClassifier : ISpamHamClassifier
 {
-    private readonly bool _fastMode = Environment.GetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE") == "1";
-    public SpamHamClassifier(ILogger<SpamHamClassifier> logger)
+    private readonly bool _fastMode;
+    public SpamHamClassifier(ILogger<SpamHamClassifier> logger, IAppConfig appConfig)
     {
         _logger = logger;
+        _fastMode = appConfig.GoldenBaselineMode;
         if (_fastMode)
         {
             _logger.LogInformation("Fast baseline mode: single initial ML training, retrain loop disabled");
@@ -43,6 +45,18 @@ public class SpamHamClassifier : ISpamHamClassifier
             Task.Run(RetrainLoop);
         }
     }
+
+    // Backward compatibility for existing tests that new-up classifier directly without DI
+    public SpamHamClassifier(ILogger<SpamHamClassifier> logger) : this(logger, new AppConfig(
+        Microsoft.Extensions.Options.Options.Create(new AutoBanOptions()),
+        Microsoft.Extensions.Options.Options.Create(new ViolationThresholdOptions()),
+        Microsoft.Extensions.Options.Options.Create(new FeatureToggleOptions()),
+        Microsoft.Extensions.Options.Options.Create(new ChatFilteringOptions()),
+        Microsoft.Extensions.Options.Options.Create(new CoreOptions()),
+        Microsoft.Extensions.Options.Options.Create(new ChatAccessOptions()),
+        Microsoft.Extensions.Options.Options.Create(new AiOptions()),
+        Microsoft.Extensions.Options.Options.Create(new TestHarnessOptions())))
+    { }
 
     private const string SpamHamDataset = "data/spam-ham.txt";
     private readonly SemaphoreSlim _datasetLock = new(1);

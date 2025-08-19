@@ -5,6 +5,7 @@ using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Effects.Channel;
 using ClubDoorman.Effects;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Services.ChannelModeration;
 
@@ -20,13 +21,16 @@ public static class ChannelModerationModule
             // Пытаемся получить эффекты (могут отсутствовать если не зарегистрированы на раннем этапе)
             var channelEffectsBuilder = provider.GetService<IChannelModerationEffectsBuilder>();
             var effectBus = provider.GetService<IEffectBus>();
+            // Требуется передать IAppConfig (ранее не передавали => NullReference / ArgumentNullException на старте)
+            var appConfig = provider.GetRequiredService<IAppConfig>();
             return new ChannelModerationService(
                 provider.GetRequiredService<ITelegramBotClientWrapper>(),
                 provider.GetRequiredService<IModerationService>(),
                 provider.GetRequiredService<IUserBanService>(),
                 provider.GetRequiredService<ILogger<ChannelModerationService>>(),
                 channelEffectsBuilder,
-                effectBus);
+                effectBus,
+                appConfig);
         });
 
         return services;

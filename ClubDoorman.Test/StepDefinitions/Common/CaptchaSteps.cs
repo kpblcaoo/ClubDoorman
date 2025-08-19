@@ -1,23 +1,4 @@
-using NUnit.Framework;
-using TechTalk.SpecFlow;
-using ClubDoorman.Models;
-using ClubDoorman.Models.Requests;
-using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Test.TestInfrastructure;
-using ClubDoorman.TestInfrastructure;
-using ClubDoorman.Test.TestData;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
-using Telegram.Bot;
-using Moq;
-using Microsoft.Extensions.Logging;
-using FluentAssertions;
-using System.Reflection;
-using ClubDoorman.Services.Telegram;
-using ClubDoorman.Services.Messaging;
-using ClubDoorman.Services.Captcha;
-using ClubDoorman.Services.Violation;
+﻿using Telegram.Bot;
 
 namespace ClubDoorman.Test.StepDefinitions.Common
 {

@@ -14,7 +14,7 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.TextProcessing;
 using ClubDoorman.Services;
-
+using ClubDoorman.Services.Core.Configuration;
 namespace ClubDoorman.Features.Moderation;
 
 /// <summary>
@@ -34,12 +34,11 @@ public class ModerationPolicy : IModerationPolicy
     private readonly IUserBanService _userBanService;
     private readonly IUserCleanupService _userCleanupService;
     private readonly ILogger<ModerationPolicy> _logger;
-
+    private readonly IAppConfig _appConfig;
     // Счетчики хороших сообщений для новой системы
     private readonly ConcurrentDictionary<long, int> _goodUserMessages = new();
     private readonly ConcurrentDictionary<string, int> _groupGoodUserMessages = new();
     private readonly ConcurrentDictionary<long, DateTime> _warnedUsers = new();
-
     // Хранение первых сообщений пользователей для анализа мимикрии
     private readonly ConcurrentDictionary<long, List<string>> _userFirstMessages = new();
     private readonly ConcurrentDictionary<string, List<string>> _groupUserFirstMessages = new();
@@ -59,7 +58,8 @@ public class ModerationPolicy : IModerationPolicy
         IMessageService messageService,
         IUserBanService userBanService,
         IUserCleanupService userCleanupService,
-        ILogger<ModerationPolicy> logger)
+        ILogger<ModerationPolicy> logger,
+        IAppConfig appConfig)
     {
         _classifier = classifier;
         _mimicryClassifier = mimicryClassifier;
@@ -72,12 +72,13 @@ public class ModerationPolicy : IModerationPolicy
         _userBanService = userBanService;
         _userCleanupService = userCleanupService;
         _logger = logger;
+        _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
 
         // Логируем статус системы мимикрии
-        if (Config.SuspiciousDetectionEnabled)
+        if (_appConfig.SuspiciousDetectionEnabled)
         {
             _logger.LogInformation("🎭 Система мимикрии ВКЛЮЧЕНА: порог={Threshold:F1}, сообщений для одобрения={Count}",
-                Config.MimicryThreshold, Config.SuspiciousToApprovedMessageCount);
+                _appConfig.MimicryThreshold, _appConfig.SuspiciousToApprovedMessageCount);
         }
         else
         {
@@ -229,9 +230,9 @@ public class ModerationPolicy : IModerationPolicy
         }
 
         _logger.LogDebug("📊 Система одобрения: GlobalMode={GlobalMode}, User={User}",
-            Config.GlobalApprovalMode, Utils.FullName(user));
+            _appConfig.GlobalApprovalMode, Utils.FullName(user));
 
-        if (!Config.GlobalApprovalMode)
+    if (!_appConfig.GlobalApprovalMode)
         {
             // Групповой режим
             _logger.LogDebug("➡️ Направляем в групповой режим для {User}", Utils.FullName(user));
@@ -253,7 +254,7 @@ public class ModerationPolicy : IModerationPolicy
         // Обновляем счетчик в storage
         _suspiciousUsersStorage.UpdateMessageCount(user.Id, chat.Id, suspiciousCount);
 
-        if (suspiciousCount >= Config.SuspiciousToApprovedMessageCount)
+    if (suspiciousCount >= _appConfig.SuspiciousToApprovedMessageCount)
         {
             _logger.LogInformation(
                 "Suspicious user {FullName} behaved well for {Count} additional messages in group {GroupTitle}, approving",
@@ -290,9 +291,9 @@ public class ModerationPolicy : IModerationPolicy
         {
             // Анализируем подозрительность, если система включена
             _logger.LogDebug("🔍 Анализ подозрительности: система включена={SuspiciousEnabled}, пользователь={User}",
-                Config.SuspiciousDetectionEnabled, Utils.FullName(user));
+                _appConfig.SuspiciousDetectionEnabled, Utils.FullName(user));
 
-            if (Config.SuspiciousDetectionEnabled && await AnalyzeMimicryAndMarkSuspicious(user, chat, groupUserKey))
+            if (_appConfig.SuspiciousDetectionEnabled && await AnalyzeMimicryAndMarkSuspicious(user, chat, groupUserKey))
             {
                 // Пользователь помечен как подозрительный
                 _groupGoodUserMessages.TryRemove(groupUserKey, out _);
@@ -333,9 +334,9 @@ public class ModerationPolicy : IModerationPolicy
         {
             // Анализируем подозрительность, если система включена
             _logger.LogDebug("🔍 Анализ подозрительности (глобальный): система включена={SuspiciousEnabled}, пользователь={User}",
-                Config.SuspiciousDetectionEnabled, Utils.FullName(user));
+                _appConfig.SuspiciousDetectionEnabled, Utils.FullName(user));
 
-            if (Config.SuspiciousDetectionEnabled && await AnalyzeMimicryAndMarkSuspicious(user, chat, user.Id.ToString()))
+            if (_appConfig.SuspiciousDetectionEnabled && await AnalyzeMimicryAndMarkSuspicious(user, chat, user.Id.ToString()))
             {
                 // Пользователь помечен как подозрительный
                 _goodUserMessages.TryRemove(user.Id, out _);
@@ -348,10 +349,10 @@ public class ModerationPolicy : IModerationPolicy
                 "User {FullName} behaved well for the last {Count} messages, approving {Mode}",
                 Utils.FullName(user),
                 goodInteractions,
-                Config.GlobalApprovalMode ? "globally" : "in old system"
+                _appConfig.GlobalApprovalMode ? "globally" : "in old system"
             );
 
-            await _userManager.Approve(user.Id, Config.GlobalApprovalMode ? null : chat.Id);
+            await _userManager.Approve(user.Id, _appConfig.GlobalApprovalMode ? null : chat.Id);
             _goodUserMessages.TryRemove(user.Id, out _);
             _userFirstMessages.TryRemove(user.Id, out _);
             _warnedUsers.TryRemove(user.Id, out _);
@@ -507,9 +508,9 @@ public class ModerationPolicy : IModerationPolicy
             var mimicryScore = _mimicryClassifier.AnalyzeMessages(firstMessages);
 
             _logger.LogDebug("🎭 Результат анализа мимикрии для {User}: скор={Score:F2}, порог={Threshold:F2}",
-                Utils.FullName(user), mimicryScore, Config.MimicryThreshold);
+                Utils.FullName(user), mimicryScore, _appConfig.MimicryThreshold);
 
-            if (mimicryScore >= Config.MimicryThreshold)
+            if (mimicryScore >= _appConfig.MimicryThreshold)
             {
                 // Помечаем как подозрительного
                 var suspiciousInfo = new SuspiciousUserInfo(
@@ -537,7 +538,7 @@ public class ModerationPolicy : IModerationPolicy
             }
 
             _logger.LogDebug("🎭✅ Пользователь {User} прошел проверку мимикрии: скор={Score:F2} < порог={Threshold:F2}",
-                Utils.FullName(user), mimicryScore, Config.MimicryThreshold);
+                Utils.FullName(user), mimicryScore, _appConfig.MimicryThreshold);
 
             return false;
         }
@@ -571,7 +572,7 @@ public class ModerationPolicy : IModerationPolicy
                 messageText += $"{i + 1}. `{msg}`\n";
             }
 
-            messageText += $"\n✅ Для одобрения нужно ещё {Config.SuspiciousToApprovedMessageCount} хороших сообщений";
+            messageText += $"\n✅ Для одобрения нужно ещё {_appConfig.SuspiciousToApprovedMessageCount} хороших сообщений";
 
             // Создаем кнопки управления
             var approveCallback = $"suspicious_approve_{user.Id}_{chat.Id}";
@@ -595,7 +596,7 @@ public class ModerationPolicy : IModerationPolicy
              });
 
             await _botClient.SendMessage(
-                chatId: Config.LogAdminChatId,
+                chatId: _appConfig.LogAdminChatId,
                 text: messageText,
                 parseMode: global::Telegram.Bot.Types.Enums.ParseMode.Markdown,
                 replyMarkup: keyboard,
@@ -619,7 +620,7 @@ public class ModerationPolicy : IModerationPolicy
         var isAnnouncement = chatType == "announcement";
 
         // Не репортим картинки и видео если фильтрация отключена
-        if (Config.IsMediaFilteringDisabledForChat(chatId) && hasPhotoOrVideo && !hasStickerOrDocument)
+    if (_appConfig.IsMediaFilteringDisabledForChat(chatId) && hasPhotoOrVideo && !hasStickerOrDocument)
             return null;
 
         // Стикеры и документы всегда блокируем в неутвержденных сообщениях
@@ -629,7 +630,7 @@ public class ModerationPolicy : IModerationPolicy
         }
 
         // Картинки и видео блокируем только если фильтрация не отключена
-        if (!Config.IsMediaFilteringDisabledForChat(chatId) && !isAnnouncement && hasPhotoOrVideo)
+    if (!_appConfig.IsMediaFilteringDisabledForChat(chatId) && !isAnnouncement && hasPhotoOrVideo)
         {
             return new ModerationResult(ModerationAction.Delete, "В первых трёх сообщениях нельзя отправлять картинки или видео");
         }
@@ -643,7 +644,7 @@ public class ModerationPolicy : IModerationPolicy
         var isAnnouncement = chatType == "announcement";
 
         // 6. ПРИОРИТЕТНАЯ проверка ссылок
-        if (Config.TextMentionFilterEnabled)
+    if (_appConfig.TextMentionFilterEnabled)
         {
             var hasLinks = SimpleFilters.HasLinks(text);
             _logger.LogDebug("Проверка ссылок: текст='{Text}', найдены={HasLinks}",
@@ -690,7 +691,7 @@ public class ModerationPolicy : IModerationPolicy
             var tailMessage = lookalike.Count > 5 ? ", и другие" : "";
             var reason = $"Были найдены слова маскирующиеся под русские: {string.Join(", ", lookalike.Take(5))}{tailMessage}";
 
-            if (Config.LookAlikeAutoBan)
+            if (_appConfig.LookAlikeAutoBan)
             {
                 return new ModerationResult(ModerationAction.Ban, reason);
             }
@@ -730,7 +731,7 @@ public class ModerationPolicy : IModerationPolicy
         }
 
         // 10. Проверка низкой уверенности в ham - каскадная проверка ML -> AI
-        if (score > -0.6 && Config.LowConfidenceHamForward)
+    if (score > -0.6 && _appConfig.LowConfidenceHamForward)
         {
             return new ModerationResult(ModerationAction.RequireAiAnalysis,
                 $"ML не уверен (скор {score}) - требуется AI анализ", score);

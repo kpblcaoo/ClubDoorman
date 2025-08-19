@@ -1,6 +1,4 @@
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
@@ -10,6 +8,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Test.Unit.Services;
 
@@ -338,7 +337,7 @@ public class ServiceChatDispatcherTests
     {
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            new ServiceChatDispatcher(null!, _factory.LoggerMock.Object));
+            new ServiceChatDispatcher(null!, _factory.LoggerMock.Object, _factory.AppConfigMock.Object));
 
         Assert.That(exception.ParamName, Is.EqualTo("bot"));
     }
@@ -349,7 +348,7 @@ public class ServiceChatDispatcherTests
     {
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            new ServiceChatDispatcher(_factory.BotClientMock.Object, null!));
+            new ServiceChatDispatcher(_factory.BotClientMock.Object, null!, _factory.AppConfigMock.Object));
 
         Assert.That(exception.ParamName, Is.EqualTo("logger"));
     }

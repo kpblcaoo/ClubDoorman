@@ -13,149 +13,173 @@ public class AppConfig : IAppConfig
     private readonly IOptions<ViolationThresholdOptions> _violationThresholdOptions;
     private readonly IOptions<FeatureToggleOptions> _featureToggleOptions;
     private readonly IOptions<ChatFilteringOptions> _chatFilteringOptions;
+    private readonly IOptions<CoreOptions> _coreOptions;
+    private readonly IOptions<ChatAccessOptions> _chatAccessOptions;
+    private readonly IOptions<AiOptions> _aiOptions;
+    private readonly IOptions<TestHarnessOptions>? _testHarnessOptions;
 
     public AppConfig(
         IOptions<AutoBanOptions> autoBanOptions,
         IOptions<ViolationThresholdOptions> violationThresholdOptions,
         IOptions<FeatureToggleOptions> featureToggleOptions,
-        IOptions<ChatFilteringOptions> chatFilteringOptions)
+        IOptions<ChatFilteringOptions> chatFilteringOptions,
+        IOptions<CoreOptions> coreOptions,
+        IOptions<ChatAccessOptions> chatAccessOptions,
+    IOptions<AiOptions> aiOptions,
+    IOptions<TestHarnessOptions>? testHarnessOptions)
     {
         _autoBanOptions = autoBanOptions;
         _violationThresholdOptions = violationThresholdOptions;
         _featureToggleOptions = featureToggleOptions;
         _chatFilteringOptions = chatFilteringOptions;
+        _coreOptions = coreOptions;
+        _chatAccessOptions = chatAccessOptions;
+        _aiOptions = aiOptions;
+    _testHarnessOptions = testHarnessOptions ?? Microsoft.Extensions.Options.Options.Create(new TestHarnessOptions());
         Effects = new EffectsConfiguration();
     }
 
     /// <summary>
     /// API токен для OpenRouter
     /// </summary>
-    public string? OpenRouterApi => Config.OpenRouterApi;
+    public string? OpenRouterApi => _aiOptions.Value.OpenRouterApi; // полностью мигрировано в AiOptions
 
     /// <summary>
     /// Включено ли обнаружение подозрительных пользователей
     /// </summary>
-    public bool SuspiciousDetectionEnabled => Config.SuspiciousDetectionEnabled;
+    public bool SuspiciousDetectionEnabled => _aiOptions.Value.SuspiciousDetectionEnabled;
 
     /// <summary>
     /// Порог мимикрии для обнаружения подозрительных пользователей
     /// </summary>
-    public double MimicryThreshold => Config.MimicryThreshold;
+    public double MimicryThreshold => _aiOptions.Value.MimicryThreshold;
 
     /// <summary>
     /// Количество сообщений для перехода из подозрительных в одобренные
     /// </summary>
-    public int SuspiciousToApprovedMessageCount => Config.SuspiciousToApprovedMessageCount;
+    public int SuspiciousToApprovedMessageCount => _aiOptions.Value.SuspiciousToApprovedMessageCount;
 
     /// <summary>
     /// ID админского чата
     /// </summary>
-    public long AdminChatId => Config.AdminChatId;
+    public long AdminChatId => _coreOptions.Value.AdminChatId;
 
     /// <summary>
     /// ID чата для логирования
     /// </summary>
-    public long LogAdminChatId => Config.LogAdminChatId;
+    public long LogAdminChatId => _coreOptions.Value.LogAdminChatId == 0 ? AdminChatId : _coreOptions.Value.LogAdminChatId;
 
     /// <summary>
     /// Список чатов с включенным AI
     /// </summary>
-    public HashSet<long> AiEnabledChats => Config.AiEnabledChats;
+    public HashSet<long> AiEnabledChats => _aiOptions.Value.AiEnabledChats;
 
     /// <summary>
     /// Включен ли AI для конкретного чата
     /// </summary>
-    public bool IsAiEnabledForChat(long chatId) => Config.IsAiEnabledForChat(chatId);
+    public bool IsAiEnabledForChat(long chatId)
+    {
+        var set = AiEnabledChats;
+        return set.Count == 0 || set.Contains(chatId);
+    }
 
     /// <summary>
     /// Разрешён ли чат для работы бота
     /// </summary>
-    public bool IsChatAllowed(long chatId) => Config.IsChatAllowed(chatId);
+    public bool IsChatAllowed(long chatId)
+    {
+        var wl = WhitelistChats;
+        return wl.Count == 0 || wl.Contains(chatId);
+    }
 
     /// <summary>
     /// Разрешён ли приватный старт
     /// </summary>
-    public bool IsPrivateStartAllowed() => Config.IsPrivateStartAllowed();
+    public bool IsPrivateStartAllowed()
+    {
+        // Если whitelist не пуст - команда /start в личке отключена
+        return WhitelistChats.Count == 0;
+    }
 
     /// <summary>
     /// API токен бота Telegram
     /// </summary>
-    public string BotApi => Config.BotApi;
+    public string BotApi => _coreOptions.Value.BotApi ?? string.Empty; // гарантируем непустую строку вместо null
 
     /// <summary>
     /// Токен сервиса клуба
     /// </summary>
-    public string? ClubServiceToken => Config.ClubServiceToken;
+    public string? ClubServiceToken => _coreOptions.Value.ClubServiceToken;
 
     /// <summary>
     /// URL клуба
     /// </summary>
-    public string ClubUrl => Config.ClubUrl;
+    public string ClubUrl => _coreOptions.Value.ClubUrl;
 
     /// <summary>
     /// Отключенные чаты
     /// </summary>
-    public HashSet<long> DisabledChats => Config.DisabledChats;
+    public HashSet<long> DisabledChats => _chatAccessOptions.Value.DisabledChats;
 
     /// <summary>
     /// Whitelist групп - если указан, бот работает только в этих группах
     /// </summary>
-    public HashSet<long> WhitelistChats => Config.WhitelistChats;
+    public HashSet<long> WhitelistChats => _chatAccessOptions.Value.WhitelistChats;
 
     /// <summary>
     /// Группы, где не показывать рекламу
     /// </summary>
-    public HashSet<long> NoVpnAdGroups => Config.NoVpnAdGroups;
+    public HashSet<long> NoVpnAdGroups => _chatAccessOptions.Value.NoVpnAdGroups;
 
     /// <summary>
     /// Группы, в которых отключена капча
     /// </summary>
-    public HashSet<long> NoCaptchaGroups => Config.NoCaptchaGroups;
+    public HashSet<long> NoCaptchaGroups => _chatAccessOptions.Value.NoCaptchaGroups;
 
     /// <summary>
     /// Включен ли фильтр ссылок
     /// </summary>
-    public bool TextMentionFilterEnabled => Config.TextMentionFilterEnabled;
+    public bool TextMentionFilterEnabled => _featureToggleOptions.Value.TextMentionFilterEnabled;
 
     /// <summary>
     /// Автоматически банить пользователей, входящих через папки
     /// </summary>
-    public bool BanFolderInviteUsers => Config.BanFolderInviteUsers;
+    public bool BanFolderInviteUsers => _autoBanOptions.Value.BanFolderInviteUsers;
 
     /// <summary>
     /// Количество повторных нарушений ML фильтра перед баном
     /// </summary>
-    public int MlViolationsBeforeBan => Config.MlViolationsBeforeBan;
+    public int MlViolationsBeforeBan => _violationThresholdOptions.Value.MlViolationsBeforeBan;
 
     /// <summary>
     /// Количество повторных нарушений стоп-слов перед баном
     /// </summary>
-    public int StopWordsViolationsBeforeBan => Config.StopWordsViolationsBeforeBan;
+    public int StopWordsViolationsBeforeBan => _violationThresholdOptions.Value.StopWordsViolationsBeforeBan;
 
     /// <summary>
     /// Количество повторных нарушений эмодзи перед баном
     /// </summary>
-    public int EmojiViolationsBeforeBan => Config.EmojiViolationsBeforeBan;
+    public int EmojiViolationsBeforeBan => _violationThresholdOptions.Value.EmojiViolationsBeforeBan;
 
     /// <summary>
     /// Количество повторных нарушений lookalike символов перед баном
     /// </summary>
-    public int LookalikeViolationsBeforeBan => Config.LookalikeViolationsBeforeBan;
+    public int LookalikeViolationsBeforeBan => _violationThresholdOptions.Value.LookalikeViolationsBeforeBan;
 
     /// <summary>
     /// Количество повторных нарушений банальных приветствий перед баном
     /// </summary>
-    public int BoringGreetingsViolationsBeforeBan => Config.BoringGreetingsViolationsBeforeBan;
+    public int BoringGreetingsViolationsBeforeBan => _violationThresholdOptions.Value.BoringGreetingsViolationsBeforeBan;
 
     /// <summary>
     /// Количество непройденных капч перед баном
     /// </summary>
-    public int CaptchaViolationsBeforeBan => Config.CaptchaViolationsBeforeBan;
+    public int CaptchaViolationsBeforeBan => _violationThresholdOptions.Value.CaptchaViolationsBeforeBan;
 
     /// <summary>
     /// Отправлять уведомления о банах за повторные нарушения в админ-чат вместо лог-чата
     /// </summary>
-    public bool RepeatedViolationsBanToAdminChat => Config.RepeatedViolationsBanToAdminChat;
+    public bool RepeatedViolationsBanToAdminChat => _featureToggleOptions.Value.RepeatedViolationsBanToAdminChat;
 
     // === НОВЫЕ СВОЙСТВА ИЗ STRONGLY-TYPED OPTIONS ===
 
@@ -241,17 +265,12 @@ public class AppConfig : IAppConfig
     /// </summary>
     public EffectsConfiguration Effects { get; }
 
-    public AppConfig(
-        IOptions<AutoBanOptions> autoBanOptions,
-        IOptions<ViolationThresholdOptions> violationThresholdOptions,
-        IOptions<FeatureToggleOptions> featureToggleOptions,
-        IOptions<ChatFilteringOptions> chatFilteringOptions,
-        EffectsConfiguration effectsConfiguration) // Добавляем инъекцию
-    {
-        _autoBanOptions = autoBanOptions;
-        _violationThresholdOptions = violationThresholdOptions;
-        _featureToggleOptions = featureToggleOptions;
-        _chatFilteringOptions = chatFilteringOptions;
-        Effects = effectsConfiguration; // Используем DI конфигурацию
-    }
+    // === ТЕСТОВЫЕ / GOLDEN НАСТРОЙКИ ===
+
+    public bool GoldenBaselineMode => _testHarnessOptions?.Value?.GoldenBaselineMode ?? false;
+
+    public HashSet<long> TestBlacklistUserIds => _testHarnessOptions?.Value?.TestBlacklistUserIds ?? _emptySet;
+
+    private static readonly HashSet<long> _emptySet = new();
+
 }

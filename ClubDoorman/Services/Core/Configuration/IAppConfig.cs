@@ -213,4 +213,17 @@ public interface IAppConfig
     /// Конфигурация эффектов модерации
     /// </summary>
     EffectsConfiguration Effects { get; }
+
+    // === ТЕСТОВЫЕ / GOLDEN НАСТРОЙКИ ===
+
+    /// <summary>
+    /// Включен ли golden baseline режим (ускоряет определенные фоновые процессы и подменяет TelegramBotClient).
+    /// </summary>
+    bool GoldenBaselineMode { get; }
+
+    /// <summary>
+    /// Тестовый блэклист пользователей (используется только в тестовых сценариях или golden baseline режиме).
+    /// Пустой если переменная окружения не задана.
+    /// </summary>
+    HashSet<long> TestBlacklistUserIds { get; }
 }

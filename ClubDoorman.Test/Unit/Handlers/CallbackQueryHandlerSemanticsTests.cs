@@ -58,6 +58,9 @@ public class CallbackQueryHandlerSemanticsTests
         msgService.Setup(x => x.SendWelcomeMessageAsync(It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Message?)null);
         var appConfig = new Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+        // Ensure captcha test chats are NOT treated as admin/log chats
+        appConfig.SetupGet(x => x.AdminChatId).Returns(-9999);
+        appConfig.SetupGet(x => x.LogAdminChatId).Returns(-9999);
         var violationTracker = new ViolationTracker(new NullLogger<ViolationTracker>(), appConfig.Object);
         var userBan = new Mock<IUserBanService>();
         var logChat = new Mock<ILogChatService>();
@@ -76,7 +79,8 @@ public class CallbackQueryHandlerSemanticsTests
             logChat.Object,
             new NullLogger<CallbackQueryHandler>(),
             recorder,
-            eventsPub
+            eventsPub,
+            appConfig.Object
         );
     }
 

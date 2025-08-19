@@ -1,4 +1,5 @@
 using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.UserManagement;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using ClubDoorman.Services.Captcha;
@@ -27,7 +28,13 @@ public class CaptchaModuleTests
         // Добавляем необходимые зависимости для тестирования
         _services.AddSingleton(Mock.Of<ITelegramBotClientWrapper>());
         _services.AddSingleton(Mock.Of<IMessageService>());
-        _services.AddSingleton(Mock.Of<IAppConfig>());
+    // Регистрируем валидный AppConfig вместо пустого мок-а, т.к. UserManager теперь требует не-null IAppConfig
+    var appConfig = AppConfigTestFactory.CreateDefault();
+    _services.AddSingleton<IAppConfig>(appConfig);
+
+    // UserManager (transitively via CaptchaModule) требует ApprovedUsersStorage
+    _services.AddSingleton<ApprovedUsersStorage>();
+    // Больше не подменяем IUserManager/IUserBanService — проверяем реальные регистрации CaptchaModule
 
         // Добавляем логгеры
         _services.AddLogging();

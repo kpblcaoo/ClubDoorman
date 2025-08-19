@@ -65,6 +65,11 @@ public class CallbackQueryHandlerTests
     _mockRecorder = new Mock<ClubDoorman.Services.Logging.IGoldenMasterRecorder>();
         _mockEvents = new Mock<IModerationEventPublisher>();
 
+    // Default config values for tests
+    const long adminChatId = 555555; // test admin chat id distinct from other test chats
+    _mockAppConfig.SetupGet(x => x.AdminChatId).Returns(adminChatId);
+    _mockAppConfig.SetupGet(x => x.LogAdminChatId).Returns(-20002);
+
         _handler = new CallbackQueryHandler(
             _mockBot.Object,
             _mockCaptchaService.Object,
@@ -79,7 +84,8 @@ public class CallbackQueryHandlerTests
             _mockLogChatService.Object,
             _mockLogger.Object,
             _mockRecorder.Object,
-            _mockEvents.Object
+            _mockEvents.Object,
+            _mockAppConfig.Object
         );
     }
 
@@ -286,7 +292,7 @@ public class CallbackQueryHandlerTests
                 Id = "test_id",
                 Data = "admin_action",
                 From = new User { Id = 123, FirstName = "Test", Username = "testuser" },
-                Message = new Message { Chat = new Chat { Id = Config.AdminChatId } }
+                Message = new Message { Chat = new Chat { Id =  _mockAppConfig.Object.AdminChatId } }
             }
         };
 
