@@ -51,7 +51,10 @@ public class FakeServicesFactory
             new Mock<IOptions<AutoBanOptions>>().Object,
             new Mock<IOptions<ViolationThresholdOptions>>().Object,
             new Mock<IOptions<FeatureToggleOptions>>().Object,
-            new Mock<IOptions<ChatFilteringOptions>>().Object
+            new Mock<IOptions<ChatFilteringOptions>>().Object,
+            new Mock<IOptions<CoreOptions>>().Object,
+            new Mock<IOptions<ChatAccessOptions>>().Object,
+            new Mock<IOptions<AiOptions>>().Object
         );
     }
 

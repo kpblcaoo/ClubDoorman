@@ -60,6 +60,36 @@ public static class ConfigurationModule
             options.MediaFilteringDisabledChats = loaded.MediaFilteringDisabledChats;
         });
 
+        // Новые группы опций
+        services.Configure<CoreOptions>(options =>
+        {
+            var loaded = ConfigurationHelper.LoadCoreOptions();
+            options.BotApi = loaded.BotApi;
+            options.AdminChatId = loaded.AdminChatId;
+            options.LogAdminChatId = loaded.LogAdminChatId;
+            options.ClubServiceToken = loaded.ClubServiceToken;
+            options.ClubUrl = loaded.ClubUrl;
+        });
+
+        services.Configure<ChatAccessOptions>(options =>
+        {
+            var loaded = ConfigurationHelper.LoadChatAccessOptions();
+            options.DisabledChats = loaded.DisabledChats;
+            options.WhitelistChats = loaded.WhitelistChats;
+            options.NoVpnAdGroups = loaded.NoVpnAdGroups;
+            options.NoCaptchaGroups = loaded.NoCaptchaGroups;
+        });
+
+        services.Configure<AiOptions>(options =>
+        {
+            var loaded = ConfigurationHelper.LoadAiOptions();
+            options.OpenRouterApi = loaded.OpenRouterApi;
+            options.SuspiciousDetectionEnabled = loaded.SuspiciousDetectionEnabled;
+            options.MimicryThreshold = loaded.MimicryThreshold;
+            options.SuspiciousToApprovedMessageCount = loaded.SuspiciousToApprovedMessageCount;
+            options.AiEnabledChats = loaded.AiEnabledChats;
+        });
+
         return services;
     }
 }
