@@ -233,45 +233,23 @@ public class MessageHandler : IUpdateHandler
 
             _logger.LogTrace("Continuing regular processing for chat {ChatId}", chat.Id);
 
-            if (chat.Type == ChatType.Private)
+            if (pipelineCtx.PrivateSkipHandled)
             {
-                _logger.LogDebug("Private chat {ChatId}, only commands processed", chat.Id);
-                _logger.LogInformation("HandleAsync: Private chat, only commands processed, returning");
-                // Private chat non-command skip -> keep historical semantics (null action)
-                _events.Publish(gmCorrelation, new ModerationEvent("private_skip", Action: null, RuleCode: RuleCode.PrivateSkip));
+                _logger.LogDebug("HandleAsync: Private skip handled via pipeline, returning");
                 return;
             }
 
             // (legacy new_members branch removed - handled by NewMembersStep in pipeline)
 
-            if (message.LeftChatMember != null && message.From?.Id == _bot.BotId)
+            if (pipelineCtx.LeftMemberCleanupHandled)
             {
-                _logger.LogDebug("Message about left chat member detected. MessageId: {MessageId}, UserId: {UserId}",
-                    message.MessageId, message.LeftChatMember.Id);
-                try
-                {
-                    await _bot.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
-                    _logger.LogDebug("Удалено сообщение о бане/исключении пользователя (UserId: {UserId})", message.LeftChatMember.Id);
-                    _logger.LogInformation("HandleAsync: Deleted left chat member message. MessageId: {MessageId}", message.MessageId);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogWarning(e, "Не удалось удалить сообщение о бане/исключении (UserId: {UserId})", message.LeftChatMember.Id);
-                    _logger.LogError(e, "HandleAsync: Exception while deleting left chat member message. MessageId: {MessageId}", message.MessageId);
-                }
-                // Historical semantics: null action for cleanup path
-                _events.Publish(gmCorrelation, new ModerationEvent("left_member_cleanup", Action: null, RuleCode: RuleCode.LeftMemberCleanup));
+                _logger.LogDebug("HandleAsync: Left member cleanup handled via pipeline, returning");
                 return;
             }
 
-            if (message.SenderChat != null)
+            if (pipelineCtx.ChannelMessageHandled)
             {
-                _logger.LogDebug("Message from channel detected. SenderChatId: {SenderChatId}, Title: {SenderChatTitle}",
-                    message.SenderChat.Id, message.SenderChat.Title);
-                await HandleChannelMessageAsync(message, cancellationToken);
-                _logger.LogDebug("HandleAsync: Channel message handled, returning");
-                // Historical semantics: null action for channel message
-                _events.Publish(gmCorrelation, new ModerationEvent("channel_message", Action: null, RuleCode: RuleCode.ChannelMessage));
+                _logger.LogDebug("HandleAsync: Channel message handled via pipeline, returning");
                 return;
             }
 
