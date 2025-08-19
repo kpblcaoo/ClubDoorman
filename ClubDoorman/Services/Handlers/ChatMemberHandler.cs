@@ -70,15 +70,22 @@ public class ChatMemberHandler : IUpdateHandler
 
     public async Task HandleAsync(Update update, CancellationToken cancellationToken = default)
     {
-        using var scope = _logger.BeginScope(new Dictionary<string, object>
+        using var scope = _logger.BeginScope(new Dictionary<string, object?>
         {
             ["opId"] = Guid.NewGuid(),
-            ["updateType"] = update.Type.ToString()
+            ["updateType"] = update.Type.ToString(),
+            ["chatId"] = update.ChatMember?.Chat.Id,
+            ["userId"] = update.ChatMember?.From?.Id
         });
         string? gmCorrelation = null;
         try
         {
             gmCorrelation = _gm.TryRecordInput(update, nameof(ChatMemberHandler), update.ChatMember?.Chat.Id, update.ChatMember?.From?.Id);
+            if (gmCorrelation != null)
+            {
+                using var corrScope = _logger.BeginScope(new Dictionary<string, object?> { ["gmCorrelation"] = gmCorrelation });
+                _logger.LogTrace("ChatMemberHandler: GM correlation established {Correlation}", gmCorrelation);
+            }
         }
         catch { }
         var chatMember = update.ChatMember;

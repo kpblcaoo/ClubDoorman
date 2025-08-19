@@ -98,10 +98,14 @@ public class MessageHandler : IUpdateHandler
     {
         _logger.LogDebug("HandleAsync called");
         var opId = Guid.NewGuid();
-        using var scope = _logger.BeginScope(new Dictionary<string, object>
+        // Scope will be enriched progressively (GmCorrelation added later once created)
+        using var scope = _logger.BeginScope(new Dictionary<string, object?>
         {
             ["opId"] = opId,
-            ["updateType"] = update?.Type.ToString() ?? "null"
+            ["updateType"] = update?.Type.ToString() ?? "null",
+            ["chatId"] = (object?) (update?.Message?.Chat.Id ?? update?.EditedMessage?.Chat.Id),
+            ["userId"] = (object?) (update?.Message?.From?.Id ?? update?.EditedMessage?.From?.Id),
+            ["messageId"] = (object?) (update?.Message?.MessageId ?? update?.EditedMessage?.MessageId)
         });
 
         string? gmCorrelation = null;
@@ -110,7 +114,11 @@ public class MessageHandler : IUpdateHandler
             try
             {
                 gmCorrelation = _gm.TryRecordInput(update, nameof(MessageHandler), update.Message?.Chat.Id ?? update.EditedMessage?.Chat.Id, update.Message?.From?.Id ?? update.EditedMessage?.From?.Id);
-                _logger.LogTrace("GoldenMaster correlation established: {Correlation}", gmCorrelation);
+                if (gmCorrelation != null)
+                {
+                    using var corrScope = _logger.BeginScope(new Dictionary<string, object> { ["gmCorrelation"] = gmCorrelation });
+                    _logger.LogTrace("GoldenMaster correlation established: {Correlation}", gmCorrelation);
+                }
             }
             catch (Exception ex) { _logger.LogTrace(ex, "Failed to establish GM correlation"); }
         }

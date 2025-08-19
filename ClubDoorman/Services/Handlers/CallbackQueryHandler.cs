@@ -85,16 +85,20 @@ public class CallbackQueryHandler : IUpdateHandler
         var callbackQuery = update.CallbackQuery!;
         var cbData = callbackQuery.Data;
 
-        string? gmCorrelation = null;
-        try
-        {
-            gmCorrelation = _recorder.TryRecordInput(update, nameof(CallbackQueryHandler), callbackQuery.Message?.Chat.Id, callbackQuery.From.Id);
-            _logger.LogTrace("CallbackQueryHandler: GoldenMaster correlation {Correlation} established", gmCorrelation);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogTrace(ex, "CallbackQueryHandler: failed to record GM input");
-        }
+            string? gmCorrelation = null;
+            try
+            {
+                gmCorrelation = _recorder.TryRecordInput(update, nameof(CallbackQueryHandler), callbackQuery.Message?.Chat.Id, callbackQuery.From.Id);
+                if (gmCorrelation != null)
+                {
+                    using var corrScope = _logger.BeginScope(new Dictionary<string, object?> { ["gmCorrelation"] = gmCorrelation, ["chatId"] = callbackQuery.Message?.Chat.Id, ["userId"] = callbackQuery.From.Id, ["messageId"] = callbackQuery.Message?.MessageId });
+                    _logger.LogTrace("CallbackQueryHandler: GoldenMaster correlation {Correlation} established", gmCorrelation);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogTrace(ex, "CallbackQueryHandler: failed to record GM input");
+            }
 
         _logger.LogDebug("📞 Получен callback: {Data} от пользователя {User} в чате {Chat}",
             cbData, callbackQuery.From.Username ?? callbackQuery.From.FirstName, callbackQuery.Message?.Chat.Id);

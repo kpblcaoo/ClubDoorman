@@ -25,7 +25,6 @@ public sealed class GoldenMasterModerationEventPublisher : IModerationEventPubli
         }
         try
         {
-            _logger.LogTrace("GM Event publish: corr={Correlation} kind={Kind} action={Action} rule={Rule}", correlationId, evt.Kind, evt.Action, evt.RuleCode);
             var payload = new
             {
                 kind = evt.Kind,
@@ -36,7 +35,14 @@ public sealed class GoldenMasterModerationEventPublisher : IModerationEventPubli
                 status = evt.Status,
                 extra = evt.Extra
             };
-            _logger.LogTrace("GM Event payload prepared: {Payload}", System.Text.Json.JsonSerializer.Serialize(payload));
+
+            // Summary at Debug; full JSON at Trace
+            _logger.LogDebug("GM Event corr={Correlation} kind={Kind} action={Action} rule={Rule} count={Count} msg={MessageId}",
+                correlationId, evt.Kind, evt.Action, evt.RuleCode, evt.Count, evt.MessageId);
+            if (_logger.IsEnabled(LogLevel.Trace))
+            {
+                _logger.LogTrace("GM Event payload: {Payload}", System.Text.Json.JsonSerializer.Serialize(payload));
+            }
             _recorder.TryRecordOutput(correlationId, payload);
         }
         catch (Exception ex)

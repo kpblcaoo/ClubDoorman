@@ -38,12 +38,29 @@ public class Program
                             Directory.CreateDirectory(logsDir);
                         }
 
+                        // Read dynamic logging configuration from environment.
+                        // DOORMAN_LOG_LEVEL: Verbose|Debug|Information|Warning|Error|Fatal  (default: Information unless DOORMAN_TRACE_ENABLE=true)
+                        // DOORMAN_TRACE_ENABLE: true/false (forces Verbose min level when true)
+                        var logLevelEnv = Environment.GetEnvironmentVariable("DOORMAN_LOG_LEVEL");
+                        var traceEnableEnv = Environment.GetEnvironmentVariable("DOORMAN_TRACE_ENABLE");
+                        var traceEnabled = bool.TryParse(traceEnableEnv, out var te) && te;
+                        LogEventLevel parsedLevel = LogEventLevel.Information;
+                        if (!string.IsNullOrWhiteSpace(logLevelEnv) && Enum.TryParse<LogEventLevel>(logLevelEnv, true, out var lvl))
+                        {
+                            parsedLevel = lvl;
+                        }
+                        if (traceEnabled && parsedLevel > LogEventLevel.Verbose)
+                        {
+                            parsedLevel = LogEventLevel.Verbose; // escalate to max detail
+                        }
+
                         config
-                            .MinimumLevel.Verbose()
+                            .MinimumLevel.Is(parsedLevel)
                             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                             .MinimumLevel.Override("System", LogEventLevel.Information)
                             .Enrich.FromLogContext()
                             .Enrich.WithProperty("Application", "ClubDoorman")
+                            .Enrich.WithProperty("TraceEnabled", traceEnabled)
                             .WriteTo.Async(a => a.Console())
                             .WriteTo.Async(a => a.File(
                                 path: Path.Combine(logsDir, "clubdoorman-.log"),
