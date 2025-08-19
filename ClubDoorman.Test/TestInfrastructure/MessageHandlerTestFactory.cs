@@ -674,34 +674,82 @@ public class MessageHandlerTestFactory
     {
         // Use a lightweight logger factory; console outputs already present in tests.
         var loggerFactory = LoggerFactory.Create(b => { });
+        var eventsMock = new Mock<IModerationEventPublisher>(); // shared lightweight mock for step events
         var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
         {
             // 10 Command
             new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(
                 CommandRouterMock.Object,
-                new Mock<IModerationEventPublisher>().Object,
+                eventsMock.Object,
                 loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
+            // 15 System/Bot semantics
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep(
+                eventsMock.Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep>()),
             // 20 New members
             new ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep(
                 _userJoinFacadeMock.Object,
                 AppConfigMock.Object,
-                new Mock<IModerationEventPublisher>().Object,
+                eventsMock.Object,
                 loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>()),
             // 30 Left member cleanup
             new ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep(
                 BotMock.Object,
-                new Mock<IModerationEventPublisher>().Object,
+                eventsMock.Object,
                 loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>()),
             // 40 Channel message
             new ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep(
                 ChannelModerationServiceMock.Object,
-                new Mock<IModerationEventPublisher>().Object,
+                eventsMock.Object,
                 loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>()),
             // 50 Private skip
             new ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep(
-                new Mock<IModerationEventPublisher>().Object,
+                eventsMock.Object,
                 AppConfigMock.Object,
-                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>())
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>()),
+            // 100 Captcha pending
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep(
+                CaptchaServiceMock.Object,
+                BotMock.Object,
+                eventsMock.Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep>()),
+            // 110 Banlist
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(
+                UserManagerMock.Object,
+                UserBanServiceMock.Object,
+                eventsMock.Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
+            // 120 Already approved
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(
+                ModerationFacadeMock.Object,
+                eventsMock.Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
+            // 130 First message log
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(
+                UserFlowLoggerMock.Object,
+                eventsMock.Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            // 140 Club member skip
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(
+                UserManagerMock.Object,
+                eventsMock.Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
+            // 200 Base moderation
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(
+                ModerationFacadeMock.Object,
+                UserFlowLoggerMock.Object,
+                eventsMock.Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
+            // 210 AI profile analysis
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(
+                AiCascadeServiceMock.Object,
+                eventsMock.Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
+            // 220 Final moderation action
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(
+                ModerationFacadeMock.Object,
+                eventsMock.Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>())
         };
         return new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(steps, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>());
     }

@@ -83,6 +83,28 @@ public class MessageHandlerSemanticsTests
     var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
     var eventsPublisher = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
 
+        // Build real pipeline with migrated steps (10-220) so semantics for moderation + AI analysis are emitted via pipeline (legacy path removed).
+    var loggerFactory = LoggerFactory.Create(b => { });
+    var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
+        {
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep(gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep(userJoinFacade.Object, appConfig.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep(bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep(channelModeration.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep(gmEvents, appConfig.Object, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep(captchaService.Object, bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>())
+        };
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(steps, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>());
+
         return new MessageHandler(
             bot.Object,
             userManager.Object,
@@ -100,7 +122,8 @@ public class MessageHandlerSemanticsTests
             aiCascade.Object,
             recorder,
             eventsPublisher,
-            flags);
+            flags,
+            pipeline);
     }
 
     private static (Update update, string basePath) BuildCommandUpdate(string command)
@@ -370,7 +393,28 @@ public class MessageHandlerSemanticsTests
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
     var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
-    var rebuild = new MessageHandler(
+        // Build full pipeline (10-220) for this manually constructed handler
+        var loggerFactory = LoggerFactory.Create(b => { });
+        var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
+        {
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep(gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep(userJoinFacade.Object, appConfig.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep(bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep(channelModeration.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep(gmEvents, appConfig.Object, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep(captchaService.Object, bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>())
+        };
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(steps, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>());
+        var rebuild = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -387,7 +431,8 @@ public class MessageHandlerSemanticsTests
             aiCascade.Object,
             recorder,
             eventsPub,
-            flags);
+            flags,
+            pipeline);
         var update = new Update
         {
             Id = 9,
@@ -438,7 +483,27 @@ public class MessageHandlerSemanticsTests
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
     var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
-    var handler = new MessageHandler(
+        var loggerFactory = LoggerFactory.Create(b => { });
+        var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
+        {
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep(gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep(userJoinFacade.Object, appConfig.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep(bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep(channelModeration.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep(gmEvents, appConfig.Object, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep(captchaService.Object, bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacadeApproved.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacadeApproved.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(moderationFacadeApproved.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>())
+        };
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(steps, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>());
+        var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -455,7 +520,8 @@ public class MessageHandlerSemanticsTests
             aiCascade.Object,
             recorder,
             eventsPub,
-            flags);
+            flags,
+            pipeline);
         var update = new Update
         {
             Id = 10,
@@ -533,7 +599,27 @@ public class MessageHandlerSemanticsTests
         forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
     var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
-    var handler = new MessageHandler(
+        var loggerFactory = LoggerFactory.Create(b => { });
+        var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
+        {
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep(gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep(userJoinFacade.Object, appConfig.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep(bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep(channelModeration.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep(gmEvents, appConfig.Object, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep(captchaService.Object, bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>())
+        };
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(steps, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>());
+        var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -550,7 +636,8 @@ public class MessageHandlerSemanticsTests
             aiCascade.Object,
             recorder,
             eventsPub,
-            flags);
+            flags,
+            pipeline);
         var update = new Update
         {
             Id = 12,
@@ -601,7 +688,27 @@ public class MessageHandlerSemanticsTests
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
     var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
-    var handler = new MessageHandler(
+        var loggerFactory = LoggerFactory.Create(b => { });
+        var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
+        {
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep(gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep(userJoinFacade.Object, appConfig.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep(bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep(channelModeration.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep(gmEvents, appConfig.Object, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep(captchaService.Object, bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>())
+        };
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(steps, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>());
+        var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -618,7 +725,8 @@ public class MessageHandlerSemanticsTests
             aiCascade.Object,
             recorder,
             eventsPub,
-            flags);
+            flags,
+            pipeline);
         var update = new Update
         {
             Id = 13,
@@ -670,7 +778,27 @@ public class MessageHandlerSemanticsTests
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
     var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
-    var handler = new MessageHandler(
+        var loggerFactory = LoggerFactory.Create(b => { });
+        var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
+        {
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep(gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep(userJoinFacade.Object, appConfig.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep(bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep(channelModeration.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep(gmEvents, appConfig.Object, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep(captchaService.Object, bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>())
+        };
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(steps, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>());
+        var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -687,7 +815,8 @@ public class MessageHandlerSemanticsTests
             aiCascade.Object,
             recorder,
             eventsPub,
-            flags);
+            flags,
+            pipeline);
         var update = new Update
         {
             Id = 14,
@@ -739,7 +868,27 @@ public class MessageHandlerSemanticsTests
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
     var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
-    var handler = new MessageHandler(
+        var loggerFactory = LoggerFactory.Create(b => { });
+        var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
+        {
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep(gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep(userJoinFacade.Object, appConfig.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep(bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep(channelModeration.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep(gmEvents, appConfig.Object, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep(captchaService.Object, bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>())
+        };
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(steps, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>());
+        var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -756,7 +905,8 @@ public class MessageHandlerSemanticsTests
             aiCascade.Object,
             recorder,
             eventsPub,
-            flags);
+            flags,
+            pipeline);
         var update = new Update
         {
             Id = 15,
@@ -808,7 +958,27 @@ public class MessageHandlerSemanticsTests
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
     var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
-    var handler = new MessageHandler(
+        var loggerFactory = LoggerFactory.Create(b => { });
+        var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
+        {
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep(gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep(userJoinFacade.Object, appConfig.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep(bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep(channelModeration.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep(gmEvents, appConfig.Object, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep(captchaService.Object, bot.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>())
+        };
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(steps, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>());
+        var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -825,7 +995,8 @@ public class MessageHandlerSemanticsTests
             aiCascade.Object,
             recorder,
             eventsPub,
-            flags);
+            flags,
+            pipeline);
         var update = new Update
         {
             Id = 16,

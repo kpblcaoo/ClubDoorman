@@ -1,4 +1,6 @@
 using Telegram.Bot.Types;
+using ClubDoorman.Features.Moderation;
+using ClubDoorman.Models; // for ModerationResult
 
 namespace ClubDoorman.Services.Handlers.Pipeline;
 
@@ -23,5 +25,12 @@ public class MessageContext
     public bool ClubMemberSkipHandled { get; set; }
     public bool UserResultHandled { get; set; } // generic early exit flag if UserResult populated
     public object? UserResult { get; set; }
+    public bool EventPublished { get; set; }
+    // Moderation chain (200+ planned extractions)
+    public User? User => Message.From;
+    public Chat Chat => Message.Chat;
+    public bool IsSilentMode { get; set; }
+    public ModerationResult? ModerationResult { get; set; }
+    public bool AiProfileRestricted { get; set; }
     // Место для будущих производных данных (normalized text, flags, decision...).
 }

@@ -1,4 +1,6 @@
 using ClubDoorman.Features.AdminOps;
+using ClubDoorman.Services.Logging; // for IModerationEventPublisher
+using ClubDoorman.Models.Logging; // ModerationEvent, RuleCode
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 
@@ -25,8 +27,8 @@ public class CommandStep : IMessageStep
 
     public async Task<StepResult> ExecuteAsync(MessageContext context, CancellationToken cancellationToken)
     {
-        var message = context.Message;
-        if (message.Text == null || !message.Text.StartsWith("/"))
+    var message = context.Message;
+    if (message.Text == null || !message.Text.StartsWith("/"))
             return StepResult.Continue();
 
         _logger.LogDebug("[Pipeline] CommandStep handling command {Command}", message.Text);
