@@ -140,9 +140,11 @@ public static class ServiceCollectionExtensions
         services.AddMessagingServices();
         services.AddTextProcessingServices();
         services.AddCaptchaServices();
-        services.AddHandlersServices();
-        services.AddCommandsServices();
-        services.AddAdminOpsFeature();
+    services.AddHandlersServices();
+    // ВНИМАНИЕ: AddCommandsServices уже вызывает AddAdminOpsFeature внутри (обратная совместимость).
+    // Ранее здесь вызывались И AddCommandsServices(), И AddAdminOpsFeature(), что приводило к двойной
+    // регистрации ICommandHandler и предупреждениям CommandRouter про дубли команд.
+    services.AddCommandsServices(); // один вызов достаточно
 
         // Регистрация Worker как HostedService
         services.AddHostedService<Worker>(provider =>
