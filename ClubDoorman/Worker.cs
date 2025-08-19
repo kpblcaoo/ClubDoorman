@@ -285,7 +285,7 @@ internal sealed class Worker(
 
                 await _messageService.SendAdminNotificationAsync(
                     AdminNotificationType.SystemInfo,
-                    new SimpleNotificationData(new User { Id = 0, FirstName = "System" }, new Chat { Id = Config.AdminChatId, Title = "Admin" }, report),
+                    new SimpleNotificationData(new User { Id = 0, FirstName = "System" }, new Chat { Id = _appConfig.AdminChatId, Title = "Admin" }, report),
                     ct
                 );
             }

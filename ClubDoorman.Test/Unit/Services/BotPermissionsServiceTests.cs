@@ -1,4 +1,3 @@
-using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.TestInfrastructure;
@@ -22,14 +21,16 @@ public class BotPermissionsServiceTests : TestBase
     private readonly Mock<ILogger<BotPermissionsService>> _mockLogger;
     private readonly BotPermissionsService _service;
     private readonly Mock<IAppConfig> _mockAppConfig;
+    private const long AdminChatIdConst = 123456789; // formerly Config.AdminChatId test value
+    private const long LogAdminChatIdConst = 223456789; // deterministic test value
 
     public BotPermissionsServiceTests()
     {
         _mockBot = new Mock<ITelegramBotClientWrapper>();
         _mockLogger = new Mock<ILogger<BotPermissionsService>>();
     _mockAppConfig = new Mock<IAppConfig>();
-    _mockAppConfig.SetupGet(x => x.AdminChatId).Returns(Config.AdminChatId);
-    _mockAppConfig.SetupGet(x => x.LogAdminChatId).Returns(Config.LogAdminChatId);
+    _mockAppConfig.SetupGet(x => x.AdminChatId).Returns(AdminChatIdConst);
+    _mockAppConfig.SetupGet(x => x.LogAdminChatId).Returns(LogAdminChatIdConst);
     _service = new BotPermissionsService(_mockBot.Object, _mockLogger.Object, _mockAppConfig.Object);
     }
 
@@ -141,7 +142,7 @@ public class BotPermissionsServiceTests : TestBase
     public async Task IsSilentModeAsync_ForAdminChat_ReturnsFalse()
     {
         // Arrange
-        var adminChatId = Config.AdminChatId;
+    var adminChatId = AdminChatIdConst;
 
         // Act
     var result = await _service.IsSilentModeAsync(adminChatId);
@@ -155,7 +156,7 @@ public class BotPermissionsServiceTests : TestBase
     public async Task IsSilentModeAsync_ForLogAdminChat_ReturnsFalse()
     {
         // Arrange
-        var logAdminChatId = Config.LogAdminChatId;
+    var logAdminChatId = LogAdminChatIdConst;
 
         // Act
     var result = await _service.IsSilentModeAsync(logAdminChatId);
