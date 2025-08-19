@@ -253,7 +253,20 @@ public class MessageHandler : IUpdateHandler
                 return;
             }
 
-            _logger.LogDebug("Processing user message in chat {ChatId}, messageId: {MessageId}", chat.Id, message.MessageId);
+            // Moderation pre-chain now partially migrated to pipeline (captcha, banlist, approved, first log, club skip)
+            if (pipelineCtx.UserResultHandled)
+            {
+                _logger.LogDebug("HandleAsync: Early user result handled via pipeline ({Kind})", pipelineCtx.UserResult?.GetType().GetProperty("kind")?.GetValue(pipelineCtx.UserResult));
+                var kindPropEarly = pipelineCtx.UserResult?.GetType().GetProperty("kind")?.GetValue(pipelineCtx.UserResult)?.ToString() ?? "user_message";
+                var actionPropEarly = pipelineCtx.UserResult?.GetType().GetProperty("action")?.GetValue(pipelineCtx.UserResult)?.ToString();
+                var rulePropEarly = pipelineCtx.UserResult?.GetType().GetProperty("ruleCode")?.GetValue(pipelineCtx.UserResult)?.ToString();
+                RuleCode? rcEarly = null;
+                if (!string.IsNullOrEmpty(rulePropEarly) && Enum.TryParse<RuleCode>(rulePropEarly, out var parsedEarly)) rcEarly = parsedEarly;
+                _events.Publish(gmCorrelation, new ModerationEvent(kindPropEarly, Action: actionPropEarly, RuleCode: rcEarly));
+                return;
+            }
+
+            _logger.LogDebug("Processing user message (legacy moderation path) in chat {ChatId}, messageId: {MessageId}", chat.Id, message.MessageId);
             var userResult = await HandleUserMessageWithResultAsync(message, isSilentMode, gmCorrelation, cancellationToken);
             _logger.LogDebug("HandleAsync: User message handled, returning");
             if (userResult != null)

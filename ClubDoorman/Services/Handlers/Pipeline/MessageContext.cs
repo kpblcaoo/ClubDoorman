@@ -16,5 +16,12 @@ public class MessageContext
     public bool LeftMemberCleanupHandled { get; set; }
     public bool ChannelMessageHandled { get; set; }
     public bool PrivateSkipHandled { get; set; }
+    // Moderation pre-chain steps (100..140)
+    public bool CaptchaPendingHandled { get; set; }
+    public bool BanlistHandled { get; set; }
+    public bool AlreadyApprovedHandled { get; set; }
+    public bool ClubMemberSkipHandled { get; set; }
+    public bool UserResultHandled { get; set; } // generic early exit flag if UserResult populated
+    public object? UserResult { get; set; }
     // Место для будущих производных данных (normalized text, flags, decision...).
 }
