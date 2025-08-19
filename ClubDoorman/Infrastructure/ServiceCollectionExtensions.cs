@@ -146,6 +146,9 @@ public static class ServiceCollectionExtensions
     // регистрации ICommandHandler и предупреждениям CommandRouter про дубли команд.
     services.AddCommandsServices(); // один вызов достаточно
 
+        // Pipeline core (Phase 1 scaffold) — пока без зарегистрированных шагов
+        services.AddSingleton<Services.Handlers.Pipeline.IMessagePipeline, Services.Handlers.Pipeline.MessagePipeline>();
+
         // Регистрация Worker как HostedService
         services.AddHostedService<Worker>(provider =>
         {
