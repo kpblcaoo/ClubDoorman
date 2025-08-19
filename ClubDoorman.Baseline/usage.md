@@ -150,12 +150,19 @@ EmojiEscalation,
 BanEscalation,
 Boundary,
 Pass,
-PrivateSkip,         # (NEW) ранний выход: приватный чат / DM не модериируется
-NewMembers,          # (NEW) событие: присоединились новые участники (до дальнейшей логики)
-LeftMemberCleanup,   # (NEW) событие: пользователь покинул / удалён (служебная очистка)
-ChannelMessage       # (NEW) тип: канал / форвард из канала (отдельная ветка правил)
+PrivateSkip,         # (PH1 NEW) ранний выход: приватный чат / DM не модериируется
+NewMembers,          # (PH1 NEW) событие: присоединились новые участники (до дальнейшей логики)
+LeftMemberCleanup,   # (PH1 NEW) событие: пользователь покинул / удалён (служебная очистка)
+ChannelMessage,      # (PH1 NEW) тип: канал / форвард из канала (отдельная ветка правил)
+SystemNoUser,        # (PH2 NEW) системное сообщение без пользователя (service / nil From)
+BotMessage,          # (PH2 NEW) сообщение от бота (не модериируем как обычный user flow)
+CaptchaPending,      # (PH2 NEW) пользователь в процессе captcha (ограниченный state)
+AlreadyApproved,     # (PH2 NEW) уже одобренный пользователь (fast-path skip)
+ClubMemberSkip,      # (PH2 NEW) участник клуба (whitelist fast-path)
+AiProfileRestricted, # (PH2 NEW) AI профиль ограничил пользователя (ранняя фиксация факта)
+ModeratedGeneric     # (PH2 NEW) последняя ветка: модерация завершилась без специальных правил
 ```
-Комментарии NEW отражают добавление в рамках PR #139 (hardening #137/#138). При дальнейших расширениях:
+Phase1 (PH1) — раннее покрытие PR #139. Phase2 (PH2) — расширение системных/AI/captcha путей (текущий PR). При дальнейших расширениях:
 1. Добавляй enum значение в конец.
 2. Пиши тест(ы), фиксирующие появление соответствующей семантики.
 3. Удостоверься что mapper (`ReasonCodeMapper`) возвращает новый код либо код явно прокидывается в `TryRecordOutput`.
@@ -164,20 +171,27 @@ ChannelMessage       # (NEW) тип: канал / форвард из канал
 ### Новые «ранние» пути (early-path semantics)
 В рамках hardening удалены устаревшие overrides и вместо них покрыты реальные ранние ветки пайплайна явными RuleCode. Это снижает риск «немых» сценариев (ExpectedAction / RuleCode = null) при регенерации baseline.
 
-Покрытые ранние сценарии:
+Покрытые ранние сценарии (PH1 + PH2):
 - `/command` → `Command` (явно задаётся action=Allow)
 - Banlist-хит (раннее удаление) → `Banlist` (action=Delete)
-- Приватный чат → `PrivateSkip` (action оставить пустым — не модерация) 
+- Приватный чат → `PrivateSkip` (action null — не модерация) 
 - Новые участники (join event первичного обработчика) → `NewMembers`
 - Участник покинул (left / kick) → `LeftMemberCleanup`
 - Сообщение канала / channel post → `ChannelMessage`
+- System message без From → `SystemNoUser`
+- Сообщение от бота → `BotMessage`
+- Пользователь ещё решает captcha → `CaptchaPending`
+- Пользователь уже одобрен → `AlreadyApproved`
+- Пользователь член клуба (fast allow path) → `ClubMemberSkip`
+- AI анализ профиля ограничил пользователя → `AiProfileRestricted`
+- Обычный результат модерации без спец признака → `ModeratedGeneric`
 
 Для четырёх последних action пока отсутствует (null в sem.json) — это допустимо: Manifest требует `ExpectedAction` только для сообщений, где модерация выставляет решение. Если появится явное решение (например auto-clean), можно расширить и задать action.
 
 ### Расширение покрытия (next steps)
-Оставшиеся кандидаты для семантики (поздние этапы):
-- CaptchaPending / CaptchaFail / CaptchaSuccess
-- AiProfileRestricted / AiHeuristicFlag
+Оставшиеся кандидаты для семантики (поздние этапы / будущие фазы):
+- CaptchaFail / CaptchaSuccess (переходы состояний)
+- AiHeuristicFlag (тонкие эвристики, отличные от restriction)
 - MediaEscalation (если появятся дополнительные уровни)
 - RateLimitTriggered / SpamStormMitigation
 

@@ -123,5 +123,6 @@ scripts/run_act_golden.sh
 С недавних PR (#137/#138/#139):
 - Удалены временные `SemanticsOverrides` — теперь все покрытые ранние ветки сами эмитят semantics.
 - Хэндлеры больше не создаются через устаревшие конструкторы: требуется явная передача `IGoldenMasterRecorder` (используйте `NullGoldenMasterRecorder` в тестах только если осознанно не хотите запись).
-- Добавлены ранние RuleCode: `PrivateSkip`, `NewMembers`, `LeftMemberCleanup`, `ChannelMessage`.
+- Добавлены ранние RuleCode (Phase1): `PrivateSkip`, `NewMembers`, `LeftMemberCleanup`, `ChannelMessage`.
+- Добавлены системные/fast-path RuleCode (Phase2): `SystemNoUser`, `BotMessage`, `CaptchaPending`, `AlreadyApproved`, `ClubMemberSkip`, `AiProfileRestricted`, `ModeratedGeneric`.
 При добавлении новой логики: сначала тест (semantics/golden), затем код, затем регенерация baseline.
