@@ -8,63 +8,63 @@
       "ShortName": "BaseMsg1",
       "CorrelationId": "43EB9B4811373E29",
       "ExpectedAction": "Allow",
-      "RuleCode": "Pass"
+      "RuleCode": "ModeratedAllow"
     },
     {
       "Id": 2,
       "ShortName": "BaseMsg2",
       "CorrelationId": "582B88BA8D301617",
       "ExpectedAction": "Allow",
-      "RuleCode": "Pass"
+      "RuleCode": "ModeratedAllow"
     },
     {
       "Id": 3,
       "ShortName": "StopWords",
       "CorrelationId": "404A7363FBF8785F",
       "ExpectedAction": "Delete",
-      "RuleCode": "StopWords"
+      "RuleCode": "ModeratedDelete"
     },
     {
       "Id": 4,
       "ShortName": "Link",
       "CorrelationId": "67A3357198D9FFA2",
       "ExpectedAction": "Delete",
-      "RuleCode": "Links"
+      "RuleCode": "ModeratedDelete"
     },
     {
       "Id": 5,
       "ShortName": "EmojiFlood",
       "CorrelationId": "545161A2D7A573C3",
       "ExpectedAction": "Delete",
-      "RuleCode": "TooManyEmojis"
+      "RuleCode": "ModeratedDelete"
     },
     {
       "Id": 6,
       "ShortName": "BenignControl",
       "CorrelationId": "A0FC50B1346FBFFD",
       "ExpectedAction": "Allow",
-      "RuleCode": "Pass"
+      "RuleCode": "ModeratedAllow"
     },
     {
       "Id": 7,
       "ShortName": "Greeting",
       "CorrelationId": "6C17E39564C2DED7",
       "ExpectedAction": "Delete",
-      "RuleCode": "Greeting"
+      "RuleCode": "ModeratedDelete"
     },
     {
       "Id": 10,
       "ShortName": "MixedStopWordsLink",
       "CorrelationId": "EFAA27637622C2B4",
       "ExpectedAction": "Delete",
-      "RuleCode": "Links"
+      "RuleCode": "ModeratedDelete"
     },
     {
       "Id": 11,
       "ShortName": "MediaEarlyDefault",
       "CorrelationId": "45C95440B2A59BAA",
       "ExpectedAction": "Delete",
-      "RuleCode": "MediaEarlyBlock"
+      "RuleCode": "ModeratedDelete"
     },
     {
       "Id": 12,
@@ -78,14 +78,14 @@
       "ShortName": "ReplyBase",
       "CorrelationId": "0EABC0ECF91457C7",
       "ExpectedAction": "Allow",
-      "RuleCode": "Pass"
+      "RuleCode": "ModeratedAllow"
     },
     {
       "Id": 14,
       "ShortName": "ReplyWithLink",
       "CorrelationId": "E0535B1530BC333C",
       "ExpectedAction": "Delete",
-      "RuleCode": "Links"
+      "RuleCode": "ModeratedDelete"
     },
     {
       "Id": 15,
@@ -99,14 +99,14 @@
       "ShortName": "EmojiBoundaryOk",
       "CorrelationId": "070D2765BDF03405",
       "ExpectedAction": "Delete",
-      "RuleCode": "TooManyEmojis"
+      "RuleCode": "ModeratedDelete"
     },
     {
       "Id": 18,
       "ShortName": "MediaAnnouncement",
       "CorrelationId": "C836A919D91DB6A3",
       "ExpectedAction": "Report",
-      "RuleCode": "MediaNoCaption"
+      "RuleCode": "ModeratedReport"
     }
   ]
 }

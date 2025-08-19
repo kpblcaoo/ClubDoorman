@@ -4,5 +4,5 @@
   "CorrelationId": "C836A919D91DB6A3",
   "ShortName": "MediaAnnouncement",
   "Action": "Report",
-  "RuleCode": "MediaNoCaption"
+  "RuleCode": "ModeratedReport"
 }

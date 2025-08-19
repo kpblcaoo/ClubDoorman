@@ -4,5 +4,5 @@
   "CorrelationId": "67A3357198D9FFA2",
   "ShortName": "Link",
   "Action": "Delete",
-  "RuleCode": "Links"
+  "RuleCode": "ModeratedDelete"
 }

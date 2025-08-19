@@ -4,5 +4,5 @@
   "Id": 6,
   "ShortName": "BenignControl",
   "Action": "Allow",
-  "RuleCode": "Pass"
+  "RuleCode": "ModeratedAllow"
 }

@@ -4,5 +4,5 @@
   "Id": 2,
   "ShortName": "BaseMsg2",
   "Action": "Allow",
-  "RuleCode": "Pass"
+  "RuleCode": "ModeratedAllow"
 }

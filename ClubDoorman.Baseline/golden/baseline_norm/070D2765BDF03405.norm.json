@@ -4,5 +4,5 @@
   "CorrelationId": "070D2765BDF03405",
   "ShortName": "EmojiBoundaryOk",
   "Action": "Delete",
-  "RuleCode": "TooManyEmojis"
+  "RuleCode": "ModeratedDelete"
 }
