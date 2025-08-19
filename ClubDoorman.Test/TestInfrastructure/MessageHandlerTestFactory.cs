@@ -35,6 +35,7 @@ using ClubDoorman.Services.Notifications;
 using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Test.TestInfrastructure;
+using ClubDoorman.Services.Handlers.Pipeline; // added for IMessagePipeline, IMessageStep
 
 
 namespace ClubDoorman.Test.TestInfrastructure;
@@ -194,7 +195,9 @@ public class MessageHandlerTestFactory
             AiCascadeServiceMock.Object,
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
             new Mock<IModerationEventPublisher>().Object,
-            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
+            // Inject real pipeline so that command handling path in tests goes through CommandStep.
+            BuildPipeline()
         );
     }
 
@@ -224,7 +227,8 @@ public class MessageHandlerTestFactory
             AiCascadeServiceMock.Object,
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
             new Mock<IModerationEventPublisher>().Object,
-            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
+            BuildPipeline()
         );
     }
 
@@ -651,7 +655,8 @@ public class MessageHandlerTestFactory
             AiCascadeServiceMock.Object,
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
             new Mock<IModerationEventPublisher>().Object,
-            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
+            BuildPipeline()
         );
     }
 
@@ -659,6 +664,46 @@ public class MessageHandlerTestFactory
     {
         setup(this);
         return CreateMessageHandler();
+    }
+
+    /// <summary>
+    /// Builds a minimal real pipeline instance with CommandStep only (current migrated step).
+    /// This allows BDD command tests to exercise the pipeline path instead of the legacy fallback.
+    /// </summary>
+    private IMessagePipeline BuildPipeline()
+    {
+        // Use a lightweight logger factory; console outputs already present in tests.
+        var loggerFactory = LoggerFactory.Create(b => { });
+        var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
+        {
+            // 10 Command
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(
+                CommandRouterMock.Object,
+                new Mock<IModerationEventPublisher>().Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
+            // 20 New members
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep(
+                _userJoinFacadeMock.Object,
+                AppConfigMock.Object,
+                new Mock<IModerationEventPublisher>().Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>()),
+            // 30 Left member cleanup
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep(
+                BotMock.Object,
+                new Mock<IModerationEventPublisher>().Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>()),
+            // 40 Channel message
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep(
+                ChannelModerationServiceMock.Object,
+                new Mock<IModerationEventPublisher>().Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>()),
+            // 50 Private skip
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep(
+                new Mock<IModerationEventPublisher>().Object,
+                AppConfigMock.Object,
+                loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>())
+        };
+        return new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(steps, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>());
     }
 
     #endregion
