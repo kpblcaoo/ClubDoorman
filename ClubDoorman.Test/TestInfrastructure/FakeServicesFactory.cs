@@ -48,13 +48,14 @@ public class FakeServicesFactory
         _fakeBot = fakeBot ?? new FakeTelegramClient();
         _loggerFactory = loggerFactory ?? LoggerFactory.Create(builder => builder.AddConsole());
         _appConfig = appConfig ?? new AppConfig(
-            new Mock<IOptions<AutoBanOptions>>().Object,
-            new Mock<IOptions<ViolationThresholdOptions>>().Object,
-            new Mock<IOptions<FeatureToggleOptions>>().Object,
-            new Mock<IOptions<ChatFilteringOptions>>().Object,
-            new Mock<IOptions<CoreOptions>>().Object,
-            new Mock<IOptions<ChatAccessOptions>>().Object,
-            new Mock<IOptions<AiOptions>>().Object
+            Options.Create(new AutoBanOptions()),
+            Options.Create(new ViolationThresholdOptions()),
+            Options.Create(new FeatureToggleOptions()),
+            Options.Create(new ChatFilteringOptions()),
+            Options.Create(new CoreOptions()),
+            Options.Create(new ChatAccessOptions()),
+            Options.Create(new AiOptions()),
+            Options.Create(new TestHarnessOptions())
         );
     }
 

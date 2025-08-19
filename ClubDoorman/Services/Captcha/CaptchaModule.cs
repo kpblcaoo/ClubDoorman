@@ -23,53 +23,40 @@ public static class CaptchaModule
     /// <returns>Коллекция сервисов с добавленными сервисами капчи</returns>
     public static IServiceCollection AddCaptchaServices(this IServiceCollection services)
     {
+        // 1. Core captcha service
         services.AddSingleton<ICaptchaService, CaptchaService>();
 
-        // Регистрируем зависимости, если они еще не зарегистрированы
+        // 2. Low-level shared dependencies (state & trackers) — must be before services that consume them
+        if (!services.Any(s => s.ServiceType == typeof(ApprovedUsersStorage)))
+            services.AddSingleton<ApprovedUsersStorage>();
+
         if (!services.Any(s => s.ServiceType == typeof(IViolationTracker)))
-        {
             services.AddSingleton<IViolationTracker, ViolationTracker>();
-        }
 
-        if (!services.Any(s => s.ServiceType == typeof(IUserBanService)))
-        {
-            services.AddSingleton<IUserBanService, UserBanService>();
-        }
-
-        if (!services.Any(s => s.ServiceType == typeof(IUserFlowLogger)))
-        {
-            services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
-        }
-
-        if (!services.Any(s => s.ServiceType == typeof(IStatisticsService)))
-        {
-            services.AddSingleton<IStatisticsService, StatisticsService>();
-        }
-
-        if (!services.Any(s => s.ServiceType == typeof(GlobalStatsManager)))
-        {
-            services.AddSingleton<GlobalStatsManager>();
-        }
-
+        // 3. User management stack (UserManager uses ApprovedUsersStorage)
         if (!services.Any(s => s.ServiceType == typeof(IUserManager)))
-        {
             services.AddSingleton<IUserManager, UserManager>();
-        }
 
         if (!services.Any(s => s.ServiceType == typeof(IUserCleanupService)))
-        {
             services.AddSingleton<IUserCleanupService, UserCleanupService>();
-        }
+
+        // 4. Logging / formatting helpers
+        if (!services.Any(s => s.ServiceType == typeof(IUserFlowLogger)))
+            services.AddSingleton<IUserFlowLogger, UserFlowLogger>();
 
         if (!services.Any(s => s.ServiceType == typeof(IChatLinkFormatter)))
-        {
             services.AddSingleton<IChatLinkFormatter, ChatLinkFormatter>();
-        }
 
-        if (!services.Any(s => s.ServiceType == typeof(ApprovedUsersStorage)))
-        {
-            services.AddSingleton<ApprovedUsersStorage>();
-        }
+        // 5. Statistics
+        if (!services.Any(s => s.ServiceType == typeof(IStatisticsService)))
+            services.AddSingleton<IStatisticsService, StatisticsService>();
+
+        if (!services.Any(s => s.ServiceType == typeof(GlobalStatsManager)))
+            services.AddSingleton<GlobalStatsManager>();
+
+        // 6. High-level services depending on everything above
+        if (!services.Any(s => s.ServiceType == typeof(IUserBanService)))
+            services.AddSingleton<IUserBanService, UserBanService>();
 
         return services;
     }

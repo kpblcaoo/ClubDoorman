@@ -187,4 +187,27 @@ public static class ConfigurationHelper
             AiEnabledChats = GetEnvironmentChatList("DOORMAN_AI_ENABLED_CHATS")
         };
     }
+
+    /// <summary>
+    /// Загружает настройки тестового / golden режима
+    /// </summary>
+    public static TestHarnessOptions LoadTestHarnessOptions()
+    {
+        var golden = Environment.GetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE") == "1";
+        var raw = Environment.GetEnvironmentVariable("DOORMAN_TEST_BLACKLIST_IDS");
+        var set = new HashSet<long>();
+        if (!string.IsNullOrWhiteSpace(raw))
+        {
+            foreach (var part in raw.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (long.TryParse(part.Trim(), out var id))
+                    set.Add(id);
+            }
+        }
+        return new TestHarnessOptions
+        {
+            GoldenBaselineMode = golden,
+            TestBlacklistUserIds = set
+        };
+    }
 }

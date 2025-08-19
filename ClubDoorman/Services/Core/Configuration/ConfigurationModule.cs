@@ -90,6 +90,13 @@ public static class ConfigurationModule
             options.AiEnabledChats = loaded.AiEnabledChats;
         });
 
+        services.Configure<TestHarnessOptions>(options =>
+        {
+            var loaded = ConfigurationHelper.LoadTestHarnessOptions();
+            options.GoldenBaselineMode = loaded.GoldenBaselineMode;
+            options.TestBlacklistUserIds = loaded.TestBlacklistUserIds;
+        });
+
         return services;
     }
 }

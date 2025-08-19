@@ -26,6 +26,8 @@ public static class AppConfigTestFactory
         mock.Setup(x => x.AdminChatId).Returns(123456789);
         mock.Setup(x => x.LogAdminChatId).Returns(123456789);
         mock.Setup(x => x.AiEnabledChats).Returns(new HashSet<long> { 123456789 });
+    mock.Setup(x => x.GoldenBaselineMode).Returns(false);
+    mock.Setup(x => x.TestBlacklistUserIds).Returns(new HashSet<long>());
 
         // Группа 2: Настройки чатов и разрешений
         mock.Setup(x => x.BotApi).Returns("test-bot-api");
@@ -59,6 +61,8 @@ public static class AppConfigTestFactory
         mock.Setup(x => x.AdminChatId).Returns(123456789);
         mock.Setup(x => x.LogAdminChatId).Returns(123456789);
         mock.Setup(x => x.AiEnabledChats).Returns(new HashSet<long>());
+    mock.Setup(x => x.GoldenBaselineMode).Returns(false);
+    mock.Setup(x => x.TestBlacklistUserIds).Returns(new HashSet<long>());
 
         // Группа 2: Настройки чатов и разрешений
         mock.Setup(x => x.BotApi).Returns("test-bot-api");
@@ -101,6 +105,8 @@ public static class AppConfigTestFactory
         mock.Setup(x => x.AdminChatId).Returns(adminChatId);
         mock.Setup(x => x.LogAdminChatId).Returns(logAdminChatId);
         mock.Setup(x => x.AiEnabledChats).Returns(aiEnabledChats ?? new HashSet<long> { adminChatId });
+    mock.Setup(x => x.GoldenBaselineMode).Returns(false);
+    mock.Setup(x => x.TestBlacklistUserIds).Returns(new HashSet<long>());
 
         // Группа 2: Настройки чатов и разрешений
         mock.Setup(x => x.BotApi).Returns("test-bot-api");

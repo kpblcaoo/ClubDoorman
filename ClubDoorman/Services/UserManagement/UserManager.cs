@@ -5,6 +5,7 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
+using Microsoft.Extensions.Options;
 
 namespace ClubDoorman.Services.UserManagement;
 
@@ -18,22 +19,20 @@ internal sealed class UserManager : IUserManager
     private readonly HttpClient _clubHttpClient = new();
     private readonly HttpClient _httpClient = new();
 
-    // Тестовый блэклист из переменной окружения DOORMAN_TEST_BLACKLIST_IDS
-    private static readonly HashSet<long> _testBlacklist = LoadTestBlacklist();
+    // Тестовый блэклист теперь приходит из IAppConfig (TestHarnessOptions)
+    private static readonly HashSet<long> _emptyTestBlacklist = new();
+    private HashSet<long> TestBlacklist => _appConfig.TestBlacklistUserIds ?? _emptyTestBlacklist;
 
     public UserManager(ILogger<UserManager> logger, ApprovedUsersStorage approvedUsersStorage, IAppConfig appConfig)
     {
-        _logger = logger;
-        _approvedUsersStorage = approvedUsersStorage;
-        _appConfig = appConfig;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _approvedUsersStorage = approvedUsersStorage ?? throw new ArgumentNullException(nameof(approvedUsersStorage));
+        _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
 
-        // Логируем состояние тестового блэклиста при создании UserManager
-        Console.WriteLine($"[DEBUG] UserManager создан: тестовый блэклист содержит {_testBlacklist.Count} ID(s): [{string.Join(", ", _testBlacklist)}]");
-
-        if (appConfig.ClubServiceToken == null)
+        if (_appConfig.ClubServiceToken == null)
             _logger.LogWarning("DOORMAN_CLUB_SERVICE_TOKEN variable is not set, additional club checks disabled");
         else
-            _clubHttpClient.DefaultRequestHeaders.Add("X-Service-Token", appConfig.ClubServiceToken);
+            _clubHttpClient.DefaultRequestHeaders.Add("X-Service-Token", _appConfig.ClubServiceToken);
     }
 
     public async Task RefreshBanlist()
@@ -175,11 +174,11 @@ internal sealed class UserManager : IUserManager
     /// <returns>true если пользователь в банлисте, false если нет</returns>
     public async ValueTask<bool> InBanlist(long userId)
     {
-        Console.WriteLine($"[DEBUG] UserManager.InBanlist: проверяем пользователя {userId} (тестовых ID: {_testBlacklist.Count})");
-        _logger.LogDebug("InBanlist: проверяем пользователя {UserId} (тестовых ID: {TestCount})", userId, _testBlacklist.Count);
+        Console.WriteLine($"[DEBUG] UserManager.InBanlist: проверяем пользователя {userId} (тестовых ID: {TestBlacklist.Count})");
+        _logger.LogDebug("InBanlist: проверяем пользователя {UserId} (тестовых ID: {TestCount})", userId, TestBlacklist.Count);
 
-        // 1. Сначала проверяем тестовый блэклист
-        if (_testBlacklist.Contains(userId))
+        // 1. Сначала проверяем тестовый блэклист (из IAppConfig)
+        if (TestBlacklist.Contains(userId))
         {
             Console.WriteLine($"[DEBUG] 🎯 НАЙДЕН в тестовом блэклисте: {userId}");
             _logger.LogWarning("🎯 Пользователь {UserId} найден в ТЕСТОВОМ блэклисте", userId);
@@ -282,33 +281,7 @@ internal sealed class UserManager : IUserManager
     /// Загружает тестовый блэклист из переменной окружения DOORMAN_TEST_BLACKLIST_IDS
     /// Формат: "123456,789012,345678" (ID через запятую)
     /// </summary>
-    private static HashSet<long> LoadTestBlacklist()
-    {
-        var testIds = Environment.GetEnvironmentVariable("DOORMAN_TEST_BLACKLIST_IDS");
-        if (string.IsNullOrWhiteSpace(testIds))
-        {
-            Console.WriteLine("[DEBUG] DOORMAN_TEST_BLACKLIST_IDS не задана - тестовый блэклист пустой");
-            return [];
-        }
-
-        var result = new HashSet<long>();
-        var ids = testIds.Split(',', StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (var idStr in ids)
-        {
-            if (long.TryParse(idStr.Trim(), out var id))
-            {
-                result.Add(id);
-            }
-            else
-            {
-                Console.WriteLine($"[WARNING] Некорректный ID в DOORMAN_TEST_BLACKLIST_IDS: '{idStr}'");
-            }
-        }
-
-        Console.WriteLine($"[DEBUG] Загружен тестовый блэклист: {result.Count} ID(s) [{string.Join(", ", result)}]");
-        return result;
-    }
+    // (Удален LoadTestBlacklist; логика перенесена в TestHarnessOptions -> ConfigurationHelper)
 
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 #pragma warning restore IDE1006 // Naming Styles

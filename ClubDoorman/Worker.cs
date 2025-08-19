@@ -62,30 +62,11 @@ internal sealed class Worker(
     private readonly GlobalStatsManager _globalStatsManager = new();
     private User _me = default!;
 
-    // Группы, где не показывать рекламу (из .env NO_VPN_AD_GROUPS)
-    private static readonly HashSet<long> NoVpnAdGroups =
-    (Environment.GetEnvironmentVariable("NO_VPN_AD_GROUPS") ?? "")
-    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-    .Select(id => long.TryParse(id.Trim(), out var val) ? val : (long?)null)
-    .Where(id => id.HasValue)
-    .Select(id => id.Value)
-    .ToHashSet();
+    // Используем значения из IAppConfig (стандартизировано)
+    private HashSet<long> NoVpnAdGroups => _appConfig.NoVpnAdGroups;
 
-    static Worker()
-    {
-        var envVar = Environment.GetEnvironmentVariable("NO_VPN_AD_GROUPS");
-        Console.WriteLine($"[DEBUG] NO_VPN_AD_GROUPS env var: '{envVar}'");
-        Console.WriteLine($"[DEBUG] Loaded {NoVpnAdGroups.Count} groups without ads: [{string.Join(", ", NoVpnAdGroups)}]");
-
-        var whitelistVar = Environment.GetEnvironmentVariable("DOORMAN_WHITELIST");
-        Console.WriteLine($"[DEBUG] DOORMAN_WHITELIST env var: '{whitelistVar}'");
-
-        var logChatVar = Environment.GetEnvironmentVariable("DOORMAN_LOG_ADMIN_CHAT");
-        Console.WriteLine($"[DEBUG] DOORMAN_LOG_ADMIN_CHAT env var: '{logChatVar}'");
-
-        var testBlacklistVar = Environment.GetEnvironmentVariable("DOORMAN_TEST_BLACKLIST_IDS");
-        Console.WriteLine($"[DEBUG] DOORMAN_TEST_BLACKLIST_IDS env var: '{testBlacklistVar}'");
-    }
+    // Static ctor retained (empty) to keep previous shape
+    static Worker() { }
 
     private async Task CaptchaLoop(CancellationToken token)
     {

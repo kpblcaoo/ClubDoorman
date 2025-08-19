@@ -108,7 +108,7 @@ public static class ServiceCollectionExtensions
             logger.LogDebug("[DI] IAppConfig resolved: {AppConfigType}, BotApi: {BotApiPrefix}...", appConfig.GetType().Name, botApiPreview);
 
             // Baseline / golden harness mode: we don't need a real Telegram client; return a stub to avoid token validation.
-            if (Environment.GetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE") == "1")
+            if (provider.GetRequiredService<IAppConfig>().GoldenBaselineMode)
             {
                 logger.LogWarning("[DI] Golden baseline mode detected — returning dummy TelegramBotClient to skip token validation.");
                 // Provide syntactically valid but obviously fake dummy token (avoids secret scanner hits).

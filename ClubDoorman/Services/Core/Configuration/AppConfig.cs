@@ -16,6 +16,7 @@ public class AppConfig : IAppConfig
     private readonly IOptions<CoreOptions> _coreOptions;
     private readonly IOptions<ChatAccessOptions> _chatAccessOptions;
     private readonly IOptions<AiOptions> _aiOptions;
+    private readonly IOptions<TestHarnessOptions>? _testHarnessOptions;
 
     public AppConfig(
         IOptions<AutoBanOptions> autoBanOptions,
@@ -24,7 +25,8 @@ public class AppConfig : IAppConfig
         IOptions<ChatFilteringOptions> chatFilteringOptions,
         IOptions<CoreOptions> coreOptions,
         IOptions<ChatAccessOptions> chatAccessOptions,
-        IOptions<AiOptions> aiOptions)
+    IOptions<AiOptions> aiOptions,
+    IOptions<TestHarnessOptions>? testHarnessOptions)
     {
         _autoBanOptions = autoBanOptions;
         _violationThresholdOptions = violationThresholdOptions;
@@ -33,6 +35,7 @@ public class AppConfig : IAppConfig
         _coreOptions = coreOptions;
         _chatAccessOptions = chatAccessOptions;
         _aiOptions = aiOptions;
+    _testHarnessOptions = testHarnessOptions ?? Microsoft.Extensions.Options.Options.Create(new TestHarnessOptions());
         Effects = new EffectsConfiguration();
     }
 
@@ -261,5 +264,13 @@ public class AppConfig : IAppConfig
     /// Конфигурация эффектов модерации
     /// </summary>
     public EffectsConfiguration Effects { get; }
+
+    // === ТЕСТОВЫЕ / GOLDEN НАСТРОЙКИ ===
+
+    public bool GoldenBaselineMode => _testHarnessOptions?.Value?.GoldenBaselineMode ?? false;
+
+    public HashSet<long> TestBlacklistUserIds => _testHarnessOptions?.Value?.TestBlacklistUserIds ?? _emptySet;
+
+    private static readonly HashSet<long> _emptySet = new();
 
 }
