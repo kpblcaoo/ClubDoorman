@@ -1,6 +1,7 @@
 using ClubDoorman.Services.ChannelModeration;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Models;
 using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
@@ -25,7 +26,7 @@ public class ChannelModerationService : IChannelModerationService
     private readonly ILogger<ChannelModerationService> _logger;
     private readonly IChannelModerationEffectsBuilder? _channelEffectsBuilder;
     private readonly IEffectBus? _effectBus;
-    // Flags removed after migration; only ChannelAutoBan remained – now inlined from Config
+    private readonly IAppConfig _appConfig;
 
     /// <summary>
     /// Создает экземпляр ChannelModerationService
@@ -41,7 +42,8 @@ public class ChannelModerationService : IChannelModerationService
         IUserBanService userBanService,
         ILogger<ChannelModerationService> logger,
         IChannelModerationEffectsBuilder? channelEffectsBuilder = null,
-        IEffectBus? effectBus = null)
+        IEffectBus? effectBus = null,
+        IAppConfig? appConfig = null)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
@@ -49,6 +51,7 @@ public class ChannelModerationService : IChannelModerationService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _channelEffectsBuilder = channelEffectsBuilder; // может быть null на ранних этапах миграции
         _effectBus = effectBus; // может быть null если эффекты отключены
+        _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
     }
 
     /// <summary>
@@ -87,7 +90,7 @@ public class ChannelModerationService : IChannelModerationService
         }
 
         // Автобан каналов если включен
-        var channelAutoBan = Config.ChannelAutoBan;
+    var channelAutoBan = _appConfig.ChannelAutoBan;
         if (channelAutoBan)
         {
             _logger.LogInformation("🚫 Автобан канала {ChannelTitle} включен - баним", senderChat.Title);

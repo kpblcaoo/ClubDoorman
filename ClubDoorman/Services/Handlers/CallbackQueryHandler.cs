@@ -3,6 +3,7 @@ using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using System.Runtime.Caching;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models.Notifications;
@@ -42,6 +43,7 @@ public class CallbackQueryHandler : IUpdateHandler
     private readonly ILogger<CallbackQueryHandler> _logger;
     private readonly IGoldenMasterRecorder _recorder; // input capture
     private readonly IModerationEventPublisher _events; // semantics publisher
+    private readonly IAppConfig _appConfig;
 
     public CallbackQueryHandler(
         ITelegramBotClientWrapper bot,
@@ -57,7 +59,8 @@ public class CallbackQueryHandler : IUpdateHandler
         ILogChatService logChatService,
     ILogger<CallbackQueryHandler> logger,
     IGoldenMasterRecorder recorder,
-    IModerationEventPublisher eventsPublisher)
+    IModerationEventPublisher eventsPublisher,
+    IAppConfig appConfig)
     {
         _bot = bot;
         _captchaService = captchaService;
@@ -73,6 +76,7 @@ public class CallbackQueryHandler : IUpdateHandler
     _logger = logger;
     _recorder = recorder;
     _events = eventsPublisher ?? throw new ArgumentNullException(nameof(eventsPublisher));
+    _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
     }
 
     public bool CanHandle(Update update)
@@ -118,7 +122,7 @@ public class CallbackQueryHandler : IUpdateHandler
 
         try
         {
-            if (message.Chat.Id == Config.AdminChatId || message.Chat.Id == Config.LogAdminChatId)
+            if (message.Chat.Id == _appConfig.AdminChatId || message.Chat.Id == _appConfig.LogAdminChatId)
             {
                 _logger.LogDebug("🔧 Обрабатываем админский callback: {Data}", cbData);
                 await HandleAdminCallback(callbackQuery, cancellationToken);
@@ -261,7 +265,7 @@ public class CallbackQueryHandler : IUpdateHandler
             Utils.FullName(user), user.Id, chat.Title ?? "-", chat.Id);
 
         // Отправляем приветствие если они не отключены
-        if (Config.DisableWelcome)
+    if (_appConfig.DisableWelcome)
         {
             _logger.LogInformation("Приветствие после капчи пропущено - приветствия отключены (DOORMAN_DISABLE_WELCOME=true)");
         }
@@ -475,7 +479,7 @@ public class CallbackQueryHandler : IUpdateHandler
                 try
                 {
                     await _bot.ForwardMessage(
-                        chatId: Config.AdminChatId,
+                        chatId: _appConfig.AdminChatId,
                         fromChatId: aiProfileData.Chat.Id,
                         messageId: (int)aiProfileData.MessageId.Value,
                         cancellationToken: cancellationToken

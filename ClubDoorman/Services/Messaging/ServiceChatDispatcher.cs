@@ -1,4 +1,5 @@
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Models.Notifications;
 using System.Runtime.Caching;
 using Telegram.Bot.Types;
@@ -14,6 +15,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
 {
     private readonly ITelegramBotClientWrapper _bot;
     private readonly ILogger<ServiceChatDispatcher> _logger;
+    private readonly IAppConfig _appConfig;
 
     /// <summary>
     /// Создает экземпляр диспетчера сервис-чатов
@@ -22,10 +24,12 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
     /// <param name="logger">Логгер</param>
     public ServiceChatDispatcher(
         ITelegramBotClientWrapper bot,
-        ILogger<ServiceChatDispatcher> logger)
+        ILogger<ServiceChatDispatcher> logger,
+        IAppConfig appConfig)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
     }
 
     /// <summary>
@@ -49,7 +53,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
 
             var message = FormatNotificationForAdminChat(notification);
             await _bot.SendMessageAsync(
-                Config.AdminChatId,
+                _appConfig.AdminChatId,
                 message,
                 parseMode: global::Telegram.Bot.Types.Enums.ParseMode.Html,
                 replyMarkup: GetAdminChatReplyMarkup(notification),
@@ -72,7 +76,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
         try
         {
             var message = FormatNotificationForLogChat(notification);
-            var chatId = Config.LogAdminChatId != Config.AdminChatId ? Config.LogAdminChatId : Config.AdminChatId;
+            var chatId = _appConfig.LogAdminChatId != _appConfig.AdminChatId ? _appConfig.LogAdminChatId : _appConfig.AdminChatId;
 
             await _bot.SendMessageAsync(
                 chatId,
@@ -306,7 +310,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
             var inputFile = InputFile.FromStream(stream, "profile.jpg");
 
             var photoMsg = await _bot.SendPhoto(
-                Config.AdminChatId,
+                _appConfig.AdminChatId,
                 inputFile,
                 caption: photoCaption,
                 parseMode: global::Telegram.Bot.Types.Enums.ParseMode.Html,
@@ -325,7 +329,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
         try
         {
             await _bot.ForwardMessage(
-                new ChatId(Config.AdminChatId),
+                new ChatId(_appConfig.AdminChatId),
                 data.Chat.Id,
                 (int)data.MessageId,
                 cancellationToken: cancellationToken
@@ -341,7 +345,7 @@ public class ServiceChatDispatcher : IServiceChatDispatcher
         var message = FormatAiProfileAnalysis(data);
 
         var mainMessage = await _bot.SendMessageAsync(
-            Config.AdminChatId,
+            _appConfig.AdminChatId,
             message,
             parseMode: global::Telegram.Bot.Types.Enums.ParseMode.Html,
             replyMarkup: GetAdminChatReplyMarkup(data),

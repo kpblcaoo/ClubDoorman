@@ -39,7 +39,7 @@ public class AppConfig : IAppConfig
     /// <summary>
     /// API токен для OpenRouter
     /// </summary>
-    public string? OpenRouterApi => _aiOptions.Value.OpenRouterApi ?? Config.OpenRouterApi; // fallback пока не удалён Config
+    public string? OpenRouterApi => _aiOptions.Value.OpenRouterApi; // полностью мигрировано в AiOptions
 
     /// <summary>
     /// Включено ли обнаружение подозрительных пользователей
@@ -101,7 +101,7 @@ public class AppConfig : IAppConfig
     /// <summary>
     /// API токен бота Telegram
     /// </summary>
-    public string BotApi => _coreOptions.Value.BotApi ?? Config.BotApi; // временный fallback
+    public string BotApi => _coreOptions.Value.BotApi ?? string.Empty; // гарантируем непустую строку вместо null
 
     /// <summary>
     /// Токен сервиса клуба
@@ -136,47 +136,47 @@ public class AppConfig : IAppConfig
     /// <summary>
     /// Включен ли фильтр ссылок
     /// </summary>
-    public bool TextMentionFilterEnabled => Config.TextMentionFilterEnabled;
+    public bool TextMentionFilterEnabled => _featureToggleOptions.Value.TextMentionFilterEnabled;
 
     /// <summary>
     /// Автоматически банить пользователей, входящих через папки
     /// </summary>
-    public bool BanFolderInviteUsers => Config.BanFolderInviteUsers;
+    public bool BanFolderInviteUsers => _autoBanOptions.Value.BanFolderInviteUsers;
 
     /// <summary>
     /// Количество повторных нарушений ML фильтра перед баном
     /// </summary>
-    public int MlViolationsBeforeBan => Config.MlViolationsBeforeBan;
+    public int MlViolationsBeforeBan => _violationThresholdOptions.Value.MlViolationsBeforeBan;
 
     /// <summary>
     /// Количество повторных нарушений стоп-слов перед баном
     /// </summary>
-    public int StopWordsViolationsBeforeBan => Config.StopWordsViolationsBeforeBan;
+    public int StopWordsViolationsBeforeBan => _violationThresholdOptions.Value.StopWordsViolationsBeforeBan;
 
     /// <summary>
     /// Количество повторных нарушений эмодзи перед баном
     /// </summary>
-    public int EmojiViolationsBeforeBan => Config.EmojiViolationsBeforeBan;
+    public int EmojiViolationsBeforeBan => _violationThresholdOptions.Value.EmojiViolationsBeforeBan;
 
     /// <summary>
     /// Количество повторных нарушений lookalike символов перед баном
     /// </summary>
-    public int LookalikeViolationsBeforeBan => Config.LookalikeViolationsBeforeBan;
+    public int LookalikeViolationsBeforeBan => _violationThresholdOptions.Value.LookalikeViolationsBeforeBan;
 
     /// <summary>
     /// Количество повторных нарушений банальных приветствий перед баном
     /// </summary>
-    public int BoringGreetingsViolationsBeforeBan => Config.BoringGreetingsViolationsBeforeBan;
+    public int BoringGreetingsViolationsBeforeBan => _violationThresholdOptions.Value.BoringGreetingsViolationsBeforeBan;
 
     /// <summary>
     /// Количество непройденных капч перед баном
     /// </summary>
-    public int CaptchaViolationsBeforeBan => Config.CaptchaViolationsBeforeBan;
+    public int CaptchaViolationsBeforeBan => _violationThresholdOptions.Value.CaptchaViolationsBeforeBan;
 
     /// <summary>
     /// Отправлять уведомления о банах за повторные нарушения в админ-чат вместо лог-чата
     /// </summary>
-    public bool RepeatedViolationsBanToAdminChat => Config.RepeatedViolationsBanToAdminChat;
+    public bool RepeatedViolationsBanToAdminChat => _featureToggleOptions.Value.RepeatedViolationsBanToAdminChat;
 
     // === НОВЫЕ СВОЙСТВА ИЗ STRONGLY-TYPED OPTIONS ===
 

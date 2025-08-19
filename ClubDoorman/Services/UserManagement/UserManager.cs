@@ -95,7 +95,7 @@ internal sealed class UserManager : IUserManager
     /// <param name="groupId">ID группы (для группового одобрения)</param>
     public async ValueTask Approve(long userId, long? groupId = null)
     {
-        if (Config.GlobalApprovalMode)
+    if (_appConfig.GlobalApprovalMode)
         {
             // Глобальный режим: одобряем глобально
             _approvedUsersStorage.ApproveUserGlobally(userId);

@@ -462,7 +462,7 @@ public class UserBanService : IUserBanService
 
             // Пересылаем сообщение и отправляем уведомление как реплай
             var forwardedMessage = await _bot.ForwardMessage(
-                new ChatId(Config.LogAdminChatId),
+                new ChatId(_appConfig.LogAdminChatId),
                 message.Chat.Id,
                 message.MessageId,
                 cancellationToken: cancellationToken
@@ -472,7 +472,7 @@ public class UserBanService : IUserBanService
             var messageText = _messageService.GetTemplates().FormatNotificationTemplate(template, blacklistData);
 
             await _bot.SendMessage(
-                Config.LogAdminChatId,
+                _appConfig.LogAdminChatId,
                 messageText,
                 parseMode: ParseMode.Html,
                 replyParameters: forwardedMessage,

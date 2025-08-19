@@ -20,6 +20,7 @@ using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Services.Logging;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -43,6 +44,7 @@ public class CallbackQueryHandlerTestFactory
     public Mock<IUserBanService> UserBanServiceMock { get; } = new();
     public Mock<IServiceProvider> ServiceProviderMock { get; } = new();
     public Mock<ILogger<CallbackQueryHandler>> LoggerMock { get; } = new();
+    public Mock<IAppConfig> AppConfigMock { get; } = new();
 
     public CallbackQueryHandler CreateCallbackQueryHandler()
     {
@@ -60,7 +62,8 @@ public class CallbackQueryHandlerTestFactory
             new Mock<ILogChatService>().Object,
             LoggerMock.Object,
             NullGoldenMasterRecorder.Instance,
-            new Mock<IModerationEventPublisher>().Object
+            new Mock<IModerationEventPublisher>().Object,
+            AppConfigMock.Object
         );
     }
 

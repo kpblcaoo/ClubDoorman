@@ -214,7 +214,7 @@ public class MessageService : IMessageService
     public async Task<Message?> SendWelcomeMessageAsync(SendWelcomeMessageRequest request)
     {
         // Проверяем, отключены ли приветствия
-        if (Config.DisableWelcome)
+    if (_appConfig.DisableWelcome)
         {
             _logger.LogDebug("Приветственные сообщения отключены (DOORMAN_DISABLE_WELCOME=true)");
             return null;
@@ -240,7 +240,7 @@ public class MessageService : IMessageService
         }
         else
         {
-            mediaWarning = Config.IsMediaFilteringDisabledForChat(request.Chat.Id) ? ", стикеры, документы" : ", изображения, стикеры, документы";
+            mediaWarning = _appConfig.IsMediaFilteringDisabledForChat(request.Chat.Id) ? ", стикеры, документы" : ", изображения, стикеры, документы";
             greetMsg = $"👋 {mention}\n\n<b>Внимание!</b> первые три сообщения проходят антиспам-проверку, эмодзи{mediaWarning} и реклама запрещены — они могут удаляться автоматически. Не просите писать в ЛС!{vpnAd}";
         }
 
@@ -272,7 +272,7 @@ public class MessageService : IMessageService
     public async Task<Message?> SendWelcomeMessageAsync(User user, Chat chat, string reason = "приветствие", CancellationToken cancellationToken = default)
     {
         // Проверяем, отключены ли приветствия
-        if (Config.DisableWelcome)
+    if (_appConfig.DisableWelcome)
         {
             _logger.LogDebug("Приветственные сообщения отключены (DOORMAN_DISABLE_WELCOME=true)");
             return null;
@@ -298,7 +298,7 @@ public class MessageService : IMessageService
         }
         else
         {
-            mediaWarning = Config.IsMediaFilteringDisabledForChat(chat.Id) ? ", стикеры, документы" : ", изображения, стикеры, документы";
+            mediaWarning = _appConfig.IsMediaFilteringDisabledForChat(chat.Id) ? ", стикеры, документы" : ", изображения, стикеры, документы";
             greetMsg = $"👋 {mention}\n\n<b>Внимание!</b> первые три сообщения проходят антиспам-проверку, эмодзи{mediaWarning} и реклама запрещены — они могут удаляться автоматически.\n\n⚠️ <b>Важно:</b> банальные приветствия без цели удаляются автоматически. Пишите конкретные вопросы!\n\nНе просите писать в ЛС!{vpnAd}";
         }
 
