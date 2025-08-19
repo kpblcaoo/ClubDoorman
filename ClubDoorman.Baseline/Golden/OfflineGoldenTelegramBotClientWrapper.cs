@@ -25,6 +25,8 @@ public class BaselineOfflineTelegramBotClientWrapper : ITelegramBotClientWrapper
         => Task.FromResult(MakeMessage(chatId.Identifier ?? 0, text));
     public Task<bool> BanChatMemberAsync(ChatId chatId, long userId, DateTime? untilDate = null, bool? revokeMessages = null, CancellationToken cancellationToken = default) => Task.FromResult(true);
     public Task<bool> DeleteMessageAsync(ChatId chatId, int messageId, CancellationToken cancellationToken = default) => Task.FromResult(true);
+    public Task<DeleteMessageResult> DeleteMessageWithOutcomeAsync(ChatId chatId, int messageId, CancellationToken cancellationToken = default)
+        => Task.FromResult(new DeleteMessageResult(chatId.Identifier ?? 0, messageId, DeleteMessageOutcome.Success, 0, null, null));
     public Task<bool> UnbanChatMemberAsync(ChatId chatId, long userId, bool? onlyIfBanned = null, CancellationToken cancellationToken = default) => Task.FromResult(true);
     public Task<User> GetMe(CancellationToken cancellationToken = default) => Task.FromResult(new User { Id = BotId, IsBot = true, Username = "offline_golden_bot" });
     public Task DeleteMessage(ChatId chatId, int messageId, CancellationToken cancellationToken = default) => Task.CompletedTask;

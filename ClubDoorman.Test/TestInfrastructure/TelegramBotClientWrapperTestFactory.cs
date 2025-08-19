@@ -1,7 +1,6 @@
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
 using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
@@ -28,7 +27,8 @@ public class TelegramBotClientWrapperTestFactory
     public TelegramBotClientWrapper CreateTelegramBotClientWrapper()
     {
         return new TelegramBotClientWrapper(
-            new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz")
+            new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"),
+            NullLogger<TelegramBotClientWrapper>.Instance
         );
     }
 

@@ -472,36 +472,47 @@ public class MessageHandler : IUpdateHandler
     {
         _logger.LogDebug("DeleteMessageLater called. MessageId: {MessageId}, ChatId: {ChatId}, After: {After}",
             message?.MessageId, message?.Chat?.Id, after);
-        if (message == null)
-        {
-            _logger.LogWarning("DeleteMessageLater: message is null, skipping");
-            return;
-        }
-        if (after == default) after = TimeSpan.FromMinutes(5);
-        _logger.LogDebug("Запланировано удаление сообщения {MessageId} в чате {ChatId} через {After}",
-            message.MessageId, message.Chat.Id, after);
-        _ = Task.Run(
-            async () =>
+            if (message == null)
             {
-                try
+                _logger.LogWarning("DeleteMessageLater: message is null, skipping");
+                return;
+            }
+            if (after == default) after = TimeSpan.FromMinutes(5);
+            _logger.LogDebug("Запланировано удаление сообщения {MessageId} в чате {ChatId} через {After}",
+                message.MessageId, message.Chat.Id, after);
+            _ = Task.Run(
+                async () =>
                 {
-                    if (after > TimeSpan.Zero)
+                    try
                     {
-                        _logger.LogTrace("Ожидание {After} перед удалением сообщения {MessageId} в чате {ChatId}",
-                            after, message.MessageId, message.Chat.Id);
-                        await Task.Delay(after, cancellationToken);
+                        if (after > TimeSpan.Zero)
+                        {
+                            _logger.LogTrace("Ожидание {After} перед удалением сообщения {MessageId} в чате {ChatId}",
+                                after, message.MessageId, message.Chat.Id);
+                            await Task.Delay(after, cancellationToken);
+                        }
+                        _logger.LogTrace("Удаляем сообщение {MessageId} в чате {ChatId}", message.MessageId, message.Chat.Id);
+                        var delResult = await _bot.DeleteMessageWithOutcomeAsync(message.Chat.Id, message.MessageId, cancellationToken: cancellationToken);
+                        switch (delResult.Outcome)
+                        {
+                            case Services.Telegram.DeleteMessageOutcome.Success:
+                                _logger.LogDebug("Сообщение {MessageId} в чате {ChatId} успешно удалено (dur={Duration}ms)", message.MessageId, message.Chat.Id, delResult.DurationMs);
+                                _logger.LogInformation("DeleteMessageLater: Message {MessageId} in chat {ChatId} deleted", message.MessageId, message.Chat.Id);
+                                break;
+                            case Services.Telegram.DeleteMessageOutcome.NotFoundOrAlreadyDeleted:
+                                _logger.LogDebug("Сообщение {MessageId} в чате {ChatId} уже удалено или недоступно (dur={Duration}ms)", message.MessageId, message.Chat.Id, delResult.DurationMs);
+                                break;
+                            default:
+                                _logger.LogWarning("Не удалось удалить сообщение {MessageId} в чате {ChatId}: outcome={Outcome} err={Error}", message.MessageId, message.Chat.Id, delResult.Outcome, delResult.Error);
+                                break;
+                        }
                     }
-                    _logger.LogTrace("Удаляем сообщение {MessageId} в чате {ChatId}", message.MessageId, message.Chat.Id);
-                    await _bot.DeleteMessage(message.Chat.Id, message.MessageId, cancellationToken: cancellationToken);
-                    _logger.LogDebug("Сообщение {MessageId} в чате {ChatId} успешно удалено", message.MessageId, message.Chat.Id);
-                    _logger.LogInformation("DeleteMessageLater: Message {MessageId} in chat {ChatId} deleted", message.MessageId, message.Chat.Id);
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    _logger.LogWarning(ex, "DeleteMessageLater failed for message {MessageId} in chat {ChatId}", message.MessageId, message.Chat.Id);
-                    _logger.LogError(ex, "DeleteMessageLater: Exception while deleting message {MessageId} in chat {ChatId}", message.MessageId, message.Chat.Id);
-                }
-            },
-            cancellationToken);
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        _logger.LogWarning(ex, "DeleteMessageLater failed for message {MessageId} in chat {ChatId}", message.MessageId, message.Chat.Id);
+                        _logger.LogError(ex, "DeleteMessageLater: Exception while deleting message {MessageId} in chat {ChatId}", message.MessageId, message.Chat.Id);
+                    }
+                },
+                cancellationToken);
     }
 }

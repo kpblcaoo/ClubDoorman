@@ -123,6 +123,16 @@ public class FakeTelegramClient : ITelegramBotClientWrapper
         return Task.FromResult(true);
     }
 
+    public Task<DeleteMessageResult> DeleteMessageWithOutcomeAsync(
+        ChatId chatId,
+        int messageId,
+        CancellationToken cancellationToken = default)
+    {
+        // Reuse existing logic.
+        return DeleteMessageAsync(chatId, messageId, cancellationToken)
+            .ContinueWith(t => new DeleteMessageResult(chatId.Identifier ?? 0, messageId, DeleteMessageOutcome.Success, 0, null, null), cancellationToken);
+    }
+
     public Task<bool> BanChatMemberAsync(
         ChatId chatId,
         long userId,

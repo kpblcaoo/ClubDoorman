@@ -63,14 +63,14 @@ public class MessageHandlerExtendedTests
         {
             // Создаем реальные экземпляры командных обработчиков для тестов
             var startCommandHandler = new StartCommandHandler(
-                new TelegramBotClientWrapper(new Telegram.Bot.TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz")),
+                new TelegramBotClientWrapper(new Telegram.Bot.TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"), Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance),
                 Microsoft.Extensions.Logging.Abstractions.NullLogger<StartCommandHandler>.Instance,
                 new Moq.Mock<IMessageService>().Object,
                 AppConfigTestFactory.CreateDefault()
             );
 
             var suspiciousCommandHandler = new SuspiciousCommandHandler(
-                new TelegramBotClientWrapper(new Telegram.Bot.TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz")),
+                new TelegramBotClientWrapper(new Telegram.Bot.TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"), Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance),
                 _factory.ModerationFacadeMock.Object,
                 new Moq.Mock<IMessageService>().Object,
                 Microsoft.Extensions.Logging.Abstractions.NullLogger<SuspiciousCommandHandler>.Instance,

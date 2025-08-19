@@ -1,5 +1,4 @@
 using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Core.Configuration;
@@ -336,7 +335,7 @@ public class MessageHandlerFakeTests
         // Настройка ServiceProvider для команд
         var mockStartCommandHandler = new Mock<StartCommandHandler>(
             MockBehavior.Loose,
-            new TelegramBotClientWrapper(new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz")),
+            new TelegramBotClientWrapper(new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"), Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance),
             NullLogger<StartCommandHandler>.Instance,
             new Mock<IMessageService>().Object,
             new Mock<IAppConfig>().Object

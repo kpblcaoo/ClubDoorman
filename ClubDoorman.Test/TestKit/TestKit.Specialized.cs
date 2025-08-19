@@ -610,7 +610,7 @@ namespace ClubDoorman.Test.TestKit
                     // Создаем AiChecks с тестовым bot client и конфигурацией
                     var testBotClient = CreateTestBotClient();
                     var testConfig = CreateAppConfig();
-                    var aiChecks = new AiChecks(new TelegramBotClientWrapper(testBotClient), aiLoggerMock.Object, testConfig);
+                    var aiChecks = new AiChecks(new TelegramBotClientWrapper(testBotClient, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance), aiLoggerMock.Object, testConfig);
 
                     // Используем FakeModerationService для тестов
                     var botClientWrapperMock = CreateMockBotClientWrapper();

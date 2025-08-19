@@ -1,4 +1,3 @@
-using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using TechTalk.SpecFlow;
 using ClubDoorman.Models;
@@ -46,7 +45,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             var appConfig = AppConfigTestFactory.CreateDefault();
             var botClient = new TelegramBotClient("1234567890:TEST_TOKEN_FOR_TESTS");
-            var telegramWrapper = new TelegramBotClientWrapper(botClient);
+            var telegramWrapper = new TelegramBotClientWrapper(botClient, _loggerFactory.CreateLogger<TelegramBotClientWrapper>());
             var messageService = new Mock<IMessageService>().Object;
 
             _captchaService = new CaptchaService(
