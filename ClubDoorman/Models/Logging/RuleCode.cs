@@ -25,5 +25,21 @@ public enum RuleCode
     PrivateSkip,
     NewMembers,
     LeftMemberCleanup,
-    ChannelMessage
+    ChannelMessage,
+    // Additional early / system semantics (Phase 2 hardening)
+    SystemNoUser,
+    BotMessage,
+    CaptchaPending,
+    AlreadyApproved,
+    ClubMemberSkip,
+    AiProfileRestricted,
+    ModeratedGeneric,
+    // Captcha lifecycle (future expansion)
+    CaptchaFail,
+    CaptchaSuccess,
+    // Split moderated outcomes (appended at end for stability)
+    ModeratedAllow,
+    ModeratedDelete,
+    ModeratedBan,
+    ModeratedReport
 }

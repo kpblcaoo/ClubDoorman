@@ -121,7 +121,9 @@ public class AiAnalysisTests
 
         var violationTrackerLogger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<ViolationTracker>();
         var logChatService = new Mock<ILogChatService>().Object;
-        _callbackHandler = new CallbackQueryHandler(_fakeBot, captchaService, _userManager, badMessageManager, statisticsService, _aiChecks, moderationService, messageService, new ViolationTracker(violationTrackerLogger, _appConfig), userBanService, logChatService, _callbackLogger);
+    // Golden Master recorder not needed for these integration tests -> pass mock
+    var gmRecorder = new Moq.Mock<ClubDoorman.Services.Logging.IGoldenMasterRecorder>();
+    _callbackHandler = new CallbackQueryHandler(_fakeBot, captchaService, _userManager, badMessageManager, statisticsService, _aiChecks, moderationService, messageService, new ViolationTracker(violationTrackerLogger, _appConfig), userBanService, logChatService, _callbackLogger, gmRecorder.Object);
     }
 
     [TearDown]

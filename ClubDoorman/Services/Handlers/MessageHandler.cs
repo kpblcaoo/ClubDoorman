@@ -424,7 +424,16 @@ public class MessageHandler : IUpdateHandler
             user.Id, chat.Id, message.MessageId, moderationResult.Action);
         await _moderationFacade.HandleUserMessageAsync(message, user, chat, moderationResult, isSilentMode, cancellationToken);
         _logger.LogTrace("HandleUserMessageAsync: Message passed to ModerationFacade. UserId: {UserId}, MessageId: {MessageId}", user.Id, message.MessageId);
-        return new { kind = "moderated", action = moderationResult.Action.ToString(), reason = moderationResult.Reason };
+        // Provide explicit ruleCode for moderated outcomes to avoid ambiguity in heuristic mapper.
+        string moderatedRule = moderationResult.Action switch
+        {
+            ModerationAction.Allow => "ModeratedAllow",
+            ModerationAction.Delete => "ModeratedDelete",
+            ModerationAction.Ban => "ModeratedBan",
+            ModerationAction.Report => "ModeratedReport",
+            _ => "ModeratedGeneric"
+        };
+        return new { kind = "moderated", action = moderationResult.Action.ToString(), reason = moderationResult.Reason, ruleCode = moderatedRule };
     }
 
     internal async Task HandleUserMessageAsync(Message message, bool isSilentMode, CancellationToken cancellationToken)

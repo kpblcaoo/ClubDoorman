@@ -2,7 +2,7 @@ using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.UserBan;
+// using ClubDoorman.Services.UserBan; // duplicate removed
 using ClubDoorman.Handlers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -19,6 +19,7 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Logging;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -57,7 +58,8 @@ public class CallbackQueryHandlerTestFactory
             ViolationTrackerMock.Object,
             UserBanServiceMock.Object,
             new Mock<ILogChatService>().Object,
-            LoggerMock.Object
+            LoggerMock.Object,
+            NullGoldenMasterRecorder.Instance
         );
     }
 

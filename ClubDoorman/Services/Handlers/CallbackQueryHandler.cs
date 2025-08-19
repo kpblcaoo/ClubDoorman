@@ -18,6 +18,7 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
+using ClubDoorman.Services.Logging;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -38,6 +39,7 @@ public class CallbackQueryHandler : IUpdateHandler
     private readonly IUserBanService _userBanService;
     private readonly ILogChatService _logChatService;
     private readonly ILogger<CallbackQueryHandler> _logger;
+    private readonly IGoldenMasterRecorder _recorder;
 
     public CallbackQueryHandler(
         ITelegramBotClientWrapper bot,
@@ -51,7 +53,8 @@ public class CallbackQueryHandler : IUpdateHandler
         IViolationTracker violationTracker,
         IUserBanService userBanService,
         ILogChatService logChatService,
-        ILogger<CallbackQueryHandler> logger)
+    ILogger<CallbackQueryHandler> logger,
+    IGoldenMasterRecorder recorder)
     {
         _bot = bot;
         _captchaService = captchaService;
@@ -64,7 +67,8 @@ public class CallbackQueryHandler : IUpdateHandler
         _violationTracker = violationTracker;
         _userBanService = userBanService;
         _logChatService = logChatService;
-        _logger = logger;
+    _logger = logger;
+    _recorder = recorder;
     }
 
     public bool CanHandle(Update update)
@@ -224,6 +228,9 @@ public class CallbackQueryHandler : IUpdateHandler
         {
             _logger.LogWarning(ex, "Не удалось забанить пользователя за неправильную капчу");
         }
+    // Golden Master semantics (standalone event, create transient correlation id)
+    var corr = _recorder.TryRecordInput(new Update { Id = (int)(DateTime.UtcNow.Ticks & 0x7FFFFFFF), CallbackQuery = new CallbackQuery() }, nameof(CallbackQueryHandler), captchaInfo.ChatId, captchaInfo.User.Id);
+    _recorder.TryRecordOutput(corr, new { kind = "captcha_fail", ruleCode = "CaptchaFail" });
     }
 
     private async Task HandleSuccessfulCaptcha(User user, Chat chat, Models.CaptchaInfo captchaInfo, CancellationToken cancellationToken)
@@ -243,6 +250,8 @@ public class CallbackQueryHandler : IUpdateHandler
             _logger.LogInformation("Отправляем приветствие после успешного прохождения капчи");
             await _messageService.SendWelcomeMessageAsync(user, chat, "приветствие после капчи", cancellationToken);
         }
+    var corr = _recorder.TryRecordInput(new Update { Id = (int)(DateTime.UtcNow.Ticks & 0x7FFFFFFF), CallbackQuery = new CallbackQuery() }, nameof(CallbackQueryHandler), chat.Id, user.Id);
+    _recorder.TryRecordOutput(corr, new { kind = "captcha_success", ruleCode = "CaptchaSuccess" });
     }
 
     private async Task HandleAdminCallback(CallbackQuery callbackQuery, CancellationToken cancellationToken)
@@ -312,7 +321,7 @@ public class CallbackQueryHandler : IUpdateHandler
         var adminName = GetAdminDisplayName(callbackQuery.From);
 
         // Обновляем сообщение с результатом действия
-        var approveMessage = $"{callbackQuery.Message.Text}\n\n✅ Одобрен администратором {adminName}\n👤 Пользователь добавлен в список доверенных";
+    var approveMessage = $"{callbackQuery.Message!.Text}\n\n✅ Одобрен администратором {adminName}\n👤 Пользователь добавлен в список доверенных";
 
         await _bot.EditMessageText(
             callbackQuery.Message!.Chat.Id,
@@ -347,7 +356,7 @@ public class CallbackQueryHandler : IUpdateHandler
             await _userBanService.BanUserAsync(chat, user, BanTypeEnum.ManualBan, "Ручной бан", userMessage, cancellationToken);
 
             // Обновляем сообщение с результатом действия
-            var banMessage = $"{callbackQuery.Message.Text}\n\n🚫 Забанен администратором {adminName}\n🧹 Пользователь очищен из всех списков\n📝 Сообщение добавлено в список авто-бана";
+            var banMessage = $"{callbackQuery.Message!.Text}\n\n🚫 Забанен администратором {adminName}\n🧹 Пользователь очищен из всех списков\n📝 Сообщение добавлено в список авто-бана";
 
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
@@ -363,7 +372,7 @@ public class CallbackQueryHandler : IUpdateHandler
             _logger.LogWarning(e, "Не удалось забанить пользователя через админский callback");
 
             // Обновляем сообщение с ошибкой
-            var errorMessage = $"{callbackQuery.Message.Text}\n\n❌ Ошибка при бане администратором {adminName}\nНе могу забанить. Не хватает могущества? Сходите забаньте руками";
+            var errorMessage = $"{callbackQuery.Message!.Text}\n\n❌ Ошибка при бане администратором {adminName}\nНе могу забанить. Не хватает могущества? Сходите забаньте руками";
 
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
@@ -384,7 +393,7 @@ public class CallbackQueryHandler : IUpdateHandler
             await _logChatService.HandleLogBanAsync(chatId, userId, adminName, cancellationToken);
 
             // Обновляем сообщение с результатом действия (без упоминания автобана)
-            var banMessage = $"{callbackQuery.Message.Text}\n\n🚫 Забанен администратором {adminName}\n🧹 Пользователь очищен из всех списков";
+            var banMessage = $"{callbackQuery.Message!.Text}\n\n🚫 Забанен администратором {adminName}\n🧹 Пользователь очищен из всех списков";
 
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
@@ -400,7 +409,7 @@ public class CallbackQueryHandler : IUpdateHandler
             _logger.LogWarning(e, "Не удалось забанить пользователя через лог-чат callback");
 
             // Обновляем сообщение с ошибкой
-            var errorMessage = $"{callbackQuery.Message.Text}\n\n❌ Ошибка при бане администратором {adminName}\nНе могу забанить. Не хватает могущества? Сходите забаньте руками";
+            var errorMessage = $"{callbackQuery.Message!.Text}\n\n❌ Ошибка при бане администратором {adminName}\nНе могу забанить. Не хватает могущества? Сходите забаньте руками";
 
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
@@ -462,7 +471,7 @@ public class CallbackQueryHandler : IUpdateHandler
             }
 
             // Обновляем сообщение с результатом действия
-            var banMessage = $"{callbackQuery.Message.Text}\n\n🚫 Забанен за спам-профиль администратором {adminName}\n🧹 Пользователь очищен из всех списков\n⚠️ Сообщение НЕ добавлено в автобан (проблема в профиле)";
+            var banMessage = $"{callbackQuery.Message!.Text}\n\n🚫 Забанен за спам-профиль администратором {adminName}\n🧹 Пользователь очищен из всех списков\n⚠️ Сообщение НЕ добавлено в автобан (проблема в профиле)";
 
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
@@ -478,7 +487,7 @@ public class CallbackQueryHandler : IUpdateHandler
             _logger.LogWarning(e, "Не удалось забанить пользователя через админский callback (бан по профилю)");
 
             // Обновляем сообщение с ошибкой
-            var errorMessage = $"{callbackQuery.Message.Text}\n\n❌ Ошибка при бане администратором {adminName}\nНе могу забанить. Не хватает могущества? Сходите забаньте руками";
+            var errorMessage = $"{callbackQuery.Message!.Text}\n\n❌ Ошибка при бане администратором {adminName}\nНе могу забанить. Не хватает могущества? Сходите забаньте руками";
 
             await _bot.EditMessageText(
                 callbackQuery.Message!.Chat.Id,
@@ -582,8 +591,8 @@ public class CallbackQueryHandler : IUpdateHandler
                     var success = await _moderationService.UnrestrictAndApproveUserAsync(userId, chatId);
 
                     var statusMessage = success
-                        ? $"{callbackQuery.Message.Text}\n\n✅ *Разблокирован и одобрен администратором {adminName}*"
-                        : $"{callbackQuery.Message.Text}\n\n⚠️ *Одобрен администратором {adminName}* (возможны проблемы с разблокировкой)";
+                        ? $"{callbackQuery.Message!.Text}\n\n✅ *Разблокирован и одобрен администратором {adminName}*"
+                        : $"{callbackQuery.Message!.Text}\n\n⚠️ *Одобрен администратором {adminName}* (возможны проблемы с разблокировкой)";
 
                     await _bot.EditMessageText(
                         callbackQuery.Message!.Chat.Id,

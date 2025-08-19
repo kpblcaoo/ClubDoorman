@@ -622,7 +622,208 @@ public class MessageHandlerSemanticsTests
         await handler.HandleAsync(update, CancellationToken.None);
         using var doc = LoadSemanticsJson(basePath);
         var root = doc.RootElement;
-        Assert.That(root.GetProperty("ruleCode").GetString(), Is.EqualTo("ModeratedGeneric"));
+        Assert.That(root.GetProperty("ruleCode").GetString(), Is.EqualTo("ModeratedAllow"));
         Assert.That(root.GetProperty("action").GetString(), Is.EqualTo("Allow"));
+    }
+
+    [Test]
+    public async Task Moderated_Delete_MapsToModeratedDelete()
+    {
+        var basePath = Path.Combine(Path.GetTempPath(), "gm_semantics_" + Path.GetRandomFileName());
+        Directory.CreateDirectory(basePath);
+        var flags = Flags(basePath);
+        var moderationFacade = new Mock<IModerationFacade>();
+        moderationFacade.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
+        moderationFacade.Setup(x => x.CheckMessageAsync(It.IsAny<Message>())).ReturnsAsync(new ModerationResult(ModerationAction.Delete, "удалено по подозрению на спам", 0.9));
+        var bot = new Mock<ITelegramBotClientWrapper>();
+        var userManager = new Mock<IUserManager>();
+        userManager.Setup(x => x.InBanlist(It.IsAny<long>())).ReturnsAsync(false);
+        var appConfig = new Mock<IAppConfig>();
+        appConfig.Setup(x => x.AdminChatId).Returns(123456789L);
+        appConfig.Setup(x => x.LogAdminChatId).Returns(123456789L);
+        appConfig.Setup(x => x.DisabledChats).Returns(new HashSet<long>());
+        appConfig.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
+        var userBanService = new Mock<IUserBanService>();
+        userBanService.Setup(x => x.HandleBlacklistBanAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var channelModeration = new Mock<IChannelModerationService>();
+        var commandRouter = new Mock<ICommandRouter>();
+        var userJoinFacade = new Mock<IUserJoinFacade>();
+        var botPermissions = new Mock<IBotPermissionsService>();
+        botPermissions.Setup(x => x.IsSilentModeAsync(It.IsAny<long>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var captchaService = new Mock<ICaptchaService>();
+        captchaService.Setup(x => x.GenerateKey(It.IsAny<long>(), It.IsAny<long>())).Returns("k");
+        captchaService.Setup(x => x.GetCaptchaInfo("k")).Returns((CaptchaInfo?)null);
+        var userFlowLogger = new Mock<IUserFlowLogger>();
+        var forwarding = new Mock<IForwardingService>();
+        forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
+        var aiCascade = new Mock<IAiCascadeService>();
+        aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+        var handler = new MessageHandler(
+            bot.Object,
+            userManager.Object,
+            appConfig.Object,
+            userBanService.Object,
+            channelModeration.Object,
+            commandRouter.Object,
+            userJoinFacade.Object,
+            moderationFacade.Object,
+            new NullLogger<MessageHandler>(),
+            botPermissions.Object,
+            captchaService.Object,
+            userFlowLogger.Object,
+            forwarding.Object,
+            aiCascade.Object,
+            recorder,
+            flags);
+        var update = new Update
+        {
+            Id = 14,
+            Message = new Message
+            {
+                Chat = new Chat { Id = -101008, Type = ChatType.Supergroup, Title = "ModeratedChat" },
+                From = new User { Id = 6002, IsBot = false, FirstName = "SuspiciousUser" },
+                Text = "spam??"
+            }
+        };
+        await handler.HandleAsync(update, CancellationToken.None);
+        using var doc = LoadSemanticsJson(basePath);
+        var root = doc.RootElement;
+        Assert.That(root.GetProperty("ruleCode").GetString(), Is.EqualTo("ModeratedDelete"));
+        Assert.That(root.GetProperty("action").GetString(), Is.EqualTo("Delete"));
+    }
+
+    [Test]
+    public async Task Moderated_Ban_MapsToModeratedBan()
+    {
+        var basePath = Path.Combine(Path.GetTempPath(), "gm_semantics_" + Path.GetRandomFileName());
+        Directory.CreateDirectory(basePath);
+        var flags = Flags(basePath);
+        var moderationFacade = new Mock<IModerationFacade>();
+        moderationFacade.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
+        moderationFacade.Setup(x => x.CheckMessageAsync(It.IsAny<Message>())).ReturnsAsync(new ModerationResult(ModerationAction.Ban, "забан за спам ссылки", 0.95));
+        var bot = new Mock<ITelegramBotClientWrapper>();
+        var userManager = new Mock<IUserManager>();
+        userManager.Setup(x => x.InBanlist(It.IsAny<long>())).ReturnsAsync(false);
+        var appConfig = new Mock<IAppConfig>();
+        appConfig.Setup(x => x.AdminChatId).Returns(123456789L);
+        appConfig.Setup(x => x.LogAdminChatId).Returns(123456789L);
+        appConfig.Setup(x => x.DisabledChats).Returns(new HashSet<long>());
+        appConfig.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
+        var userBanService = new Mock<IUserBanService>();
+        userBanService.Setup(x => x.HandleBlacklistBanAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var channelModeration = new Mock<IChannelModerationService>();
+        var commandRouter = new Mock<ICommandRouter>();
+        var userJoinFacade = new Mock<IUserJoinFacade>();
+        var botPermissions = new Mock<IBotPermissionsService>();
+        botPermissions.Setup(x => x.IsSilentModeAsync(It.IsAny<long>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var captchaService = new Mock<ICaptchaService>();
+        captchaService.Setup(x => x.GenerateKey(It.IsAny<long>(), It.IsAny<long>())).Returns("k");
+        captchaService.Setup(x => x.GetCaptchaInfo("k")).Returns((CaptchaInfo?)null);
+        var userFlowLogger = new Mock<IUserFlowLogger>();
+        var forwarding = new Mock<IForwardingService>();
+        forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
+        var aiCascade = new Mock<IAiCascadeService>();
+        aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+        var handler = new MessageHandler(
+            bot.Object,
+            userManager.Object,
+            appConfig.Object,
+            userBanService.Object,
+            channelModeration.Object,
+            commandRouter.Object,
+            userJoinFacade.Object,
+            moderationFacade.Object,
+            new NullLogger<MessageHandler>(),
+            botPermissions.Object,
+            captchaService.Object,
+            userFlowLogger.Object,
+            forwarding.Object,
+            aiCascade.Object,
+            recorder,
+            flags);
+        var update = new Update
+        {
+            Id = 15,
+            Message = new Message
+            {
+                Chat = new Chat { Id = -101009, Type = ChatType.Supergroup, Title = "ModeratedChat" },
+                From = new User { Id = 6003, IsBot = false, FirstName = "BadUser" },
+                Text = "spam links"
+            }
+        };
+        await handler.HandleAsync(update, CancellationToken.None);
+        using var doc = LoadSemanticsJson(basePath);
+        var root = doc.RootElement;
+        Assert.That(root.GetProperty("ruleCode").GetString(), Is.EqualTo("ModeratedBan"));
+        Assert.That(root.GetProperty("action").GetString(), Is.EqualTo("Ban"));
+    }
+
+    [Test]
+    public async Task Moderated_Report_MapsToModeratedReport()
+    {
+        var basePath = Path.Combine(Path.GetTempPath(), "gm_semantics_" + Path.GetRandomFileName());
+        Directory.CreateDirectory(basePath);
+        var flags = Flags(basePath);
+        var moderationFacade = new Mock<IModerationFacade>();
+        moderationFacade.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
+        moderationFacade.Setup(x => x.CheckMessageAsync(It.IsAny<Message>())).ReturnsAsync(new ModerationResult(ModerationAction.Report, "репорт подозрение", 0.6));
+        var bot = new Mock<ITelegramBotClientWrapper>();
+        var userManager = new Mock<IUserManager>();
+        userManager.Setup(x => x.InBanlist(It.IsAny<long>())).ReturnsAsync(false);
+        var appConfig = new Mock<IAppConfig>();
+        appConfig.Setup(x => x.AdminChatId).Returns(123456789L);
+        appConfig.Setup(x => x.LogAdminChatId).Returns(123456789L);
+        appConfig.Setup(x => x.DisabledChats).Returns(new HashSet<long>());
+        appConfig.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
+        var userBanService = new Mock<IUserBanService>();
+        userBanService.Setup(x => x.HandleBlacklistBanAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        var channelModeration = new Mock<IChannelModerationService>();
+        var commandRouter = new Mock<ICommandRouter>();
+        var userJoinFacade = new Mock<IUserJoinFacade>();
+        var botPermissions = new Mock<IBotPermissionsService>();
+        botPermissions.Setup(x => x.IsSilentModeAsync(It.IsAny<long>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var captchaService = new Mock<ICaptchaService>();
+        captchaService.Setup(x => x.GenerateKey(It.IsAny<long>(), It.IsAny<long>())).Returns("k");
+        captchaService.Setup(x => x.GetCaptchaInfo("k")).Returns((CaptchaInfo?)null);
+        var userFlowLogger = new Mock<IUserFlowLogger>();
+        var forwarding = new Mock<IForwardingService>();
+        forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
+        var aiCascade = new Mock<IAiCascadeService>();
+        aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+        var handler = new MessageHandler(
+            bot.Object,
+            userManager.Object,
+            appConfig.Object,
+            userBanService.Object,
+            channelModeration.Object,
+            commandRouter.Object,
+            userJoinFacade.Object,
+            moderationFacade.Object,
+            new NullLogger<MessageHandler>(),
+            botPermissions.Object,
+            captchaService.Object,
+            userFlowLogger.Object,
+            forwarding.Object,
+            aiCascade.Object,
+            recorder,
+            flags);
+        var update = new Update
+        {
+            Id = 16,
+            Message = new Message
+            {
+                Chat = new Chat { Id = -101010, Type = ChatType.Supergroup, Title = "ModeratedChat" },
+                From = new User { Id = 6004, IsBot = false, FirstName = "ReportUser" },
+                Text = "maybe spam"
+            }
+        };
+        await handler.HandleAsync(update, CancellationToken.None);
+        using var doc = LoadSemanticsJson(basePath);
+        var root = doc.RootElement;
+        Assert.That(root.GetProperty("ruleCode").GetString(), Is.EqualTo("ModeratedReport"));
+        Assert.That(root.GetProperty("action").GetString(), Is.EqualTo("Report"));
     }
 }
