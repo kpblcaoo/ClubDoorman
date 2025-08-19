@@ -41,7 +41,7 @@ public class MessageHandler : IUpdateHandler
     private readonly IGoldenMasterRecorder _gm;
     private readonly LoggingFlagsOptions? _flags; // optional for quick checks
 
-    [Obsolete("Legacy constructor without Golden Master / flags. Use DI constructor with IGoldenMasterRecorder.")]
+    // Primary DI constructor (Golden Master + flags required)
     public MessageHandler(
         ITelegramBotClientWrapper bot,
         IUserManager userManager,
@@ -80,40 +80,7 @@ public class MessageHandler : IUpdateHandler
         _logger.LogDebug("MessageHandler constructed successfully");
     }
 
-    [Obsolete("Legacy constructor without Golden Master / flags. Use DI constructor with IGoldenMasterRecorder.")]
-    public MessageHandler(
-        ITelegramBotClientWrapper bot,
-        IUserManager userManager,
-        IAppConfig appConfig,
-        IUserBanService userBanService,
-        IChannelModerationService channelModerationService,
-        ICommandRouter commandRouter,
-        IUserJoinFacade userJoinFacade,
-        IModerationFacade moderationFacade,
-        ILogger<MessageHandler> logger,
-        IBotPermissionsService botPermissionsService,
-        ICaptchaService captchaService,
-        IUserFlowLogger userFlowLogger,
-        IForwardingService forwardingService,
-        IAiCascadeService aiCascadeService)
-        : this(
-            bot,
-            userManager,
-            appConfig,
-            userBanService,
-            channelModerationService,
-            commandRouter,
-            userJoinFacade,
-            moderationFacade,
-            logger,
-            botPermissionsService,
-            captchaService,
-            userFlowLogger,
-            forwardingService,
-            aiCascadeService,
-            NullGoldenMasterRecorder.Instance,
-            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions()))
-    { }
+    // Legacy simplified constructor removed (used NullGoldenMasterRecorder). Tests must pass IGoldenMasterRecorder explicitly now.
 
     public bool CanHandle(Update update)
     {

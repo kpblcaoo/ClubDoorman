@@ -36,7 +36,7 @@ public class ChatMemberHandler : IUpdateHandler
     private readonly IGoldenMasterRecorder _gm;
     private readonly LoggingFlagsOptions? _flags;
 
-    [Obsolete("Legacy constructor without Golden Master / flags. Use DI constructor with IGoldenMasterRecorder.")]
+    // Primary DI constructor (Golden Master + flags required)
     public ChatMemberHandler(
         ITelegramBotClientWrapper bot,
         IUserManager userManager,
@@ -61,28 +61,7 @@ public class ChatMemberHandler : IUpdateHandler
         _flags = flagsOptions?.Value;
     }
 
-    [Obsolete("Legacy constructor without Golden Master / flags. Use DI constructor with IGoldenMasterRecorder.")]
-    public ChatMemberHandler(
-        ITelegramBotClientWrapper bot,
-        IUserManager userManager,
-        ILogger<ChatMemberHandler> logger,
-        IntroFlowService introFlowService,
-        IMessageService messageService,
-        IAppConfig appConfig,
-        IUserCleanupService userCleanupService,
-        IFolderInviteService folderInviteService)
-        : this(
-            bot,
-            userManager,
-            logger,
-            introFlowService,
-            messageService,
-            appConfig,
-            userCleanupService,
-            folderInviteService,
-            NullGoldenMasterRecorder.Instance,
-            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions()))
-    { }
+    // Legacy simplified constructor removed (used NullGoldenMasterRecorder). Tests must pass IGoldenMasterRecorder explicitly now.
 
     public bool CanHandle(Update update) => update.Type == UpdateType.ChatMember;
 
