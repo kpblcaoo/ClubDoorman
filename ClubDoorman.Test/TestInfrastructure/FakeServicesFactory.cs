@@ -234,24 +234,15 @@ public class FakeServicesFactory
 
         return new MessageHandler(
             _fakeBot,
-            userManagerMock.Object,
             _appConfig,
-            new Mock<IUserBanService>().Object,
             channelModerationMock.Object,
             commandRouterMock.Object,
-            userJoinFacadeMock.Object,
-            moderationFacadeMock.Object,
             logger,
             botPermissionsServiceMock.Object,
-            captchaService ?? CreateCaptchaService(),
-            userFlowLoggerMock.Object,
-            forwardingMock.Object,
-            aiCascadeServiceMock.Object,
             gmRecorder,
             eventsPublisher,
             Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
-            pipeline
-        );
+            pipeline);
     }
 
     /// <summary>

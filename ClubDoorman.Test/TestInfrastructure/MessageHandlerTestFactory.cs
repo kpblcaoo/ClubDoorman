@@ -96,12 +96,8 @@ public class MessageHandlerTestFactory
 
     public MessageHandler CreateMessageHandler()
     {
-        // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
-        if (!ServiceProviderMock.Setups.Any(s => s.ToString().Contains("IChannelModerationService")))
-        {
-            ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
-                .Returns(ChannelModerationServiceMock.Object);
-        }
+    // NOTE: Previously we configured ServiceProviderMock to return IChannelModerationService.
+    // The pipeline now injects concrete services directly; this indirection is no longer required.
 
         // Базовый AdminChatId по умолчанию для тестов с подозрительными сообщениями
         if (!AppConfigMock.Setups.Any(s => s.ToString().Contains("AdminChatId")))
@@ -180,56 +176,32 @@ public class MessageHandlerTestFactory
 
         return new MessageHandler(
             BotMock.Object,
-            UserManagerMock.Object,
             AppConfigMock.Object,
-            UserBanServiceMock.Object,
             ChannelModerationServiceMock.Object,
             CommandRouterMock.Object,
-            _userJoinFacadeMock.Object,
-            ModerationFacadeMock.Object,
             LoggerMock.Object,
             BotPermissionsServiceMock.Object,
-            CaptchaServiceMock.Object,
-            UserFlowLoggerMock.Object,
-            new Mock<IForwardingService>().Object,
-            AiCascadeServiceMock.Object,
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
             new Mock<IModerationEventPublisher>().Object,
             Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
-            // Inject real pipeline so that command handling path in tests goes through CommandStep.
-            BuildPipeline()
-        );
+            BuildPipeline());
     }
 
     public MessageHandler CreateMessageHandlerWithRealUserBanService()
     {
-        // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
-        if (!ServiceProviderMock.Setups.Any(s => s.ToString().Contains("IChannelModerationService")))
-        {
-            ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
-                .Returns(ChannelModerationServiceMock.Object);
-        }
+    // ServiceProviderMock setup removed (not required for slim pipeline-based handler)
 
         return new MessageHandler(
             BotMock.Object,
-            UserManagerMock.Object,
             AppConfigMock.Object,
-            CreateRealUserBanService(),
             ChannelModerationServiceMock.Object,
             CommandRouterMock.Object,
-            _userJoinFacadeMock.Object,
-            ModerationFacadeMock.Object,
             LoggerMock.Object,
             BotPermissionsServiceMock.Object,
-            CaptchaServiceMock.Object,
-            UserFlowLoggerMock.Object,
-            new Mock<IForwardingService>().Object,
-            AiCascadeServiceMock.Object,
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
             new Mock<IModerationEventPublisher>().Object,
             Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
-            BuildPipeline()
-        );
+            BuildPipeline());
     }
 
     #region Configuration Methods
@@ -556,12 +528,7 @@ public class MessageHandlerTestFactory
 
     public MessageHandler CreateMessageHandlerWithFake(FakeTelegramClient fakeClient)
     {
-        // Настраиваем ServiceProvider для возврата IChannelModerationService если еще не настроен
-        if (!ServiceProviderMock.Setups.Any(s => s.ToString().Contains("IChannelModerationService")))
-        {
-            ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
-                .Returns(ChannelModerationServiceMock.Object);
-        }
+    // ServiceProviderMock setup removed (pipeline constructs steps directly)
 
         // Настраиваем мок для удаления сообщений
         BotMock.Setup(x => x.DeleteMessageWithOutcomeAsync(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
@@ -640,24 +607,15 @@ public class MessageHandlerTestFactory
 
         return new MessageHandler(
             BotMock.Object,
-            UserManagerMock.Object,
             AppConfigMock.Object,
-            UserBanServiceMock.Object,
             ChannelModerationServiceMock.Object,
             CommandRouterMock.Object,
-            _userJoinFacadeMock.Object,
-            ModerationFacadeMock.Object,
             LoggerMock.Object,
             BotPermissionsServiceMock.Object,
-            CaptchaServiceMock.Object,
-            UserFlowLoggerMock.Object,
-            new Mock<IForwardingService>().Object,
-            AiCascadeServiceMock.Object,
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
             new Mock<IModerationEventPublisher>().Object,
             Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
-            BuildPipeline()
-        );
+            BuildPipeline());
     }
 
     public MessageHandler CreateMessageHandlerWithFake(Action<MessageHandlerTestFactory> setup)

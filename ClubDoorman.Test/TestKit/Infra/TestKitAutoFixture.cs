@@ -137,14 +137,35 @@ public static class TestKitAutoFixture
                 var joinedUserFlags = TK.CreateMock<IJoinedUserFlags>().Object;
                 var userIndex = TK.CreateMock<IUserIndex>().Object;
 
+                // Минимальный pipeline: базовая модерация + финальное действие
+                var eventsPublisher = TK.CreateMock<IModerationEventPublisher>();
+                var moderationFacade = TK.CreateMock<IModerationFacade>();
+                moderationFacade.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+                    .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Fixture allow"));
+                var baseStep = new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(
+                    moderationFacade.Object,
+                    userFlowLogger,
+                    eventsPublisher.Object,
+                    TK.CreateMock<ILogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>>().Object);
+                var finalStep = new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(
+                    moderationFacade.Object,
+                    eventsPublisher.Object,
+                    TK.CreateMock<ILogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>>().Object);
+                var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(
+                    new ClubDoorman.Services.Handlers.Pipeline.IMessageStep[] { baseStep, finalStep },
+                    TK.CreateMock<ILogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>>().Object);
+
                 return new MessageHandler(
-                    bot, userManager, appConfig, userBanService, channelModerationService,
-                    commandRouter, TK.CreateMock<IUserJoinFacade>().Object, TK.CreateMock<IModerationFacade>().Object,
-                    logger, botPermissionsService, captchaService, userFlowLogger,
-                    forwardingService, aiCascadeService,
+                    bot,
+                    appConfig,
+                    channelModerationService,
+                    commandRouter,
+                    logger,
+                    botPermissionsService,
                     new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), TK.CreateMock<ILogger<GoldenMasterRecorder>>().Object),
-                    TK.CreateMock<IModerationEventPublisher>().Object,
-                    Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }));
+                    eventsPublisher.Object,
+                    Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
+                    pipeline);
             })
             .OmitAutoProperties());
 

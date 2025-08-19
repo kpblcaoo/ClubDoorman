@@ -308,25 +308,35 @@ public class MessageHandlerBuilder
     /// </summary>
     public MessageHandler Build()
     {
+        // Минимальный pipeline (модерация) для билдерных тестов
+        var eventsPublisher = new Mock<IModerationEventPublisher>();
+        var moderationFacade = new Mock<IModerationFacade>();
+        moderationFacade.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+            .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Builder allow"));
+        var baseStep = new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(
+            moderationFacade.Object,
+            _userFlowLoggerMock.Object,
+            eventsPublisher.Object,
+            new Mock<ILogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>>().Object);
+        var finalStep = new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(
+            moderationFacade.Object,
+            eventsPublisher.Object,
+            new Mock<ILogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>>().Object);
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(
+            new ClubDoorman.Services.Handlers.Pipeline.IMessageStep[] { baseStep, finalStep },
+            new Mock<ILogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>>().Object);
+
         return new MessageHandler(
             _botMock.Object,
-            _userManagerMock.Object,
             _appConfigMock.Object,
-            _userBanServiceMock.Object,
             _channelModerationServiceMock.Object,
             _commandRouterMock.Object,
-            new Mock<IUserJoinFacade>().Object,
-            new Mock<IModerationFacade>().Object,
             _loggerMock.Object,
             _botPermissionsServiceMock.Object,
-            _captchaServiceMock.Object,
-            _userFlowLoggerMock.Object,
-            new Mock<IForwardingService>().Object,
-            new Mock<IAiCascadeService>().Object,
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
-            new Mock<IModerationEventPublisher>().Object,
-            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
-        );
+            eventsPublisher.Object,
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
+            pipeline);
     }
 
     /// <summary>

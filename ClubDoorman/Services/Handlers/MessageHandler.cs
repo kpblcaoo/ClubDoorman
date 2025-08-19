@@ -26,19 +26,12 @@ namespace ClubDoorman.Services.Handlers;
 public class MessageHandler : IUpdateHandler
 {
     private readonly ITelegramBotClientWrapper _bot;
-    private readonly IUserManager _userManager;
+    // Slimmed: removed unused legacy dependencies (UserManager, UserBanService, UserJoinFacade, ModerationFacade, CaptchaService, UserFlowLogger, ForwardingService, AiCascadeService)
     private readonly IAppConfig _appConfig;
-    private readonly IUserBanService _userBanService;
     private readonly IChannelModerationService _channelModerationService;
     private readonly ICommandRouter _commandRouter;
-    private readonly IUserJoinFacade _userJoinFacade; // injected service
-    private readonly IModerationFacade _moderationFacade; // injected service
     private readonly ILogger<MessageHandler> _logger;
     private readonly IBotPermissionsService _botPermissionsService;
-    private readonly ICaptchaService _captchaService;
-    private readonly IUserFlowLogger _userFlowLogger;
-    private readonly IForwardingService _forwardingService;
-    private readonly IAiCascadeService _aiCascadeService;
     private readonly IGoldenMasterRecorder _gm; // input capture
     private readonly IModerationEventPublisher _events; // semantics publisher
     private readonly LoggingFlagsOptions? _flags; // optional for quick checks
@@ -47,71 +40,31 @@ public class MessageHandler : IUpdateHandler
     // Primary DI constructor (Golden Master + flags required)
     public MessageHandler(
         ITelegramBotClientWrapper bot,
-        IUserManager userManager,
         IAppConfig appConfig,
-        IUserBanService userBanService,
         IChannelModerationService channelModerationService,
         ICommandRouter commandRouter,
-        IUserJoinFacade userJoinFacade,
-        IModerationFacade moderationFacade,
         ILogger<MessageHandler> logger,
         IBotPermissionsService botPermissionsService,
-        ICaptchaService captchaService,
-        IUserFlowLogger userFlowLogger,
-        IForwardingService forwardingService,
-    IAiCascadeService aiCascadeService,
-    IGoldenMasterRecorder gm,
-    IModerationEventPublisher eventsPublisher,
-    Microsoft.Extensions.Options.IOptions<LoggingFlagsOptions> flagsOptions,
-    IMessagePipeline pipeline)
+        IGoldenMasterRecorder gm,
+        IModerationEventPublisher eventsPublisher,
+        Microsoft.Extensions.Options.IOptions<LoggingFlagsOptions> flagsOptions,
+        IMessagePipeline pipeline)
     {
         _logger?.LogDebug("MessageHandler constructor called");
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
-        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
-        _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
         _channelModerationService = channelModerationService ?? throw new ArgumentNullException(nameof(channelModerationService));
         _commandRouter = commandRouter ?? throw new ArgumentNullException(nameof(commandRouter));
-        _userJoinFacade = userJoinFacade ?? throw new ArgumentNullException(nameof(userJoinFacade));
-        _moderationFacade = moderationFacade ?? throw new ArgumentNullException(nameof(moderationFacade));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _botPermissionsService = botPermissionsService ?? throw new ArgumentNullException(nameof(botPermissionsService));
-        _captchaService = captchaService ?? throw new ArgumentNullException(nameof(captchaService));
-        _userFlowLogger = userFlowLogger ?? throw new ArgumentNullException(nameof(userFlowLogger));
-        _forwardingService = forwardingService ?? throw new ArgumentNullException(nameof(forwardingService));
-        _aiCascadeService = aiCascadeService ?? throw new ArgumentNullException(nameof(aiCascadeService));
-    _gm = gm ?? throw new ArgumentNullException(nameof(gm));
-    _events = eventsPublisher ?? throw new ArgumentNullException(nameof(eventsPublisher));
+        _gm = gm ?? throw new ArgumentNullException(nameof(gm));
+        _events = eventsPublisher ?? throw new ArgumentNullException(nameof(eventsPublisher));
         _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
         _flags = flagsOptions?.Value;
         _logger.LogDebug("MessageHandler constructed successfully");
     }
 
-    // Temporary legacy constructor kept to avoid breaking existing test factories; injects NullMessagePipeline.
-    public MessageHandler(
-        ITelegramBotClientWrapper bot,
-        IUserManager userManager,
-        IAppConfig appConfig,
-        IUserBanService userBanService,
-        IChannelModerationService channelModerationService,
-        ICommandRouter commandRouter,
-        IUserJoinFacade userJoinFacade,
-        IModerationFacade moderationFacade,
-        ILogger<MessageHandler> logger,
-        IBotPermissionsService botPermissionsService,
-        ICaptchaService captchaService,
-        IUserFlowLogger userFlowLogger,
-        IForwardingService forwardingService,
-        IAiCascadeService aiCascadeService,
-        IGoldenMasterRecorder gm,
-        IModerationEventPublisher eventsPublisher,
-        Microsoft.Extensions.Options.IOptions<LoggingFlagsOptions> flagsOptions)
-        : this(bot, userManager, appConfig, userBanService, channelModerationService, commandRouter, userJoinFacade, moderationFacade, logger, botPermissionsService, captchaService, userFlowLogger, forwardingService, aiCascadeService, gm, eventsPublisher, flagsOptions, new NullMessagePipeline())
-    {
-        _logger.LogDebug("[Compat] MessageHandler legacy ctor: NullMessagePipeline injected");
-    }
-
-    // Legacy simplified constructor removed (used NullGoldenMasterRecorder). Tests must pass IGoldenMasterRecorder explicitly now.
+    // Legacy constructors removed after full pipeline migration.
 
     public bool CanHandle(Update update)
     {
@@ -242,14 +195,7 @@ public class MessageHandler : IUpdateHandler
                 _logger.LogDebug("HandleAsync: New members handled via pipeline, returning");
                 return; // semantics event already published
             }
-            // Fallback for legacy command semantics if pipeline didn't handle a leading slash command
-            if (message.Text?.StartsWith("/") == true)
-            {
-                _logger.LogDebug("HandleAsync: Pipeline did not handle command, falling back to legacy handler");
-                await HandleCommandAsync(message, cancellationToken);
-                _events.Publish(gmCorrelation, new ModerationEvent("command", Action: "Allow", RuleCode: RuleCode.Command, MessageId: message.MessageId));
-                return;
-            }
+            // (command fallback removed – CommandStep is authoritative for all slash commands)
 
             _logger.LogTrace("Continuing regular processing for chat {ChatId}", chat.Id);
 

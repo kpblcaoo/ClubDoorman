@@ -123,25 +123,28 @@ public class MessageHandlerBanExceptionTests
         var commandRouterMock = new Mock<ICommandRouter>();
 
         // Создаем MessageHandler с настроенными моками (новая сигнатура конструктора)
+        // Минимальный pipeline только с двумя шагами модерации, достаточный для этих тестов (исключения в бан/удаление и т.д.)
+        var eventsPublisher = new Mock<IModerationEventPublisher>();
+        var moderationFacade = _moderationServiceMock.Object; // IModerationFacade уже мокнут
+        var userFlowLogger = userFlowLoggerMock.Object;
+        var pipelineLogger = new Mock<ILogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>>().Object;
+        var baseStepLogger = new Mock<ILogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>>().Object;
+        var finalStepLogger = new Mock<ILogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>>().Object;
+        var baseStep = new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade, userFlowLogger, eventsPublisher.Object, baseStepLogger);
+        var finalStep = new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(moderationFacade, eventsPublisher.Object, finalStepLogger);
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(new ClubDoorman.Services.Handlers.Pipeline.IMessageStep[] { baseStep, finalStep }, pipelineLogger);
+
         _handler = new MessageHandler(
             _botMock.Object,
-            userManagerMock.Object,
             appConfigMock.Object,
-            _userBanServiceMock.Object,
             channelModerationServiceMock.Object,
             commandRouterMock.Object,
-            Mock.Of<IUserJoinFacade>(),
-            _moderationServiceMock.Object,
             _loggerMock.Object,
             botPermissionsServiceMock.Object,
-            captchaServiceMock.Object,
-            userFlowLoggerMock.Object,
-            Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
-            Mock.Of<IAiCascadeService>(),
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), Mock.Of<ILogger<GoldenMasterRecorder>>()),
-            new Mock<IModerationEventPublisher>().Object,
-            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
-        );
+            eventsPublisher.Object,
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
+            pipeline);
     }
 
     [Test]
