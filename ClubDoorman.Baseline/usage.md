@@ -131,6 +131,58 @@ dotnet test ClubDoorman.Test --filter "(Category=GoldenManifest|Category=GoldenV
 1. Пишет `GoldenMasterRecorder.TryRecordOutput` если из результата можно извлечь `action` / `ruleCode`.
 2. Используются билдерами (`GoldenManifestBuilder`, `GoldenV2Exporter`, `GoldenNormalizationBuilder`) как источник правды для заполнения `ExpectedAction` и `RuleCode`, снижая дублирование логики.
 
+### Текущий набор RuleCode (фаза hardening)
+Ниже — актуальный перечислимый список (упорядочен как в `RuleCode.cs`, новые значения всегда аппендятся в конец чтобы не ломать прошлые baseline-ы):
+
+```
+Unknown,
+StopWords,
+Links,
+TooManyEmojis,
+Greeting,
+Banlist,
+MediaNoCaption,
+MediaEarlyBlock,
+Command,
+ReplyLink,
+MixedLinkStopWords,
+EmojiEscalation,
+BanEscalation,
+Boundary,
+Pass,
+PrivateSkip,         # (NEW) ранний выход: приватный чат / DM не модериируется
+NewMembers,          # (NEW) событие: присоединились новые участники (до дальнейшей логики)
+LeftMemberCleanup,   # (NEW) событие: пользователь покинул / удалён (служебная очистка)
+ChannelMessage       # (NEW) тип: канал / форвард из канала (отдельная ветка правил)
+```
+Комментарии NEW отражают добавление в рамках PR #139 (hardening #137/#138). При дальнейших расширениях:
+1. Добавляй enum значение в конец.
+2. Пиши тест(ы), фиксирующие появление соответствующей семантики.
+3. Удостоверься что mapper (`ReasonCodeMapper`) возвращает новый код либо код явно прокидывается в `TryRecordOutput`.
+4. Регенерируй baseline и убедись что Aggregates учитывает новый RuleCode.
+
+### Новые «ранние» пути (early-path semantics)
+В рамках hardening удалены устаревшие overrides и вместо них покрыты реальные ранние ветки пайплайна явными RuleCode. Это снижает риск «немых» сценариев (ExpectedAction / RuleCode = null) при регенерации baseline.
+
+Покрытые ранние сценарии:
+- `/command` → `Command` (явно задаётся action=Allow)
+- Banlist-хит (раннее удаление) → `Banlist` (action=Delete)
+- Приватный чат → `PrivateSkip` (action оставить пустым — не модерация) 
+- Новые участники (join event первичного обработчика) → `NewMembers`
+- Участник покинул (left / kick) → `LeftMemberCleanup`
+- Сообщение канала / channel post → `ChannelMessage`
+
+Для четырёх последних action пока отсутствует (null в sem.json) — это допустимо: Manifest требует `ExpectedAction` только для сообщений, где модерация выставляет решение. Если появится явное решение (например auto-clean), можно расширить и задать action.
+
+### Расширение покрытия (next steps)
+Оставшиеся кандидаты для семантики (поздние этапы):
+- CaptchaPending / CaptchaFail / CaptchaSuccess
+- AiProfileRestricted / AiHeuristicFlag
+- MediaEscalation (если появятся дополнительные уровни)
+- RateLimitTriggered / SpamStormMitigation
+
+Рекомендованный порядок: сначала добавить Golden тест сценария → убедиться что `.sem.json` появляется → затем обновить baseline.
+
 ### Почему не коммитим
 Три причины:
 1. Шум: при любых правках текста reason/структуры результирующие файлы будут меняться пачкой.
