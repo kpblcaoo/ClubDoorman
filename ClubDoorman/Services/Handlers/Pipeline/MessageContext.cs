@@ -10,5 +10,8 @@ public class MessageContext
     public required Update Update { get; init; }
     public required Message Message { get; init; }
     public Guid OperationId { get; init; } = Guid.NewGuid();
+    public string? GmCorrelation { get; init; }
+    public bool CommandHandled { get; set; }
+    public bool NewMembersHandled { get; set; } // set by NewMembersStep when it stops pipeline
     // Место для будущих производных данных (normalized text, flags, decision...).
 }

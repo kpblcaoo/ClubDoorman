@@ -16,6 +16,7 @@ using ClubDoorman.Services.Notifications;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.Logging;
 using ClubDoorman.Models.Logging;
+using ClubDoorman.Services.Handlers.Pipeline;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -41,6 +42,7 @@ public class MessageHandler : IUpdateHandler
     private readonly IGoldenMasterRecorder _gm; // input capture
     private readonly IModerationEventPublisher _events; // semantics publisher
     private readonly LoggingFlagsOptions? _flags; // optional for quick checks
+    private readonly IMessagePipeline _pipeline; // new pipeline
 
     // Primary DI constructor (Golden Master + flags required)
     public MessageHandler(
@@ -60,7 +62,8 @@ public class MessageHandler : IUpdateHandler
     IAiCascadeService aiCascadeService,
     IGoldenMasterRecorder gm,
     IModerationEventPublisher eventsPublisher,
-    Microsoft.Extensions.Options.IOptions<LoggingFlagsOptions> flagsOptions)
+    Microsoft.Extensions.Options.IOptions<LoggingFlagsOptions> flagsOptions,
+    IMessagePipeline pipeline)
     {
         _logger?.LogDebug("MessageHandler constructor called");
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
@@ -79,8 +82,33 @@ public class MessageHandler : IUpdateHandler
         _aiCascadeService = aiCascadeService ?? throw new ArgumentNullException(nameof(aiCascadeService));
     _gm = gm ?? throw new ArgumentNullException(nameof(gm));
     _events = eventsPublisher ?? throw new ArgumentNullException(nameof(eventsPublisher));
+        _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
         _flags = flagsOptions?.Value;
         _logger.LogDebug("MessageHandler constructed successfully");
+    }
+
+    // Temporary legacy constructor kept to avoid breaking existing test factories; injects NullMessagePipeline.
+    public MessageHandler(
+        ITelegramBotClientWrapper bot,
+        IUserManager userManager,
+        IAppConfig appConfig,
+        IUserBanService userBanService,
+        IChannelModerationService channelModerationService,
+        ICommandRouter commandRouter,
+        IUserJoinFacade userJoinFacade,
+        IModerationFacade moderationFacade,
+        ILogger<MessageHandler> logger,
+        IBotPermissionsService botPermissionsService,
+        ICaptchaService captchaService,
+        IUserFlowLogger userFlowLogger,
+        IForwardingService forwardingService,
+        IAiCascadeService aiCascadeService,
+        IGoldenMasterRecorder gm,
+        IModerationEventPublisher eventsPublisher,
+        Microsoft.Extensions.Options.IOptions<LoggingFlagsOptions> flagsOptions)
+        : this(bot, userManager, appConfig, userBanService, channelModerationService, commandRouter, userJoinFacade, moderationFacade, logger, botPermissionsService, captchaService, userFlowLogger, forwardingService, aiCascadeService, gm, eventsPublisher, flagsOptions, new NullMessagePipeline())
+    {
+        _logger.LogDebug("[Compat] MessageHandler legacy ctor: NullMessagePipeline injected");
     }
 
     // Legacy simplified constructor removed (used NullGoldenMasterRecorder). Tests must pass IGoldenMasterRecorder explicitly now.
@@ -175,18 +203,35 @@ public class MessageHandler : IUpdateHandler
 
             ChatSettingsManager.EnsureChatInConfig(chat.Id, chat.Title);
 
+            // === PIPELINE INTEGRATION (Phase 3): early pipeline run for commands + structural branches (new members etc.) ===
+            var pipelineCtx = new Services.Handlers.Pipeline.MessageContext
+            {
+                Update = update,
+                Message = message,
+                GmCorrelation = gmCorrelation,
+                OperationId = opId
+            };
+            await _pipeline.RunAsync(pipelineCtx, cancellationToken);
+            if (pipelineCtx.CommandHandled)
+            {
+                _logger.LogDebug("HandleAsync: Command handled via pipeline, returning");
+                return;
+            }
+            if (pipelineCtx.NewMembersHandled)
+            {
+                _logger.LogDebug("HandleAsync: New members handled via pipeline, returning");
+                return; // semantics event already published
+            }
+            // Fallback for legacy command semantics if pipeline didn't handle a leading slash command
             if (message.Text?.StartsWith("/") == true)
             {
-                _logger.LogDebug("Handling command '{Command}' in chat {ChatId}", message.Text, chat.Id);
+                _logger.LogDebug("HandleAsync: Pipeline did not handle command, falling back to legacy handler");
                 await HandleCommandAsync(message, cancellationToken);
-                _logger.LogDebug("HandleAsync: Command handled, returning");
-                // Semantics: /command (в особенно /start) трактуется как Allow Command
-                // Command early exit -> action Allow + RuleCode.Command
                 _events.Publish(gmCorrelation, new ModerationEvent("command", Action: "Allow", RuleCode: RuleCode.Command, MessageId: message.MessageId));
                 return;
             }
 
-            _logger.LogTrace("Not a command, continuing regular processing for chat {ChatId}", chat.Id);
+            _logger.LogTrace("Continuing regular processing for chat {ChatId}", chat.Id);
 
             if (chat.Type == ChatType.Private)
             {
@@ -197,16 +242,7 @@ public class MessageHandler : IUpdateHandler
                 return;
             }
 
-            if (message.NewChatMembers != null && chat.Id != _appConfig.AdminChatId)
-            {
-                _logger.LogDebug("Handling new chat members in chat {ChatId}. Members: {Members}",
-                    chat.Id, string.Join(", ", message.NewChatMembers.Select(m => $"{m.Id} ({m.Username})")));
-                await _userJoinFacade.HandleNewMembersAsync(message, cancellationToken);
-                _logger.LogDebug("HandleAsync: New chat members handled, returning");
-                // Historical semantics: null action for new_members
-                _events.Publish(gmCorrelation, new ModerationEvent("new_members", Action: null, RuleCode: RuleCode.NewMembers, Count: message.NewChatMembers.Length));
-                return;
-            }
+            // (legacy new_members branch removed - handled by NewMembersStep in pipeline)
 
             if (message.LeftChatMember != null && message.From?.Id == _bot.BotId)
             {
