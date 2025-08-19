@@ -80,7 +80,8 @@ public class MessageHandlerSemanticsTests
         forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
         var aiCascade = new Mock<IAiCascadeService>();
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+    var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+    var eventsPublisher = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
 
         return new MessageHandler(
             bot.Object,
@@ -98,6 +99,7 @@ public class MessageHandlerSemanticsTests
             forwarding.Object,
             aiCascade.Object,
             recorder,
+            eventsPublisher,
             flags);
     }
 
@@ -366,8 +368,9 @@ public class MessageHandlerSemanticsTests
         forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
         var aiCascade = new Mock<IAiCascadeService>();
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
-        var rebuild = new MessageHandler(
+    var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+    var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+    var rebuild = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -383,6 +386,7 @@ public class MessageHandlerSemanticsTests
             forwarding.Object,
             aiCascade.Object,
             recorder,
+            eventsPub,
             flags);
         var update = new Update
         {
@@ -432,8 +436,9 @@ public class MessageHandlerSemanticsTests
         forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
         var aiCascade = new Mock<IAiCascadeService>();
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
-        var handler = new MessageHandler(
+    var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+    var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+    var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -449,6 +454,7 @@ public class MessageHandlerSemanticsTests
             forwarding.Object,
             aiCascade.Object,
             recorder,
+            eventsPub,
             flags);
         var update = new Update
         {
@@ -525,8 +531,9 @@ public class MessageHandlerSemanticsTests
         var userFlowLogger = new Mock<IUserFlowLogger>();
         var forwarding = new Mock<IForwardingService>();
         forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
-        var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
-        var handler = new MessageHandler(
+    var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+    var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+    var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -542,6 +549,7 @@ public class MessageHandlerSemanticsTests
             forwarding.Object,
             aiCascade.Object,
             recorder,
+            eventsPub,
             flags);
         var update = new Update
         {
@@ -591,8 +599,9 @@ public class MessageHandlerSemanticsTests
         forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
         var aiCascade = new Mock<IAiCascadeService>();
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
-        var handler = new MessageHandler(
+    var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+    var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+    var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -608,6 +617,7 @@ public class MessageHandlerSemanticsTests
             forwarding.Object,
             aiCascade.Object,
             recorder,
+            eventsPub,
             flags);
         var update = new Update
         {
@@ -658,8 +668,9 @@ public class MessageHandlerSemanticsTests
         forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
         var aiCascade = new Mock<IAiCascadeService>();
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
-        var handler = new MessageHandler(
+    var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+    var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+    var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -675,6 +686,7 @@ public class MessageHandlerSemanticsTests
             forwarding.Object,
             aiCascade.Object,
             recorder,
+            eventsPub,
             flags);
         var update = new Update
         {
@@ -725,8 +737,9 @@ public class MessageHandlerSemanticsTests
         forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
         var aiCascade = new Mock<IAiCascadeService>();
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
-        var handler = new MessageHandler(
+    var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+    var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+    var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -742,6 +755,7 @@ public class MessageHandlerSemanticsTests
             forwarding.Object,
             aiCascade.Object,
             recorder,
+            eventsPub,
             flags);
         var update = new Update
         {
@@ -792,8 +806,9 @@ public class MessageHandlerSemanticsTests
         forwarding.Setup(x => x.IsChannelDiscussion(It.IsAny<Chat>(), It.IsAny<Message>())).ReturnsAsync(false);
         var aiCascade = new Mock<IAiCascadeService>();
         aiCascade.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
-        var handler = new MessageHandler(
+    var recorder = new GoldenMasterRecorder(flags, new NullLogger<GoldenMasterRecorder>());
+    var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+    var handler = new MessageHandler(
             bot.Object,
             userManager.Object,
             appConfig.Object,
@@ -809,6 +824,7 @@ public class MessageHandlerSemanticsTests
             forwarding.Object,
             aiCascade.Object,
             recorder,
+            eventsPub,
             flags);
         var update = new Update
         {

@@ -189,6 +189,7 @@ public class MessageHandlerTestFactory
             new Mock<IForwardingService>().Object,
             AiCascadeServiceMock.Object,
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
+            new Mock<IModerationEventPublisher>().Object,
             Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
         );
     }
@@ -218,6 +219,7 @@ public class MessageHandlerTestFactory
             new Mock<IForwardingService>().Object,
             AiCascadeServiceMock.Object,
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
+            new Mock<IModerationEventPublisher>().Object,
             Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
         );
     }
@@ -643,6 +645,7 @@ public class MessageHandlerTestFactory
             new Mock<IForwardingService>().Object,
             AiCascadeServiceMock.Object,
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
+            new Mock<IModerationEventPublisher>().Object,
             Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
         );
     }

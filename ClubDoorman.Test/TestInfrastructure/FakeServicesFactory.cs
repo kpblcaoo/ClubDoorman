@@ -217,6 +217,7 @@ public class FakeServicesFactory
             new Mock<IForwardingService>().Object,
             aiCascadeServiceMock.Object,
             new GoldenMasterRecorder(Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
+            new Mock<IModerationEventPublisher>().Object,
             Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
         );
     }

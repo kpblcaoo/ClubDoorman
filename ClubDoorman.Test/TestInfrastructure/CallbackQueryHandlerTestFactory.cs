@@ -59,7 +59,8 @@ public class CallbackQueryHandlerTestFactory
             UserBanServiceMock.Object,
             new Mock<ILogChatService>().Object,
             LoggerMock.Object,
-            NullGoldenMasterRecorder.Instance
+            NullGoldenMasterRecorder.Instance,
+            new Mock<IModerationEventPublisher>().Object
         );
     }
 

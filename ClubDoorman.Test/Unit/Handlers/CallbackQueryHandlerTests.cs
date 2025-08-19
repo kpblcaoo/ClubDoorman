@@ -1,6 +1,7 @@
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.Logging; // for IModerationEventPublisher
 using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using ClubDoorman.Handlers;
@@ -43,6 +44,7 @@ public class CallbackQueryHandlerTests
     private Mock<IUserBanService> _mockUserBanService = null!;
     private Mock<ILogChatService> _mockLogChatService = null!;
     private Mock<ClubDoorman.Services.Logging.IGoldenMasterRecorder> _mockRecorder = null!;
+    private Mock<IModerationEventPublisher> _mockEvents = null!;
 
     [SetUp]
     public void Setup()
@@ -61,6 +63,7 @@ public class CallbackQueryHandlerTests
         _mockUserBanService = new Mock<IUserBanService>();
         _mockLogChatService = new Mock<ILogChatService>();
     _mockRecorder = new Mock<ClubDoorman.Services.Logging.IGoldenMasterRecorder>();
+        _mockEvents = new Mock<IModerationEventPublisher>();
 
         _handler = new CallbackQueryHandler(
             _mockBot.Object,
@@ -75,7 +78,8 @@ public class CallbackQueryHandlerTests
             _mockUserBanService.Object,
             _mockLogChatService.Object,
             _mockLogger.Object,
-            _mockRecorder.Object
+            _mockRecorder.Object,
+            _mockEvents.Object
         );
     }
 

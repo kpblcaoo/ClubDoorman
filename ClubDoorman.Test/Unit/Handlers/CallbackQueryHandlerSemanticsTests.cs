@@ -61,6 +61,7 @@ public class CallbackQueryHandlerSemanticsTests
         var violationTracker = new ViolationTracker(new NullLogger<ViolationTracker>(), appConfig.Object);
         var userBan = new Mock<IUserBanService>();
         var logChat = new Mock<ILogChatService>();
+        var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
         return new CallbackQueryHandler(
             bot.Object,
             captcha.Object,
@@ -74,7 +75,8 @@ public class CallbackQueryHandlerSemanticsTests
             userBan.Object,
             logChat.Object,
             new NullLogger<CallbackQueryHandler>(),
-            recorder
+            recorder,
+            eventsPub
         );
     }
 

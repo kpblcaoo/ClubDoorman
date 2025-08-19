@@ -143,6 +143,7 @@ public static class TestKitAutoFixture
                     logger, botPermissionsService, captchaService, userFlowLogger,
                     forwardingService, aiCascadeService,
                     new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), TK.CreateMock<ILogger<GoldenMasterRecorder>>().Object),
+                    TK.CreateMock<IModerationEventPublisher>().Object,
                     Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }));
             })
             .OmitAutoProperties());

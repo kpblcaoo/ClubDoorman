@@ -324,6 +324,7 @@ public class MessageHandlerBuilder
             new Mock<IForwardingService>().Object,
             new Mock<IAiCascadeService>().Object,
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
+            new Mock<IModerationEventPublisher>().Object,
             Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
         );
     }

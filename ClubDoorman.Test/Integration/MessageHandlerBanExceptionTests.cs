@@ -139,6 +139,7 @@ public class MessageHandlerBanExceptionTests
             Mock.Of<ClubDoorman.Services.Notifications.IForwardingService>(),
             Mock.Of<IAiCascadeService>(),
             new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), Mock.Of<ILogger<GoldenMasterRecorder>>()),
+            new Mock<IModerationEventPublisher>().Object,
             Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
         );
     }

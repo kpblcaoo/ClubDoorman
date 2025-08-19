@@ -1,7 +1,7 @@
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.Logging;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Services.UserBan;
@@ -123,7 +123,7 @@ public class AiAnalysisTests
         var logChatService = new Mock<ILogChatService>().Object;
     // Golden Master recorder not needed for these integration tests -> pass mock
     var gmRecorder = new Moq.Mock<ClubDoorman.Services.Logging.IGoldenMasterRecorder>();
-    _callbackHandler = new CallbackQueryHandler(_fakeBot, captchaService, _userManager, badMessageManager, statisticsService, _aiChecks, moderationService, messageService, new ViolationTracker(violationTrackerLogger, _appConfig), userBanService, logChatService, _callbackLogger, gmRecorder.Object);
+    _callbackHandler = new CallbackQueryHandler(_fakeBot, captchaService, _userManager, badMessageManager, statisticsService, _aiChecks, moderationService, messageService, new ViolationTracker(violationTrackerLogger, _appConfig), userBanService, logChatService, _callbackLogger, gmRecorder.Object, new Moq.Mock<IModerationEventPublisher>().Object);
     }
 
     [TearDown]

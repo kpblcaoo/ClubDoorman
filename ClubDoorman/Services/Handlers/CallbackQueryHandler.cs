@@ -19,6 +19,7 @@ using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -39,7 +40,8 @@ public class CallbackQueryHandler : IUpdateHandler
     private readonly IUserBanService _userBanService;
     private readonly ILogChatService _logChatService;
     private readonly ILogger<CallbackQueryHandler> _logger;
-    private readonly IGoldenMasterRecorder _recorder;
+    private readonly IGoldenMasterRecorder _recorder; // input capture
+    private readonly IModerationEventPublisher _events; // semantics publisher
 
     public CallbackQueryHandler(
         ITelegramBotClientWrapper bot,
@@ -54,7 +56,8 @@ public class CallbackQueryHandler : IUpdateHandler
         IUserBanService userBanService,
         ILogChatService logChatService,
     ILogger<CallbackQueryHandler> logger,
-    IGoldenMasterRecorder recorder)
+    IGoldenMasterRecorder recorder,
+    IModerationEventPublisher eventsPublisher)
     {
         _bot = bot;
         _captchaService = captchaService;
@@ -69,6 +72,7 @@ public class CallbackQueryHandler : IUpdateHandler
         _logChatService = logChatService;
     _logger = logger;
     _recorder = recorder;
+    _events = eventsPublisher ?? throw new ArgumentNullException(nameof(eventsPublisher));
     }
 
     public bool CanHandle(Update update)
@@ -80,6 +84,17 @@ public class CallbackQueryHandler : IUpdateHandler
     {
         var callbackQuery = update.CallbackQuery!;
         var cbData = callbackQuery.Data;
+
+        string? gmCorrelation = null;
+        try
+        {
+            gmCorrelation = _recorder.TryRecordInput(update, nameof(CallbackQueryHandler), callbackQuery.Message?.Chat.Id, callbackQuery.From.Id);
+            _logger.LogTrace("CallbackQueryHandler: GoldenMaster correlation {Correlation} established", gmCorrelation);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogTrace(ex, "CallbackQueryHandler: failed to record GM input");
+        }
 
         _logger.LogDebug("📞 Получен callback: {Data} от пользователя {User} в чате {Chat}",
             cbData, callbackQuery.From.Username ?? callbackQuery.From.FirstName, callbackQuery.Message?.Chat.Id);
@@ -107,7 +122,7 @@ public class CallbackQueryHandler : IUpdateHandler
             else
             {
                 _logger.LogDebug("🎯 Обрабатываем капча callback: {Data}", cbData);
-                await HandleCaptchaCallback(callbackQuery, cancellationToken);
+                await HandleCaptchaCallback(callbackQuery, gmCorrelation, cancellationToken);
             }
         }
         catch (Exception ex)
@@ -117,7 +132,7 @@ public class CallbackQueryHandler : IUpdateHandler
         }
     }
 
-    private async Task HandleCaptchaCallback(CallbackQuery callbackQuery, CancellationToken cancellationToken)
+    private async Task HandleCaptchaCallback(CallbackQuery callbackQuery, string? gmCorrelation, CancellationToken cancellationToken)
     {
         var cbData = callbackQuery.Data!;
         var message = callbackQuery.Message!;
@@ -156,15 +171,15 @@ public class CallbackQueryHandler : IUpdateHandler
 
         if (!isCorrect)
         {
-            await HandleFailedCaptcha(captchaInfo, cancellationToken);
+            await HandleFailedCaptcha(captchaInfo, gmCorrelation, cancellationToken);
         }
         else
         {
-            await HandleSuccessfulCaptcha(callbackQuery.From, chat, captchaInfo, cancellationToken);
+            await HandleSuccessfulCaptcha(callbackQuery.From, chat, captchaInfo, gmCorrelation, cancellationToken);
         }
     }
 
-    private async Task HandleFailedCaptcha(Models.CaptchaInfo captchaInfo, CancellationToken cancellationToken)
+    private async Task HandleFailedCaptcha(Models.CaptchaInfo captchaInfo, string? gmCorrelation, CancellationToken cancellationToken)
     {
         _logger.LogInformation("==================== КАПЧА НЕ ПРОЙДЕНА ====================\n" +
             "Пользователь {User} (id={UserId}) не прошёл капчу в группе '{ChatTitle}' (id={ChatId})\n" +
@@ -228,12 +243,13 @@ public class CallbackQueryHandler : IUpdateHandler
         {
             _logger.LogWarning(ex, "Не удалось забанить пользователя за неправильную капчу");
         }
-    // Golden Master semantics (standalone event, create transient correlation id)
-    var corr = _recorder.TryRecordInput(new Update { Id = (int)(DateTime.UtcNow.Ticks & 0x7FFFFFFF), CallbackQuery = new CallbackQuery() }, nameof(CallbackQueryHandler), captchaInfo.ChatId, captchaInfo.User.Id);
-    _recorder.TryRecordOutput(corr, new { kind = "captcha_fail", ruleCode = "CaptchaFail" });
+        if (gmCorrelation != null)
+        {
+            _events.Publish(gmCorrelation, new ModerationEvent("captcha_fail", RuleCode: Models.Logging.RuleCode.CaptchaFail));
+        }
     }
 
-    private async Task HandleSuccessfulCaptcha(User user, Chat chat, Models.CaptchaInfo captchaInfo, CancellationToken cancellationToken)
+    private async Task HandleSuccessfulCaptcha(User user, Chat chat, Models.CaptchaInfo captchaInfo, string? gmCorrelation, CancellationToken cancellationToken)
     {
         _logger.LogInformation("==================== КАПЧА ПРОЙДЕНА ====================\n" +
             "Пользователь {User} (id={UserId}) успешно прошёл капчу в группе '{ChatTitle}' (id={ChatId})\n" +
@@ -250,8 +266,10 @@ public class CallbackQueryHandler : IUpdateHandler
             _logger.LogInformation("Отправляем приветствие после успешного прохождения капчи");
             await _messageService.SendWelcomeMessageAsync(user, chat, "приветствие после капчи", cancellationToken);
         }
-    var corr = _recorder.TryRecordInput(new Update { Id = (int)(DateTime.UtcNow.Ticks & 0x7FFFFFFF), CallbackQuery = new CallbackQuery() }, nameof(CallbackQueryHandler), chat.Id, user.Id);
-    _recorder.TryRecordOutput(corr, new { kind = "captcha_success", ruleCode = "CaptchaSuccess" });
+        if (gmCorrelation != null)
+        {
+            _events.Publish(gmCorrelation, new ModerationEvent("captcha_success", RuleCode: Models.Logging.RuleCode.CaptchaSuccess));
+        }
     }
 
     private async Task HandleAdminCallback(CallbackQuery callbackQuery, CancellationToken cancellationToken)
