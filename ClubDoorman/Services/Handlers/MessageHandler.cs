@@ -201,7 +201,8 @@ public class MessageHandler : IUpdateHandler
                 _logger.LogDebug("Handling command '{Command}' in chat {ChatId}", message.Text, chat.Id);
                 await HandleCommandAsync(message, cancellationToken);
                 _logger.LogDebug("HandleAsync: Command handled, returning");
-                _gm.TryRecordOutput(gmCorrelation, new { kind = "command", messageId = message.MessageId });
+                // Semantics: /command (в особенно /start) трактуется как Allow Command
+                _gm.TryRecordOutput(gmCorrelation, new { kind = "command", messageId = message.MessageId, action = "Allow", ruleCode = "Command" });
                 return;
             }
 
@@ -362,13 +363,14 @@ public class MessageHandler : IUpdateHandler
         }
 
         _logger.LogDebug("🔍 Проверяем пользователя {UserId} по блэклисту lols.bot", user.Id);
-        if (await _userManager.InBanlist(user.Id))
+            if (await _userManager.InBanlist(user.Id))
         {
             _logger.LogWarning("Пользователь {UserId} найден в блэклисте lols.bot. Применяем бан. ChatId: {ChatId}, MessageId: {MessageId}",
                 user.Id, chat.Id, message.MessageId);
             _logger.LogInformation("HandleUserMessageAsync: User {UserId} found in banlist, banning. MessageId: {MessageId}", user.Id, message.MessageId);
             await _userBanService.HandleBlacklistBanAsync(message, user, chat, cancellationToken);
-            return new { kind = "banlist_ban" };
+                // Semantics: банлист → Delete (стабильное действие) с RuleCode Banlist
+                return new { kind = "banlist_ban", action = "Delete", ruleCode = "Banlist" };
         }
         _logger.LogDebug("✅ Пользователь {UserId} не найден в блэклисте", user.Id);
         _logger.LogTrace("HandleUserMessageAsync: User {UserId} not in banlist", user.Id);
