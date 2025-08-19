@@ -20,5 +20,10 @@ public enum RuleCode
     EmojiEscalation,
     BanEscalation,
     Boundary,
-    Pass
+    Pass,
+    // Added for early path semantics (golden hardening)
+    PrivateSkip,
+    NewMembers,
+    LeftMemberCleanup,
+    ChannelMessage
 }

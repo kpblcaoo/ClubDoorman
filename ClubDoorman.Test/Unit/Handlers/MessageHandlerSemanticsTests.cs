@@ -47,11 +47,12 @@ public class MessageHandlerSemanticsTests
     });
 
     private static MessageHandler CreateHandler(IOptions<LoggingFlagsOptions> flags,
+        Mock<ITelegramBotClientWrapper>? botMock = null,
         Mock<IUserManager>? userManagerMock = null,
         Action<Mock<IUserManager>>? configureUserManager = null,
         Action<Mock<ICommandRouter>>? configureCommandRouter = null)
     {
-        var bot = new Mock<ITelegramBotClientWrapper>();
+        var bot = botMock ?? new Mock<ITelegramBotClientWrapper>();
         var userManager = userManagerMock ?? new Mock<IUserManager>();
         configureUserManager?.Invoke(userManager);
         var appConfig = new Mock<IAppConfig>();
@@ -150,7 +151,7 @@ public class MessageHandlerSemanticsTests
     public async Task Command_EarlyExit_WritesAllowCommandSemantics()
     {
         var (update, basePath) = BuildCommandUpdate("/start");
-        var handler = CreateHandler(Flags(basePath), configureCommandRouter: cr =>
+    var handler = CreateHandler(Flags(basePath), botMock: null, userManagerMock: null, configureCommandRouter: cr =>
             cr.Setup(x => x.HandleCommandAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>())).ReturnsAsync(true));
 
         await handler.HandleAsync(update, CancellationToken.None);
@@ -165,7 +166,7 @@ public class MessageHandlerSemanticsTests
     public async Task Banlist_Hit_WritesDeleteBanlistSemantics()
     {
         var (update, basePath, userManager) = BuildBanlistUpdate();
-        var handler = CreateHandler(Flags(basePath), userManager, um => { });
+    var handler = CreateHandler(Flags(basePath), botMock: null, userManagerMock: userManager, configureUserManager: um => { });
 
         await handler.HandleAsync(update, CancellationToken.None);
 
@@ -173,5 +174,115 @@ public class MessageHandlerSemanticsTests
         var root = doc.RootElement;
         Assert.That(root.GetProperty("action").GetString(), Is.EqualTo("Delete"));
         Assert.That(root.GetProperty("ruleCode").GetString(), Is.EqualTo("Banlist"));
+    }
+
+    [Test]
+    public async Task PrivateChat_NonCommand_SkipsAndWritesSemanticRule()
+    {
+        var basePath = Path.Combine(Path.GetTempPath(), "gm_semantics_" + Path.GetRandomFileName());
+        Directory.CreateDirectory(basePath);
+        var flags = Flags(basePath);
+        var update = new Update
+        {
+            Id = 3,
+            Message = new Message
+            {
+                Chat = new Chat { Id = 999001, Type = ChatType.Private, FirstName = "User" },
+                From = new User { Id = 424242, IsBot = false, FirstName = "User" },
+                Text = "hello there"
+            }
+        };
+    var handler = CreateHandler(flags);
+        await handler.HandleAsync(update, CancellationToken.None);
+        using var doc = LoadSemanticsJson(basePath);
+        var root = doc.RootElement;
+    // private_skip path only emits ruleCode via ReasonCodeMapper
+    Assert.That(root.TryGetProperty("action", out var actionEl), Is.True, "Semantics JSON should include action key (null)");
+    Assert.That(actionEl.ValueKind, Is.EqualTo(System.Text.Json.JsonValueKind.Null));
+    var rule = root.GetProperty("ruleCode").GetString();
+    Assert.That(rule, Is.EqualTo("PrivateSkip"));
+    }
+
+    [Test]
+    public async Task NewMembers_TriggersSemanticRule()
+    {
+        var basePath = Path.Combine(Path.GetTempPath(), "gm_semantics_" + Path.GetRandomFileName());
+        Directory.CreateDirectory(basePath);
+        var flags = Flags(basePath);
+        var update = new Update
+        {
+            Id = 4,
+            Message = new Message
+            {
+                Chat = new Chat { Id = -100777, Type = ChatType.Supergroup, Title = "JoinChat" },
+                From = new User { Id = 111, IsBot = false, FirstName = "Starter" },
+                NewChatMembers = new[] { new User { Id = 222, IsBot = false, FirstName = "Newbie" } }
+            }
+        };
+    var handler = CreateHandler(flags);
+        await handler.HandleAsync(update, CancellationToken.None);
+        using var doc = LoadSemanticsJson(basePath);
+        var root = doc.RootElement;
+    Assert.That(root.TryGetProperty("action", out var actionEl), Is.True);
+    Assert.That(actionEl.ValueKind, Is.EqualTo(System.Text.Json.JsonValueKind.Null));
+    var rule = root.GetProperty("ruleCode").GetString();
+    Assert.That(rule, Is.EqualTo("NewMembers"));
+    }
+
+    [Test]
+    public async Task LeftMemberCleanup_EmitsSemanticRule()
+    {
+        var basePath = Path.Combine(Path.GetTempPath(), "gm_semantics_" + Path.GetRandomFileName());
+        Directory.CreateDirectory(basePath);
+        var flags = Flags(basePath);
+        var bot = new User { Id = 515151, IsBot = true, FirstName = "Bot" };
+        var update = new Update
+        {
+            Id = 5,
+            Message = new Message
+            {
+                Chat = new Chat { Id = -100888, Type = ChatType.Supergroup, Title = "LeaveChat" },
+                From = bot, // simulate message from bot about left member
+                LeftChatMember = new User { Id = 999, IsBot = false, FirstName = "Leaver" }
+            }
+        };
+        var botMock = new Mock<ITelegramBotClientWrapper>();
+        botMock.SetupGet(x => x.BotId).Returns(515151);
+    var handler = CreateHandler(flags, botMock: botMock);
+        // Need to set BotId on ITelegramBotClientWrapper mock used inside handler -> simplest: ignore delete path (won't throw) and rely on semantics kind
+        await handler.HandleAsync(update, CancellationToken.None);
+        using var doc = LoadSemanticsJson(basePath);
+        var root = doc.RootElement;
+    Assert.That(root.TryGetProperty("action", out var actionEl), Is.True);
+    Assert.That(actionEl.ValueKind, Is.EqualTo(System.Text.Json.JsonValueKind.Null));
+    var rule = root.GetProperty("ruleCode").GetString();
+    Assert.That(rule, Is.EqualTo("LeftMemberCleanup"));
+    }
+
+    [Test]
+    public async Task ChannelMessage_EmitsSemanticRule()
+    {
+        var basePath = Path.Combine(Path.GetTempPath(), "gm_semantics_" + Path.GetRandomFileName());
+        Directory.CreateDirectory(basePath);
+        var flags = Flags(basePath);
+        var update = new Update
+        {
+            Id = 6,
+            Message = new Message
+            {
+                Chat = new Chat { Id = -100999, Type = ChatType.Supergroup, Title = "ChannelChat" },
+                From = new User { Id = 333, IsBot = false, FirstName = "Poster" },
+                SenderChat = new Chat { Id = -200001, Type = ChatType.Channel, Title = "ChannelName" },
+                Text = "Channel forwarded content"
+            }
+        };
+    var handler = CreateHandler(flags);
+        await handler.HandleAsync(update, CancellationToken.None);
+        using var doc = LoadSemanticsJson(basePath);
+        var root = doc.RootElement;
+    Assert.That(root.TryGetProperty("action", out var actionEl), Is.True);
+    Assert.That(actionEl.ValueKind, Is.EqualTo(System.Text.Json.JsonValueKind.Null));
+    var rule = root.GetProperty("ruleCode").GetString();
+    Assert.That(rule, Is.EqualTo("ChannelMessage"));
     }
 }

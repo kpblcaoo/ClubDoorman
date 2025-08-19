@@ -42,6 +42,10 @@ internal static class ReasonCodeMapper
                 var ak0 = actionKind.ToLowerInvariant();
                 if (ak0.Contains("banlist")) return RuleCode.Banlist;
                 if (ak0 == "command") return RuleCode.Command;
+                if (ak0 == "private_skip") return RuleCode.PrivateSkip;
+                if (ak0 == "new_members") return RuleCode.NewMembers;
+                if (ak0 == "left_member_cleanup") return RuleCode.LeftMemberCleanup;
+                if (ak0 == "channel_message") return RuleCode.ChannelMessage;
             }
         }
         foreach (var (needle, code) in Map)
@@ -54,6 +58,10 @@ internal static class ReasonCodeMapper
             var ak = actionKind.ToLowerInvariant();
             if (ak.Contains("banlist")) return RuleCode.Banlist;
             if (ak == "command") return RuleCode.Command;
+            if (ak == "private_skip") return RuleCode.PrivateSkip;
+            if (ak == "new_members") return RuleCode.NewMembers;
+            if (ak == "left_member_cleanup") return RuleCode.LeftMemberCleanup;
+            if (ak == "channel_message") return RuleCode.ChannelMessage;
             if (ak.Contains("ban") && norm.Contains("лимит")) return RuleCode.BanEscalation;
             if (ak.Contains("ban") && !string.IsNullOrEmpty(reason) && reason.Contains("банлист", StringComparison.OrdinalIgnoreCase)) return RuleCode.Banlist;
             if (ak.Contains("moderated") && norm.Contains("прошло все проверки")) return RuleCode.Pass;
