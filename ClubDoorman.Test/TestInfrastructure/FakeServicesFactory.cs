@@ -8,9 +8,12 @@ using ClubDoorman.Handlers;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Models.Requests;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Services.UserBan;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -212,7 +215,11 @@ public class FakeServicesFactory
             captchaService ?? CreateCaptchaService(),
             userFlowLoggerMock.Object,
             new Mock<IForwardingService>().Object,
-            aiCascadeServiceMock.Object);
+            aiCascadeServiceMock.Object,
+            new GoldenMasterRecorder(Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
+            new Mock<IModerationEventPublisher>().Object,
+            Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
+        );
     }
 
     /// <summary>
@@ -257,9 +264,9 @@ public class FakeServicesFactory
                 .SetShouldAnswerCallback(true);
         }
 
-        /// <summary>
-        /// Сценарий бана пользователя
-        /// </summary>
+    /// <summary>
+    /// Сценарий бана пользователя
+    /// </summary>
         public static FakeCallbackQueryHandler UserBan(FakeServicesFactory factory)
         {
             return factory.CreateCallbackQueryHandler()

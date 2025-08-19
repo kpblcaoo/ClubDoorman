@@ -1,5 +1,7 @@
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.BadMessage;
@@ -185,7 +187,10 @@ public class MessageHandlerTestFactory
             CaptchaServiceMock.Object,
             UserFlowLoggerMock.Object,
             new Mock<IForwardingService>().Object,
-            AiCascadeServiceMock.Object
+            AiCascadeServiceMock.Object,
+            new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
+            new Mock<IModerationEventPublisher>().Object,
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
         );
     }
 
@@ -212,7 +217,10 @@ public class MessageHandlerTestFactory
             CaptchaServiceMock.Object,
             UserFlowLoggerMock.Object,
             new Mock<IForwardingService>().Object,
-            AiCascadeServiceMock.Object
+            AiCascadeServiceMock.Object,
+            new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
+            new Mock<IModerationEventPublisher>().Object,
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
         );
     }
 
@@ -635,7 +643,10 @@ public class MessageHandlerTestFactory
             CaptchaServiceMock.Object,
             UserFlowLoggerMock.Object,
             new Mock<IForwardingService>().Object,
-            AiCascadeServiceMock.Object
+            AiCascadeServiceMock.Object,
+            new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
+            new Mock<IModerationEventPublisher>().Object,
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
         );
     }
 

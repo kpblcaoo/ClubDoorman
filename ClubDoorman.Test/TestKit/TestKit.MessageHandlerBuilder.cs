@@ -32,6 +32,8 @@ using ClubDoorman.Services.Captcha;
 using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
 using ClubDoorman.Features.Moderation;
 using ClubDoorman.Services.Notifications;
 
@@ -320,7 +322,10 @@ public class MessageHandlerBuilder
             _captchaServiceMock.Object,
             _userFlowLoggerMock.Object,
             new Mock<IForwardingService>().Object,
-            new Mock<IAiCascadeService>().Object
+            new Mock<IAiCascadeService>().Object,
+            new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
+            new Mock<IModerationEventPublisher>().Object,
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
         );
     }
 

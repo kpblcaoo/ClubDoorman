@@ -3,6 +3,8 @@ using AutoFixture.AutoMoq;
 
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.BadMessage;
@@ -139,7 +141,10 @@ public static class TestKitAutoFixture
                     bot, userManager, appConfig, userBanService, channelModerationService,
                     commandRouter, TK.CreateMock<IUserJoinFacade>().Object, TK.CreateMock<IModerationFacade>().Object,
                     logger, botPermissionsService, captchaService, userFlowLogger,
-                    forwardingService, aiCascadeService);
+                    forwardingService, aiCascadeService,
+                    new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), TK.CreateMock<ILogger<GoldenMasterRecorder>>().Object),
+                    TK.CreateMock<IModerationEventPublisher>().Object,
+                    Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }));
             })
             .OmitAutoProperties());
 

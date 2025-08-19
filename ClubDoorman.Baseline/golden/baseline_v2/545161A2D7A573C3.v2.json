@@ -4,5 +4,5 @@
   "Id": 5,
   "ShortName": "EmojiFlood",
   "Action": "Delete",
-  "RuleCode": "TooManyEmojis"
+  "RuleCode": "ModeratedDelete"
 }

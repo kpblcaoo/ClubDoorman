@@ -37,14 +37,6 @@ internal static class GoldenManifestBuilder
         [18] = "MediaAnnouncement"
     };
 
-    // Phase 9 regression guard: some scenarios do not naturally emit semantics (.sem.json) yet
-    // (e.g. pure command allow, banlist match resolved earlier). Provide deterministic overrides
-    // so manifest invariants (ExpectedAction + RuleCode non-null) hold even if recorder skipped.
-    private static readonly Dictionary<int, (string action, string ruleCode)> SemanticsOverrides = new()
-    {
-        [12] = ("Allow", "Command"),   // /start command -> allowed
-        [15] = ("Delete", "Banlist")    // User present in banlist -> delete/ban action
-    };
 
     public static void Build(string goldenRoot, string variantName)
     {
@@ -83,12 +75,7 @@ internal static class GoldenManifestBuilder
                     catch { /* ignore */ }
                 }
 
-                // Apply fallback overrides if semantics missing.
-                if (string.IsNullOrWhiteSpace(expectedAction) && SemanticsOverrides.TryGetValue(updateId, out var ov))
-                {
-                    expectedAction = ov.action;
-                    ruleCode ??= ov.ruleCode;
-                }
+                // No overrides: ExpectedAction / RuleCode may remain null if semantics not yet recorded (will surface in invariants/tests).
 
                 ShortNames.TryGetValue(updateId, out var shortName);
                 if (string.IsNullOrWhiteSpace(shortName))

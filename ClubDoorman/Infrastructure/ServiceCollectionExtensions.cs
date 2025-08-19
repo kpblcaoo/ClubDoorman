@@ -59,8 +59,9 @@ public static class ServiceCollectionExtensions
             services.Configure<LoggingFlagsOptions>(_ => { }); // defaults
         }
 
-        // Golden Master recorder
-        services.AddSingleton<IGoldenMasterRecorder, GoldenMasterRecorder>();
+    // Golden Master recorder + moderation event publisher abstraction
+    services.AddSingleton<IGoldenMasterRecorder, GoldenMasterRecorder>();
+    services.AddSingleton<IModerationEventPublisher, GoldenMasterModerationEventPublisher>();
 
         // Регистрация инфраструктуры эффектов (должна быть перед AppConfig)
         services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration

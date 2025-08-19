@@ -4,5 +4,5 @@
   "Id": 7,
   "ShortName": "Greeting",
   "Action": "Delete",
-  "RuleCode": "Greeting"
+  "RuleCode": "ModeratedDelete"
 }

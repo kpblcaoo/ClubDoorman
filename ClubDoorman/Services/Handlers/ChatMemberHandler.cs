@@ -34,9 +34,10 @@ public class ChatMemberHandler : IUpdateHandler
     private readonly IUserCleanupService _userCleanupService;
     private readonly IFolderInviteService _folderInviteService;
     private readonly IGoldenMasterRecorder _gm;
+    private readonly IModerationEventPublisher _events;
     private readonly LoggingFlagsOptions? _flags;
 
-    [Obsolete("Legacy constructor without Golden Master / flags. Use DI constructor with IGoldenMasterRecorder.")]
+    // Primary DI constructor (Golden Master + flags required)
     public ChatMemberHandler(
         ITelegramBotClientWrapper bot,
         IUserManager userManager,
@@ -47,6 +48,7 @@ public class ChatMemberHandler : IUpdateHandler
         IUserCleanupService userCleanupService,
     IFolderInviteService folderInviteService,
     IGoldenMasterRecorder gm,
+    IModerationEventPublisher eventsPublisher,
     IOptions<LoggingFlagsOptions> flagsOptions)
     {
         _bot = bot;
@@ -57,32 +59,12 @@ public class ChatMemberHandler : IUpdateHandler
         _appConfig = appConfig;
         _userCleanupService = userCleanupService;
         _folderInviteService = folderInviteService;
-        _gm = gm;
+    _gm = gm;
+    _events = eventsPublisher ?? throw new ArgumentNullException(nameof(eventsPublisher));
         _flags = flagsOptions?.Value;
     }
 
-    [Obsolete("Legacy constructor without Golden Master / flags. Use DI constructor with IGoldenMasterRecorder.")]
-    public ChatMemberHandler(
-        ITelegramBotClientWrapper bot,
-        IUserManager userManager,
-        ILogger<ChatMemberHandler> logger,
-        IntroFlowService introFlowService,
-        IMessageService messageService,
-        IAppConfig appConfig,
-        IUserCleanupService userCleanupService,
-        IFolderInviteService folderInviteService)
-        : this(
-            bot,
-            userManager,
-            logger,
-            introFlowService,
-            messageService,
-            appConfig,
-            userCleanupService,
-            folderInviteService,
-            NullGoldenMasterRecorder.Instance,
-            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions()))
-    { }
+    // Legacy simplified constructor removed (used NullGoldenMasterRecorder). Tests must pass IGoldenMasterRecorder explicitly now.
 
     public bool CanHandle(Update update) => update.Type == UpdateType.ChatMember;
 
@@ -108,7 +90,7 @@ public class ChatMemberHandler : IUpdateHandler
         if (!_appConfig.IsChatAllowed(chatMember.Chat.Id))
         {
             _logger.LogDebug("Чат {ChatId} ({ChatTitle}) не в whitelist - игнорируем изменение участника", chatMember.Chat.Id, chatMember.Chat.Title);
-            _gm.TryRecordOutput(gmCorrelation, new { kind = "not_allowed_chat" });
+            _events.Publish(gmCorrelation, new ModerationEvent("not_allowed_chat"));
             return;
         }
 
@@ -116,7 +98,7 @@ public class ChatMemberHandler : IUpdateHandler
         if (chatMember.From?.Id == _bot.BotId)
         {
             _logger.LogDebug("Игнорируем изменение статуса участника, сделанное самим ботом");
-            _gm.TryRecordOutput(gmCorrelation, new { kind = "self_change_ignore" });
+            _events.Publish(gmCorrelation, new ModerationEvent("self_change_ignore"));
             return;
         }
 
@@ -145,7 +127,7 @@ public class ChatMemberHandler : IUpdateHandler
                             });
                         }
                     }
-                    _gm.TryRecordOutput(gmCorrelation, new { kind = "new_member", userId = newChatMember.User.Id });
+                    _events.Publish(gmCorrelation, new ModerationEvent("new_member", Extra: newChatMember.User.Id.ToString()));
                     break;
                 }
             case ChatMemberStatus.Kicked
@@ -176,10 +158,10 @@ public class ChatMemberHandler : IUpdateHandler
                     restrictedData,
                     cancellationToken
                 );
-                _gm.TryRecordOutput(gmCorrelation, new { kind = "restricted", userId = user.Id });
+                _events.Publish(gmCorrelation, new ModerationEvent("restricted", Extra: user.Id.ToString()));
                 break;
         }
-        _gm.TryRecordOutput(gmCorrelation, new { kind = "other_status", status = newChatMember.Status.ToString() });
+    _events.Publish(gmCorrelation, new ModerationEvent("other_status", Status: newChatMember.Status.ToString()));
     }
 
     private static string FullName(string firstName, string? lastName) =>

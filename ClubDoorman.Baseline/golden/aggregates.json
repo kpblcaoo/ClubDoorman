@@ -10,13 +10,9 @@
   "RuleCodeCounts": {
     "Banlist": "1",
     "Command": "1",
-    "Greeting": "1",
-    "Links": "3",
-    "MediaEarlyBlock": "1",
-    "MediaNoCaption": "1",
-    "Pass": "4",
-    "StopWords": "1",
-    "TooManyEmojis": "2"
+    "ModeratedAllow": "4",
+    "ModeratedDelete": "8",
+    "ModeratedReport": "1"
   },
-  "RuleCodesFingerprint": "Banlist|Command|Greeting|Links|MediaEarlyBlock|MediaNoCaption|Pass|StopWords|TooManyEmojis"
+  "RuleCodesFingerprint": "Banlist|Command|ModeratedAllow|ModeratedDelete|ModeratedReport"
 }

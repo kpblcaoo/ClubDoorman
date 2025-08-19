@@ -4,5 +4,5 @@
   "CorrelationId": "404A7363FBF8785F",
   "ShortName": "StopWords",
   "Action": "Delete",
-  "RuleCode": "StopWords"
+  "RuleCode": "ModeratedDelete"
 }

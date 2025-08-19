@@ -4,5 +4,5 @@
   "Id": 13,
   "ShortName": "ReplyBase",
   "Action": "Allow",
-  "RuleCode": "Pass"
+  "RuleCode": "ModeratedAllow"
 }

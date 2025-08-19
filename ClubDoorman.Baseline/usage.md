@@ -121,5 +121,107 @@ dotnet test ClubDoorman.Test --filter "(Category=GoldenManifest|Category=GoldenV
 - Golden Harness: baseline генератор (Baseline проект)
 - Semantics file: временный JSON c результатами анализа для билдеров
 
+## 12. Semantics (*.sem.json) — глубже и roadmap
+### Что внутри
+`<correlationId>.sem.json` содержит минимальную «семантику» результата обработки: 
+```
+{ "action": "Allow|Delete|Report|…", "ruleCode": "StopWords|Emoji|Banlist|Command|…" }
+```
+Эти данные:
+1. Пишет `GoldenMasterRecorder.TryRecordOutput` если из результата можно извлечь `action` / `ruleCode`.
+2. Используются билдерами (`GoldenManifestBuilder`, `GoldenV2Exporter`, `GoldenNormalizationBuilder`) как источник правды для заполнения `ExpectedAction` и `RuleCode`, снижая дублирование логики.
+
+### Текущий набор RuleCode (фаза hardening)
+Ниже — актуальный перечислимый список (упорядочен как в `RuleCode.cs`, новые значения всегда аппендятся в конец чтобы не ломать прошлые baseline-ы):
+
+```
+Unknown,
+StopWords,
+Links,
+TooManyEmojis,
+Greeting,
+Banlist,
+MediaNoCaption,
+MediaEarlyBlock,
+Command,
+ReplyLink,
+MixedLinkStopWords,
+EmojiEscalation,
+BanEscalation,
+Boundary,
+Pass,
+PrivateSkip,         # (PH1 NEW) ранний выход: приватный чат / DM не модериируется
+NewMembers,          # (PH1 NEW) событие: присоединились новые участники (до дальнейшей логики)
+LeftMemberCleanup,   # (PH1 NEW) событие: пользователь покинул / удалён (служебная очистка)
+ChannelMessage,      # (PH1 NEW) тип: канал / форвард из канала (отдельная ветка правил)
+SystemNoUser,        # (PH2 NEW) системное сообщение без пользователя (service / nil From)
+BotMessage,          # (PH2 NEW) сообщение от бота (не модериируем как обычный user flow)
+CaptchaPending,      # (PH2 NEW) пользователь в процессе captcha (ограниченный state)
+AlreadyApproved,     # (PH2 NEW) уже одобренный пользователь (fast-path skip)
+ClubMemberSkip,      # (PH2 NEW) участник клуба (whitelist fast-path)
+AiProfileRestricted, # (PH2 NEW) AI профиль ограничил пользователя (ранняя фиксация факта)
+ModeratedGeneric     # (PH2 NEW) последняя ветка: модерация завершилась без специальных правил
+```
+Phase1 (PH1) — раннее покрытие PR #139. Phase2 (PH2) — расширение системных/AI/captcha путей (текущий PR). При дальнейших расширениях:
+1. Добавляй enum значение в конец.
+2. Пиши тест(ы), фиксирующие появление соответствующей семантики.
+3. Удостоверься что mapper (`ReasonCodeMapper`) возвращает новый код либо код явно прокидывается в `TryRecordOutput`.
+4. Регенерируй baseline и убедись что Aggregates учитывает новый RuleCode.
+
+### Новые «ранние» пути (early-path semantics)
+В рамках hardening удалены устаревшие overrides и вместо них покрыты реальные ранние ветки пайплайна явными RuleCode. Это снижает риск «немых» сценариев (ExpectedAction / RuleCode = null) при регенерации baseline.
+
+Покрытые ранние сценарии (PH1 + PH2):
+- `/command` → `Command` (явно задаётся action=Allow)
+- Banlist-хит (раннее удаление) → `Banlist` (action=Delete)
+- Приватный чат → `PrivateSkip` (action null — не модерация) 
+- Новые участники (join event первичного обработчика) → `NewMembers`
+- Участник покинул (left / kick) → `LeftMemberCleanup`
+- Сообщение канала / channel post → `ChannelMessage`
+- System message без From → `SystemNoUser`
+- Сообщение от бота → `BotMessage`
+- Пользователь ещё решает captcha → `CaptchaPending`
+- Пользователь уже одобрен → `AlreadyApproved`
+- Пользователь член клуба (fast allow path) → `ClubMemberSkip`
+- AI анализ профиля ограничил пользователя → `AiProfileRestricted`
+- Обычный результат модерации без спец признака → `ModeratedGeneric`
+
+Для четырёх последних action пока отсутствует (null в sem.json) — это допустимо: Manifest требует `ExpectedAction` только для сообщений, где модерация выставляет решение. Если появится явное решение (например auto-clean), можно расширить и задать action.
+
+### Расширение покрытия (next steps)
+Оставшиеся кандидаты для семантики (поздние этапы / будущие фазы):
+- CaptchaFail / CaptchaSuccess (переходы состояний)
+- AiHeuristicFlag (тонкие эвристики, отличные от restriction)
+- MediaEscalation (если появятся дополнительные уровни)
+- RateLimitTriggered / SpamStormMitigation
+
+Рекомендованный порядок: сначала добавить Golden тест сценария → убедиться что `.sem.json` появляется → затем обновить baseline.
+
+### Почему не коммитим
+Три причины:
+1. Шум: при любых правках текста reason/структуры результирующие файлы будут меняться пачкой.
+2. Детерминизм: CI регенерирует артефакты без сетевых/случайных дрожаний — меньше ложных diffs.
+3. Текущий компромисс: часть сценариев пока не всегда эмитит семантику (см. overrides ниже) — не хотим фиксировать неполные файлы в истории.
+
+### SemanticsOverrides (Удалены)
+Ранее существовал временный словарь `SemanticsOverrides` (Id 12=/start, Id 15=BanlistUser) для заполнения `ExpectedAction`/`RuleCode`, пока recorder не покрывал эти ранние пути.
+
+Сейчас overrides удалены (#137). Если для какого-либо сценария не появился `.sem.json` и поля в manifest стали null — это явный сигнал расширить запись семантики (GoldenMasterRecorder) или добавить тестовый путь.
+
+### Workflow локальной регенерации (с учётом семантики)
+1. Включить запись (env / флаги) и прогнать сценарий / тесты, чтобы появились `.sem.json` (они лягут рядом с `.input.json`).
+2. Запустить baseline генератор — manifest подхватит свежие семантики.
+3. Перед коммитом: удалить или просто оставить — hygiene тест упадёт ТОЛЬКО если файл попал в индекс git (tracked). Проще: не добавлять их (`git add -p` / pathspec).
+
+### FAQ (semantics)
+Q: Почему hygiene тест раньше падал у меня локально?  
+A: Были закоммичены *.sem.json (или тест ещё не различал tracked/untracked); теперь он проверяет только tracked.
+
+Q: Нужно ли руками редактировать sem.json?  
+A: Нет — правь код, регенерируй; файлы считаются производными.
+
+Q: Что если хочу посмотреть diff семантики?  
+A: Запусти регенерацию дважды после правки — сравни содержимое локально (они же не в git, можно использовать `diff` / IDE).
+
 ---
 Поддержка / улучшения: при расширении набора правил **сначала** добавь тесты (Golden), затем регенерация и commit.

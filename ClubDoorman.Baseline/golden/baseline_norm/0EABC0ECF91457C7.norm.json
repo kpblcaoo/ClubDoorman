@@ -4,5 +4,5 @@
   "CorrelationId": "0EABC0ECF91457C7",
   "ShortName": "ReplyBase",
   "Action": "Allow",
-  "RuleCode": "Pass"
+  "RuleCode": "ModeratedAllow"
 }

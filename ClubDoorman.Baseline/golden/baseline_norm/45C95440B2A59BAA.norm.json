@@ -4,5 +4,5 @@
   "CorrelationId": "45C95440B2A59BAA",
   "ShortName": "MediaEarlyDefault",
   "Action": "Delete",
-  "RuleCode": "MediaEarlyBlock"
+  "RuleCode": "ModeratedDelete"
 }

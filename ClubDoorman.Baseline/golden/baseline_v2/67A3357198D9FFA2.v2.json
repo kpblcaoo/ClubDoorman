@@ -4,5 +4,5 @@
   "Id": 4,
   "ShortName": "Link",
   "Action": "Delete",
-  "RuleCode": "Links"
+  "RuleCode": "ModeratedDelete"
 }

@@ -4,5 +4,5 @@
   "Id": 10,
   "ShortName": "MixedStopWordsLink",
   "Action": "Delete",
-  "RuleCode": "Links"
+  "RuleCode": "ModeratedDelete"
 }

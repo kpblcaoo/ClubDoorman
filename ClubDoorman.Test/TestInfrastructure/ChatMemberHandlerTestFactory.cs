@@ -1,7 +1,6 @@
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -20,6 +19,8 @@ using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Services.UserJoin;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -48,7 +49,10 @@ public class ChatMemberHandlerTestFactory
             MessageServiceMock.Object,
             AppConfigMock.Object,
             new Mock<IUserCleanupService>().Object,
-            new Mock<IFolderInviteService>().Object
+            new Mock<IFolderInviteService>().Object,
+            new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
+            new Mock<IModerationEventPublisher>().Object,
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
         );
     }
 

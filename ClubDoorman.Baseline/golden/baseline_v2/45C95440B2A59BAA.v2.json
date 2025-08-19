@@ -4,5 +4,5 @@
   "Id": 11,
   "ShortName": "MediaEarlyDefault",
   "Action": "Delete",
-  "RuleCode": "MediaEarlyBlock"
+  "RuleCode": "ModeratedDelete"
 }

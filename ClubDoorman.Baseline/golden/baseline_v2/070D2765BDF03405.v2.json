@@ -4,5 +4,5 @@
   "Id": 16,
   "ShortName": "EmojiBoundaryOk",
   "Action": "Delete",
-  "RuleCode": "TooManyEmojis"
+  "RuleCode": "ModeratedDelete"
 }
