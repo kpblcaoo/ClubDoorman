@@ -27,69 +27,71 @@ public class Program
         }
 
         InitData();
-        var host = Host.CreateDefaultBuilder(args)
-            .UseSerilog(
-                (_, _, config) =>
-                {
-                    // Создаем директорию для логов если её нет
-                    var logsDir = "logs";
-                    if (!Directory.Exists(logsDir))
+        var hostBuilder = Host.CreateDefaultBuilder(args)
+                .UseSerilog(
+                    (_, _, config) =>
                     {
-                        Directory.CreateDirectory(logsDir);
-                    }
+                        // Создаем директорию для логов если её нет
+                        var logsDir = "logs";
+                        if (!Directory.Exists(logsDir))
+                        {
+                            Directory.CreateDirectory(logsDir);
+                        }
 
-                    config
-                        .MinimumLevel.Verbose()
-                        .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                        .MinimumLevel.Override("System", LogEventLevel.Information)
-                        .Enrich.FromLogContext()
-                        .Enrich.WithProperty("Application", "ClubDoorman")
-                        .WriteTo.Async(a => a.Console())
-                        .WriteTo.Async(a => a.File(
-                            path: Path.Combine(logsDir, "clubdoorman-.log"),
-                            rollingInterval: RollingInterval.Day,
-                            retainedFileCountLimit: 7,
-                            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-                        ))
-                        .WriteTo.Async(a => a.File(
-                            path: Path.Combine(logsDir, "errors-.log"),
-                            rollingInterval: RollingInterval.Day,
-                            retainedFileCountLimit: 30,
-                            restrictedToMinimumLevel: LogEventLevel.Error,
-                            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-                        ))
-                        .WriteTo.Async(a => a.File(
-                            path: Path.Combine(logsDir, "system-.log"),
-                            rollingInterval: RollingInterval.Day,
-                            retainedFileCountLimit: 14,
-                            restrictedToMinimumLevel: LogEventLevel.Information,
-                            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [System] {Message:lj}{NewLine}{Exception}"
-                        ))
-                        .WriteTo.Logger(lc => lc
-                            .Filter.ByIncludingOnly(e => e.Properties.ContainsKey("UserFlow"))
+                        config
+                            .MinimumLevel.Verbose()
+                            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                            .MinimumLevel.Override("System", LogEventLevel.Information)
+                            .Enrich.FromLogContext()
+                            .Enrich.WithProperty("Application", "ClubDoorman")
+                            .WriteTo.Async(a => a.Console())
                             .WriteTo.Async(a => a.File(
-                                path: Path.Combine(logsDir, "userflow-.log"),
+                                path: Path.Combine(logsDir, "clubdoorman-.log"),
                                 rollingInterval: RollingInterval.Day,
                                 retainedFileCountLimit: 7,
-                                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [UserFlow] {Message:lj}{NewLine}{Exception}"
+                                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
                             ))
-                        );
-                }
-            )
-            .ConfigureServices(services =>
-            {
-                // Единая точка регистрации всех сервисов ClubDoorman
-                services.AddClubDoorman();
-
-                // Логируем статус AI и Mimicry систем после полной инициализации
-                services.PostConfigure<IAppConfig>(appConfig =>
+                            .WriteTo.Async(a => a.File(
+                                path: Path.Combine(logsDir, "errors-.log"),
+                                rollingInterval: RollingInterval.Day,
+                                retainedFileCountLimit: 30,
+                                restrictedToMinimumLevel: LogEventLevel.Error,
+                                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                            ))
+                            .WriteTo.Async(a => a.File(
+                                path: Path.Combine(logsDir, "system-.log"),
+                                rollingInterval: RollingInterval.Day,
+                                retainedFileCountLimit: 14,
+                                restrictedToMinimumLevel: LogEventLevel.Information,
+                                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [System] {Message:lj}{NewLine}{Exception}"
+                            ))
+                            .WriteTo.Logger(lc => lc
+                                .Filter.ByIncludingOnly(e => e.Properties.ContainsKey("UserFlow"))
+                                .WriteTo.Async(a => a.File(
+                                    path: Path.Combine(logsDir, "userflow-.log"),
+                                    rollingInterval: RollingInterval.Day,
+                                    retainedFileCountLimit: 7,
+                                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [UserFlow] {Message:lj}{NewLine}{Exception}"
+                                ))
+                            );
+                    }
+                )
+                .ConfigureServices((ctx, services) =>
                 {
-                    var serviceProvider = services.BuildServiceProvider();
-                    var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] PostConfigure: IAppConfig loaded. AI/Mimicry/Other system status will be logged here if needed.");
+                    // Единая точка регистрации всех сервисов ClubDoorman
+                    services.AddClubDoorman(ctx.Configuration);
+
+                    // Логируем статус AI и Mimicry систем после полной инициализации
+                    services.PostConfigure<IAppConfig>(appConfig =>
+                    {
+                        var serviceProvider = services.BuildServiceProvider();
+                        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                        logger.LogDebug("[DI] PostConfigure: IAppConfig loaded. AI/Mimicry/Other system status will be logged here if needed.");
+                    });
                 });
-            })
-            .Build();
+
+
+        var host = hostBuilder.Build();
 
         // Логируем статус AI и Mimicry систем после полной инициализации
         var appConfig = host.Services.GetRequiredService<IAppConfig>();

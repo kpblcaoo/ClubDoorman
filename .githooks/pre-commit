@@ -8,13 +8,18 @@ if ! command -v dotnet >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "[pre-commit] dotnet format (в режиме проверки)"
-dotnet format --verify-no-changes || {
-  echo "[pre-commit] Неконсистентное форматирование. Исправляю..." >&2
-  dotnet format
-  echo "[pre-commit] Пожалуйста, добавьте отформатированные файлы и повторите commit." >&2
-  exit 1
-}
+# Formatting step temporarily disabled (requested). Opt-in by exporting PRECOMMIT_FORMAT=1.
+if [ "${PRECOMMIT_FORMAT:-0}" = "1" ]; then
+  echo "[pre-commit] dotnet format (в режиме проверки)"
+  dotnet format --verify-no-changes || {
+    echo "[pre-commit] Неконсистентное форматирование. Исправляю..." >&2
+    dotnet format
+    echo "[pre-commit] Пожалуйста, добавьте отформатированные файлы и повторите commit." >&2
+    exit 1
+  }
+else
+  echo "[pre-commit] dotnet format пропущен (установите PRECOMMIT_FORMAT=1 для включения)"
+fi
 
 # Optional: gitleaks baseline check (если пользователь установил gitleaks)
 if command -v gitleaks >/dev/null 2>&1; then

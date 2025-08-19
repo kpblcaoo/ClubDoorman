@@ -38,6 +38,9 @@ coverage-reports/
 ClubDoorman/logs/
 *.log
 
+# Golden transient semantics (never commit)
+*.sem.json
+
 # Temporary test files
 *.tmp
 *.temp

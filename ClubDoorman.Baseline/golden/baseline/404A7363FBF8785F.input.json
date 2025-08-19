@@ -1,0 +1,22 @@
+{
+  "ChatId": -1001234567890,
+  "Payload": {
+    "Id": 3,
+    "Type": "Message",
+    "Message": {
+      "MessageId": 0,
+      "ChatId": -1001234567890,
+      "Type": 2,
+      "Title": "GoldenBaselineChat",
+      "From": {
+        "Id": "U0003",
+        "IsBot": false,
+        "Username": "u_f918fd98"
+      },
+      "Text": "ищу партнеров для удаленного заработка"
+    }
+  },
+  "Type": "Message",
+  "UserId": "U0003",
+  "handler": "MessageHandler"
+}

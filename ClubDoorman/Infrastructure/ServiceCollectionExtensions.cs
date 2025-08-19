@@ -24,6 +24,8 @@ using ClubDoorman.Models.Logging;
 using ClubDoorman.Effects;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -42,10 +44,23 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services">Коллекция сервисов</param>
     /// <returns>Коллекция сервисов для цепочки вызовов</returns>
-    public static IServiceCollection AddClubDoorman(this IServiceCollection services)
+    public static IServiceCollection AddClubDoorman(this IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration? configuration = null)
     {
         // Регистрация конфигурации приложения (должна быть первой)
         services.AddConfigurationServices();
+
+        // Logging / tracing flags (optional configuration section)
+        if (configuration != null)
+        {
+            services.Configure<LoggingFlagsOptions>(configuration.GetSection("LoggingFlags"));
+        }
+        else
+        {
+            services.Configure<LoggingFlagsOptions>(_ => { }); // defaults
+        }
+
+        // Golden Master recorder
+        services.AddSingleton<IGoldenMasterRecorder, GoldenMasterRecorder>();
 
         // Регистрация инфраструктуры эффектов (должна быть перед AppConfig)
         services.AddSingleton<EffectsConfiguration>(provider => new EffectsConfiguration
@@ -88,23 +103,24 @@ public static class ServiceCollectionExtensions
             var logger = provider.GetRequiredService<ILogger<TelegramBotClient>>();
             logger.LogDebug("[DI] TelegramBotClient factory called");
             var appConfig = provider.GetRequiredService<IAppConfig>();
-            logger.LogDebug("[DI] IAppConfig resolved: {AppConfigType}, BotApi: {BotApiPrefix}...",
-                appConfig.GetType().Name,
-                appConfig.BotApi != null ? appConfig.BotApi.Substring(0, Math.Min(appConfig.BotApi.Length, 10)) : "null");
+            var botApiPreview = appConfig.BotApi != null ? appConfig.BotApi.Substring(0, Math.Min(appConfig.BotApi.Length, 10)) : "null";
+            logger.LogDebug("[DI] IAppConfig resolved: {AppConfigType}, BotApi: {BotApiPrefix}...", appConfig.GetType().Name, botApiPreview);
 
-            // Проверяем конфигурацию бота
-            if (string.IsNullOrEmpty(appConfig.BotApi))
+            // Baseline / golden harness mode: we don't need a real Telegram client; return a stub to avoid token validation.
+            if (Environment.GetEnvironmentVariable("DOORMAN_GOLDEN_BASELINE") == "1")
             {
-                logger.LogError("[DI] DOORMAN_BOT_API is not set or is 'test-bot-token'.");
-                throw new InvalidOperationException(
-                    "❌ Бот не может запуститься: DOORMAN_BOT_API не настроен или равен 'test-bot-token'. " +
-                    "Установите переменную окружения DOORMAN_BOT_API с валидным токеном бота."
-                );
+                logger.LogWarning("[DI] Golden baseline mode detected — returning dummy TelegramBotClient to skip token validation.");
+                // Provide syntactically valid but obviously fake dummy token (avoids secret scanner hits).
+                return new TelegramBotClient("000000000:PLACEHOLDER_PLACEHOLDER_PLACEHOLD");
             }
 
-            logger.LogDebug("[DI] 🤖 Starting bot with token: {BotApiPrefix}...",
-                appConfig.BotApi.Substring(0, Math.Min(appConfig.BotApi.Length, 10)));
+            if (string.IsNullOrEmpty(appConfig.BotApi) || appConfig.BotApi == "test-bot-token")
+            {
+                logger.LogError("[DI] DOORMAN_BOT_API is not set or is 'test-bot-token'.");
+                throw new InvalidOperationException("❌ Бот не может запуститься: DOORMAN_BOT_API не настроен или равен 'test-bot-token'. Установите переменную окружения DOORMAN_BOT_API с валидным токеном бота.");
+            }
 
+            logger.LogDebug("[DI] 🤖 Starting bot with token: {BotApiPrefix}...", botApiPreview);
             return new TelegramBotClient(appConfig.BotApi);
         });
 

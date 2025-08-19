@@ -1,0 +1,8 @@
+{
+  "Schema": 2,
+  "CorrelationId": "0EABC0ECF91457C7",
+  "Id": 13,
+  "ShortName": "ReplyBase",
+  "Action": "Allow",
+  "RuleCode": "Pass"
+}

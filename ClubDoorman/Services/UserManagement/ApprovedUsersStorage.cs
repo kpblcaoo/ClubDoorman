@@ -18,8 +18,19 @@ public class ApprovedUsersStorage
     public ApprovedUsersStorage(ILogger<ApprovedUsersStorage> logger)
     {
         _logger = logger;
-        _globalFilePath = Path.Combine("data", "approved_users.json");
-        _groupsFilePath = Path.Combine("data", "approved_users_groups.json");
+
+        // Allow overriding data root via env var to isolate baseline/tests from production static files.
+        // Fallback to default "data" to preserve existing behaviour.
+        var dataRoot = Environment.GetEnvironmentVariable("DOORMAN_DATA_ROOT");
+        if (string.IsNullOrWhiteSpace(dataRoot))
+        {
+            dataRoot = "data";
+        }
+
+        _globalFilePath = Path.Combine(dataRoot, "approved_users.json");
+        _groupsFilePath = Path.Combine(dataRoot, "approved_users_groups.json");
+
+        _logger.LogDebug("ApprovedUsersStorage using data root: {DataRoot}", Path.GetFullPath(dataRoot));
 
         _globalApprovedUsers = LoadGlobalFromFile();
         _groupApprovedUsers = LoadGroupsFromFile();

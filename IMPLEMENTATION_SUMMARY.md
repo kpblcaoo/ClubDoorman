@@ -93,6 +93,67 @@ DOORMAN_BAN_FOLDER_INVITE_USERS=false
 
 ---
 
+## 🧪 Golden Master Evolution (Phases 0–4) — Current Snapshot
+
+Полная актуальная спецификация и детализированная инструкция по фазам теперь вынесена в отдельный документ: `docs/GOLDEN_PIPELINE.md`. Ниже оставлена сокращённая версия для быстрого обзора.
+
+Ниже краткая фиксация состояния многофазной эволюции golden baseline (для разработчиков, работающих с тестовой семантикой модерации).
+
+| Phase | Цель | Артефакты | Ключевые инварианты |
+|-------|------|-----------|---------------------|
+| 0 | Дет. заморозка исходных v1 snapshot пар | `golden/baseline/*.input.json` + (legacy) `*.output.json` | Стабильность хеша корреляции, неизменяемый набор сценариев |
+| 1 | Семантическое обогащение (RuleCode) | Расширенные `*.output.json` (устарело) → теперь легковес `*.sem.json` | Отсутствие `Unknown` в `ruleCode` |
+| 2 | Манифест (Schema=1) | `golden/manifest.json` | Непрерывные Id, нет сирот, `Pass ⇒ Allow` |
+| 3 | Упрощённый слой (Schema=2) | `golden/baseline_v2/*.v2.json` | Биекция RuleCode множеств (manifest ↔ v2), паритет Action |
+| 4 | Нормализованный слой (Schema=4) | `golden/baseline_norm/*.norm.json` | Schema=4 маркер, паритет RuleCode с manifest, Action совпадает при наличии |
+| 5 | Агрегаты (Schema=5) | `golden/aggregates.json` | Totals, ActionCounts, RuleCodeCounts, RuleCodesFingerprint согласованы с manifest |
+| 6 (CI Gate) | Валидация стабильности | GitHub Action `golden-validation` | Отсутствие diff после регенерации + прохождение Golden-* тестов |
+
+### Phase 4 (Schema=4) Детали
+Цель: предоставить «самый тонкий» стабильный слой для будущего сравнения без шума. Поля: `Schema`, `Id`, `CorrelationId`, `ShortName`, `Action`, `RuleCode`.
+
+Источник данных:
+1. Первично — V2 (`baseline_v2/*.v2.json`).
+2. (Удалено) Fallback — исходный v1 `*.output.json`.
+2*. Новый fallback: локальный `*.sem.json` (не коммитится).
+
+Инварианты проверяются тестом `GoldenNormalizationTests` (Category=GoldenNorm):
+- Наличие файла для каждого manifest entry.
+- `Schema == 4`.
+- Совпадение `Id/CorrelationId/ShortName` и (если не null) `Action` / `RuleCode` с manifest.
+- Полное множество `RuleCode` идентично manifest.
+
+Назначение слоя Schema=4:
+- Будущая точка входа для дифф-валидации PR (CI gate) с минимальными ложными диффами.
+- (Сделано Phase 9) Убраны громоздкие v1 `*.output.json`.
+
+След. шаги (план):
+1. Phase 9 — окончательное удаление v1; введён локальный semantics слой (`*.sem.json`).
+2. Phase 8 — Mutation/chaos проверки стабильности (опционально) + hash цепочка для quick integrity check.
+
+### Phase 6 (CI Gate) Детали
+Добавлен workflow `golden-validation.yml`, который на каждом PR:
+1. Собирает проект (Release).
+2. Запускает baseline harness (`ClubDoorman.Baseline`) для регенерации всех фаз (0–5).
+3. Выполняет проверку `git status --porcelain -- ClubDoorman.Baseline/golden` и падает, если есть изменённые или новые файлы.
+4. Запускает селективные Golden-тесты (категории: GoldenManifest, GoldenV2, GoldenNorm, GoldenAgg).
+5. Публикует артефакты (golden файлы + результаты тестов) для ревью.
+
+Цель: мгновенно подсветить любые непреднамеренные изменения семантики модерации. Если изменение осознанное — разработчик обновляет golden baseline локально и коммитит.
+
+Локальный прогон через act (пример):
+```
+act pull_request -j golden-validation -W .github/workflows/golden-validation.yml
+```
+Перед запуском убедитесь в наличии .NET 9 (см. скрипт `./dotnet-install.sh`).
+
+Процедура осознанного обновления golden:
+1. Изменить код.
+2. `dotnet run --project ClubDoorman.Baseline/ClubDoorman.Baseline.csproj` (Release не обязателен локально).
+3. Просмотреть `git diff ClubDoorman.Baseline/golden`.
+4. Если корректно — добавить/коммитить изменения.
+5. Убедиться, что workflow golden-validation проходит без дальнейших диффов.
+
 ## 🔄 Channel Effects Migration Progress (Stage 2 & 3) — HISTORICAL (migration completed, scaffolding removed)
 
 Дата (историческая фиксация этапа): 2025-08-17
