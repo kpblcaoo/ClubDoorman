@@ -205,25 +205,44 @@ public class FakeServicesFactory
 
         var logger = _loggerFactory.CreateLogger<MessageHandler>();
 
+        // Build full pipeline (10-220) mirroring production so AI analysis + moderation semantics happen inside pipeline.
+        var gmRecorder = new GoldenMasterRecorder(Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object);
+        var eventsPublisher = new Mock<IModerationEventPublisher>().Object; // semantics ignored in these integration tests
+        var commandRouterMock = new Mock<ICommandRouter>();
+        var userJoinFacadeMock = new Mock<IUserJoinFacade>();
+        var channelModerationMock = new Mock<IChannelModerationService>();
+        var forwardingMock = new Mock<IForwardingService>();
+
+        var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
+        {
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouterMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep(eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep(userJoinFacadeMock.Object, _appConfig, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep(_fakeBot, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep(channelModerationMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep(eventsPublisher, _appConfig, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep(captchaService ?? CreateCaptchaService(), _fakeBot, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManagerMock.Object, new Mock<IUserBanService>().Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacadeMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLoggerMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManagerMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacadeMock.Object, userFlowLoggerMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascadeServiceMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(moderationFacadeMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>())
+        };
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(steps, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>());
+
         return new MessageHandler(
             _fakeBot,
-            userManagerMock.Object,
             _appConfig,
-            new Mock<IUserBanService>().Object,
-            new Mock<IChannelModerationService>().Object,
-            new Mock<ICommandRouter>().Object,
-            new Mock<IUserJoinFacade>().Object,
-            moderationFacadeMock.Object,
+            channelModerationMock.Object,
+            commandRouterMock.Object,
             logger,
             botPermissionsServiceMock.Object,
-            captchaService ?? CreateCaptchaService(),
-            userFlowLoggerMock.Object,
-            new Mock<IForwardingService>().Object,
-            aiCascadeServiceMock.Object,
-            new GoldenMasterRecorder(Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), new Mock<ILogger<GoldenMasterRecorder>>().Object),
-            new Mock<IModerationEventPublisher>().Object,
-            Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false })
-        );
+            gmRecorder,
+            eventsPublisher,
+            Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
+            pipeline);
     }
 
     /// <summary>

@@ -146,6 +146,23 @@ public static class ServiceCollectionExtensions
     // регистрации ICommandHandler и предупреждениям CommandRouter про дубли команд.
     services.AddCommandsServices(); // один вызов достаточно
 
+    // Pipeline core (Phase 2+) — регистрируем конвейер и ВСЕ шаги (10–220)
+    services.AddSingleton<Services.Handlers.Pipeline.IMessagePipeline, Services.Handlers.Pipeline.MessagePipeline>();
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>(); // 10
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.SystemOrBotMessageStep>(); // 15
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.NewMembersStep>(); // 20
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.LeftMemberCleanupStep>(); // 30
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.ChannelMessageStep>(); // 40
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.PrivateSkipStep>(); // 50
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.CaptchaPendingStep>(); // 100
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>(); // 110
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>(); // 120
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>(); // 130
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>(); // 140
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>(); // 200
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>(); // 210
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>(); // 220
+
         // Регистрация Worker как HostedService
         services.AddHostedService<Worker>(provider =>
         {
