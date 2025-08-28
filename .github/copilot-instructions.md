@@ -138,7 +138,7 @@ dotnet test --filter "Category=BDD"
 
 ### GitHub Actions Pipelines
 1. **ci.yml**: PR validation (build + basic tests)
-2. **deploy.yml**: Docker build/push on `next-dev` branch
+2. **deploy.yml**: Docker build/push on `next*` branches
 3. **e2e-tests.yml**: Full E2E testing with secrets
 
 ### Deployment Process
@@ -222,7 +222,7 @@ public class SomeService(ILogger<SomeService> logger, IDependency dep)
 - `docker-compose.yml`: Local development setup
 
 ## Agent Instructions
-0. **ALL** new branches for development must be based on the `next-dev` branch.
+0. **ALL** new branches for development must be based on the `next-lab` branch.
 1. **ALWAYS** use .NET 9.0 SDK before any dotnet commands
 2. **ALWAYS** run `dotnet restore` before building
 3. **EXCLUDE** real-api, BDD, disabled, and demo tests in standard runs

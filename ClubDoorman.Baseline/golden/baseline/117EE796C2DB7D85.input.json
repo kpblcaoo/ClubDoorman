@@ -1,0 +1,22 @@
+{
+  "ChatId": -1001234567890,
+  "Payload": {
+    "Id": 15,
+    "Type": "Message",
+    "Message": {
+      "MessageId": 0,
+      "ChatId": -1001234567890,
+      "Type": 2,
+      "Title": "GoldenBaselineChat",
+      "From": {
+        "Id": "U0050",
+        "IsBot": false,
+        "Username": "u_3457ed5a"
+      },
+      "Text": "Сообщение от забаненного ранее пользователя"
+    }
+  },
+  "Type": "Message",
+  "UserId": "U0050",
+  "handler": "MessageHandler"
+}

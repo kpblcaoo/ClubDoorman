@@ -18,9 +18,20 @@ public class ApprovedUsersStorage
     public ApprovedUsersStorage(ILogger<ApprovedUsersStorage> logger)
     {
         _logger = logger;
-        _globalFilePath = Path.Combine("data", "approved_users.json");
-        _groupsFilePath = Path.Combine("data", "approved_users_groups.json");
-        
+
+        // Allow overriding data root via env var to isolate baseline/tests from production static files.
+        // Fallback to default "data" to preserve existing behaviour.
+        var dataRoot = Environment.GetEnvironmentVariable("DOORMAN_DATA_ROOT");
+        if (string.IsNullOrWhiteSpace(dataRoot))
+        {
+            dataRoot = "data";
+        }
+
+        _globalFilePath = Path.Combine(dataRoot, "approved_users.json");
+        _groupsFilePath = Path.Combine(dataRoot, "approved_users_groups.json");
+
+        _logger.LogDebug("ApprovedUsersStorage using data root: {DataRoot}", Path.GetFullPath(dataRoot));
+
         _globalApprovedUsers = LoadGlobalFromFile();
         _groupApprovedUsers = LoadGroupsFromFile();
     }
@@ -108,7 +119,7 @@ public class ApprovedUsersStorage
                 var json = JsonSerializer.Serialize(list, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(tempPath, json);
             }
-            
+
             File.Move(tempPath, _globalFilePath, true);
         }
         catch (Exception ex)
@@ -131,7 +142,7 @@ public class ApprovedUsersStorage
                 var json = JsonSerializer.Serialize(_groupApprovedUsers, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(tempPath, json);
             }
-            
+
             File.Move(tempPath, _groupsFilePath, true);
         }
         catch (Exception ex)
@@ -158,7 +169,7 @@ public class ApprovedUsersStorage
     {
         lock (_lock)
         {
-            return _groupApprovedUsers.TryGetValue(groupId, out var groupUsers) && 
+            return _groupApprovedUsers.TryGetValue(groupId, out var groupUsers) &&
                    groupUsers.ContainsKey(userId);
         }
     }
@@ -196,7 +207,7 @@ public class ApprovedUsersStorage
             {
                 added = _globalApprovedUsers.Add(userId);
             }
-            
+
             if (added)
             {
                 _logger.LogInformation("Пользователь {UserId} добавлен в глобальный список одобренных", userId);
@@ -231,7 +242,7 @@ public class ApprovedUsersStorage
                     _groupApprovedUsers[groupId][userId] = new GroupApprovalInfo(DateTime.UtcNow);
                 }
             }
-            
+
             if (added)
             {
                 _logger.LogInformation("Пользователь {UserId} добавлен в список одобренных группы {GroupId}", userId, groupId);
@@ -257,7 +268,7 @@ public class ApprovedUsersStorage
             {
                 removed = _globalApprovedUsers.Remove(userId);
             }
-            
+
             if (removed)
             {
                 _logger.LogInformation("Пользователь {UserId} удален из глобального списка одобренных", userId);
@@ -283,10 +294,10 @@ public class ApprovedUsersStorage
             bool removed;
             lock (_lock)
             {
-                removed = _groupApprovedUsers.TryGetValue(groupId, out var groupUsers) && 
+                removed = _groupApprovedUsers.TryGetValue(groupId, out var groupUsers) &&
                           groupUsers.Remove(userId);
             }
-            
+
             if (removed)
             {
                 _logger.LogInformation("Пользователь {UserId} удален из списка одобренных группы {GroupId}", userId, groupId);
@@ -311,12 +322,12 @@ public class ApprovedUsersStorage
         {
             bool globalRemoved = false;
             bool groupsRemoved = false;
-            
+
             lock (_lock)
             {
                 // Удаляем из глобального списка
                 globalRemoved = _globalApprovedUsers.Remove(userId);
-                
+
                 // Удаляем из всех групп
                 foreach (var groupUsers in _groupApprovedUsers.Values)
                 {
@@ -324,7 +335,7 @@ public class ApprovedUsersStorage
                         groupsRemoved = true;
                 }
             }
-            
+
             // Сохраняем файлы только если были изменения
             if (globalRemoved)
             {
@@ -334,7 +345,7 @@ public class ApprovedUsersStorage
             {
                 SaveGroupsToFile();
             }
-            
+
             if (globalRemoved || groupsRemoved)
             {
                 _logger.LogInformation("Пользователь {UserId} удален из всех списков одобренных", userId);
@@ -394,8 +405,8 @@ public class ApprovedUsersStorage
             var globalCount = _globalApprovedUsers.Count;
             var groupCount = _groupApprovedUsers.Count;
             var totalGroupApprovals = _groupApprovedUsers.Values.Sum(g => g.Count);
-            
+
             return (globalCount, groupCount, totalGroupApprovals);
         }
     }
-} 
+}

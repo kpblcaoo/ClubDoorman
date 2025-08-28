@@ -76,4 +76,4 @@ public class StatisticsServiceGetChatLinkTests
         var result = _chatLinkFormatter.GetChatLink(chat);
         Assert.That(result, Is.EqualTo("[Test \\*Bold\\* \\_Italic\\_ \\[Link\\]](https://t.me/testgroup)"));
     }
-} 
+}

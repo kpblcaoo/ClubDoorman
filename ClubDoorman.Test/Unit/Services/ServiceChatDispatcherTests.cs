@@ -1,6 +1,4 @@
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
@@ -10,6 +8,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Test.Unit.Services;
 
@@ -164,16 +163,16 @@ public class ServiceChatDispatcherTests
     {
         // Arrange
         var notification = ServiceChatDispatcherTestFactory.CreateTestNotificationData();
-        
+
         _factory.BotClientMock.Setup(x => x.SendMessageAsync(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), It.IsAny<ReplyParameters>(), It.IsAny<ReplyMarkup>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Bot API error"));
 
         // Act & Assert
         var exception = Assert.ThrowsAsync<Exception>(async () =>
             await _dispatcher.SendToAdminChatAsync(notification));
-        
+
         Assert.That(exception.Message, Is.EqualTo("Bot API error"));
-        
+
         _factory.LoggerMock.Verify(x => x.Log(
             LogLevel.Error,
             It.IsAny<EventId>(),
@@ -188,16 +187,16 @@ public class ServiceChatDispatcherTests
     {
         // Arrange
         var notification = ServiceChatDispatcherTestFactory.CreateTestNotificationData();
-        
+
         _factory.BotClientMock.Setup(x => x.SendMessageAsync(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), It.IsAny<ReplyParameters>(), It.IsAny<ReplyMarkup>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Bot API error"));
 
         // Act & Assert
         var exception = Assert.ThrowsAsync<Exception>(async () =>
             await _dispatcher.SendToLogChatAsync(notification));
-        
+
         Assert.That(exception.Message, Is.EqualTo("Bot API error"));
-        
+
         _factory.LoggerMock.Verify(x => x.Log(
             LogLevel.Error,
             It.IsAny<EventId>(),
@@ -226,7 +225,7 @@ public class ServiceChatDispatcherTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<OperationCanceledException>(async () =>
             await _dispatcher.SendToAdminChatAsync(notification, cancellationToken));
-        
+
         Assert.That(exception, Is.Not.Null);
     }
 
@@ -250,7 +249,7 @@ public class ServiceChatDispatcherTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<OperationCanceledException>(async () =>
             await _dispatcher.SendToLogChatAsync(notification, cancellationToken));
-        
+
         Assert.That(exception, Is.Not.Null);
     }
 
@@ -271,7 +270,7 @@ public class ServiceChatDispatcherTests
             It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("отправляем уведомление типа")),
             It.IsAny<Exception>(),
             It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
-        
+
         _factory.LoggerMock.Verify(x => x.Log(
             LogLevel.Debug,
             It.IsAny<EventId>(),
@@ -317,7 +316,7 @@ public class ServiceChatDispatcherTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<NullReferenceException>(async () =>
             await _dispatcher.SendToAdminChatAsync(null!));
-        
+
         Assert.That(exception, Is.Not.Null);
     }
 
@@ -328,7 +327,7 @@ public class ServiceChatDispatcherTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<NullReferenceException>(async () =>
             await _dispatcher.SendToLogChatAsync(null!));
-        
+
         Assert.That(exception, Is.Not.Null);
     }
 
@@ -338,8 +337,8 @@ public class ServiceChatDispatcherTests
     {
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            new ServiceChatDispatcher(null!, _factory.LoggerMock.Object));
-        
+            new ServiceChatDispatcher(null!, _factory.LoggerMock.Object, _factory.AppConfigMock.Object));
+
         Assert.That(exception.ParamName, Is.EqualTo("bot"));
     }
 
@@ -349,8 +348,8 @@ public class ServiceChatDispatcherTests
     {
         // Act & Assert
         var exception = Assert.Throws<ArgumentNullException>(() =>
-            new ServiceChatDispatcher(_factory.BotClientMock.Object, null!));
-        
+            new ServiceChatDispatcher(_factory.BotClientMock.Object, null!, _factory.AppConfigMock.Object));
+
         Assert.That(exception.ParamName, Is.EqualTo("logger"));
     }
 
@@ -431,4 +430,4 @@ public class ServiceChatDispatcherTests
             It.IsAny<ReplyMarkup>(),
             It.IsAny<CancellationToken>()), Times.Exactly(notifications.Length));
     }
-} 
+}

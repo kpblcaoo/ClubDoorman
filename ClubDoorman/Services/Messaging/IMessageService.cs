@@ -14,12 +14,12 @@ public interface IMessageService
     /// Отправить уведомление в админский чат
     /// </summary>
     Task SendAdminNotificationAsync(AdminNotificationType type, NotificationData data, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Отправить уведомление в лог-чат
     /// </summary>
     Task SendLogNotificationAsync(LogNotificationType type, NotificationData data, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Отправить уведомление пользователю
     /// </summary>
@@ -49,29 +49,29 @@ public interface IMessageService
     /// Отправляет сообщение капчи используя Request объект
     /// </summary>
     Task<Message> SendCaptchaMessageAsync(SendCaptchaMessageRequest request);
-    
+
     /// <summary>
     /// Переслать сообщение в админский чат с уведомлением
     /// </summary>
     Task<Message?> ForwardToAdminWithNotificationAsync(Message originalMessage, AdminNotificationType type, NotificationData data, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Переслать сообщение в лог-чат с уведомлением
     /// </summary>
     Task<Message?> ForwardToLogWithNotificationAsync(Message originalMessage, LogNotificationType type, NotificationData data, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Отправить уведомление об ошибке используя Request объект
     /// </summary>
     Task SendErrorNotificationAsync(SendErrorNotificationRequest request);
-    
+
     /// <summary>
     /// Отправить уведомление о AI анализе профиля с фото
     /// </summary>
     Task SendAiProfileAnalysisAsync(AiProfileAnalysisData data, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Получить доступ к шаблонам сообщений
     /// </summary>
     MessageTemplates GetTemplates();
-} 
+}

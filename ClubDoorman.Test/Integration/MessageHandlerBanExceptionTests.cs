@@ -16,16 +16,19 @@ using NUnit.Framework;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Features.UserJoin;
 using ClubDoorman.Services.Handlers;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Features.Moderation;
 
 namespace ClubDoorman.Test.Integration;
 
@@ -43,7 +46,7 @@ public class MessageHandlerBanExceptionTests
 {
     private MessageHandler _handler = null!;
     private Mock<ITelegramBotClientWrapper> _botMock = null!;
-    private Mock<IModerationService> _moderationServiceMock = null!;
+    private Mock<IModerationFacade> _moderationServiceMock = null!;
     private Mock<IMessageService> _messageServiceMock = null!;
     private Mock<ILogger<MessageHandler>> _loggerMock = null!;
     private Mock<IUserBanService> _userBanServiceMock = null!;
@@ -53,17 +56,17 @@ public class MessageHandlerBanExceptionTests
     {
         // Используем автомоки для создания основных зависимостей
         _botMock = TK.CreateMockBotClientWrapper();
-        _moderationServiceMock = TK.CreateMockModerationService();
+        _moderationServiceMock = TK.CreateMock<IModerationFacade>();
         _messageServiceMock = TK.CreateMockMessageService();
         _loggerMock = new Mock<ILogger<MessageHandler>>();
         _userBanServiceMock = TK.CreateMockUserBanService();
-        
+
         // Создаем все необходимые моки для MessageHandler
         var userManagerMock = TK.CreateMockUserManager();
         var appConfigMock = TK.CreateMockAppConfig();
         var captchaServiceMock = TK.CreateMockCaptchaService();
         var botPermissionsServiceMock = TK.CreateMockBotPermissionsService();
-        
+
         // Создаем недостающие моки
         var classifierMock = new Mock<ISpamHamClassifier>();
         var badMessageManagerMock = new Mock<IBadMessageManager>();
@@ -86,61 +89,62 @@ public class MessageHandlerBanExceptionTests
             Mock.Of<ILogger<SuspiciousCommandHandler>>(),
             Mock.Of<IAppConfig>());
         var logChatServiceMock = new Mock<ILogChatService>();
-        
+
         // Настраиваем базовые моки
         appConfigMock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
         appConfigMock.Setup(x => x.DisabledChats).Returns(new HashSet<long>());
         appConfigMock.Setup(x => x.AdminChatId).Returns(123456789);
         appConfigMock.Setup(x => x.LogAdminChatId).Returns(987654321);
-        
+
         botPermissionsServiceMock.Setup(x => x.IsSilentModeAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-        
+
         captchaServiceMock.Setup(x => x.GenerateKey(It.IsAny<long>(), It.IsAny<long>()))
             .Returns("test-key");
         captchaServiceMock.Setup(x => x.GetCaptchaInfo(It.IsAny<string>()))
             .Returns((CaptchaInfo?)null);
-        
+
         userManagerMock.Setup(x => x.InBanlist(It.IsAny<long>())).ReturnsAsync(false);
         userManagerMock.Setup(x => x.GetClubUsername(It.IsAny<long>())).ReturnsAsync((string?)null);
-        
+
         _moderationServiceMock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
             .Returns(false);
-        
+
         // Настраиваем CheckUserNameAsync для тестов новых участников
         _moderationServiceMock.Setup(x => x.CheckUserNameAsync(It.IsAny<User>()))
             .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Valid username"));
-        
+
         // Настраиваем UserBanService методы
         _userBanServiceMock.Setup(x => x.BanUserForLongNameAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<string>(), It.IsAny<TimeSpan?>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         _userBanServiceMock.Setup(x => x.BanBlacklistedUserAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        
-        // Создаем MessageHandler с настроенными моками
+
+        var commandRouterMock = new Mock<ICommandRouter>();
+
+        // Создаем MessageHandler с настроенными моками (новая сигнатура конструктора)
+        // Минимальный pipeline только с двумя шагами модерации, достаточный для этих тестов (исключения в бан/удаление и т.д.)
+        var eventsPublisher = new Mock<IModerationEventPublisher>();
+        var moderationFacade = _moderationServiceMock.Object; // IModerationFacade уже мокнут
+        var userFlowLogger = userFlowLoggerMock.Object;
+        var pipelineLogger = new Mock<ILogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>>().Object;
+        var baseStepLogger = new Mock<ILogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>>().Object;
+        var finalStepLogger = new Mock<ILogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>>().Object;
+        var baseStep = new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade, userFlowLogger, eventsPublisher.Object, baseStepLogger);
+        var finalStep = new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(moderationFacade, eventsPublisher.Object, finalStepLogger);
+        var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(new ClubDoorman.Services.Handlers.Pipeline.IMessageStep[] { baseStep, finalStep }, pipelineLogger);
+
         _handler = new MessageHandler(
             _botMock.Object,
-            _moderationServiceMock.Object,
-            captchaServiceMock.Object,
-            userManagerMock.Object,
-            classifierMock.Object,
-            badMessageManagerMock.Object,
-            aiChecksMock.Object,
-            globalStatsManagerMock.Object,
-            statisticsServiceMock.Object,
-            userFlowLoggerMock.Object,
-            _messageServiceMock.Object,
-            chatLinkFormatterMock.Object,
-            botPermissionsServiceMock.Object,
             appConfigMock.Object,
-            violationTrackerMock.Object,
-            _loggerMock.Object,
-            _userBanServiceMock.Object,
             channelModerationServiceMock.Object,
-            startCommandHandlerMock.Object,
-            suspiciousCommandHandlerMock.Object,
-            logChatServiceMock.Object
-        );
+            commandRouterMock.Object,
+            _loggerMock.Object,
+            botPermissionsServiceMock.Object,
+            new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), Mock.Of<ILogger<GoldenMasterRecorder>>()),
+            eventsPublisher.Object,
+            Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
+            pipeline);
     }
 
     [Test]
@@ -164,15 +168,15 @@ public class MessageHandlerBanExceptionTests
             .FromUser(user)
             .InChat(chat)
             .Build();
-        
+
         // Настраиваем сценарий AutoBan с исключением в MessageService
         _moderationServiceMock.Setup(x => x.CheckMessageAsync(message))
             .ReturnsAsync(new ModerationResult(ModerationAction.Ban, "Спам сообщение"));
-        
+
         // В legacy режиме исключение может возникнуть в MessageService при отправке уведомления
         _messageServiceMock.Setup(x => x.SendLogNotificationAsync(It.IsAny<LogNotificationType>(), It.IsAny<AutoBanNotificationData>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Network error"));
-        
+
         // Act
         var update = new Update { Message = message };
         await _handler.HandleAsync(update, CancellationToken.None);
@@ -202,14 +206,14 @@ public class MessageHandlerBanExceptionTests
             .FromUser(user)
             .InChat(chat)
             .Build();
-        
+
         // Настраиваем сценарий AutoBan с исключением в DeleteMessage
         _moderationServiceMock.Setup(x => x.CheckMessageAsync(message))
             .ReturnsAsync(new ModerationResult(ModerationAction.Ban, "Спам сообщение"));
-        
+
         _botMock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Message not found"));
-        
+
         // Act
         var update = new Update { Message = message };
         await _handler.HandleAsync(update, CancellationToken.None);
@@ -239,14 +243,14 @@ public class MessageHandlerBanExceptionTests
             .FromUser(user)
             .InChat(chat)
             .Build();
-        
+
         // Настраиваем сценарий AutoBan с исключением в BanChatMember
         _moderationServiceMock.Setup(x => x.CheckMessageAsync(message))
             .ReturnsAsync(new ModerationResult(ModerationAction.Ban, "Спам сообщение"));
-        
+
         _botMock.Setup(x => x.BanChatMember(It.IsAny<ChatId>(), It.IsAny<long>(), It.IsAny<DateTime?>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Insufficient permissions"));
-        
+
         // Act
         var update = new Update { Message = message };
         await _handler.HandleAsync(update, CancellationToken.None);
@@ -277,14 +281,14 @@ public class MessageHandlerBanExceptionTests
             .FromUser(user)
             .InChat(chat)
             .Build();
-        
+
         // Настраиваем сценарий DeleteAndReportMessage с исключением
         _moderationServiceMock.Setup(x => x.CheckMessageAsync(message))
             .ReturnsAsync(new ModerationResult(ModerationAction.Delete, "Спам"));
-        
+
         _botMock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Forward failed"));
-        
+
         // Act
         var update = new Update { Message = message };
         await _handler.HandleAsync(update, CancellationToken.None);
@@ -314,14 +318,14 @@ public class MessageHandlerBanExceptionTests
             .FromUser(user)
             .InChat(chat)
             .Build();
-        
+
         // Настраиваем сценарий DeleteAndReportMessage с исключением
         _moderationServiceMock.Setup(x => x.CheckMessageAsync(message))
             .ReturnsAsync(new ModerationResult(ModerationAction.Delete, "Спам"));
-        
+
         _botMock.Setup(x => x.SendMessageAsync(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), It.IsAny<ReplyParameters>(), It.IsAny<ReplyMarkup>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Send failed"));
-        
+
         // Act
         var update = new Update { Message = message };
         await _handler.HandleAsync(update, CancellationToken.None);
@@ -352,10 +356,10 @@ public class MessageHandlerBanExceptionTests
             .FromUser(user)
             .InChat(chat)
             .Build();
-        
+
         // Настраиваем сценарий нового участника с длинным именем
         userJoinMessage.NewChatMembers = new[] { user };
-        
+
         // Act
         var update = new Update { Message = userJoinMessage };
         await _handler.HandleAsync(update, CancellationToken.None);
@@ -385,10 +389,10 @@ public class MessageHandlerBanExceptionTests
             .FromUser(user)
             .InChat(chat)
             .Build();
-        
+
         // Настраиваем сценарий нового участника в черном списке
         userJoinMessage.NewChatMembers = new[] { user };
-        
+
         // Act
         var update = new Update { Message = userJoinMessage };
         await _handler.HandleAsync(update, CancellationToken.None);
@@ -396,4 +400,4 @@ public class MessageHandlerBanExceptionTests
         // Assert - проверяем что логирование произошло
         _loggerMock.Verify(x => x.Log(It.IsAny<LogLevel>(), It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.AtLeastOnce);
     }
-} 
+}

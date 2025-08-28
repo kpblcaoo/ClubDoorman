@@ -37,7 +37,7 @@ public class CaptchaServiceFakeTests
     {
         _messageServiceMock = new Mock<IMessageService>();
         _factory = new CaptchaServiceTestFactory();
-        
+
         // Создаем тестовые данные
         chat = new Chat { Id = 123456, Title = "Test Chat", Type = ChatType.Group };
         user = new User { Id = 789, FirstName = "Test", LastName = "User" };
@@ -45,17 +45,17 @@ public class CaptchaServiceFakeTests
         key = "123456_789";
     }
 
-            private CaptchaService CreateCaptchaService()
-        {
-            return new CaptchaService(
-                new Mock<ITelegramBotClientWrapper>().Object,
-                new Mock<ILogger<CaptchaService>>().Object,
-                _messageServiceMock.Object,
-                AppConfigTestFactory.CreateDefault(),
-                new Mock<IViolationTracker>().Object,
-                new Mock<IUserBanService>().Object
-            );
-        }
+    private CaptchaService CreateCaptchaService()
+    {
+        return new CaptchaService(
+            new Mock<ITelegramBotClientWrapper>().Object,
+            new Mock<ILogger<CaptchaService>>().Object,
+            _messageServiceMock.Object,
+            AppConfigTestFactory.CreateDefault(),
+            new Mock<IViolationTracker>().Object,
+            new Mock<IUserBanService>().Object
+        );
+    }
 
     [Test]
     public async Task CreateCaptchaAsync_ValidUser_SendsWelcomeMessage()
@@ -64,7 +64,7 @@ public class CaptchaServiceFakeTests
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
-        
+
         var service = CreateCaptchaService();
 
         // Act
@@ -73,7 +73,7 @@ public class CaptchaServiceFakeTests
         // Assert
         Assert.That(captchaInfo, Is.Not.Null);
         Assert.That(captchaInfo.User.Id, Is.EqualTo(789));
-        
+
         _messageServiceMock.Verify(x => x.SendCaptchaMessageAsync(It.IsAny<SendCaptchaMessageRequest>()), Times.Once);
     }
 
@@ -84,7 +84,7 @@ public class CaptchaServiceFakeTests
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
-        
+
         var service = CreateCaptchaService();
         var userWithInappropriateName = new User { Id = 999, FirstName = "p0rn", LastName = "User" };
 
@@ -102,9 +102,9 @@ public class CaptchaServiceFakeTests
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
-        
+
         var service = CreateCaptchaService();
-        
+
         // Act - сначала создаем капчу
         var createdCaptcha = await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
         var key = service.GenerateKey(chat.Id, user.Id);
@@ -121,7 +121,7 @@ public class CaptchaServiceFakeTests
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
-        
+
         var service = CreateCaptchaService();
         var key = service.GenerateKey(chat.Id, user.Id);
 
@@ -139,15 +139,15 @@ public class CaptchaServiceFakeTests
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
         .ThrowsAsync(new Exception("Telegram API error"));
-        
+
         var service = CreateCaptchaService();
-        
+
         // Act & Assert
         var caughtException = Assert.ThrowsAsync<Exception>(async () =>
         {
             await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
         });
-        
+
         Assert.That(caughtException.Message, Is.EqualTo("Telegram API error"));
     }
 
@@ -173,7 +173,7 @@ public class CaptchaServiceFakeTests
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
-        
+
         var service = CreateCaptchaService();
 
         // Act
@@ -191,7 +191,7 @@ public class CaptchaServiceFakeTests
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
-        
+
         var service = CreateCaptchaService();
         var key = service.GenerateKey(chat.Id, user.Id);
 
@@ -223,9 +223,9 @@ public class CaptchaServiceFakeTests
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
-        
+
         var service = CreateCaptchaService();
-        
+
         // Act - сначала создаем капчу
         var createdCaptcha = await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
         var key = service.GenerateKey(chat.Id, user.Id);
@@ -243,9 +243,9 @@ public class CaptchaServiceFakeTests
         _messageServiceMock.Setup(x => x.SendCaptchaMessageAsync(
             It.IsAny<SendCaptchaMessageRequest>()))
         .ReturnsAsync(new global::Telegram.Bot.Types.Message());
-        
+
         var service = CreateCaptchaService();
-        
+
         // Act - сначала создаем капчу
         var createdCaptcha = await service.CreateCaptchaAsync(new CreateCaptchaRequest(chat, user, null));
         var key = service.GenerateKey(chat.Id, user.Id);
@@ -255,4 +255,4 @@ public class CaptchaServiceFakeTests
         Assert.That(result, Is.True);
         Assert.That(service.GetCaptchaInfo(key), Is.Null);
     }
-} 
+}

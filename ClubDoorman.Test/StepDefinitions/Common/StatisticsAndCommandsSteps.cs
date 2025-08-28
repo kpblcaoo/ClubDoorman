@@ -62,4 +62,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             // Assert.Pass("Correct statistics are displayed");
         }
     }
-} 
+}

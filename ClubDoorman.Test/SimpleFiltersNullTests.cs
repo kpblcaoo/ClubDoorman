@@ -1,8 +1,4 @@
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
-using NUnit.Framework;
-
+﻿
 namespace ClubDoorman.Test;
 
 [TestFixture]
@@ -12,9 +8,9 @@ public class SimpleFiltersNullTests
     public void HasStopWords_WithNullInput_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
+        var exception = Assert.Throws<ArgumentNullException>(() =>
             SimpleFilters.HasStopWords(null!));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("message"));
     }
 
@@ -23,7 +19,7 @@ public class SimpleFiltersNullTests
     {
         // Act
         var result = SimpleFilters.HasStopWords("");
-        
+
         // Assert
         Assert.That(result, Is.False);
     }
@@ -33,7 +29,7 @@ public class SimpleFiltersNullTests
     {
         // Act
         var result = SimpleFilters.HasStopWords("Привет, как дела?");
-        
+
         // Assert
         Assert.That(result, Is.False);
     }
@@ -42,9 +38,9 @@ public class SimpleFiltersNullTests
     public void FindAllRussianWordsWithLookalikeSymbols_WithNullInput_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
+        var exception = Assert.Throws<ArgumentNullException>(() =>
             SimpleFilters.FindAllRussianWordsWithLookalikeSymbols(null!));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("message"));
     }
 
@@ -53,7 +49,7 @@ public class SimpleFiltersNullTests
     {
         // Act
         var result = SimpleFilters.FindAllRussianWordsWithLookalikeSymbols("");
-        
+
         // Assert
         Assert.That(result, Is.Empty);
     }
@@ -62,9 +58,9 @@ public class SimpleFiltersNullTests
     public void FindAllRussianWordsWithLookalikeSymbolsInNormalizedText_WithNullInput_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
+        var exception = Assert.Throws<ArgumentNullException>(() =>
             SimpleFilters.FindAllRussianWordsWithLookalikeSymbolsInNormalizedText(null!));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("message"));
     }
 
@@ -73,7 +69,7 @@ public class SimpleFiltersNullTests
     {
         // Act
         var result = SimpleFilters.FindAllRussianWordsWithLookalikeSymbolsInNormalizedText("");
-        
+
         // Assert
         Assert.That(result, Is.Empty);
     }
@@ -82,9 +78,9 @@ public class SimpleFiltersNullTests
     public void TooManyEmojis_WithNullInput_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
+        var exception = Assert.Throws<ArgumentNullException>(() =>
             SimpleFilters.TooManyEmojis(null!));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("message"));
     }
 
@@ -93,8 +89,8 @@ public class SimpleFiltersNullTests
     {
         // Act
         var result = SimpleFilters.TooManyEmojis("");
-        
+
         // Assert
         Assert.That(result, Is.False);
     }
-} 
+}

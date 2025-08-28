@@ -30,4 +30,4 @@ public interface IBotPermissionsService
     /// <param name="cancellationToken">Токен отмены</param>
     /// <returns>Информация о члене чата или null, если бот не в чате</returns>
     Task<ChatMember?> GetBotChatMemberAsync(long chatId, CancellationToken cancellationToken = default);
-} 
+}

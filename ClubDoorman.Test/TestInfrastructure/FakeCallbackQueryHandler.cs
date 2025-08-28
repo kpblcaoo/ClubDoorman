@@ -158,7 +158,7 @@ public class FakeCallbackQueryHandler : ICallbackQueryHandler
             await _bot.AnswerCallbackQuery(callbackQuery.Id, "Обработано", cancellationToken: cancellationToken);
         }
 
-        _logger.LogInformation("FakeCallbackQueryHandler: обработан callback {CallbackId}, данные: {Data}, ответ: {Answered}", 
+        _logger.LogInformation("FakeCallbackQueryHandler: обработан callback {CallbackId}, данные: {Data}, ответ: {Answered}",
             callbackQuery.Id, callbackQuery.Data, ShouldAnswerCallback ? "да" : "нет");
     }
 
@@ -206,4 +206,4 @@ public record CallbackQueryResult
     public bool WasAnswered { get; init; }
     public bool Success { get; init; }
     public DateTime Timestamp { get; init; }
-} 
+}

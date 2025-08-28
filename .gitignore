@@ -38,6 +38,9 @@ coverage-reports/
 ClubDoorman/logs/
 *.log
 
+# Golden transient semantics (never commit)
+*.sem.json
+
 # Temporary test files
 *.tmp
 *.temp
@@ -71,3 +74,7 @@ scripts/testkit-sql-indexer/testkit_index_*.txt
 
 venv/
 .venv/
+archive/
+archived/
+/html/
+/latex/

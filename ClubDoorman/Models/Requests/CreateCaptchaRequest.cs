@@ -12,17 +12,17 @@ public class CreateCaptchaRequest
     /// Чат, для которого создается капча
     /// </summary>
     public Chat Chat { get; }
-    
+
     /// <summary>
     /// Пользователь, для которого создается капча
     /// </summary>
     public User User { get; }
-    
+
     /// <summary>
     /// Сообщение о присоединении пользователя (опционально)
     /// </summary>
     public Message? UserJoinMessage { get; }
-    
+
     /// <summary>
     /// Создает новый запрос на создание капчи
     /// </summary>
@@ -38,4 +38,4 @@ public class CreateCaptchaRequest
         User = user ?? throw new ArgumentNullException(nameof(user));
         UserJoinMessage = userJoinMessage;
     }
-} 
+}

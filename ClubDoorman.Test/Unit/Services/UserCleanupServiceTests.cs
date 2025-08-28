@@ -154,41 +154,41 @@ public class UserCleanupServiceTests
         // Arrange
         var userId = 12345L;
         var groupId = 67890L;
-        
+
         // Act
         var result = _service.RemoveUserFromGroupApproval(userId, groupId, "Тест");
-        
+
         // Assert
         Assert.That(result, Is.False);
         Assert.That(_approvedUsersStorage.IsApprovedInGroup(userId, groupId), Is.False);
     }
-    
+
     [Test]
     public void RemoveUserFromGlobalApproval_UserApprovedGlobally_ReturnsTrue()
     {
         // Arrange
         var userId = 12345L;
         _approvedUsersStorage.ApproveUserGlobally(userId);
-        
+
         // Act
         var result = _service.RemoveUserFromGlobalApproval(userId, "Тест");
-        
+
         // Assert
         Assert.That(result, Is.True);
         Assert.That(_approvedUsersStorage.IsGloballyApproved(userId), Is.False);
     }
-    
+
     [Test]
     public void RemoveUserFromGlobalApproval_UserNotApprovedGlobally_ReturnsFalse()
     {
         // Arrange
         var userId = 12345L;
-        
+
         // Act
         var result = _service.RemoveUserFromGlobalApproval(userId, "Тест");
-        
+
         // Assert
         Assert.That(result, Is.False);
         Assert.That(_approvedUsersStorage.IsGloballyApproved(userId), Is.False);
     }
-} 
+}

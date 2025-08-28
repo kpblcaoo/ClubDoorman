@@ -1,0 +1,8 @@
+{
+  "Schema": 4,
+  "Id": 18,
+  "CorrelationId": "C836A919D91DB6A3",
+  "ShortName": "MediaAnnouncement",
+  "Action": "Report",
+  "RuleCode": "ModeratedReport"
+}

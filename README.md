@@ -29,11 +29,13 @@
 - Система доверия (после 3 обычных сообщений)
 
 ## Установка
+
 - DOORMAN_BOT_API: Токен бота (обязательно)
 - DOORMAN_ADMIN_CHAT: ID админ-чата (обязательно)
 - Остальные настройки опциональны
 
 ---------
+
 
 ## Антиспам для телеграма
 
@@ -78,4 +80,7 @@
 
 ### Translation
 If you're willing to do the heavy lifting of translating all the text of this bot to other languages, please let me know first before running headfirst and creating a PR.
+
+### Golden Master / Early-path semantics (hardening 2025 Q3)
+Часть инфраструктуры качества — Golden Master baseline — получила расширение: добавлены явные RuleCode для ранних веток (до основного анализа): Phase1 `PrivateSkip`, `NewMembers`, `LeftMemberCleanup`, `ChannelMessage`; Phase2 системные / fast-path / AI ветки: `SystemNoUser`, `BotMessage`, `CaptchaPending`, `AlreadyApproved`, `ClubMemberSkip`, `AiProfileRestricted`, `ModeratedGeneric` + уточнены semantics для `/command` и banlist. Это убрало временные overrides и делает регрессии более заметными. Полная документация: `ClubDoorman.Baseline/usage.md` (секция Semantics).
 

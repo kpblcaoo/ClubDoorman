@@ -1,11 +1,12 @@
 {
   "mcpServers": {
-    "testkitdex": {
-      "command": "/home/kpblc/projects/ClubDoorman/scripts/testkit-sql-indexer/bin/tk-mcp",
-      "env": {
-        "TESTKIT_ROOT": "/home/kpblc/projects/ClubDoorman",
-        "TESTKIT_DB_PATH": "/home/kpblc/projects/ClubDoorman/scripts/testkit-sql-indexer/testkit_index.db"
-      }
+    "roslyn": {
+      "command": "dotnet",
+      "args": ["run", "--no-build", "--project", "/home/kpblc/projects/roslyn-mcp/RoslynMCP/RoslynMCP.csproj"]
+    },
+    "refactor": {
+      "command": "dotnet",
+      "args": ["run", "--project", "/home/kpblc/projects/refactor-mcp/RefactorMCP.ConsoleApp"]
     }
   }
 } 

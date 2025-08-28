@@ -69,18 +69,18 @@ public class StatisticsService : IStatisticsService
         var report = _stats.ToArray();
         var sb = new StringBuilder();
         sb.AppendLine("📊 *Статистика за последние 24 часа:*");
-        
+
         foreach (var (chatId, stats) in report.OrderBy(x => x.Value.ChatTitle))
         {
             var sum = stats.KnownBadMessage + stats.BlacklistBanned + stats.StoppedCaptcha + stats.LongNameBanned;
             if (sum == 0) continue;
-            
+
             try
             {
                 var chat = await _bot.GetChat(chatId);
                 var chatLink = _chatLinkFormatter.GetChatLink(chat);
                 var chatType = ChatSettingsManager.GetChatType(chat.Id);
-                
+
                 sb.AppendLine();
                 sb.AppendLine($"{chatLink} (`{chat.Id}`) [{chatType}]:");
                 sb.AppendLine($"▫️ Всего блокировок: *{sum}*");
@@ -109,4 +109,4 @@ public class StatisticsService : IStatisticsService
     }
 
 
-} 
+}

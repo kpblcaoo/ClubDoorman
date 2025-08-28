@@ -1,0 +1,8 @@
+{
+  "Schema": 2,
+  "CorrelationId": "69E2E8CA2B7A6103",
+  "Id": 12,
+  "ShortName": "CommandStart",
+  "Action": "Allow",
+  "RuleCode": "Command"
+}

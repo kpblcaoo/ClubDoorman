@@ -141,4 +141,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             // Assert.Pass("User sends a spam message");
         }
     }
-} 
+}

@@ -1,0 +1,8 @@
+{
+  "Schema": 4,
+  "Id": 1,
+  "CorrelationId": "43EB9B4811373E29",
+  "ShortName": "BaseMsg1",
+  "Action": "Allow",
+  "RuleCode": "ModeratedAllow"
+}

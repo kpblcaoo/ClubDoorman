@@ -28,4 +28,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             true.Should().BeTrue();
         }
     }
-} 
+}

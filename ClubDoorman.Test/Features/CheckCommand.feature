@@ -43,5 +43,5 @@ Feature: Check Command
     Given I am not an administrator
     And I reply to a user's message with check command "/check"
     When I send the check command
-    Then I should receive a check access denied message
-    And no analysis results should be displayed 
+  Then I should receive a check access denied message
+  And no analysis results should be displayed

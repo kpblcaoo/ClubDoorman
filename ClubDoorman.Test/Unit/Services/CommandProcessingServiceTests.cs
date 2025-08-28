@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Telegram.Bot.Types;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 
 namespace ClubDoorman.Test.Unit.Services;
 
@@ -21,16 +21,16 @@ namespace ClubDoorman.Test.Unit.Services;
 [Category("command-processing")]
 public class CommandProcessingServiceTests
 {
-    private Mock<IMessageHandler> _messageHandlerMock = null!;
+    private Mock<ICommandRouter> _commandRouterMock = null!;
     private Mock<ILogger<CommandProcessingService>> _loggerMock = null!;
     private CommandProcessingService _service = null!;
 
     [SetUp]
     public void Setup()
     {
-        _messageHandlerMock = new Mock<IMessageHandler>();
+        _commandRouterMock = new Mock<ICommandRouter>();
         _loggerMock = new Mock<ILogger<CommandProcessingService>>();
-        _service = new CommandProcessingService(_messageHandlerMock.Object, _loggerMock.Object);
+        _service = new CommandProcessingService(_commandRouterMock.Object, _loggerMock.Object);
     }
 
     /// <summary>
@@ -48,6 +48,6 @@ public class CommandProcessingServiceTests
         await _service.HandleCommandAsync(message, cancellationToken);
 
         // Assert
-        _messageHandlerMock.Verify(x => x.HandleCommandAsync(message, cancellationToken), Times.Once);
+        _commandRouterMock.Verify(x => x.HandleCommandAsync(message, cancellationToken), Times.Once);
     }
-} 
+}

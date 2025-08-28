@@ -7,9 +7,23 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      # Workaround for act environment where MSBuild TerminalLogger crashes (WrapText ArgumentOutOfRange)
+      MSBUILDTERMINALLOGGER: false
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Detect local act
+      id: detect_act
+      run: |
+        if [ "${ACT:-}" = "true" ]; then
+          echo "Detected local act run (ACT=true)";
+          echo "skip_upload=true" >> $GITHUB_OUTPUT
+        else
+          echo "Running on GitHub (ACT not true)";
+          echo "skip_upload=false" >> $GITHUB_OUTPUT
+        fi
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -24,3 +38,13 @@ jobs:
 
     - name: Run tests
       run: dotnet test ClubDoorman.Test --settings ClubDoorman.Test/.runsettings --no-restore --filter "Category!=real-api&Category!=BDD&Category!=disabled" --verbosity quiet --logger "console;verbosity=quiet" --logger "trx;LogFileName=test-results.trx"
+
+    - name: Upload test results artifact
+      # Real artifact upload only on GitHub (skip under local act where runtime token is absent)
+      if: always() && steps.detect_act.outputs.skip_upload == 'false'
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-trx
+        path: ClubDoorman.Test/TestResults/
+        if-no-files-found: warn
+        retention-days: 7

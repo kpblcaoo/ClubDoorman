@@ -1,22 +1,22 @@
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using ClubDoorman.Handlers;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Test.TestKit;
 using ClubDoorman.TestInfrastructure;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
-using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
@@ -34,7 +34,7 @@ public class MessageHandlerMutationCoverageTests
     private Mock<ILogger<MessageHandler>> _loggerMock;
     private MessageHandlerTestFactory _factory;
     private IUserBanService _userBanService;
-    
+
     [SetUp]
     public void Setup()
     {
@@ -43,9 +43,22 @@ public class MessageHandlerMutationCoverageTests
             .WithBotSetup(mock => _botMock = mock)
             .WithMessageServiceSetup(mock => _messageServiceMock = mock)
             .WithLoggerSetup(mock => _loggerMock = mock);
-            
+
         _messageHandler = _factory.CreateMessageHandlerWithRealUserBanService();
-        _userBanService = _factory.CreateRealUserBanService();
+
+        // Создаем UserBanService с моком BotMock вместо реального ITelegramBotClientWrapper
+        _userBanService = new UserBanService(
+            _botMock.Object, // Используем мок вместо реального клиента
+            _messageServiceMock.Object,
+            _factory.UserFlowLoggerMock.Object,
+            _factory.UserBanServiceLoggerMock.Object,
+            _factory.ViolationTrackerMock.Object,
+            _factory.AppConfigMock.Object,
+            _factory.StatisticsServiceMock.Object,
+            new GlobalStatsManager(),
+            _factory.UserManagerMock.Object,
+            _factory.UserCleanupServiceMock.Object
+        );
     }
 
     /// <summary>
@@ -67,7 +80,7 @@ public class MessageHandlerMutationCoverageTests
             .FromUser(user)
             .InChat(chat)
             .Build();
-        
+
         // Создаем обычный Chat - убираем проблемный тест с моком
         var messageWithProblematicChat = TestKitBuilders.CreateMessage()
             .FromUser(user)
@@ -76,8 +89,8 @@ public class MessageHandlerMutationCoverageTests
 
         // Act & Assert
         // Вызываем метод через UserBanService - он должен работать нормально
-        await _userBanService.Invoking(h => 
-                h.BanUserForLongNameAsync(messageWithProblematicChat, user, "Test ban", 
+        await _userBanService.Invoking(h =>
+                h.BanUserForLongNameAsync(messageWithProblematicChat, user, "Test ban",
                     TimeSpan.FromMinutes(10), CancellationToken.None))
             .Should().NotThrowAsync();
 

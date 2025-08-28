@@ -1,0 +1,22 @@
+{
+  "ChatId": -1001234567890,
+  "Payload": {
+    "Id": 2,
+    "Type": "Message",
+    "Message": {
+      "MessageId": 0,
+      "ChatId": -1001234567890,
+      "Type": 2,
+      "Title": "GoldenBaselineChat",
+      "From": {
+        "Id": "U0002",
+        "IsBot": false,
+        "Username": "u_ddb39753"
+      },
+      "Text": "Second baseline message about normal workflow"
+    }
+  },
+  "Type": "Message",
+  "UserId": "U0002",
+  "handler": "MessageHandler"
+}

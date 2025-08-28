@@ -4,6 +4,22 @@ using ClubDoorman.Test.TestKit;
 using NUnit.Framework;
 using System.Runtime.Caching;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.Captcha;
+using ClubDoorman.Services.UserManagement;
+using ClubDoorman.Services.AI;
+using ClubDoorman.Features.UserJoin;
+using ClubDoorman.Services.BadMessage;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.Statistics;
+using ClubDoorman.Services.UserFlow;
+using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.Violation;
+using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Notifications;
+using ClubDoorman.Features.AdminOps;
+using ClubDoorman.Services;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
@@ -16,19 +32,14 @@ namespace ClubDoorman.Test.Unit.Handlers;
 [Category("MessageHandler")]
 public class MessageHandlerTryFindUserIdTests
 {
-    private MessageHandler _messageHandler;
+    private IUserIndex _userIndex;
 
     [SetUp]
     public void Setup()
     {
-        // Используем AutoFixture для автоматического создания всех зависимостей
-        _messageHandler = TestKitAutoFixture.CreateMessageHandler();
-        
-        // Очищаем кэш перед каждым тестом
+        _userIndex = new ClubDoorman.Services.UserManagement.UserIndex();
         foreach (var item in MemoryCache.Default.ToList())
-        {
             MemoryCache.Default.Remove(item.Key);
-        }
     }
 
     [TearDown]
@@ -55,11 +66,11 @@ public class MessageHandlerTryFindUserIdTests
         var userId = 789012L;
         var cacheKey = $"{chatId}_{userId}";
         var cacheValue = $"Message from @{username}";
-        
+
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.EqualTo(userId));
@@ -75,12 +86,12 @@ public class MessageHandlerTryFindUserIdTests
     {
         // Arrange
         var username = "nonexistentuser2";
-        
+
         // Кэш пустой или содержит другие данные
         MemoryCache.Default.Add("123_456", "Message from @otheruser", new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -98,7 +109,7 @@ public class MessageHandlerTryFindUserIdTests
         var username = "";
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -116,7 +127,7 @@ public class MessageHandlerTryFindUserIdTests
         string? username = null;
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username!);
+        var result = _userIndex.TryFindUserIdByUsername(username!);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -136,11 +147,11 @@ public class MessageHandlerTryFindUserIdTests
         var userId = 789012L;
         var cacheKey = $"{chatId}_{userId}";
         var cacheValue = $"Message from @{username.ToLower()}";
-        
+
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username.ToLower());
+        var result = _userIndex.TryFindUserIdByUsername(username.ToLower());
 
         // Assert
         Assert.That(result, Is.EqualTo(userId));
@@ -161,12 +172,12 @@ public class MessageHandlerTryFindUserIdTests
         var chatId2 = 789012L;
         var userId1 = 111111L;
         var userId2 = 222222L;
-        
+
         MemoryCache.Default.Add($"{chatId1}_{userId1}", $"Message from @{targetUsername}", new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
         MemoryCache.Default.Add($"{chatId2}_{userId2}", $"Message from @{otherUsername}", new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(targetUsername);
+        var result = _userIndex.TryFindUserIdByUsername(targetUsername);
 
         // Assert
         Assert.That(result, Is.EqualTo(userId1));
@@ -184,11 +195,11 @@ public class MessageHandlerTryFindUserIdTests
         var username = "testuser5";
         var invalidCacheKey = "invalid_key_format";
         var cacheValue = $"Message from @{username}";
-        
+
         MemoryCache.Default.Add(invalidCacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -208,11 +219,11 @@ public class MessageHandlerTryFindUserIdTests
         var invalidUserId = "invalid_user_id";
         var cacheKey = $"{chatId}_{invalidUserId}";
         var cacheValue = $"Message from @{username}";
-        
+
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -228,11 +239,11 @@ public class MessageHandlerTryFindUserIdTests
     {
         // Arrange
         var username = "testuser7";
-        
+
         // Кэш пустой
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.Null);
@@ -252,11 +263,11 @@ public class MessageHandlerTryFindUserIdTests
         var userId = 789012L;
         var cacheKey = $"{chatId}_{userId}";
         var cacheValue = $"Message from {username}"; // Без @ символа
-        
+
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Assert.That(result, Is.EqualTo(userId));
@@ -275,19 +286,19 @@ public class MessageHandlerTryFindUserIdTests
         var userId = 789012L;
         var cacheKey = $"{chatId}_{userId}";
         var cacheValue = $"Message from @{username}";
-        
+
         // Добавляем в кэш
         MemoryCache.Default.Add(cacheKey, cacheValue, new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(1) });
-        
+
         // Проверяем, что кэш содержит данные
         var cacheItem = MemoryCache.Default.Get(cacheKey);
         Assert.That(cacheItem, Is.Not.Null, "Кэш должен содержать добавленный элемент");
         Assert.That(cacheItem, Is.EqualTo(cacheValue), "Значение в кэше должно совпадать");
-        
+
         // Проверяем количество элементов в кэше
         var cacheCount = MemoryCache.Default.GetCount();
         Assert.That(cacheCount, Is.GreaterThan(0), "Кэш должен содержать элементы");
-        
+
         // Выводим все элементы кэша для отладки
         Console.WriteLine($"Количество элементов в кэше: {cacheCount}");
         foreach (var item in MemoryCache.Default)
@@ -296,10 +307,10 @@ public class MessageHandlerTryFindUserIdTests
         }
 
         // Act
-        var result = _messageHandler.TryFindUserIdByUsername(username);
+        var result = _userIndex.TryFindUserIdByUsername(username);
 
         // Assert
         Console.WriteLine($"Результат поиска: {result}");
         Assert.That(result, Is.EqualTo(userId), "Должен найти пользователя в кэше");
     }
-} 
+}

@@ -2,7 +2,7 @@ using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.UserBan;
+// using ClubDoorman.Services.UserBan; // duplicate removed
 using ClubDoorman.Handlers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -12,7 +12,6 @@ using Telegram.Bot;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services;
 using ClubDoorman.Services.UserBan;
-using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
@@ -20,6 +19,8 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -43,6 +44,7 @@ public class CallbackQueryHandlerTestFactory
     public Mock<IUserBanService> UserBanServiceMock { get; } = new();
     public Mock<IServiceProvider> ServiceProviderMock { get; } = new();
     public Mock<ILogger<CallbackQueryHandler>> LoggerMock { get; } = new();
+    public Mock<IAppConfig> AppConfigMock { get; } = new();
 
     public CallbackQueryHandler CreateCallbackQueryHandler()
     {
@@ -58,7 +60,10 @@ public class CallbackQueryHandlerTestFactory
             ViolationTrackerMock.Object,
             UserBanServiceMock.Object,
             new Mock<ILogChatService>().Object,
-            LoggerMock.Object
+            LoggerMock.Object,
+            NullGoldenMasterRecorder.Instance,
+            new Mock<IModerationEventPublisher>().Object,
+            AppConfigMock.Object
         );
     }
 
@@ -129,37 +134,27 @@ public class CallbackQueryHandlerTestFactory
     #region Smart Methods Based on Business Logic
 
     public FakeTelegramClient FakeTelegramClient => FakeTelegramClientFactory.Create();
-    
+
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
-    public ModerationService CreateModerationServiceWithFake()
+    public ModerationServiceAdapter CreateModerationServiceWithFake()
     {
-        return new ModerationService(
-            new Mock<ISpamHamClassifier>().Object,
-            new Mock<IMimicryClassifier>().Object,
-            new Mock<IBadMessageManager>().Object,
-            new Mock<IUserManager>().Object,
-            new Mock<IAiChecks>().Object,
-            new Mock<ISuspiciousUsersStorage>().Object,
-            new Mock<ITelegramBotClient>().Object,
-            new Mock<IMessageService>().Object,
-            new Mock<IUserBanService>().Object,
-            new Mock<IUserCleanupService>().Object,
-            new Mock<ILogger<ModerationService>>().Object
+        return new ModerationServiceAdapter(
+            new Mock<IModerationPolicy>().Object
         );
     }
 
-            public CaptchaService CreateCaptchaServiceWithFake()
-        {
-            return new CaptchaService(
-                new Mock<ITelegramBotClientWrapper>().Object,
-                new Mock<ILogger<CaptchaService>>().Object,
-                new Mock<IMessageService>().Object,
-                AppConfigTestFactory.CreateDefault(),
-                new Mock<IViolationTracker>().Object,
-                new Mock<IUserBanService>().Object
-            );
-        }
+    public CaptchaService CreateCaptchaServiceWithFake()
+    {
+        return new CaptchaService(
+            new Mock<ITelegramBotClientWrapper>().Object,
+            new Mock<ILogger<CaptchaService>>().Object,
+            new Mock<IMessageService>().Object,
+            AppConfigTestFactory.CreateDefault(),
+            new Mock<IViolationTracker>().Object,
+            new Mock<IUserBanService>().Object
+        );
+    }
 
     public IUserManager CreateUserManagerWithFake()
     {

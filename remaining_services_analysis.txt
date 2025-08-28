@@ -53,8 +53,6 @@
 - AI/ISpamHamClassifier.cs
 - AI/AiChecks.cs
 - AI/SpamHamClassifier.cs
-- UserManagement/UserJoinService.cs
-- UserManagement/IUserJoinService.cs
 - UserManagement/ApprovedUsersStorage.cs
 - UserManagement/IUserManager.cs
 - UserManagement/IUserCleanupService.cs
@@ -107,7 +105,6 @@
 - IUserFlowLogger.cs: 28 строк кода
 - NotificationService.cs: 28 строк кода
 - IAppConfig.cs: 28 строк кода
-- UserJoinService.cs: 25 строк кода
 - IMessageService.cs: 21 строк кода
 - HandlersModule.cs: 20 строк кода
 - CommandProcessingService.cs: 19 строк кода
@@ -137,7 +134,7 @@
 - ICommandHandler.cs: 7 строк кода
 - ILogChatService.cs: 7 строк кода
 - IChatLinkFormatter.cs: 7 строк кода
-- IUserJoinService.cs: 7 строк кода
+// (UserJoinService/IUserJoinService удалены; см. UserJoinFacade)
 - IUserCleanupService.cs: 7 строк кода
 - IUpdateDispatcher.cs: 6 строк кода
 - IBadMessageManager.cs: 6 строк кода

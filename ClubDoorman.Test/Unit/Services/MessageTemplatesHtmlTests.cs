@@ -1,10 +1,10 @@
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models.Notifications;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using Telegram.Bot.Types;
 using ClubDoorman.Services.Messaging;
+using Moq;
+using ClubDoorman.Services.Core.Configuration;
 
 namespace ClubDoorman.Test.Unit.Services
 {
@@ -16,7 +16,9 @@ namespace ClubDoorman.Test.Unit.Services
         [SetUp]
         public void Setup()
         {
-            _templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            _templates = new MessageTemplates(appConfig.Object);
         }
 
         [Test]
@@ -36,11 +38,11 @@ namespace ClubDoorman.Test.Unit.Services
             Assert.That(result, Contains.Substring("<b>Первые 3 сообщения</b>"));
             Assert.That(result, Contains.Substring("<b>стоп-слова</b>"));
             Assert.That(result, Contains.Substring("<a href=\"tg://user?id=12345\">Test User</a>"));
-            
+
             // Проверяем, что нет лишних слешей
             Assert.That(result, Does.Not.Contain("\\."));
             Assert.That(result, Does.Not.Contain("\\-"));
-            
+
             // Проверяем, что нет Markdown синтаксиса
             Assert.That(result, Does.Not.Contain("*новичок*"));
             Assert.That(result, Does.Not.Contain("*Первые 3 сообщения*"));
@@ -80,4 +82,4 @@ namespace ClubDoorman.Test.Unit.Services
             Assert.That(result, Does.Not.Contain("`Test message 1`"));
         }
     }
-} 
+}

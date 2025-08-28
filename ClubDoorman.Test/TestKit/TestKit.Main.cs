@@ -16,7 +16,7 @@ namespace ClubDoorman.Test.TestKit
     /// </summary>
     public static partial class TestKit
     {
-        
+
 
         #region Basic Objects
 
@@ -151,6 +151,12 @@ namespace ClubDoorman.Test.TestKit
         /// <tags>message, admin, help, command, telegram</tags>
         /// </summary>
         public static Message CreateHelpCommandMessage() => TestDataFactory.CreateHelpCommandMessage();
+
+        /// <summary>
+        /// Создает команду say
+        /// <tags>message, admin, say, command, telegram</tags>
+        /// </summary>
+        public static Message CreateSayCommandMessage(string text = "/say Hello World") => TestDataFactory.CreateTextMessage(123456789, -1001234567890, text);
 
         /// <summary>
         /// Создает валидный callback query
@@ -296,4 +302,4 @@ namespace ClubDoorman.Test.TestKit
 
         #endregion
     }
-} 
+}

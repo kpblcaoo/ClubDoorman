@@ -27,7 +27,7 @@ public class AiChecksTests
     {
         _mockBot = new Mock<ITelegramBotClientWrapper>();
         _mockLogger = new Mock<ILogger<AiChecks>>();
-        
+
         // Создаем реальный AiChecks с моками
         _aiChecks = new AiChecks(_mockBot.Object, _mockLogger.Object, AppConfigTestFactory.CreateDefault());
     }
@@ -54,8 +54,8 @@ public class AiChecksTests
     public async Task GetSpamProbability_WithValidMessage_ReturnsSpamProbability()
     {
         // Arrange
-        var message = new Message 
-        { 
+        var message = new Message
+        {
             Text = "Test message",
             Chat = new Chat { Id = 123 },
             From = new User { Id = 456, FirstName = "Test" }
@@ -78,7 +78,7 @@ public class AiChecksTests
         Message? message = null;
 
         // Act & Assert
-        Assert.ThrowsAsync<ArgumentNullException>(async () => 
+        Assert.ThrowsAsync<ArgumentNullException>(async () =>
             await _aiChecks.GetSpamProbability(message!));
     }
 
@@ -86,8 +86,8 @@ public class AiChecksTests
     public async Task GetSpamProbability_WithEmptyMessage_ReturnsDefaultProbability()
     {
         // Arrange
-        var message = new Message 
-        { 
+        var message = new Message
+        {
             Text = "",
             Chat = new Chat { Id = 123 },
             From = new User { Id = 456, FirstName = "Test" }
@@ -105,11 +105,11 @@ public class AiChecksTests
     public async Task GetAttentionBaitProbability_WithValidUser_ReturnsSpamPhotoBio()
     {
         // Arrange
-        var user = new User 
-        { 
-            Id = 123, 
-            FirstName = "Test", 
-            Username = "testuser" 
+        var user = new User
+        {
+            Id = 123,
+            FirstName = "Test",
+            Username = "testuser"
         };
 
         // Act
@@ -143,8 +143,8 @@ public class AiChecksTests
     public async Task GetSuspiciousUserSpamProbability_WithValidInput_ReturnsSpamProbability()
     {
         // Arrange
-        var message = new Message 
-        { 
+        var message = new Message
+        {
             Text = "Test message",
             Chat = new Chat { Id = 123 },
             From = new User { Id = 456, FirstName = "Test" }
@@ -167,8 +167,8 @@ public class AiChecksTests
     public async Task GetSuspiciousUserSpamProbability_WithEmptyMessages_ReturnsSpamProbability()
     {
         // Arrange
-        var message = new Message 
-        { 
+        var message = new Message
+        {
             Text = "Test message",
             Chat = new Chat { Id = 123 },
             From = new User { Id = 456, FirstName = "Test" }
@@ -190,8 +190,8 @@ public class AiChecksTests
     public async Task GetSuspiciousUserSpamProbability_WithNullMessages_ReturnsSpamProbability()
     {
         // Arrange
-        var message = new Message 
-        { 
+        var message = new Message
+        {
             Text = "Test message",
             Chat = new Chat { Id = 123 },
             From = new User { Id = 456, FirstName = "Test" }
@@ -226,8 +226,8 @@ public class AiChecksTests
     public async Task GetSpamProbability_WithSpecialCharacters_ReturnsSpamProbability()
     {
         // Arrange
-        var message = new Message 
-        { 
+        var message = new Message
+        {
             Text = "Test message with special chars: !@#$%^&*()",
             Chat = new Chat { Id = 123 },
             From = new User { Id = 456, FirstName = "Test" }
@@ -247,8 +247,8 @@ public class AiChecksTests
     {
         // Arrange
         var longText = new string('a', 1000); // 1000 символов
-        var message = new Message 
-        { 
+        var message = new Message
+        {
             Text = longText,
             Chat = new Chat { Id = 123 },
             From = new User { Id = 456, FirstName = "Test" }
@@ -262,4 +262,4 @@ public class AiChecksTests
         Assert.That(result.Probability, Is.GreaterThanOrEqualTo(0.0));
         Assert.That(result.Probability, Is.LessThanOrEqualTo(1.0));
     }
-} 
+}

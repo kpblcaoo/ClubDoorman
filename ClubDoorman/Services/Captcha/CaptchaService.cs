@@ -79,26 +79,27 @@ public class CaptchaService : ICaptchaService
         // Отключение капчи для определённых групп
         if (_appConfig.NoCaptchaGroups.Contains(request.Chat.Id))
         {
-            _logger.LogInformation($"[NO_CAPTCHA] Капча отключена для чата {request.Chat.Id}");
+            // Лог опущен до Debug: финальный пользовательский инфо-лог формируется в IntroFlow / Policy
+            _logger.LogDebug("[NO_CAPTCHA] Капча отключена для чата {ChatId}", request.Chat.Id);
             return null;
         }
 
         const int challengeLength = 8;
         var correctAnswerIndex = Random.Shared.Next(challengeLength);
         var challenge = new List<int>(challengeLength);
-        
+
         while (challenge.Count < challengeLength)
         {
             var rand = Random.Shared.Next(Infrastructure.Captcha.CaptchaList.Count);
             if (!challenge.Contains(rand))
                 challenge.Add(rand);
         }
-        
+
         var correctAnswer = challenge[correctAnswerIndex];
         var keyboard = challenge
-            .Select(x => new InlineKeyboardButton(Infrastructure.Captcha.CaptchaList[x].Emoji) 
-            { 
-                CallbackData = $"cap_{request.User.Id}_{x}" 
+            .Select(x => new InlineKeyboardButton(Infrastructure.Captcha.CaptchaList[x].Emoji)
+            {
+                CallbackData = $"cap_{request.User.Id}_{x}"
             })
             .ToList();
 
@@ -109,9 +110,9 @@ public class CaptchaService : ICaptchaService
         var fullNameForDisplay = Utils.FullName(request.User);
         var fullNameLower = fullNameForDisplay.ToLowerInvariant();
         var username = request.User.Username?.ToLower();
-        
-        if (_namesBlacklist.Any(fullNameLower.Contains) || 
-            username?.Contains("porn") == true || 
+
+        if (_namesBlacklist.Any(fullNameLower.Contains) ||
+            username?.Contains("porn") == true ||
             username?.Contains("p0rn") == true)
         {
             fullNameForDisplay = "новый участник чата";
@@ -145,7 +146,7 @@ public class CaptchaService : ICaptchaService
 
         var cts = new CancellationTokenSource();
         var captchaInfo = new CaptchaInfo(request.Chat.Id, request.Chat.Title, DateTime.UtcNow, request.User, correctAnswer, cts, request.UserJoinMessage);
-        
+
         var key = GenerateKey(request.Chat.Id, request.User.Id);
         _captchaNeededUsers.TryAdd(key, captchaInfo);
 
@@ -155,19 +156,19 @@ public class CaptchaService : ICaptchaService
             try
             {
                 await Task.Delay(TimeSpan.FromMinutes(1.2), cts.Token);
-                
+
                 // Удаляем капчу из коллекции
                 if (_captchaNeededUsers.TryRemove(key, out var expiredCaptcha))
                 {
-                    _logger.LogInformation("Пользователь {User} (id={UserId}) не прошёл капчу (таймаут) в группе '{ChatTitle}' (id={ChatId})", 
+                    _logger.LogInformation("Пользователь {User} (id={UserId}) не прошёл капчу (таймаут) в группе '{ChatTitle}' (id={ChatId})",
                         Utils.FullName(expiredCaptcha.User), expiredCaptcha.User.Id, expiredCaptcha.ChatTitle ?? "-", expiredCaptcha.ChatId);
-                    
+
                     try
                     {
                         // Баним пользователя на 20 минут
-                        await _bot.BanChatMemberAsync(expiredCaptcha.ChatId, expiredCaptcha.User.Id, 
+                        await _bot.BanChatMemberAsync(expiredCaptcha.ChatId, expiredCaptcha.User.Id,
                             untilDate: DateTime.UtcNow + TimeSpan.FromMinutes(20), revokeMessages: true);
-                        
+
                         // Удаляем сообщения
                         await _bot.DeleteMessageAsync(request.Chat.Id, captchaMessage.MessageId);
                         if (request.UserJoinMessage != null)
@@ -177,7 +178,7 @@ public class CaptchaService : ICaptchaService
                     {
                         _logger.LogWarning(ex, "Ошибка при бане пользователя {UserId} за просроченную капчу", expiredCaptcha.User.Id);
                     }
-                    
+
                     // Разбан через 20 минут
                     _ = Task.Run(async () =>
                     {
@@ -284,34 +285,34 @@ public class CaptchaService : ICaptchaService
 
         var now = DateTime.UtcNow;
         var users = _captchaNeededUsers.ToArray();
-        
+
         foreach (var (key, captchaInfo) in users)
         {
             var minutes = (now - captchaInfo.Timestamp).TotalMinutes;
             if (minutes > 1.3)
             {
-                _logger.LogInformation("Пользователь {User} (id={UserId}) не прошёл капчу (таймаут) в группе '{ChatTitle}' (id={ChatId})", 
+                _logger.LogInformation("Пользователь {User} (id={UserId}) не прошёл капчу (таймаут) в группе '{ChatTitle}' (id={ChatId})",
                     Utils.FullName(captchaInfo.User), captchaInfo.User.Id, captchaInfo.ChatTitle ?? "-", captchaInfo.ChatId);
 
                 // Регистрируем нарушение за непройденную капчу
                 var shouldBan = _violationTracker.RegisterViolation(captchaInfo.User.Id, captchaInfo.ChatId, ViolationType.CaptchaFailed);
-                
+
                 if (shouldBan)
                 {
-                    _logger.LogWarning("Пользователь {User} (id={UserId}) достиг лимита непройденных капч в группе '{ChatTitle}' (id={ChatId}) - бан навсегда", 
+                    _logger.LogWarning("Пользователь {User} (id={UserId}) достиг лимита непройденных капч в группе '{ChatTitle}' (id={ChatId}) - бан навсегда",
                         Utils.FullName(captchaInfo.User), captchaInfo.User.Id, captchaInfo.ChatTitle ?? "-", captchaInfo.ChatId);
                 }
 
                 _captchaNeededUsers.TryRemove(key, out _);
-                
+
                 try
                 {
                     // Если достигнут лимит нарушений - бан навсегда, иначе временный бан на 20 минут
                     var banUntilDate = shouldBan ? null : (DateTime?)now.AddMinutes(20);
-                    
-                    await _bot.BanChatMemberAsync(captchaInfo.ChatId, captchaInfo.User.Id, 
+
+                    await _bot.BanChatMemberAsync(captchaInfo.ChatId, captchaInfo.User.Id,
                         untilDate: banUntilDate, revokeMessages: true);
-                    
+
                     if (captchaInfo.UserJoinedMessage != null)
                         await _bot.DeleteMessageAsync(captchaInfo.ChatId, captchaInfo.UserJoinedMessage.MessageId);
 
@@ -352,8 +353,8 @@ public class CaptchaService : ICaptchaService
     /// </summary>
     /// <param name="chatId">ID чата</param>
     /// <returns>true, если группа без рекламы VPN</returns>
-    private static bool IsNoAdGroup(long chatId)
+    private bool IsNoAdGroup(long chatId)
     {
-        return Config.NoVpnAdGroups.Contains(chatId);
+        return _appConfig.NoVpnAdGroups.Contains(chatId);
     }
-} 
+}

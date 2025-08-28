@@ -16,6 +16,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using Times = Moq.Times;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Notifications;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
@@ -31,6 +32,18 @@ public class MessageHandlerSendSuspiciousMessageTests
 {
     private MessageHandlerTestFactory _factory = null!;
     private MessageHandler _messageHandler = null!;
+    private NotificationService CreateNotificationService()
+    {
+        // Admin chat id default
+        _factory.WithAppConfigSetup(c => c.Setup(x => x.AdminChatId).Returns(12345L));
+        var logChatService = new Mock<ILogChatService>();
+        return new NotificationService(
+            new Mock<ILogger<NotificationService>>().Object,
+            _factory.MessageServiceMock.Object,
+            _factory.AppConfigMock.Object,
+            _factory.BotMock.Object,
+            logChatService.Object);
+    }
 
     // Хелпер для создания ChatId
     private static ChatId Chat(long id) => new ChatId(id);
@@ -50,52 +63,31 @@ public class MessageHandlerSendSuspiciousMessageTests
         var data = new SuspiciousMessageNotificationData(user, chat, "Test message", message.MessageId);
         var isSilentMode = false;
 
-        // Настраиваем моки для успешной отправки
         _factory.WithBotSetup(mock =>
         {
-            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), chat.Id, message.MessageId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(message);
+            mock.Setup(x => x.SendMessage(It.IsAny<ChatId>(), It.IsAny<string>(), ParseMode.Html, It.IsAny<ReplyParameters>(), It.IsAny<InlineKeyboardMarkup>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Message { Chat = new Chat { Id = 12345L } });
         });
 
-        _factory.WithAppConfigSetup(mock =>
-        {
-            mock.Setup(x => x.AdminChatId).Returns(12345L);
-        });
+            _factory.WithMessageServiceSetup(mock =>
+            {
+                var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+                appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+                var templates = new MessageTemplates(appConfig.Object);
+                mock.Setup(x => x.GetTemplates()).Returns(templates);
+            });
 
-        // Настраиваем моки для IMessageService
-        _factory.WithMessageServiceSetup(mock =>
-        {
-            var templates = new MessageTemplates();
-            mock.Setup(x => x.GetTemplates()).Returns(templates);
-        });
-
-        // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
-
-        // Assert
-        _factory.BotMock.Verify(
-            x => x.ForwardMessage(
-                Chat(12345L),
-                chat.Id,
-                message.MessageId,
-                It.IsAny<CancellationToken>()
-            ),
-            Times.Once,
-            "Сообщение должно быть переслано в админ-чат"
-        );
+        var service = CreateNotificationService();
+        await service.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
 
         _factory.BotMock.Verify(
-            x => x.SendMessage(
-                Chat(12345L),
-                It.IsAny<string>(),
-                ParseMode.Html,
-                It.IsAny<ReplyParameters>(),
-                It.IsAny<InlineKeyboardMarkup>(),
-                It.IsAny<CancellationToken>()
-            ),
-            Times.Once,
-            "Уведомление с кнопками должно быть отправлено"
-        );
+            x => x.ForwardMessage(Chat(12345L), chat.Id, message.MessageId, It.IsAny<CancellationToken>()),
+            Times.Once, "Сообщение должно быть переслано в админ-чат");
+        _factory.BotMock.Verify(
+            x => x.SendMessage(Chat(12345L), It.IsAny<string>(), ParseMode.Html, It.IsAny<ReplyParameters>(), It.IsAny<InlineKeyboardMarkup>(), It.IsAny<CancellationToken>()),
+            Times.Once, "Уведомление с кнопками должно быть отправлено");
     }
 
     [Test]
@@ -106,29 +98,22 @@ public class MessageHandlerSendSuspiciousMessageTests
         var data = new SuspiciousMessageNotificationData(user, chat, "Test message", message.MessageId);
         var isSilentMode = true;
 
-        // Настраиваем моки для успешной отправки
         _factory.WithBotSetup(mock =>
         {
-            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), chat.Id, message.MessageId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(message);
+            mock.Setup(x => x.SendMessage(Chat(12345L), It.IsAny<string>(), ParseMode.Html, It.IsAny<ReplyParameters>(), It.IsAny<InlineKeyboardMarkup>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Message { Chat = new Chat { Id = 12345L } });
         });
-
-        _factory.WithAppConfigSetup(mock =>
-        {
-            mock.Setup(x => x.AdminChatId).Returns(12345L);
-        });
-
-        // Настраиваем моки для IMessageService
         _factory.WithMessageServiceSetup(mock =>
         {
-            var templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
             mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
-
-        // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
-
-        // Assert
+        var service = CreateNotificationService();
+        await service.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
         _factory.BotMock.Verify(
             x => x.SendMessage(
                 Chat(12345L),
@@ -136,11 +121,8 @@ public class MessageHandlerSendSuspiciousMessageTests
                 ParseMode.Html,
                 It.IsAny<ReplyParameters>(),
                 It.IsAny<InlineKeyboardMarkup>(),
-                It.IsAny<CancellationToken>()
-            ),
-            Times.Once,
-            "Сообщение должно содержать префикс тихого режима"
-        );
+                It.IsAny<CancellationToken>()),
+            Times.Once, "Сообщение должно содержать префикс тихого режима");
     }
 
     [Test]
@@ -150,30 +132,22 @@ public class MessageHandlerSendSuspiciousMessageTests
         var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
         var data = new SuspiciousMessageNotificationData(user, chat, "Test message", message.MessageId);
         var isSilentMode = false;
-
-        // Настраиваем мок для выброса исключения при пересылке
         _factory.WithBotSetup(mock =>
         {
-            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), chat.Id, message.MessageId, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidOperationException("protected content"));
+            mock.Setup(x => x.SendMessage(Chat(12345L), It.IsAny<string>(), ParseMode.Html, null, It.IsAny<InlineKeyboardMarkup>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Message { Chat = new Chat { Id = 12345L } });
         });
-
-        _factory.WithAppConfigSetup(mock =>
-        {
-            mock.Setup(x => x.AdminChatId).Returns(12345L);
-        });
-
-        // Настраиваем моки для IMessageService
         _factory.WithMessageServiceSetup(mock =>
         {
-            var templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
             mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
-
-        // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
-
-        // Assert
+        var service = CreateNotificationService();
+        await service.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
         _factory.BotMock.Verify(
             x => x.SendMessage(
                 Chat(12345L),
@@ -181,11 +155,8 @@ public class MessageHandlerSendSuspiciousMessageTests
                 ParseMode.Html,
                 null,
                 It.IsAny<InlineKeyboardMarkup>(),
-                It.IsAny<CancellationToken>()
-            ),
-            Times.Once,
-            "Сообщение должно быть отправлено без пересылки"
-        );
+                It.IsAny<CancellationToken>()),
+            Times.Once, "Сообщение должно быть отправлено без пересылки");
     }
 
     [Test]
@@ -195,32 +166,23 @@ public class MessageHandlerSendSuspiciousMessageTests
         var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
         var data = new SuspiciousMessageNotificationData(user, chat, "Test message", message.MessageId);
         var isSilentMode = false;
-
-        // Настраиваем мок для выброса исключения
         _factory.WithBotSetup(mock =>
         {
-            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), chat.Id, message.MessageId, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new InvalidOperationException("Test exception"));
         });
-
-        _factory.WithAppConfigSetup(mock =>
+        _factory.WithMessageServiceSetup(mock =>
         {
-            mock.Setup(x => x.AdminChatId).Returns(12345L);
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
+            mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
-
-        // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
-
-        // Assert
+        var service = CreateNotificationService();
+        await service.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
         _factory.MessageServiceMock.Verify(
-            x => x.SendAdminNotificationAsync(
-                AdminNotificationType.SuspiciousMessage,
-                data,
-                It.IsAny<CancellationToken>()
-            ),
-            Times.Once,
-            "Должно быть отправлено fallback уведомление"
-        );
+            x => x.SendAdminNotificationAsync(AdminNotificationType.SuspiciousMessage, data, It.IsAny<CancellationToken>()),
+            Times.Once, "Должно быть отправлено fallback уведомление");
     }
 
     [Test]
@@ -232,8 +194,8 @@ public class MessageHandlerSendSuspiciousMessageTests
         var isSilentMode = false;
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
-            await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data!, isSilentMode, CancellationToken.None),
+        Assert.DoesNotThrowAsync(async () =>
+            await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, user, data!, isSilentMode, CancellationToken.None),
             "Метод должен обрабатывать null данные без исключений"
         );
     }
@@ -248,8 +210,8 @@ public class MessageHandlerSendSuspiciousMessageTests
         Message? nullMessage = null;
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
-            await _messageHandler.SendSuspiciousMessageWithButtons(nullMessage!, user, data, isSilentMode, CancellationToken.None),
+        Assert.DoesNotThrowAsync(async () =>
+            await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(nullMessage!, user, data, isSilentMode, CancellationToken.None),
             "Метод должен обрабатывать null сообщение без исключений"
         );
     }
@@ -264,8 +226,8 @@ public class MessageHandlerSendSuspiciousMessageTests
         User? nullUser = null;
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
-            await _messageHandler.SendSuspiciousMessageWithButtons(message, nullUser!, data, isSilentMode, CancellationToken.None),
+        Assert.DoesNotThrowAsync(async () =>
+            await _factory.NotificationServiceMock.Object.SendSuspiciousMessageWithButtons(message, nullUser!, data, isSilentMode, CancellationToken.None),
             "Метод должен обрабатывать null пользователя без исключений"
         );
     }
@@ -275,45 +237,28 @@ public class MessageHandlerSendSuspiciousMessageTests
     {
         // Arrange
         var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        message.Text = "";
-        var data = new SuspiciousMessageNotificationData(user, chat, "", message.MessageId);
+        message.Text = string.Empty;
+        var data = new SuspiciousMessageNotificationData(user, chat, string.Empty, message.MessageId);
         var isSilentMode = false;
-
-        // Настраиваем моки для успешной отправки
         _factory.WithBotSetup(mock =>
         {
-            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), chat.Id, message.MessageId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(message);
+            mock.Setup(x => x.SendMessage(Chat(12345L), It.IsAny<string>(), ParseMode.Html, It.IsAny<ReplyParameters>(), It.IsAny<InlineKeyboardMarkup>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Message { Chat = new Chat { Id = 12345L } });
         });
-
-        _factory.WithAppConfigSetup(mock =>
-        {
-            mock.Setup(x => x.AdminChatId).Returns(12345L);
-        });
-
-        // Настраиваем моки для IMessageService
         _factory.WithMessageServiceSetup(mock =>
         {
-            var templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
             mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
-
-        // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
-
-        // Assert
+        var service = CreateNotificationService();
+        await service.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
         _factory.BotMock.Verify(
-            x => x.SendMessage(
-                Chat(12345L),
-                It.IsAny<string>(),
-                ParseMode.Html,
-                It.IsAny<ReplyParameters>(),
-                It.IsAny<InlineKeyboardMarkup>(),
-                It.IsAny<CancellationToken>()
-            ),
-            Times.Once,
-            "Сообщение должно быть отправлено даже с пустым текстом"
-        );
+            x => x.SendMessage(Chat(12345L), It.IsAny<string>(), ParseMode.Html, It.IsAny<ReplyParameters>(), It.IsAny<InlineKeyboardMarkup>(), It.IsAny<CancellationToken>()),
+            Times.Once, "Сообщение должно быть отправлено даже с пустым текстом");
     }
 
     [Test]
@@ -325,42 +270,25 @@ public class MessageHandlerSendSuspiciousMessageTests
         message.Text = longText;
         var data = new SuspiciousMessageNotificationData(user, chat, longText, message.MessageId);
         var isSilentMode = false;
-
-        // Настраиваем моки для успешной отправки
         _factory.WithBotSetup(mock =>
         {
-            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), chat.Id, message.MessageId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(message);
+            mock.Setup(x => x.SendMessage(Chat(12345L), It.IsAny<string>(), ParseMode.Html, It.IsAny<ReplyParameters>(), It.IsAny<InlineKeyboardMarkup>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Message { Chat = new Chat { Id = 12345L } });
         });
-
-        _factory.WithAppConfigSetup(mock =>
-        {
-            mock.Setup(x => x.AdminChatId).Returns(12345L);
-        });
-
-        // Настраиваем моки для IMessageService
         _factory.WithMessageServiceSetup(mock =>
         {
-            var templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
             mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
-
-        // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
-
-        // Assert
+        var service = CreateNotificationService();
+        await service.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
         _factory.BotMock.Verify(
-            x => x.SendMessage(
-                Chat(12345L),
-                It.IsAny<string>(),
-                ParseMode.Html,
-                It.IsAny<ReplyParameters>(),
-                It.IsAny<InlineKeyboardMarkup>(),
-                It.IsAny<CancellationToken>()
-            ),
-            Times.Once,
-            "Сообщение должно быть отправлено даже с длинным текстом"
-        );
+            x => x.SendMessage(Chat(12345L), It.IsAny<string>(), ParseMode.Html, It.IsAny<ReplyParameters>(), It.IsAny<InlineKeyboardMarkup>(), It.IsAny<CancellationToken>()),
+            Times.Once, "Сообщение должно быть отправлено даже с длинным текстом");
     }
 
     [Test]
@@ -372,41 +300,24 @@ public class MessageHandlerSendSuspiciousMessageTests
         message.Text = specialText;
         var data = new SuspiciousMessageNotificationData(user, chat, specialText, message.MessageId);
         var isSilentMode = false;
-
-        // Настраиваем моки для успешной отправки
         _factory.WithBotSetup(mock =>
         {
-            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            mock.Setup(x => x.ForwardMessage(It.IsAny<ChatId>(), chat.Id, message.MessageId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(message);
+            mock.Setup(x => x.SendMessage(Chat(12345L), It.IsAny<string>(), ParseMode.Html, It.IsAny<ReplyParameters>(), It.IsAny<InlineKeyboardMarkup>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new Message { Chat = new Chat { Id = 12345L } });
         });
-
-        _factory.WithAppConfigSetup(mock =>
-        {
-            mock.Setup(x => x.AdminChatId).Returns(12345L);
-        });
-
-        // Настраиваем моки для IMessageService
         _factory.WithMessageServiceSetup(mock =>
         {
-            var templates = new MessageTemplates();
+            var appConfig = new Moq.Mock<ClubDoorman.Services.Core.Configuration.IAppConfig>();
+            appConfig.SetupGet(x => x.SuspiciousToApprovedMessageCount).Returns(3);
+            var templates = new MessageTemplates(appConfig.Object);
             mock.Setup(x => x.GetTemplates()).Returns(templates);
         });
-
-        // Act
-        await _messageHandler.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
-
-        // Assert
+        var service = CreateNotificationService();
+        await service.SendSuspiciousMessageWithButtons(message, user, data, isSilentMode, CancellationToken.None);
         _factory.BotMock.Verify(
-            x => x.SendMessage(
-                Chat(12345L),
-                It.IsAny<string>(),
-                ParseMode.Html,
-                It.IsAny<ReplyParameters>(),
-                It.IsAny<InlineKeyboardMarkup>(),
-                It.IsAny<CancellationToken>()
-            ),
-            Times.Once,
-            "Сообщение должно быть отправлено с специальными символами"
-        );
+            x => x.SendMessage(Chat(12345L), It.IsAny<string>(), ParseMode.Html, It.IsAny<ReplyParameters>(), It.IsAny<InlineKeyboardMarkup>(), It.IsAny<CancellationToken>()),
+            Times.Once, "Сообщение должно быть отправлено с специальными символами");
     }
-} 
+}

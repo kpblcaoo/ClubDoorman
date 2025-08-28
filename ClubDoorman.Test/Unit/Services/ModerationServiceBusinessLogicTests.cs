@@ -3,8 +3,7 @@ using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.TestInfrastructure;
+using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -13,6 +12,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using ClubDoorman.Test.TestKit;
+using ClubDoorman.TestInfrastructure;
 
 namespace ClubDoorman.Test.Unit.Services;
 
@@ -25,15 +25,15 @@ namespace ClubDoorman.Test.Unit.Services;
 [Category("moderation")]
 public class ModerationServiceBusinessLogicTests
 {
-    private ModerationServiceTestFactory _factory;
-    private ModerationService _service;
+    private ModerationServiceAdapter _service;
     private FakeTelegramClient _fakeClient;
+    private ModerationServiceTestFactory _factory;
 
     [SetUp]
     public void Setup()
     {
+        _fakeClient = new FakeTelegramClient();
         _factory = new ModerationServiceTestFactory();
-        _fakeClient = _factory.FakeTelegramClient;
         _service = _factory.CreateModerationService();
     }
 
@@ -48,8 +48,8 @@ public class ModerationServiceBusinessLogicTests
             .FromUser(userId)
             .WithText("Hello world")
             .Build();
-        
-        _factory.WithUserManagerSetup(mock => 
+
+        _factory.WithUserManagerSetup(mock =>
             mock.Setup(x => x.InBanlist(userId)).ReturnsAsync(true));
 
         // Act
@@ -68,7 +68,7 @@ public class ModerationServiceBusinessLogicTests
             .FromUser(123456L)
             .WithText("Hello")
             .Build();
-        
+
         // Добавляем кнопки (пока нет билдера для этого)
         message.ReplyMarkup = new InlineKeyboardMarkup(new[]
         {
@@ -91,7 +91,7 @@ public class ModerationServiceBusinessLogicTests
             .FromUser(123456L)
             .WithText("Hello")
             .Build();
-        
+
         // Добавляем Story (пока нет билдера для этого)
         message.Story = new Story { Id = 1 };
 
@@ -111,8 +111,8 @@ public class ModerationServiceBusinessLogicTests
             .FromUser(123456L)
             .WithText("SPAM MESSAGE")
             .Build();
-        
-        _factory.WithClassifierSetup(mock => 
+
+        _factory.WithClassifierSetup(mock =>
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
                 .ReturnsAsync((true, 0.9f)));
 
@@ -129,15 +129,15 @@ public class ModerationServiceBusinessLogicTests
     {
         // Arrange
         var message = CreateTestMessage(123456L, "Это нормальное сообщение с полезной информацией");
-        
-        _factory.WithClassifierSetup(mock => 
+
+        _factory.WithClassifierSetup(mock =>
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
                 .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
-        
+
         // Мимикрия проверяется только для подозрительных пользователей
         // и только в AnalyzeMimicryAndMarkSuspicious, не в CheckMessageAsync
         // Поэтому этот тест не корректен - убираем его
-        
+
         // Act
         var result = await _service.CheckMessageAsync(message);
 
@@ -153,12 +153,12 @@ public class ModerationServiceBusinessLogicTests
             .FromUser(123456L)
             .WithText("Это нормальное сообщение с полезной информацией")
             .Build();
-        
-        _factory.WithClassifierSetup(mock => 
+
+        _factory.WithClassifierSetup(mock =>
             mock.Setup(x => x.IsSpam(It.IsAny<string>()))
                 .ReturnsAsync((false, -1.5f))); // Уверенный ham (не спам)
-        
-        _factory.WithMimicryClassifierSetup(mock => 
+
+        _factory.WithMimicryClassifierSetup(mock =>
             mock.Setup(x => x.AnalyzeMessages(It.IsAny<List<string>>()))
                 .Returns(0.1));
 
@@ -181,14 +181,14 @@ public class ModerationServiceBusinessLogicTests
             .WithId(123456L)
             .WithUsername("john_doe")
             .Build();
-        
+
         // Устанавливаем FirstName в null
         user.FirstName = null;
 
         // Act & Assert
-        var ex = Assert.ThrowsAsync<ModerationException>(async () => 
+        var ex = Assert.ThrowsAsync<ModerationException>(async () =>
             await _service.CheckUserNameAsync(user));
-        
+
         Assert.That(ex.Message, Does.Contain("пустым"));
     }
 
@@ -233,8 +233,8 @@ public class ModerationServiceBusinessLogicTests
         // Arrange
         var userId = 123456L;
         var chatId = 789L;
-        
-        _factory.WithBotClientSetup(mock => 
+
+        _factory.WithBotClientSetup(mock =>
             mock.Setup(x => x.SendRequest(It.IsAny<global::Telegram.Bot.Requests.BanChatMemberRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true));
 
@@ -251,8 +251,8 @@ public class ModerationServiceBusinessLogicTests
         // Arrange
         var userId = 123456L;
         var chatId = 789L;
-        
-        _factory.WithBotClientSetup(mock => 
+
+        _factory.WithBotClientSetup(mock =>
             mock.Setup(x => x.SendRequest(It.IsAny<global::Telegram.Bot.Requests.RestrictChatMemberRequest>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true));
 
@@ -285,8 +285,8 @@ public class ModerationServiceBusinessLogicTests
         // Arrange
         var userId = 123456L;
         var chatId = 789L;
-        
-        _factory.WithSuspiciousUsersStorageSetup(mock => 
+
+        _factory.WithSuspiciousUsersStorageSetup(mock =>
             mock.Setup(x => x.SetAiDetectEnabled(userId, chatId, true))
                 .Returns(true));
 
@@ -305,9 +305,9 @@ public class ModerationServiceBusinessLogicTests
     public void CheckMessageAsync_NullMessage_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var ex = Assert.ThrowsAsync<ArgumentNullException>(async () => 
+        var ex = Assert.ThrowsAsync<ArgumentNullException>(async () =>
             await _service.CheckMessageAsync(null!));
-        
+
         Assert.That(ex.ParamName, Is.EqualTo("message"));
     }
 
@@ -318,9 +318,9 @@ public class ModerationServiceBusinessLogicTests
         var message = new Message { Text = "Hello", Chat = new Chat { Id = 123 } };
 
         // Act & Assert
-        var ex = Assert.ThrowsAsync<ModerationException>(async () => 
+        var ex = Assert.ThrowsAsync<ModerationException>(async () =>
             await _service.CheckMessageAsync(message));
-        
+
         Assert.That(ex.Message, Does.Contain("пользователе"));
     }
 
@@ -355,4 +355,4 @@ public class ModerationServiceBusinessLogicTests
     }
 
     #endregion
-} 
+}

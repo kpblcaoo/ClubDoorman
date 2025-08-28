@@ -92,4 +92,4 @@ public class UserCleanupServiceTestFactoryTests
         Assert.That(factory.ApprovedUsersStorageLoggerMock, Is.Not.Null);
         Assert.That(factory.ApprovedUsersStorageLoggerMock.Object, Is.Not.Null);
     }
-} 
+}

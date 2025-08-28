@@ -27,13 +27,14 @@
         <PackageReference Include="FluentAssertions" Version="6.12.1" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
         <PackageReference Include="Moq" Version="4.20.70" />
-        <PackageReference Include="NUnit" Version="4.3.2" />
-        <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
+  <PackageReference Include="NUnit" Version="4.4.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+        <PackageReference Include="Scrutor" Version="4.2.2" />
         <PackageReference Include="SpecFlow" Version="3.9.74" />
         <PackageReference Include="SpecFlow.NUnit" Version="3.9.74" />
         <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.9.74" />
         <PackageReference Include="Telegram.Bot" Version="22.4.4" />
-        <!-- New packages for improved test infrastructure -->
+        <!-- Test infrastructure packages -->
         <PackageReference Include="Bogus" Version="35.4.0" />
         <PackageReference Include="AutoFixture" Version="4.18.1" />
         <PackageReference Include="AutoFixture.AutoMoq" Version="4.18.1" />
@@ -41,9 +42,7 @@
         <PackageReference Include="Verify.NUnit" Version="30.5.0" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Using Include="NUnit.Framework" />
-    </ItemGroup>
+    <!-- Using directives handled in GlobalUsings.cs -->
 
     <ItemGroup>
       <ProjectReference Include="..\ClubDoorman\ClubDoorman.csproj" />
@@ -80,5 +79,7 @@
         <Exec Command="cp -n &quot;$(ProjectDir)test-timeouts.json&quot; &quot;$(TargetDir)test-timeouts.json&quot;" Condition="'$(OS)' != 'Windows_NT'" />
         <Exec Command="copy &quot;$(ProjectDir)test-timeouts.json&quot; &quot;$(TargetDir)test-timeouts.json&quot;" Condition="'$(OS)' == 'Windows_NT'" />
     </Target>
+
+    <!-- TestKit2 archived, using original TestKit -->
 
 </Project>

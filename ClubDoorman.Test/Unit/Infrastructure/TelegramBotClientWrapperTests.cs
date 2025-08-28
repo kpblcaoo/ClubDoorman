@@ -1,6 +1,4 @@
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
@@ -24,8 +22,8 @@ public class TelegramBotClientWrapperTests
     {
         _factory = new TelegramBotClientWrapperTestFactory();
         // Создаем реальный TelegramBotClient для wrapper'а
-        var realBotClient = new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz");
-        _wrapper = new TelegramBotClientWrapper(realBotClient);
+    var realBotClient = new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz");
+    _wrapper = new TelegramBotClientWrapper(realBotClient, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance);
     }
 
     [Test]
@@ -33,7 +31,7 @@ public class TelegramBotClientWrapperTests
     {
         // Arrange & Act
         var botClient = new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz");
-        var wrapper = new TelegramBotClientWrapper(botClient);
+    var wrapper = new TelegramBotClientWrapper(botClient, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance);
 
         // Assert
         Assert.That(wrapper, Is.Not.Null);
@@ -43,7 +41,7 @@ public class TelegramBotClientWrapperTests
     public void TelegramBotClientWrapper_Constructor_ThrowsOnNullBot()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new TelegramBotClientWrapper(null!));
+    Assert.Throws<ArgumentNullException>(() => new TelegramBotClientWrapper(null!, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance));
     }
 
     [Test]
@@ -51,7 +49,7 @@ public class TelegramBotClientWrapperTests
     {
         // Arrange
         var botClient = new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz");
-        var wrapper = new TelegramBotClientWrapper(botClient);
+    var wrapper = new TelegramBotClientWrapper(botClient, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance);
 
         // Act
         var botId = wrapper.BotId;
@@ -65,7 +63,7 @@ public class TelegramBotClientWrapperTests
     {
         // Arrange
         var chatId = new ChatId(123456789);
-        
+
         // Создаем тестовый Chat с Photo
         var testPhoto = new ChatPhoto
         {
@@ -78,17 +76,17 @@ public class TelegramBotClientWrapperTests
         // Act & Assert
         // Этот тест проверяет, что метод GetChatFullInfo правильно копирует Photo
         // Мы не можем вызвать реальный API, но можем проверить структуру кода
-        
+
         // Проверяем, что в TelegramBotClientWrapper.GetChatFullInfo есть строка Photo = chat.Photo
         var wrapperCode = File.ReadAllText("../../../../ClubDoorman/Services/Telegram/TelegramBotClientWrapper.cs");
-        Assert.That(wrapperCode, Does.Contain("Photo = chat.Photo"), 
+        Assert.That(wrapperCode, Does.Contain("Photo = chat.Photo"),
             "TelegramBotClientWrapper.GetChatFullInfo должен копировать Photo из Chat");
-        
+
         // Проверяем, что ChatFullInfo имеет свойство Photo
         var chatFullInfoType = typeof(ChatFullInfo);
         var photoProperty = chatFullInfoType.GetProperty("Photo");
         Assert.That(photoProperty, Is.Not.Null, "ChatFullInfo должен иметь свойство Photo");
-        Assert.That(photoProperty!.PropertyType, Is.EqualTo(typeof(ChatPhoto)), 
+        Assert.That(photoProperty!.PropertyType, Is.EqualTo(typeof(ChatPhoto)),
             "Свойство Photo должно быть типа ChatPhoto");
     }
 
@@ -96,6 +94,6 @@ public class TelegramBotClientWrapperTests
     public void TelegramBotClientWrapper_Constructor_ValidatesInput()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new TelegramBotClientWrapper(null!));
+    Assert.Throws<ArgumentNullException>(() => new TelegramBotClientWrapper(null!, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance));
     }
-} 
+}

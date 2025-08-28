@@ -66,37 +66,27 @@ public class StatisticsServiceTestFactory
     #region Smart Methods Based on Business Logic
 
     public FakeTelegramClient FakeTelegramClient => FakeTelegramClientFactory.Create();
-    
+
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
-    public ModerationService CreateModerationServiceWithFake()
+    public ModerationServiceAdapter CreateModerationServiceWithFake()
     {
-        return new ModerationService(
-            new Mock<ISpamHamClassifier>().Object,
-            new Mock<IMimicryClassifier>().Object,
-            new Mock<IBadMessageManager>().Object,
-            new Mock<IUserManager>().Object,
-            new Mock<IAiChecks>().Object,
-            new Mock<ISuspiciousUsersStorage>().Object,
-            new Mock<ITelegramBotClient>().Object,
-            new Mock<IMessageService>().Object,
-            new Mock<IUserBanService>().Object,
-            new Mock<IUserCleanupService>().Object,
-            new Mock<ILogger<ModerationService>>().Object
+        return new ModerationServiceAdapter(
+            new Mock<IModerationPolicy>().Object
         );
     }
 
-            public CaptchaService CreateCaptchaServiceWithFake()
-        {
-            return new CaptchaService(
-                new Mock<ITelegramBotClientWrapper>().Object,
-                new Mock<ILogger<CaptchaService>>().Object,
-                new Mock<IMessageService>().Object,
-                AppConfigTestFactory.CreateDefault(),
-                new Mock<IViolationTracker>().Object,
-                new Mock<IUserBanService>().Object
-            );
-        }
+    public CaptchaService CreateCaptchaServiceWithFake()
+    {
+        return new CaptchaService(
+            new Mock<ITelegramBotClientWrapper>().Object,
+            new Mock<ILogger<CaptchaService>>().Object,
+            new Mock<IMessageService>().Object,
+            AppConfigTestFactory.CreateDefault(),
+            new Mock<IViolationTracker>().Object,
+            new Mock<IUserBanService>().Object
+        );
+    }
 
     public async Task<StatisticsService> CreateAsync()
     {

@@ -16,28 +16,28 @@ public static class TestKitBuilders
     /// <tags>builders, message, telegram, fluent-api</tags>
     /// </summary>
     public static MessageBuilder CreateMessage() => new MessageBuilder();
-    
+
     /// <summary>
     /// Создает builder для пользователя Telegram
     /// <tags>builders, user, telegram, fluent-api</tags>
     /// </summary>
     public static UserBuilder CreateUser() => new UserBuilder();
-    
+
     /// <summary>
     /// Создает builder для чата Telegram
     /// <tags>builders, chat, telegram, fluent-api</tags>
     /// </summary>
     public static ChatBuilder CreateChat() => new ChatBuilder();
-    
+
     /// <summary>
     /// Создает builder для результата модерации
     /// <tags>builders, moderation-result, moderation, fluent-api</tags>
     /// </summary>
     public static ModerationResultBuilder CreateModerationResult() => new ModerationResultBuilder();
-    
+
     /// <summary>
     /// Создает builder для полной информации о чате
     /// <tags>builders, chat-full-info, telegram, fluent-api</tags>
     /// </summary>
     public static ChatFullInfoBuilder CreateChatFullInfo() => new ChatFullInfoBuilder();
-} 
+}

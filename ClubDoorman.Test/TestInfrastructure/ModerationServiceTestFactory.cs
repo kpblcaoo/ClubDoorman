@@ -33,23 +33,25 @@ public class ModerationServiceTestFactory
     public Mock<ITelegramBotClient> BotClientMock { get; } = new();
     public Mock<IMessageService> MessageServiceMock { get; } = new();
     public Mock<IUserBanService> UserBanServiceMock { get; } = new();
-    public Mock<ILogger<ModerationService>> LoggerMock { get; } = new();
+    public Mock<ILogger<FakeModerationService>> LoggerMock { get; } = new();
 
-    public ModerationService CreateModerationService()
+    public ModerationServiceAdapter CreateModerationService()
     {
-        return new ModerationService(
+        // Создаем FakeModerationService как IModerationPolicy
+        var fakeModerationService = new FakeModerationService(
             ClassifierMock.Object,
             MimicryClassifierMock.Object,
             BadMessageManagerMock.Object,
             UserManagerMock.Object,
             AiChecksMock.Object,
             SuspiciousUsersStorageMock.Object,
-            BotClientMock.Object,
+            TelegramBotClientWrapperMock.Object,
             MessageServiceMock.Object,
             UserBanServiceMock.Object,
-            new Mock<IUserCleanupService>().Object,
             LoggerMock.Object
         );
+
+        return new ModerationServiceAdapter(fakeModerationService);
     }
 
     #region Configuration Methods
@@ -108,7 +110,7 @@ public class ModerationServiceTestFactory
         return this;
     }
 
-    public ModerationServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<ModerationService>>> setup)
+    public ModerationServiceTestFactory WithLoggerSetup(Action<Mock<ILogger<FakeModerationService>>> setup)
     {
         setup(LoggerMock);
         return this;
@@ -119,7 +121,7 @@ public class ModerationServiceTestFactory
     #region Smart Methods Based on Business Logic
 
     public FakeTelegramClient FakeTelegramClient => FakeTelegramClientFactory.Create();
-    
+
     public Mock<ITelegramBotClientWrapper> TelegramBotClientWrapperMock => new Mock<ITelegramBotClientWrapper>();
 
     public IUserManager CreateUserManagerWithFake()
@@ -127,7 +129,7 @@ public class ModerationServiceTestFactory
         return new Mock<IUserManager>().Object;
     }
 
-    public async Task<ModerationService> CreateAsync()
+    public async Task<ModerationServiceAdapter> CreateAsync()
     {
         return await Task.FromResult(CreateModerationService());
     }

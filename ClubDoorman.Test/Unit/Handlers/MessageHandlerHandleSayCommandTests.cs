@@ -7,12 +7,14 @@ using ClubDoorman.Models.Notifications;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Test.TestKit;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Times = Moq.Times;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Features.AdminOps;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
@@ -33,6 +35,34 @@ public class MessageHandlerHandleSayCommandTests
     public void Setup()
     {
         _factory = new MessageHandlerTestFactory();
+
+        // Настраиваем AppConfig для разрешения команды /say из тестового чата
+        _factory.AppConfigMock.Setup(x => x.AdminChatId).Returns(-1001234567890); // ID тестового чата
+        _factory.AppConfigMock.Setup(x => x.LogAdminChatId).Returns(-1001234567890);
+
+        // Настраиваем CommandRouter для обработки /say команд через SayCommandHandler
+        var sayCommandHandler = new SayCommandHandler(
+            _factory.BotMock.Object,
+            _factory.MessageServiceMock.Object,
+            _factory.AppConfigMock.Object,
+            NullLogger<SayCommandHandler>.Instance
+        );
+
+        _factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
+            It.Is<Message>(m => m.Text != null && m.Text.StartsWith("/say")),
+            It.IsAny<CancellationToken>()))
+            .Returns<Message, CancellationToken>(async (message, ct) =>
+            {
+                await sayCommandHandler.HandleAsync(message, ct);
+                return true; // Возвращаем true, что команда обработана
+            });
+
+        // Добавляем отдельный setup для null или не-/say сообщений
+        _factory.CommandRouterMock.Setup(x => x.HandleCommandAsync(
+            It.Is<Message>(m => m.Text == null || !m.Text.StartsWith("/say")),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false); // Команда не обработана
+
         _messageHandler = _factory.CreateMessageHandler();
     }
 
@@ -44,7 +74,7 @@ public class MessageHandlerHandleSayCommandTests
         message.Text = "/say @username"; // Недостаточно частей
 
         // Act
-        await _messageHandler.HandleSayCommandAsync(message, CancellationToken.None);
+        await _messageHandler.HandleCommandAsync(message, CancellationToken.None);
 
         // Assert
         _factory.MessageServiceMock.Verify(
@@ -65,9 +95,8 @@ public class MessageHandlerHandleSayCommandTests
     {
         // Arrange
         var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        message.Text = "/say 12345 Привет!"; // Используем userId вместо username
+        message.Text = "/say 12345 Привет!"; // используем userId вместо username
 
-        // Настраиваем мок для успешной отправки
         _factory.WithBotSetup(mock =>
         {
             mock.Setup(x => x.SendMessage(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), null, null, It.IsAny<CancellationToken>()))
@@ -75,7 +104,7 @@ public class MessageHandlerHandleSayCommandTests
         });
 
         // Act
-        await _messageHandler.HandleSayCommandAsync(message, CancellationToken.None);
+        await _messageHandler.HandleCommandAsync(message, CancellationToken.None);
 
         // Assert
         _factory.MessageServiceMock.Verify(
@@ -98,7 +127,6 @@ public class MessageHandlerHandleSayCommandTests
         var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
         message.Text = "/say 12345 Привет!";
 
-        // Настраиваем мок для успешной отправки
         _factory.WithBotSetup(mock =>
         {
             mock.Setup(x => x.SendMessage(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), null, null, It.IsAny<CancellationToken>()))
@@ -106,7 +134,7 @@ public class MessageHandlerHandleSayCommandTests
         });
 
         // Act
-        await _messageHandler.HandleSayCommandAsync(message, CancellationToken.None);
+        await _messageHandler.HandleCommandAsync(message, CancellationToken.None);
 
         // Assert
         _factory.BotMock.Verify(
@@ -124,7 +152,7 @@ public class MessageHandlerHandleSayCommandTests
         message.Text = "/say @nonexistentuser Привет!";
 
         // Act
-        await _messageHandler.HandleSayCommandAsync(message, CancellationToken.None);
+        await _messageHandler.HandleCommandAsync(message, CancellationToken.None);
 
         // Assert
         _factory.MessageServiceMock.Verify(
@@ -148,7 +176,7 @@ public class MessageHandlerHandleSayCommandTests
         message.Text = "/say invalid_id Привет!";
 
         // Act
-        await _messageHandler.HandleSayCommandAsync(message, CancellationToken.None);
+        await _messageHandler.HandleCommandAsync(message, CancellationToken.None);
 
         // Assert
         _factory.MessageServiceMock.Verify(
@@ -172,7 +200,6 @@ public class MessageHandlerHandleSayCommandTests
         message.Text = "/say 12345 Привет!";
         var expectedException = new InvalidOperationException("Test exception");
 
-        // Настраиваем мок для выброса исключения
         _factory.WithBotSetup(mock =>
         {
             mock.Setup(x => x.SendMessage(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), null, null, It.IsAny<CancellationToken>()))
@@ -180,7 +207,7 @@ public class MessageHandlerHandleSayCommandTests
         });
 
         // Act
-        await _messageHandler.HandleSayCommandAsync(message, CancellationToken.None);
+        await _messageHandler.HandleCommandAsync(message, CancellationToken.None);
 
         // Assert
         _factory.MessageServiceMock.Verify(
@@ -204,7 +231,7 @@ public class MessageHandlerHandleSayCommandTests
         message.Text = "/say 12345 "; // Пустое сообщение
 
         // Act
-        await _messageHandler.HandleSayCommandAsync(message, CancellationToken.None);
+        await _messageHandler.HandleCommandAsync(message, CancellationToken.None);
 
         // Assert
         _factory.BotMock.Verify(
@@ -221,7 +248,6 @@ public class MessageHandlerHandleSayCommandTests
         var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
         message.Text = "/say 12345 Привет! *bold* _italic_ `code`";
 
-        // Настраиваем мок для успешной отправки
         _factory.WithBotSetup(mock =>
         {
             mock.Setup(x => x.SendMessage(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), null, null, It.IsAny<CancellationToken>()))
@@ -229,7 +255,7 @@ public class MessageHandlerHandleSayCommandTests
         });
 
         // Act
-        await _messageHandler.HandleSayCommandAsync(message, CancellationToken.None);
+        await _messageHandler.HandleCommandAsync(message, CancellationToken.None);
 
         // Assert
         _factory.BotMock.Verify(
@@ -247,7 +273,6 @@ public class MessageHandlerHandleSayCommandTests
         var longText = new string('A', 1000); // Длинное сообщение
         message.Text = $"/say 12345 {longText}";
 
-        // Настраиваем мок для успешной отправки
         _factory.WithBotSetup(mock =>
         {
             mock.Setup(x => x.SendMessage(It.IsAny<ChatId>(), It.IsAny<string>(), It.IsAny<ParseMode>(), null, null, It.IsAny<CancellationToken>()))
@@ -255,7 +280,7 @@ public class MessageHandlerHandleSayCommandTests
         });
 
         // Act
-        await _messageHandler.HandleSayCommandAsync(message, CancellationToken.None);
+        await _messageHandler.HandleCommandAsync(message, CancellationToken.None);
 
         // Assert
         _factory.BotMock.Verify(
@@ -273,8 +298,8 @@ public class MessageHandlerHandleSayCommandTests
         message.Text = null;
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
-            await _messageHandler.HandleSayCommandAsync(message, CancellationToken.None),
+        Assert.DoesNotThrowAsync(async () =>
+            await _messageHandler.HandleCommandAsync(message, CancellationToken.None),
             "Метод должен обрабатывать null сообщение без исключений"
         );
     }
@@ -288,9 +313,9 @@ public class MessageHandlerHandleSayCommandTests
         message.Text = "/say 12345 Привет!";
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
-            await _messageHandler.HandleSayCommandAsync(message, CancellationToken.None),
+        Assert.DoesNotThrowAsync(async () =>
+            await _messageHandler.HandleCommandAsync(message, CancellationToken.None),
             "Метод должен обрабатывать null пользователя без исключений"
         );
     }
-} 
+}

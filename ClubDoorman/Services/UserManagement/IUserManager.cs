@@ -43,4 +43,4 @@ public interface IUserManager
     /// Обновляет банлист
     /// </summary>
     Task RefreshBanlist();
-} 
+}

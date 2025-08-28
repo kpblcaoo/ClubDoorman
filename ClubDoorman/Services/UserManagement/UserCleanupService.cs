@@ -11,13 +11,13 @@ public class UserCleanupService : IUserCleanupService
 {
     private readonly ApprovedUsersStorage _approvedUsersStorage;
     private readonly ILogger<UserCleanupService> _logger;
-    
+
     public UserCleanupService(ApprovedUsersStorage approvedUsersStorage, ILogger<UserCleanupService> logger)
     {
         _approvedUsersStorage = approvedUsersStorage;
         _logger = logger;
     }
-    
+
     /// <summary>
     /// Удаляет пользователя из всех списков одобренных
     /// </summary>
@@ -41,7 +41,7 @@ public class UserCleanupService : IUserCleanupService
             return false;
         }
     }
-    
+
     /// <summary>
     /// Удаляет пользователя из списка одобренных конкретной группы
     /// </summary>
@@ -66,7 +66,7 @@ public class UserCleanupService : IUserCleanupService
             return false;
         }
     }
-    
+
     /// <summary>
     /// Удаляет пользователя из глобального списка одобренных
     /// </summary>
@@ -90,4 +90,4 @@ public class UserCleanupService : IUserCleanupService
             return false;
         }
     }
-} 
+}

@@ -39,6 +39,14 @@ public interface ITelegramBotClientWrapper
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Удаляет сообщение и возвращает детализированный результат (для диагностики).
+    /// </summary>
+    Task<DeleteMessageResult> DeleteMessageWithOutcomeAsync(
+        ChatId chatId,
+        int messageId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Разбанивает пользователя в чате
     /// </summary>
     Task<bool> UnbanChatMemberAsync(
@@ -183,4 +191,4 @@ public interface ITelegramBotClientWrapper
     /// Получает информацию о чате (альтернативный метод)
     /// </summary>
     Task<Chat> GetChatAsync(ChatId chatId, CancellationToken cancellationToken = default);
-} 
+}

@@ -13,7 +13,6 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +20,7 @@ using System.Collections.Generic;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
-using ClubDoorman.Services.Commands;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.Unit.Handlers;
@@ -38,18 +37,18 @@ public class MessageHandlerExtendedTests
     public void Setup()
     {
         _factory = new MessageHandlerTestFactory();
-        
+
         // Настройка базовых моков для предотвращения NullReferenceException
-        _factory.WithModerationServiceSetup(mock =>
+        _factory.WithModerationFacadeMock(mock =>
         {
             mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
-                .ReturnsAsync(new Models.ModerationResult(Models.ModerationAction.Allow, "Test"));
+                .ReturnsAsync(new ClubDoorman.Models.ModerationResult(ClubDoorman.Models.ModerationAction.Allow, "Test"));
             mock.Setup(x => x.CheckUserNameAsync(It.IsAny<User>()))
-                .ReturnsAsync(new Models.ModerationResult(Models.ModerationAction.Allow, "Test name"));
+                .ReturnsAsync(new ClubDoorman.Models.ModerationResult(ClubDoorman.Models.ModerationAction.Allow, "Test name"));
             mock.Setup(x => x.IsUserApproved(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(false);
         });
-        
+
         _factory.WithUserManagerSetup(mock =>
         {
             mock.Setup(x => x.Approved(It.IsAny<long>(), It.IsAny<long?>()))
@@ -59,35 +58,35 @@ public class MessageHandlerExtendedTests
             mock.Setup(x => x.InBanlist(It.IsAny<long>()))
                 .ReturnsAsync(false);
         });
-        
+
         _factory.WithServiceProviderSetup(mock =>
         {
             // Создаем реальные экземпляры командных обработчиков для тестов
             var startCommandHandler = new StartCommandHandler(
-                new TelegramBotClientWrapper(new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz")),
-                NullLogger<StartCommandHandler>.Instance,
-                new Mock<IMessageService>().Object,
+                new TelegramBotClientWrapper(new Telegram.Bot.TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"), Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance),
+                Microsoft.Extensions.Logging.Abstractions.NullLogger<StartCommandHandler>.Instance,
+                new Moq.Mock<IMessageService>().Object,
                 AppConfigTestFactory.CreateDefault()
             );
-            
+
             var suspiciousCommandHandler = new SuspiciousCommandHandler(
-                new TelegramBotClientWrapper(new TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz")),
-                _factory.ModerationServiceMock.Object,
-                new Mock<IMessageService>().Object,
-                NullLogger<SuspiciousCommandHandler>.Instance,
+                new TelegramBotClientWrapper(new Telegram.Bot.TelegramBotClient("1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"), Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance),
+                _factory.ModerationFacadeMock.Object,
+                new Moq.Mock<IMessageService>().Object,
+                Microsoft.Extensions.Logging.Abstractions.NullLogger<SuspiciousCommandHandler>.Instance,
                 AppConfigTestFactory.CreateDefault()
             );
-            
+
             // Возвращаем реальные экземпляры для командных обработчиков через GetService
             mock.Setup(x => x.GetService(typeof(StartCommandHandler)))
                 .Returns(startCommandHandler);
-                
+
             mock.Setup(x => x.GetService(typeof(SuspiciousCommandHandler)))
                 .Returns(suspiciousCommandHandler);
-                
+
             // Для остальных сервисов возвращаем null, но только если это не командные обработчики
             mock.Setup(x => x.GetService(It.IsAny<Type>()))
-                .Returns<Type>(serviceType => 
+                .Returns<Type>(serviceType =>
                 {
                     if (serviceType == typeof(StartCommandHandler))
                         return startCommandHandler;
@@ -223,9 +222,9 @@ public class MessageHandlerExtendedTests
     public void CanHandle_UpdateWithCallbackQuery_ReturnsFalse()
     {
         // Arrange
-        var update = new Update 
-        { 
-            Message = null, 
+        var update = new Update
+        {
+            Message = null,
             EditedMessage = null,
             CallbackQuery = new CallbackQuery { Id = "test" }
         };
@@ -252,7 +251,7 @@ public class MessageHandlerExtendedTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<ArgumentNullException>(
             async () => await handler.HandleAsync(update));
-        
+
         Assert.That(exception.ParamName, Is.EqualTo("update"));
     }
 
@@ -828,4 +827,4 @@ public class MessageHandlerExtendedTests
     }
 
     #endregion
-} 
+}

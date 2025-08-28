@@ -10,4 +10,4 @@ public static class TextProcessingModule
         // This module is created for consistency with the modular architecture
         return services;
     }
-} 
+}

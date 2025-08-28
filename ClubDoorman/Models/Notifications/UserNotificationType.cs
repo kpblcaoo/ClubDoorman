@@ -9,37 +9,37 @@ public enum UserNotificationType
     /// Предупреждение о модерации
     /// </summary>
     ModerationWarning,
-    
+
     /// <summary>
     /// Сообщение удалено
     /// </summary>
     MessageDeleted,
-    
+
     /// <summary>
     /// Пользователь забанен
     /// </summary>
     UserBanned,
-    
+
     /// <summary>
     /// Пользователь ограничен
     /// </summary>
     UserRestricted,
-    
+
     /// <summary>
     /// Капча показана
     /// </summary>
     CaptchaShown,
-    
+
     /// <summary>
     /// Приветствие
     /// </summary>
     Welcome,
-    
+
     /// <summary>
     /// Предупреждение
     /// </summary>
     Warning,
-    
+
     /// <summary>
     /// Успешная операция
     /// </summary>
@@ -54,4 +54,4 @@ public enum UserNotificationType
     /// Приветствие после капчи
     /// </summary>
     CaptchaWelcome
-} 
+}

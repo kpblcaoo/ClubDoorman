@@ -2,6 +2,8 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Models.Notifications;
 using Telegram.Bot.Types;
 
+using ClubDoorman.Services.Core.Configuration;
+
 namespace ClubDoorman.Services.Messaging;
 
 /// <summary>
@@ -9,36 +11,42 @@ namespace ClubDoorman.Services.Messaging;
 /// </summary>
 public class MessageTemplates
 {
+    private readonly IAppConfig _appConfig;
+
+    public MessageTemplates(IAppConfig appConfig)
+    {
+        _appConfig = appConfig;
+    }
     private readonly Dictionary<AdminNotificationType, string> _adminTemplates = new()
     {
-        [AdminNotificationType.AutoBanBlacklist] = 
+        [AdminNotificationType.AutoBanBlacklist] =
             "🚫 Автобан по блэклисту lols.bot (первое сообщение)\n" +
             "Юзер {UserFullName} из чата {ChatTitle}\n" +
             "{MessageLink}",
-            
-        [AdminNotificationType.AutoBanFromBlacklist] = 
+
+        [AdminNotificationType.AutoBanFromBlacklist] =
             "🚫 Автобан из блэклиста: {Reason}\n" +
             "Юзер {UserFullName} из чата {ChatTitle}\n" +
             "{MessageLink}",
-            
-        [AdminNotificationType.PrivateChatBanAttempt] = 
+
+        [AdminNotificationType.PrivateChatBanAttempt] =
             "⚠️ Попытка бана в приватном чате: {Reason}\n" +
             "Юзер {UserFullName} из чата {ChatTitle}\n" +
             "Операция невозможна в приватных чатах",
-            
-        [AdminNotificationType.BanForLongName] = 
+
+        [AdminNotificationType.BanForLongName] =
             "{BanType} в чате <b>{ChatTitle}</b>: {Reason}",
-            
-        [AdminNotificationType.BanChannel] = 
+
+        [AdminNotificationType.BanChannel] =
             "Сообщение удалено, в чате {ChatTitle} забанен канал {ChannelTitle}",
-            
-        [AdminNotificationType.RemovedFromApproved] = 
+
+        [AdminNotificationType.RemovedFromApproved] =
             "⚠️ Пользователь {UserFullName} удален из списка одобренных после автобана по блэклисту",
-            
-        [AdminNotificationType.ChannelMessage] = 
+
+        [AdminNotificationType.ChannelMessage] =
             "Сообщение от канала {ChannelTitle} в чате {ChatTitle} - репорт в админ-чат",
-            
-        [AdminNotificationType.SuspiciousUser] = 
+
+        [AdminNotificationType.SuspiciousUser] =
             "🔍 <b>Подозрительный пользователь обнаружен</b>\n\n" +
             "👤 Пользователь: <a href=\"tg://user?id={UserId}\">{UserFullName}</a>\n" +
             "🏠 Чат: <b>{ChatTitle}</b>\n" +
@@ -46,54 +54,54 @@ public class MessageTemplates
             "🕐 Помечен как подозрительный: {SuspiciousAt:yyyy-MM-dd HH:mm}\n\n" +
             "📝 Первые сообщения:\n{FirstMessages}\n\n" +
             "✅ Для одобрения нужно ещё {RequiredMessages} хороших сообщений",
-            
-        [AdminNotificationType.AiProfileAnalysis] = 
+
+        [AdminNotificationType.AiProfileAnalysis] =
             "🤖 <b>AI анализ профиля</b>\n\n" +
             "👤 Пользователь: <a href=\"tg://user?id={UserId}\">{UserFullName}</a>\n" +
             "🏠 Чат: <b>{ChatTitle}</b>\n" +
             "📊 Вероятность спама: <b>{SpamProbability:F2}</b>\n" +
             "📝 Имя и био:\n<code>{NameBio}</code>\n\n" +
             "🔍 Причина: {AiReason}",
-            
-        [AdminNotificationType.ModerationError] = 
+
+        [AdminNotificationType.ModerationError] =
             "❌ Ошибка модерации: {Context}\n" +
             "Пользователь: {UserFullName}\n" +
             "Чат: {ChatTitle}\n" +
             "Ошибка: {ErrorMessage}",
-            
-        [AdminNotificationType.SystemError] = 
+
+        [AdminNotificationType.SystemError] =
             "💥 Системная ошибка: {Context}\n" +
             "Ошибка: {ErrorMessage}",
-            
-        [AdminNotificationType.AutoBan] = 
+
+        [AdminNotificationType.AutoBan] =
             "Сообщение удалено: {Reason}\n" +
             "Юзер {UserFullName} из чата {ChatTitle}\n" +
             "{MessageLink}",
-            
-        [AdminNotificationType.SuspiciousMessage] = 
+
+        [AdminNotificationType.SuspiciousMessage] =
             "⚠️ <b>Подозрительное сообщение</b> - требует ручной проверки. Сообщение <b>НЕ удалено</b>.\n" +
             "Пользователь <a href=\"tg://user?id={UserId}\">{UserFullName}</a> в чате <b>{ChatTitle}</b>\n" +
             "Сообщение: <code>{MessageText}</code>",
-            
-        [AdminNotificationType.ChannelError] = 
+
+        [AdminNotificationType.ChannelError] =
             "⚠️ Не могу забанить канал в чате {ChatTitle}. Не хватает могущества?",
-            
-                    [AdminNotificationType.UserCleanup] = 
+
+        [AdminNotificationType.UserCleanup] =
                 "🧹 Пользователь {UserFullName} очищен из всех списков после автобана",
 
-            [AdminNotificationType.UserApproved] = 
+        [AdminNotificationType.UserApproved] =
                 "✅ {Reason}",
 
-            [AdminNotificationType.SystemInfo] = 
+        [AdminNotificationType.SystemInfo] =
                 "{Reason}",
 
-            [AdminNotificationType.Success] = 
+        [AdminNotificationType.Success] =
                 "✅ {Reason}",
 
-            [AdminNotificationType.Warning] = 
+        [AdminNotificationType.Warning] =
                 "⚠️ {Reason}",
 
-            [AdminNotificationType.AiDetectAutoDelete] =
+        [AdminNotificationType.AiDetectAutoDelete] =
                 "🔍🤖🚫 <b>Специальный AI детект: автоудаление спама</b>\n\n" +
                 "👤 Пользователь: <a href=\"tg://user?id={UserId}\">{UserName}</a>\n" +
                 "🏠 Чат: <b>{ChatTitle}</b>\n" +
@@ -103,7 +111,7 @@ public class MessageTemplates
                 "🔬 ML скор: <b>{MlScore:F2}</b>\n" +
                 "⚡ Действие: <b>Автоматически удалено + ограничение на 2 часа</b>",
 
-            [AdminNotificationType.AiDetectSuspicious] =
+        [AdminNotificationType.AiDetectSuspicious] =
                 "🔍🤖❓ <b>Специальный AI детект: подозрительное сообщение</b>\n\n" +
                 "👤 Пользователь: <a href=\"tg://user?id={UserId}\">{UserName}</a>\n" +
                 "🏠 Чат: <b>{ChatTitle}</b>\n" +
@@ -113,141 +121,141 @@ public class MessageTemplates
                 "🔬 ML скор: <b>{MlScore:F2}</b>\n" +
                 "🔒 Пользователь ограничен на 2 часа. Требуется решение.",
 
-            [AdminNotificationType.UserRemovedFromApproved] =
+        [AdminNotificationType.UserRemovedFromApproved] =
                 "⚠️ Пользователь <a href=\"tg://user?id={UserId}\">{UserName}</a> удален из списка одобренных после получения ограничений в чате <b>{ChatTitle}</b>",
 
-            [AdminNotificationType.UserRestricted] =
+        [AdminNotificationType.UserRestricted] =
                 "🔔 В чате <b>{ChatTitle}</b> пользователю <a href=\"tg://user?id={UserId}\">{UserName}</a> дали ридонли или забанили, посмотрите в Recent actions, возможно ML пропустил спам. Если это так - кидайте его сюда.{LastMessage}"
-        };
-    
+    };
+
     private readonly Dictionary<LogNotificationType, string> _logTemplates = new()
     {
-        [LogNotificationType.AutoBanBlacklist] = 
+        [LogNotificationType.AutoBanBlacklist] =
             "🚫 Автобан по блэклисту lols.bot (первое сообщение)\n" +
             "Юзер {UserFullName} из чата {ChatTitle}\n" +
             "{MessageLink}",
-            
-        [LogNotificationType.AutoBanFromBlacklist] = 
+
+        [LogNotificationType.AutoBanFromBlacklist] =
             "🚫 Автобан из блэклиста: {Reason}\n" +
             "Юзер {UserFullName} из чата {ChatTitle}\n" +
             "{MessageLink}",
-            
-        [LogNotificationType.AutoBanKnownSpam] = 
+
+        [LogNotificationType.AutoBanKnownSpam] =
             "🚫 Автобан за известное спам-сообщение\n" +
             "Юзер {UserFullName} из чата {ChatTitle}\n" +
             "{MessageLink}",
-            
-        [LogNotificationType.BanForLongName] = 
+
+        [LogNotificationType.BanForLongName] =
             "🚫 Бан за длинное имя: {Reason}\n" +
             "Юзер {UserFullName} из чата {ChatTitle}",
-            
-        [LogNotificationType.BanChannel] = 
+
+        [LogNotificationType.BanChannel] =
             "🚫 Бан канала {ChannelTitle} в чате {ChatTitle}",
-            
-        [LogNotificationType.SuspiciousUser] = 
+
+        [LogNotificationType.SuspiciousUser] =
             "🔍 Подозрительный пользователь: {UserFullName} в чате {ChatTitle}\n" +
             "Оценка мимикрии: {MimicryScore:F2}",
-            
-        [LogNotificationType.AiProfileAnalysis] = 
+
+        [LogNotificationType.AiProfileAnalysis] =
             "🤖 AI анализ профиля: {UserFullName} в чате {ChatTitle}\n" +
             "Вероятность спама: {SpamProbability:F2}",
-            
-        [LogNotificationType.CriticalError] = 
+
+        [LogNotificationType.CriticalError] =
             "💥 Критическая ошибка: {Context}\n" +
             "Ошибка: {ErrorMessage}",
-            
-        [LogNotificationType.ChannelMessage] = 
+
+        [LogNotificationType.ChannelMessage] =
             "📢 Сообщение от канала {ChannelTitle} в чате {ChatTitle}",
-            
-        [LogNotificationType.AutoBanTextMention] = 
+
+        [LogNotificationType.AutoBanTextMention] =
             "🚫 Удаление сообщения за ссылки\n" +
             "Юзер {UserFullName} из чата {ChatTitle}\n" +
             "{MessageLink}",
-            
-        [LogNotificationType.AutoBanRepeatedViolations] = 
+
+        [LogNotificationType.AutoBanRepeatedViolations] =
             "🚫 Автобан за повторные нарушения: {Reason}\n" +
             "Юзер {UserFullName} из чата {ChatTitle}\n" +
             "Если это ошибка - разбаньте вручную"
     };
-    
+
     private readonly Dictionary<UserNotificationType, string> _userTemplates = new()
     {
-        [UserNotificationType.ModerationWarning] = 
+        [UserNotificationType.ModerationWarning] =
             "👋 {UserMention}, вы пока <b>новичок</b> в этом чате.\n\n" +
             "<b>Первые 3 сообщения</b> проходят антиспам-проверку:\n" +
             "• нельзя эмодзи, рекламу и <b>стоп-слова</b>\n" +
             "• работает ML-анализ{ReasonSuffix}",
-            
-        [UserNotificationType.MessageDeleted] = 
+
+        [UserNotificationType.MessageDeleted] =
             "❌ Ваше сообщение удалено: {Reason}",
-            
-        [UserNotificationType.UserBanned] = 
+
+        [UserNotificationType.UserBanned] =
             "🚫 Вы забанены в этом чате: {Reason}",
-            
-        [UserNotificationType.UserRestricted] = 
+
+        [UserNotificationType.UserRestricted] =
             "⚠️ Вы ограничены в этом чате: {Reason}",
-            
-        [UserNotificationType.CaptchaShown] = 
+
+        [UserNotificationType.CaptchaShown] =
             "🧩 Пожалуйста, пройдите капчу для входа в чат",
-            
-                    [UserNotificationType.Warning] = 
+
+        [UserNotificationType.Warning] =
                 "⚠️ {Reason}",
-            
-            [UserNotificationType.Success] = 
+
+        [UserNotificationType.Success] =
                 "✅ {Reason}",
 
-            [UserNotificationType.SystemInfo] =
+        [UserNotificationType.SystemInfo] =
                 "{Reason}",
 
-            [UserNotificationType.Welcome] = 
+        [UserNotificationType.Welcome] =
                 "{Reason}",
 
-            [UserNotificationType.CaptchaWelcome] =
+        [UserNotificationType.CaptchaWelcome] =
                 "👋 {UserName}\n\n<b>Внимание!</b> первые три сообщения проходят антиспам-проверку, эмодзи{MediaWarning} и реклама запрещены — они могут удаляться автоматически. Не просите писать в ЛС!{VpnAd}"
-        };
-    
+    };
+
     /// <summary>
     /// Получить шаблон для админского уведомления
     /// </summary>
     public string GetAdminTemplate(AdminNotificationType type) => _adminTemplates[type];
-    
+
     /// <summary>
     /// Получить шаблон для лог-уведомления
     /// </summary>
     public string GetLogTemplate(LogNotificationType type) => _logTemplates[type];
-    
+
     /// <summary>
     /// Получить шаблон для пользовательского уведомления
     /// </summary>
     public string GetUserTemplate(UserNotificationType type) => _userTemplates[type];
-    
+
     /// <summary>
     /// Форматировать шаблон с данными
     /// </summary>
     public string FormatTemplate(string template, object data)
     {
         var result = template;
-        
+
         // Заменяем плейсхолдеры на значения из data
         var properties = data.GetType().GetProperties();
         foreach (var property in properties)
         {
             var placeholder = $"{{{property.Name}}}";
             var value = property.GetValue(data)?.ToString() ?? "";
-            
+
             result = result.Replace(placeholder, value);
         }
-        
+
         return result;
     }
-    
+
     /// <summary>
     /// Форматировать шаблон с данными уведомления
     /// </summary>
     public string FormatNotificationTemplate(string template, NotificationData data)
     {
         var result = template;
-        
+
         // Базовые поля
         result = result.Replace("{UserFullName}", Utils.FullName(data.User));
         result = result.Replace("{UserMention}", $"<a href=\"tg://user?id={data.User.Id}\">{Utils.FullName(data.User)}</a>");
@@ -257,7 +265,7 @@ public class MessageTemplates
         result = result.Replace("{Reason}", data.Reason ?? "");
         result = result.Replace("{MessageId}", data.MessageId?.ToString() ?? "");
         result = result.Replace("{ReasonSuffix}", !string.IsNullOrEmpty(data.Reason) ? $"\n\n<i>Ваше сообщение удалено: {data.Reason}</i>" : "");
-        
+
         // Специфичные поля для разных типов данных
         if (data is AutoBanNotificationData autoBanData)
         {
@@ -269,7 +277,7 @@ public class MessageTemplates
             result = result.Replace("{MimicryScore}", suspiciousData.MimicryScore.ToString("F2"));
             result = result.Replace("{SuspiciousAt}", suspiciousData.SuspiciousAt.ToString("yyyy-MM-dd HH:mm"));
             result = result.Replace("{FirstMessages}", FormatFirstMessages(suspiciousData.FirstMessages));
-            result = result.Replace("{RequiredMessages}", Config.SuspiciousToApprovedMessageCount.ToString());
+            result = result.Replace("{RequiredMessages}", _appConfig.SuspiciousToApprovedMessageCount.ToString());
         }
 
         else if (data is ErrorNotificationData errorData)
@@ -291,72 +299,72 @@ public class MessageTemplates
             result = result.Replace("{MessageText}", System.Net.WebUtility.HtmlEncode(suspiciousMsgData.MessageText));
             result = result.Replace("{MessageLink}", suspiciousMsgData.MessageLink ?? "");
         }
-                    else if (data is UserCleanupNotificationData cleanupData)
-            {
-                result = result.Replace("{CleanupReason}", cleanupData.CleanupReason);
-            }
-            else if (data is AiProfileAnalysisData aiProfileData)
-            {
-                result = result.Replace("{SpamProbability:F2}", (aiProfileData.SpamProbability * 100).ToString("F2"));
-                result = result.Replace("{AiReason}", aiProfileData.Reason);
-                result = result.Replace("{NameBio}", aiProfileData.NameBio);
-                result = result.Replace("{MessageText}", aiProfileData.MessageText);
-            }
-            else if (data is AiDetectNotificationData aiDetectData)
-            {
-                result = result.Replace("{UserName}", Utils.FullName(aiDetectData.User));
-                result = result.Replace("{UserId}", aiDetectData.User.Id.ToString());
-                result = result.Replace("{ChatTitle}", aiDetectData.Chat.Title ?? "");
-                result = result.Replace("{MimicryScore}", aiDetectData.MimicryScore.ToString("F2"));
-                result = result.Replace("{AiScore}", aiDetectData.AiScore.ToString("F2"));
-                result = result.Replace("{MlScore}", aiDetectData.MlScore.ToString("F2"));
-                result = result.Replace("{AiReason}", aiDetectData.AiReason);
-                result = result.Replace("{MessageText}", aiDetectData.MessageText.Substring(0, Math.Min(aiDetectData.MessageText.Length, 200)));
-            }
-            else if (data is UserRestrictedNotificationData restrictedData)
-            {
-                result = result.Replace("{UserName}", Utils.FullName(restrictedData.User));
-                result = result.Replace("{UserId}", restrictedData.User.Id.ToString());
-                result = result.Replace("{ChatTitle}", restrictedData.ChatTitle);
-                result = result.Replace("{LastMessage}", string.IsNullOrWhiteSpace(restrictedData.LastMessage) 
-                    ? "" 
-                    : $" Его/её последним сообщением было:\n<pre>{restrictedData.LastMessage}</pre>");
-            }
-            else if (data is UserRemovedFromApprovedNotificationData removedData)
-            {
-                result = result.Replace("{UserName}", Utils.FullName(removedData.User));
-                result = result.Replace("{UserId}", removedData.User.Id.ToString());
-                result = result.Replace("{ChatTitle}", removedData.ChatTitle);
-            }
-            else if (data is CaptchaWelcomeNotificationData captchaWelcomeData)
-            {
-                result = result.Replace("{UserName}", Utils.FullName(captchaWelcomeData.User));
-                result = result.Replace("{MediaWarning}", captchaWelcomeData.MediaWarning);
-                result = result.Replace("{VpnAd}", captchaWelcomeData.VpnAd);
-            }
-            else if (data is SimpleNotificationData simpleData)
-            {
-                result = result.Replace("{UserName}", Utils.FullName(simpleData.User));
-                result = result.Replace("{UserId}", simpleData.User.Id.ToString());
-                result = result.Replace("{ChatTitle}", simpleData.Chat.Title ?? "");
-                result = result.Replace("{Reason}", simpleData.Reason);
-            }
-            else
-            {
-                // Fallback для базовых полей
-                result = result.Replace("{UserName}", Utils.FullName(data.User));
-                result = result.Replace("{UserId}", data.User.Id.ToString());
-                result = result.Replace("{ChatTitle}", data.Chat.Title ?? "");
-                result = result.Replace("{Reason}", data.Reason);
-            }
-        
+        else if (data is UserCleanupNotificationData cleanupData)
+        {
+            result = result.Replace("{CleanupReason}", cleanupData.CleanupReason);
+        }
+        else if (data is AiProfileAnalysisData aiProfileData)
+        {
+            result = result.Replace("{SpamProbability:F2}", (aiProfileData.SpamProbability * 100).ToString("F2"));
+            result = result.Replace("{AiReason}", aiProfileData.Reason);
+            result = result.Replace("{NameBio}", aiProfileData.NameBio);
+            result = result.Replace("{MessageText}", aiProfileData.MessageText);
+        }
+        else if (data is AiDetectNotificationData aiDetectData)
+        {
+            result = result.Replace("{UserName}", Utils.FullName(aiDetectData.User));
+            result = result.Replace("{UserId}", aiDetectData.User.Id.ToString());
+            result = result.Replace("{ChatTitle}", aiDetectData.Chat.Title ?? "");
+            result = result.Replace("{MimicryScore}", aiDetectData.MimicryScore.ToString("F2"));
+            result = result.Replace("{AiScore}", aiDetectData.AiScore.ToString("F2"));
+            result = result.Replace("{MlScore}", aiDetectData.MlScore.ToString("F2"));
+            result = result.Replace("{AiReason}", aiDetectData.AiReason);
+            result = result.Replace("{MessageText}", aiDetectData.MessageText.Substring(0, Math.Min(aiDetectData.MessageText.Length, 200)));
+        }
+        else if (data is UserRestrictedNotificationData restrictedData)
+        {
+            result = result.Replace("{UserName}", Utils.FullName(restrictedData.User));
+            result = result.Replace("{UserId}", restrictedData.User.Id.ToString());
+            result = result.Replace("{ChatTitle}", restrictedData.ChatTitle);
+            result = result.Replace("{LastMessage}", string.IsNullOrWhiteSpace(restrictedData.LastMessage)
+                ? ""
+                : $" Его/её последним сообщением было:\n<pre>{restrictedData.LastMessage}</pre>");
+        }
+        else if (data is UserRemovedFromApprovedNotificationData removedData)
+        {
+            result = result.Replace("{UserName}", Utils.FullName(removedData.User));
+            result = result.Replace("{UserId}", removedData.User.Id.ToString());
+            result = result.Replace("{ChatTitle}", removedData.ChatTitle);
+        }
+        else if (data is CaptchaWelcomeNotificationData captchaWelcomeData)
+        {
+            result = result.Replace("{UserName}", Utils.FullName(captchaWelcomeData.User));
+            result = result.Replace("{MediaWarning}", captchaWelcomeData.MediaWarning);
+            result = result.Replace("{VpnAd}", captchaWelcomeData.VpnAd);
+        }
+        else if (data is SimpleNotificationData simpleData)
+        {
+            result = result.Replace("{UserName}", Utils.FullName(simpleData.User));
+            result = result.Replace("{UserId}", simpleData.User.Id.ToString());
+            result = result.Replace("{ChatTitle}", simpleData.Chat.Title ?? "");
+            result = result.Replace("{Reason}", simpleData.Reason);
+        }
+        else
+        {
+            // Fallback для базовых полей
+            result = result.Replace("{UserName}", Utils.FullName(data.User));
+            result = result.Replace("{UserId}", data.User.Id.ToString());
+            result = result.Replace("{ChatTitle}", data.Chat.Title ?? "");
+            result = result.Replace("{Reason}", data.Reason);
+        }
+
         return result;
     }
-    
+
     private string FormatFirstMessages(List<string> messages)
     {
         if (messages.Count == 0) return "Нет сообщений";
-        
+
         var result = "";
         for (int i = 0; i < Math.Min(messages.Count, 5); i++)
         {
@@ -365,7 +373,7 @@ public class MessageTemplates
                 msg = msg.Substring(0, 50) + "...";
             result += $"{i + 1}. <code>{msg}</code>\n";
         }
-        
+
         return result;
     }
     // TODO: Восстановить для будущей реализации автовыбора ParseMode
@@ -393,4 +401,4 @@ public class MessageTemplates
     //         .Replace(".", "\\.")
     //         .Replace("!", "\\!");
     // }
-} 
+}

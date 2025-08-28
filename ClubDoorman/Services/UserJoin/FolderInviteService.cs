@@ -76,11 +76,11 @@ public class FolderInviteService : IFolderInviteService
         var user = chatMemberUpdated.NewChatMember.User;
         var chat = chatMemberUpdated.Chat;
 
-        _logger.LogWarning("🚫 ПОЛЬЗОВАТЕЛЬ ВОШЕЛ ЧЕРЕЗ ПАПКУ: {User} (id={UserId}, username={Username}) в группу '{ChatTitle}' (id={ChatId})", 
-            (user.FirstName + (string.IsNullOrEmpty(user.LastName) ? "" : " " + user.LastName)), 
-            user.Id, 
-            user.Username ?? "-", 
-            chat.Title ?? "-", 
+        _logger.LogWarning("🚫 ПОЛЬЗОВАТЕЛЬ ВОШЕЛ ЧЕРЕЗ ПАПКУ: {User} (id={UserId}, username={Username}) в группу '{ChatTitle}' (id={ChatId})",
+            (user.FirstName + (string.IsNullOrEmpty(user.LastName) ? "" : " " + user.LastName)),
+            user.Id,
+            user.Username ?? "-",
+            chat.Title ?? "-",
             chat.Id);
 
         try
@@ -92,23 +92,23 @@ public class FolderInviteService : IFolderInviteService
                 Chat = chat,
                 Date = DateTime.UtcNow
             };
-            
+
             await _userBanService.AutoBanAsync(
                 fakeMessage,
                 "Автоматический бан за вход через папку",
                 cancellationToken);
 
-            _logger.LogInformation("✅ Пользователь {User} (id={UserId}) забанен за вход через папку в группе '{ChatTitle}'", 
-                (user.FirstName + (string.IsNullOrEmpty(user.LastName) ? "" : " " + user.LastName)), 
-                user.Id, 
+            _logger.LogInformation("✅ Пользователь {User} (id={UserId}) забанен за вход через папку в группе '{ChatTitle}'",
+                (user.FirstName + (string.IsNullOrEmpty(user.LastName) ? "" : " " + user.LastName)),
+                user.Id,
                 chat.Title ?? "-");
 
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Ошибка при бане пользователя {User} (id={UserId}) за вход через папку", 
-                (user.FirstName + (string.IsNullOrEmpty(user.LastName) ? "" : " " + user.LastName)), 
+            _logger.LogError(ex, "❌ Ошибка при бане пользователя {User} (id={UserId}) за вход через папку",
+                (user.FirstName + (string.IsNullOrEmpty(user.LastName) ? "" : " " + user.LastName)),
                 user.Id);
             return false;
         }

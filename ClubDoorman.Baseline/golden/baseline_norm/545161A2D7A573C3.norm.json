@@ -1,0 +1,8 @@
+{
+  "Schema": 4,
+  "Id": 5,
+  "CorrelationId": "545161A2D7A573C3",
+  "ShortName": "EmojiFlood",
+  "Action": "Delete",
+  "RuleCode": "ModeratedDelete"
+}

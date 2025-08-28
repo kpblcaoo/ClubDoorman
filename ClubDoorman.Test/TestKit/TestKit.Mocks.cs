@@ -2,7 +2,6 @@ using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Infrastructure;
 using Telegram.Bot;
@@ -68,10 +67,10 @@ namespace ClubDoorman.Test.TestKit
         public static Mock<ITelegramBotClient> CreateMockBotClient()
         {
             var mock = new Mock<ITelegramBotClient>();
-            
+
             // Примечание: GetMe - это extension метод и не может быть замокан
             // Для тестирования используйте ITelegramBotClientWrapper или реальный TelegramBotClient
-                
+
             return mock;
         }
 
@@ -102,17 +101,17 @@ namespace ClubDoorman.Test.TestKit
         public static Mock<ITelegramBotClientWrapper> CreateMockBotClientWrapper()
         {
             var mock = new Mock<ITelegramBotClientWrapper>();
-            
+
             // Настройка базовых методов
             mock.Setup(x => x.GetMe(It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new User 
-                { 
-                    Id = 123456789, 
-                    IsBot = true, 
+                .ReturnsAsync(new User
+                {
+                    Id = 123456789,
+                    IsBot = true,
                     FirstName = "TestBot",
                     Username = "test_bot"
                 });
-                
+
             return mock;
         }
 
@@ -124,7 +123,7 @@ namespace ClubDoorman.Test.TestKit
         {
             var user = CreateTestUser();
             var chat = CreateTestChat();
-            
+
             // Создаем сообщение с базовыми свойствами
             var message = new Message
             {
@@ -133,7 +132,7 @@ namespace ClubDoorman.Test.TestKit
                 From = user,
                 Text = text
             };
-            
+
             return message;
         }
 
@@ -230,7 +229,7 @@ namespace ClubDoorman.Test.TestKit
             mock.Setup(x => x.RegisterViolation(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<ViolationType>())).Returns(false);
             return mock;
         }
-        
+
         /// <summary> Создает Mock IMessageService </summary>
         public static Mock<IMessageService> CreateMockMessageService()
         {
@@ -238,7 +237,7 @@ namespace ClubDoorman.Test.TestKit
             // Базовые настройки для IMessageService
             return mock;
         }
-        
+
         /// <summary> Создает Mock IStatisticsService </summary>
         public static Mock<IStatisticsService> CreateMockStatisticsService()
         {
@@ -246,7 +245,7 @@ namespace ClubDoorman.Test.TestKit
             // Базовые настройки для IStatisticsService
             return mock;
         }
-        
+
         /// <summary> Создает Mock IBotPermissionsService </summary>
         public static Mock<IBotPermissionsService> CreateMockBotPermissionsService()
         {
@@ -254,7 +253,7 @@ namespace ClubDoorman.Test.TestKit
             // Базовые настройки для IBotPermissionsService
             return mock;
         }
-        
+
         /// <summary> Создает Mock IServiceProvider </summary>
         public static Mock<IServiceProvider> CreateMockServiceProvider()
         {
@@ -265,7 +264,7 @@ namespace ClubDoorman.Test.TestKit
         #endregion
 
         #region Specialized Mocks
-        
+
         /// <summary>
         /// Создает полный набор моков для MessageHandler тестов
         /// </summary>
@@ -279,7 +278,7 @@ namespace ClubDoorman.Test.TestKit
                 CreateMockAiChecks()
             );
         }
-        
+
         /// <summary>
         /// Создает полный набор моков для CallbackQueryHandler тестов
         /// </summary>
@@ -292,7 +291,7 @@ namespace ClubDoorman.Test.TestKit
                 CreateMockMessageService()
             );
         }
-        
+
         /// <summary>
         /// Создает мок IModerationService с предустановленным действием бана
         /// </summary>
@@ -300,7 +299,7 @@ namespace ClubDoorman.Test.TestKit
         {
             return CreateMockModerationService(ModerationAction.Ban, reason);
         }
-        
+
         /// <summary>
         /// Создает мок IModerationService с предустановленным действием удаления
         /// </summary>
@@ -308,7 +307,7 @@ namespace ClubDoorman.Test.TestKit
         {
             return CreateMockModerationService(ModerationAction.Delete, reason);
         }
-        
+
         /// <summary>
         /// Создает мок ICaptchaService с предустановленным успешным ответом
         /// </summary>
@@ -318,7 +317,7 @@ namespace ClubDoorman.Test.TestKit
             mock.Setup(x => x.ValidateCaptchaAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync(true);
             return mock;
         }
-        
+
         /// <summary>
         /// Создает мок ICaptchaService с предустановленным неуспешным ответом
         /// </summary>
@@ -328,7 +327,7 @@ namespace ClubDoorman.Test.TestKit
             mock.Setup(x => x.ValidateCaptchaAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync(false);
             return mock;
         }
-        
+
         /// <summary>
         /// Создает мок IUserManager с предустановленным одобренным пользователем
         /// </summary>
@@ -338,7 +337,7 @@ namespace ClubDoorman.Test.TestKit
             mock.Setup(x => x.Approved(It.IsAny<long>(), It.IsAny<long?>())).Returns(true);
             return mock;
         }
-        
+
         /// <summary>
         /// Создает мок IUserManager с предустановленным неодобренным пользователем
         /// </summary>
@@ -348,7 +347,7 @@ namespace ClubDoorman.Test.TestKit
             mock.Setup(x => x.Approved(It.IsAny<long>(), It.IsAny<long?>())).Returns(false);
             return mock;
         }
-        
+
         /// <summary>
         /// Создает мок IViolationTracker с предустановленным триггером бана
         /// </summary>
@@ -467,7 +466,7 @@ namespace ClubDoorman.Test.TestKit
         public static Mock<IAppConfig> CreateMockAppConfig()
         {
             var mock = new Mock<IAppConfig>();
-            
+
             mock.Setup(x => x.NoCaptchaGroups).Returns(new HashSet<long>());
             mock.Setup(x => x.NoVpnAdGroups).Returns(new HashSet<long>());
             mock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
@@ -476,7 +475,7 @@ namespace ClubDoorman.Test.TestKit
             mock.Setup(x => x.LogAdminChatId).Returns(987654321);
             // ChannelAutoBan отсутствует в эталонной версии momai
             // mock.Setup(x => x.ChannelAutoBan).Returns(true);
-            
+
             return mock;
         }
 
@@ -509,4 +508,4 @@ namespace ClubDoorman.Test.TestKit
             return mock;
         }
     }
-} 
+}

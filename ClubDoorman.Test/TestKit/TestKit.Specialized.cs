@@ -4,7 +4,6 @@ using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Test.TestData;
 using ClubDoorman.Test.TestInfrastructure;
@@ -46,25 +45,25 @@ namespace ClubDoorman.Test.TestKit
                 /// <tags>captcha, valid, user-verification</tags>
                 /// </summary>
                 public static CaptchaInfo Valid() => TestDataFactory.CreateValidCaptchaInfo();
-                
+
                 /// <summary>
                 /// Истекшая капча для тестов
                 /// <tags>captcha, expired, user-verification</tags>
                 /// </summary>
                 public static CaptchaInfo Expired() => TestDataFactory.CreateExpiredCaptchaInfo();
-                
+
                 /// <summary>
                 /// Приманка-капча для тестов
                 /// <tags>captcha, bait, user-verification</tags>
                 /// </summary>
                 public static CaptchaInfo Bait() => TestDataFactory.CreateBaitCaptchaInfo();
-                
+
                 /// <summary>
                 /// Правильный результат капчи
                 /// <tags>captcha, correct, result</tags>
                 /// </summary>
                 public static bool CorrectResult() => TestDataFactory.CreateCorrectCaptchaResult();
-                
+
                 /// <summary>
                 /// Неправильный результат капчи
                 /// <tags>captcha, incorrect, result</tags>
@@ -83,13 +82,13 @@ namespace ClubDoorman.Test.TestKit
                 /// <tags>moderation, allow, ml, ai</tags>
                 /// </summary>
                 public static ModerationResult Allow() => TestDataFactory.CreateAllowResult();
-                
+
                 /// <summary>
                 /// Результат модерации: удалить сообщение
                 /// <tags>moderation, delete, ml, ai</tags>
                 /// </summary>
                 public static ModerationResult Delete() => TestDataFactory.CreateDeleteResult();
-                
+
                 /// <summary>
                 /// Результат модерации: забанить пользователя
                 /// <tags>moderation, ban, ml, ai</tags>
@@ -108,31 +107,31 @@ namespace ClubDoorman.Test.TestKit
                 /// <tags>admin, callback, approve, moderation</tags>
                 /// </summary>
                 public static CallbackQuery ApproveCallback() => TestDataFactory.CreateAdminApproveCallback();
-                
+
                 /// <summary>
                 /// Callback для бана пользователя админом
                 /// <tags>admin, callback, ban, moderation</tags>
                 /// </summary>
                 public static CallbackQuery BanCallback() => TestDataFactory.CreateAdminBanCallback();
-                
+
                 /// <summary>
                 /// Callback для пропуска пользователя админом
                 /// <tags>admin, callback, skip, moderation</tags>
                 /// </summary>
                 public static CallbackQuery SkipCallback() => TestDataFactory.CreateAdminSkipCallback();
-                
+
                 /// <summary>
                 /// Уведомление для админов
                 /// <tags>admin, notification, moderation</tags>
                 /// </summary>
                 public static Message Notification() => TestDataFactory.CreateAdminNotificationMessage();
-                
+
                 /// <summary>
                 /// Команда статистики для админов
                 /// <tags>admin, stats, command</tags>
                 /// </summary>
                 public static Message StatsCommand() => TestDataFactory.CreateStatsCommandMessage();
-                
+
                 /// <summary>
                 /// Команда помощи для админов
                 /// <tags>admin, help, command</tags>
@@ -151,31 +150,31 @@ namespace ClubDoorman.Test.TestKit
                 /// <tags>chat, member, joined, updates</tags>
                 /// </summary>
                 public static ChatMemberUpdated MemberJoined() => TestDataFactory.CreateMemberJoined();
-                
+
                 /// <summary>
                 /// Пользователь покинул чат
                 /// <tags>chat, member, left, updates</tags>
                 /// </summary>
                 public static ChatMemberUpdated MemberLeft() => TestDataFactory.CreateMemberLeft();
-                
+
                 /// <summary>
                 /// Пользователь забанен в чате
                 /// <tags>chat, member, banned, updates, ban</tags>
                 /// </summary>
                 public static ChatMemberUpdated MemberBanned() => TestDataFactory.CreateMemberBanned();
-                
+
                 /// <summary>
                 /// Пользователь ограничен в чате
                 /// <tags>chat, member, restricted, updates</tags>
                 /// </summary>
                 public static ChatMemberUpdated MemberRestricted() => TestDataFactory.CreateMemberRestricted();
-                
+
                 /// <summary>
                 /// Пользователь повышен в чате
                 /// <tags>chat, member, promoted, updates</tags>
                 /// </summary>
                 public static ChatMemberUpdated MemberPromoted() => TestDataFactory.CreateMemberPromoted();
-                
+
                 /// <summary>
                 /// Пользователь понижен в чате
                 /// <tags>chat, member, demoted, updates</tags>
@@ -194,7 +193,7 @@ namespace ClubDoorman.Test.TestKit
                 /// <tags>callback, valid, interaction</tags>
                 /// </summary>
                 public static CallbackQuery Valid() => TestDataFactory.CreateValidCallbackQuery();
-                
+
                 /// <summary>
                 /// Невалидный callback query
                 /// <tags>callback, invalid, interaction</tags>
@@ -213,7 +212,7 @@ namespace ClubDoorman.Test.TestKit
                 /// <tags>messages, suspicious, user, ai-analysis</tags>
                 /// </summary>
                 public static Message SuspiciousUser() => TestDataFactory.CreateSuspiciousUserMessage();
-                
+
                 /// <summary>
                 /// Сообщение о присоединении нового пользователя
                 /// <tags>messages, new-user, join, member</tags>
@@ -221,7 +220,7 @@ namespace ClubDoorman.Test.TestKit
                 public static Message NewUserJoin(long userId = 12345) => TestDataFactory.CreateNewUserJoinMessage(userId);
 
                 // === СЦЕНАРИИ ДЛЯ ПОКРЫТИЯ NULL COALESCING МУТАНТОВ ===
-                
+
                 /// <summary>
                 /// Сценарий для тестирования сообщения с Text, но без Caption
                 /// <tags>messages, null-coalescing, text-only, mutation-coverage</tags>
@@ -235,7 +234,7 @@ namespace ClubDoorman.Test.TestKit
                     message.Chat = chat;
                     message.Text = "Обычное текстовое сообщение";
                     message.Caption = null;
-                    
+
                     return (user, chat, message);
                 }
 
@@ -252,7 +251,7 @@ namespace ClubDoorman.Test.TestKit
                     message.Chat = chat;
                     message.Text = null;
                     message.Caption = "Подпись к медиа";
-                    
+
                     return (user, chat, message);
                 }
 
@@ -270,7 +269,7 @@ namespace ClubDoorman.Test.TestKit
                     message.Text = null;
                     message.Caption = null;
                     message.Photo = new[] { new PhotoSize { FileId = "photo1", Width = 100, Height = 100 } };
-                    
+
                     return (user, chat, message);
                 }
 
@@ -287,7 +286,7 @@ namespace ClubDoorman.Test.TestKit
                     message.Chat = chat;
                     message.Text = "Это очень длинное сообщение, которое содержит более ста символов для тестирования логики обрезки текста в логах. Оно должно быть обрезано до 100 символов с добавлением многоточия.";
                     message.Caption = null;
-                    
+
                     return (user, chat, message);
                 }
 
@@ -305,7 +304,7 @@ namespace ClubDoorman.Test.TestKit
                     message.Text = null;
                     message.Caption = "Это очень длинная подпись к медиа, которая содержит более ста символов для тестирования логики обрезки текста в логах. Она должна быть обрезана до 100 символов с добавлением многоточия.";
                     message.Photo = new[] { new PhotoSize { FileId = "photo2", Width = 200, Height = 200 } };
-                    
+
                     return (user, chat, message);
                 }
             }
@@ -330,7 +329,7 @@ namespace ClubDoorman.Test.TestKit
             public static class BanTests
             {
                 // === СЦЕНАРИИ ДЛЯ GOLDEN MASTER ТЕСТОВ ===
-                
+
                 /// <summary>
                 /// Сценарий для тестирования временного бана
                 /// <tags>ban, scenario, temporary, golden-master</tags>
@@ -341,7 +340,7 @@ namespace ClubDoorman.Test.TestKit
                     var chat = TK.CreateGroupChat();
                     var message = TK.CreateNewUserJoinMessage(user.Id);
                     message.Chat = chat;
-                    
+
                     return (user, chat, message, TimeSpan.FromMinutes(10), "Длинное имя пользователя");
                 }
 
@@ -355,7 +354,7 @@ namespace ClubDoorman.Test.TestKit
                     var chat = TK.CreateGroupChat();
                     var message = TK.CreateNewUserJoinMessage(user.Id);
                     message.Chat = chat;
-                    
+
                     return (user, chat, message, null, "Экстремально длинное имя пользователя");
                 }
 
@@ -369,7 +368,7 @@ namespace ClubDoorman.Test.TestKit
                     var chat = TK.CreatePrivateChat();
                     var message = TK.CreateNewUserJoinMessage(user.Id);
                     message.Chat = chat;
-                    
+
                     return (user, chat, message, TimeSpan.FromMinutes(10), "Длинное имя пользователя");
                 }
 
@@ -383,7 +382,7 @@ namespace ClubDoorman.Test.TestKit
                     var chat = TK.CreateGroupChat();
                     var message = TK.CreateNewUserJoinMessage(user.Id);
                     message.Chat = chat;
-                    
+
                     return (user, chat, message);
                 }
 
@@ -398,7 +397,7 @@ namespace ClubDoorman.Test.TestKit
                     var message = TK.CreateChannelMessage(senderChat.Id, targetChat.Id);
                     message.Chat = targetChat;
                     message.SenderChat = senderChat;
-                    
+
                     return (targetChat, senderChat, message);
                 }
 
@@ -413,7 +412,7 @@ namespace ClubDoorman.Test.TestKit
                     var message = TK.CreateValidMessage();
                     message.From = user;
                     message.Chat = chat;
-                    
+
                     return (user, chat, message, "Известное спам-сообщение");
                 }
 
@@ -428,7 +427,7 @@ namespace ClubDoorman.Test.TestKit
                     var message = TK.CreateValidMessage();
                     message.From = user;
                     message.Chat = chat;
-                    
+
                     return (user, chat, message);
                 }
 
@@ -444,7 +443,7 @@ namespace ClubDoorman.Test.TestKit
                     message.From = user;
                     message.Chat = chat;
                     message.Text = "Это очень длинное сообщение от пользователя из блэклиста, которое содержит более ста символов для тестирования логики обрезки текста в логах. Оно должно быть обрезано до 100 символов с добавлением многоточия.";
-                    
+
                     return (user, chat, message);
                 }
 
@@ -462,7 +461,7 @@ namespace ClubDoorman.Test.TestKit
                     message.Text = null;
                     message.Caption = "Подпись к медиа от пользователя из блэклиста";
                     message.Photo = new[] { new PhotoSize { FileId = "photo1", Width = 100, Height = 100 } };
-                    
+
                     return (user, chat, message);
                 }
 
@@ -477,52 +476,52 @@ namespace ClubDoorman.Test.TestKit
                     var message = TK.CreateValidMessage();
                     message.From = user;
                     message.Chat = chat;
-                    
+
                     return (user, chat, message);
                 }
 
                 // === УТИЛИТЫ ДЛЯ СТАРЫХ ТЕСТОВ (DEPRECATED) ===
-                
+
                 /// <summary>
                 /// Пользователь для тестов банов
                 /// <tags>ban, user, integration, deprecated</tags>
                 /// </summary>
                 [Obsolete("Используйте сценарии выше")]
                 public static User UserForBan() => TestDataFactory.CreateValidUser();
-                
+
                 /// <summary>
                 /// Чат для тестов банов
                 /// <tags>ban, chat, integration, deprecated</tags>
                 /// </summary>
                 [Obsolete("Используйте сценарии выше")]
                 public static Chat ChatForBanTest() => TestDataFactory.CreateGroupChat();
-                
+
                 /// <summary>
                 /// Спам сообщение для тестов банов
                 /// <tags>ban, spam, message, moderation, deprecated</tags>
                 /// </summary>
                 [Obsolete("Используйте сценарии выше")]
                 public static Message SpamMessage() => TestDataFactory.CreateSpamMessage();
-                
+
                 /// <summary>
                 /// Сообщение от канала для тестов банов
                 /// <tags>ban, channel, message, moderation, deprecated</tags>
                 /// </summary>
                 [Obsolete("Используйте сценарии выше")]
                 public static Message ChannelMessage() => TestDataFactory.CreateChannelMessage(-100123456789, -1009876543210);
-                
+
                 /// <summary>
                 /// Результат модерации: бан
                 /// <tags>ban, moderation, result, ml</tags>
                 /// </summary>
                 public static ModerationResult BanResult(string reason = "Спам") => new ModerationResult(ModerationAction.Ban, reason);
-                
+
                 /// <summary>
                 /// Результат модерации: удаление
                 /// <tags>ban, moderation, delete, result, ml</tags>
                 /// </summary>
                 public static ModerationResult DeleteResult(string reason = "ML решил что это спам") => new ModerationResult(ModerationAction.Delete, reason);
-                
+
                 /// <summary>
                 /// Результат модерации: разрешить
                 /// <tags>ban, moderation, allow, result, ml</tags>
@@ -541,12 +540,12 @@ namespace ClubDoorman.Test.TestKit
                 /// <tags>chat, ban, integration</tags>
                 /// </summary>
                 public static Chat ForBanTest() => TestDataFactory.CreateGroupChat();
-                
+
                 /// <summary>
                 /// Чат для тестов каналов (не announcement)
                 /// <tags>chat, channel, integration, non-announcement</tags>
                 /// </summary>
-                public static Chat ForChannelTest() 
+                public static Chat ForChannelTest()
                 {
                     var chat = TestDataFactory.CreateGroupChat();
                     chat.Id = -1009876543210; // Чат, который не настроен как announcement
@@ -566,19 +565,18 @@ namespace ClubDoorman.Test.TestKit
                 /// </summary>
                 public class ModerationSetup
                 {
-                    public ModerationService Service { get; init; } = null!;
+                    public IModerationPolicy Service { get; init; } = null!;
                     public SpamHamClassifier SpamClassifier { get; init; } = null!;
                     public MimicryClassifier MimicryClassifier { get; init; } = null!;
                     public BadMessageManager BadMessageManager { get; init; } = null!;
                     public SuspiciousUsersStorage SuspiciousUsersStorage { get; init; } = null!;
                     public IAiChecks AiChecks { get; init; } = null!;
-                    
+
                     // Моки для управления поведением
                     public Mock<IUserManager> UserManagerMock { get; init; } = null!;
-                    public Mock<ITelegramBotClient> BotClientMock { get; init; } = null!;
+                    public Mock<ITelegramBotClientWrapper> BotClientMock { get; init; } = null!;
                     public Mock<IMessageService> MessageServiceMock { get; init; } = null!;
-                    public Mock<ILogger<ModerationService>> LoggerMock { get; init; } = null!;
-                    
+                    public Mock<ILogger<IModerationPolicy>> LoggerMock { get; init; } = null!;
                     // Логгеры для отдельных компонентов
                     public Mock<ILogger<SpamHamClassifier>> SpamLoggerMock { get; init; } = null!;
                     public Mock<ILogger<MimicryClassifier>> MimicryLoggerMock { get; init; } = null!;
@@ -587,10 +585,9 @@ namespace ClubDoorman.Test.TestKit
                 }
 
                 /// <summary>
-                /// Создает полный setup ModerationService со всеми реальными и мокированными зависимостями
-                /// Заменяет ~45 строк дублированного кода в SetUp методах
+                /// Создает полный setup IModerationService со всеми реальными и мокированными зависимостями
                 /// </summary>
-                /// <returns>Полностью настроенный ModerationService и все его зависимости</returns>
+                /// <returns>Полностью настроенный IModerationService и все его зависимости</returns>
                 public static ModerationSetup CompleteSetup()
                 {
                     // Создаем моки логгеров
@@ -598,7 +595,6 @@ namespace ClubDoorman.Test.TestKit
                     var mimicryLoggerMock = CreateLoggerMock<MimicryClassifier>();
                     var suspiciousLoggerMock = CreateLoggerMock<SuspiciousUsersStorage>();
                     var aiLoggerMock = CreateLoggerMock<AiChecks>();
-                    var moderationLoggerMock = CreateLoggerMock<ModerationService>();
 
                     // Создаем реальные компоненты
                     var spamClassifier = new SpamHamClassifier(spamLoggerMock.Object);
@@ -614,21 +610,21 @@ namespace ClubDoorman.Test.TestKit
                     // Создаем AiChecks с тестовым bot client и конфигурацией
                     var testBotClient = CreateTestBotClient();
                     var testConfig = CreateAppConfig();
-                    var aiChecks = new AiChecks(new TelegramBotClientWrapper(testBotClient), aiLoggerMock.Object, testConfig);
+                    var aiChecks = new AiChecks(new TelegramBotClientWrapper(testBotClient, Microsoft.Extensions.Logging.Abstractions.NullLogger<TelegramBotClientWrapper>.Instance), aiLoggerMock.Object, testConfig);
 
-                    // Создаем ModerationService
-                    var moderationService = new ModerationService(
+                    // Используем FakeModerationService для тестов
+                    var botClientWrapperMock = CreateMockBotClientWrapper();
+                    var moderationService = new ClubDoorman.TestInfrastructure.FakeModerationService(
                         spamClassifier,
                         mimicryClassifier,
                         badMessageManager,
                         userManagerMock.Object,
                         aiChecks,
                         suspiciousUsersStorage,
-                        botClientMock.Object,
+                        botClientWrapperMock.Object,
                         messageServiceMock.Object,
-                        CreateMockUserBanService().Object,
-                        new Mock<IUserCleanupService>().Object,
-                        moderationLoggerMock.Object
+                        new Mock<IUserBanService>().Object,
+                        CreateLoggerMock<ClubDoorman.TestInfrastructure.FakeModerationService>().Object
                     );
 
                     return new ModerationSetup
@@ -640,9 +636,9 @@ namespace ClubDoorman.Test.TestKit
                         SuspiciousUsersStorage = suspiciousUsersStorage,
                         AiChecks = aiChecks,
                         UserManagerMock = userManagerMock,
-                        BotClientMock = botClientMock,
+                        BotClientMock = botClientWrapperMock,
                         MessageServiceMock = messageServiceMock,
-                        LoggerMock = moderationLoggerMock,
+                        LoggerMock = CreateLoggerMock<IModerationPolicy>(),
                         SpamLoggerMock = spamLoggerMock,
                         MimicryLoggerMock = mimicryLoggerMock,
                         SuspiciousLoggerMock = suspiciousLoggerMock,
@@ -654,12 +650,11 @@ namespace ClubDoorman.Test.TestKit
                 /// Создает минимальный setup только с необходимыми компонентами
                 /// Для простых unit тестов где не нужны все зависимости
                 /// </summary>
-                /// <returns>Минимальный setup ModerationService</returns>
+                /// <returns>Минимальный setup IModerationService</returns>
                 public static ModerationSetup MinimalSetup()
                 {
                     var spamLoggerMock = CreateLoggerMock<SpamHamClassifier>();
                     var mimicryLoggerMock = CreateLoggerMock<MimicryClassifier>();
-                    var moderationLoggerMock = CreateLoggerMock<ModerationService>();
 
                     var spamClassifier = new SpamHamClassifier(spamLoggerMock.Object);
                     var mimicryClassifier = new MimicryClassifier(mimicryLoggerMock.Object);
@@ -667,24 +662,23 @@ namespace ClubDoorman.Test.TestKit
 
                     // Создаем минимальные моки и реальные объекты
                     var userManagerMock = CreateMockUserManager();
-                    var botClientMock = CreateMockBotClient();
+                    var botClientWrapperMock = CreateMockBotClientWrapper();
                     var messageServiceMock = CreateMockMessageService();
                     var suspiciousLoggerMock = CreateLoggerMock<SuspiciousUsersStorage>();
                     var suspiciousUsersStorage = new SuspiciousUsersStorage(suspiciousLoggerMock.Object); // Реальный объект
                     var aiChecksMock = CreateMockAiChecks();
 
-                    var moderationService = new ModerationService(
+                    var moderationService = new ClubDoorman.TestInfrastructure.FakeModerationService(
                         spamClassifier,
                         mimicryClassifier,
                         badMessageManager,
                         userManagerMock.Object,
                         aiChecksMock.Object,
                         suspiciousUsersStorage,
-                        botClientMock.Object,
+                        botClientWrapperMock.Object,
                         messageServiceMock.Object,
-                        CreateMockUserBanService().Object,
-                        new Mock<IUserCleanupService>().Object,
-                        moderationLoggerMock.Object
+                        new Mock<IUserBanService>().Object,
+                        CreateLoggerMock<ClubDoorman.TestInfrastructure.FakeModerationService>().Object
                     );
 
                     return new ModerationSetup
@@ -696,13 +690,13 @@ namespace ClubDoorman.Test.TestKit
                         SuspiciousUsersStorage = suspiciousUsersStorage,
                         AiChecks = aiChecksMock.Object,
                         UserManagerMock = userManagerMock,
-                        BotClientMock = botClientMock,
+                        BotClientMock = botClientWrapperMock,
                         MessageServiceMock = messageServiceMock,
-                        LoggerMock = moderationLoggerMock,
+                        LoggerMock = CreateLoggerMock<IModerationPolicy>(),
                         SpamLoggerMock = spamLoggerMock,
                         MimicryLoggerMock = mimicryLoggerMock,
-                        SuspiciousLoggerMock = CreateMock<ILogger<SuspiciousUsersStorage>>(),
-                        AiLoggerMock = CreateMock<ILogger<AiChecks>>()
+                        SuspiciousLoggerMock = suspiciousLoggerMock,
+                        AiLoggerMock = CreateLoggerMock<AiChecks>()
                     };
                 }
 
@@ -711,7 +705,7 @@ namespace ClubDoorman.Test.TestKit
                 /// Использует реальные объекты для sealed классов и моки для интерфейсов
                 /// </summary>
                 /// <returns>Setup с мокированными компонентами</returns>
-                public static (ModerationService service, Dictionary<string, Mock> mocks) MockedSetup()
+                public static (IModerationPolicy service, Dictionary<string, Mock> mocks) MockedSetup()
                 {
                     var mocks = new Dictionary<string, Mock>();
 
@@ -727,31 +721,30 @@ namespace ClubDoorman.Test.TestKit
                     var aiChecksMock = CreateMockAiChecks();
                     var suspiciousLoggerMock = CreateLoggerMock<SuspiciousUsersStorage>();
                     var suspiciousUsersStorage = new SuspiciousUsersStorage(suspiciousLoggerMock.Object); // Реальный объект
-                    var botClientMock = CreateMockBotClient();
+                    var botClientWrapperMock = CreateMockBotClientWrapper();
                     var messageServiceMock = CreateMockMessageService();
-                    var loggerMock = CreateLoggerMock<ModerationService>();
+                    var loggerMock = CreateLoggerMock<ClubDoorman.TestInfrastructure.FakeModerationService>();
 
                     // Добавляем в словарь для удобного доступа (только моки)
                     mocks["UserManager"] = userManagerMock;
                     mocks["AiChecks"] = aiChecksMock;
-                    mocks["BotClient"] = botClientMock;
+                    mocks["BotClient"] = botClientWrapperMock;
                     mocks["MessageService"] = messageServiceMock;
                     mocks["Logger"] = loggerMock;
                     mocks["SpamLogger"] = spamLoggerMock;
                     mocks["MimicryLogger"] = mimicryLoggerMock;
                     mocks["SuspiciousLogger"] = suspiciousLoggerMock;
 
-                    var moderationService = new ModerationService(
+                    var moderationService = new ClubDoorman.TestInfrastructure.FakeModerationService(
                         spamClassifier,
                         mimicryClassifier,
                         badMessageManager,
                         userManagerMock.Object,
                         aiChecksMock.Object,
                         suspiciousUsersStorage,
-                        botClientMock.Object,
+                        botClientWrapperMock.Object,
                         messageServiceMock.Object,
-                        CreateMockUserBanService().Object,
-                        new Mock<IUserCleanupService>().Object,
+                        new Mock<IUserBanService>().Object,
                         loggerMock.Object
                     );
 
@@ -760,4 +753,4 @@ namespace ClubDoorman.Test.TestKit
             }
         }
     }
-} 
+}

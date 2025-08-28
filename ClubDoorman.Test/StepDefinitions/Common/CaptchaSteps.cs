@@ -1,24 +1,4 @@
-using ClubDoorman.Services.UserBan;
-using NUnit.Framework;
-using TechTalk.SpecFlow;
-using ClubDoorman.Models;
-using ClubDoorman.Models.Requests;
-using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Test.TestInfrastructure;
-using ClubDoorman.TestInfrastructure;
-using ClubDoorman.Test.TestData;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
-using Telegram.Bot;
-using Moq;
-using Microsoft.Extensions.Logging;
-using FluentAssertions;
-using System.Reflection;
-using ClubDoorman.Services.Telegram;
-using ClubDoorman.Services.Messaging;
-using ClubDoorman.Services.Captcha;
-using ClubDoorman.Services.Violation;
+﻿using Telegram.Bot;
 
 namespace ClubDoorman.Test.StepDefinitions.Common
 {
@@ -38,7 +18,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void BeforeScenario()
         {
             _fakeBot = new FakeTelegramClient();
-            _loggerFactory = LoggerFactory.Create(builder => 
+            _loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddConsole();
                 builder.SetMinimumLevel(LogLevel.Debug);
@@ -46,9 +26,9 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             var appConfig = AppConfigTestFactory.CreateDefault();
             var botClient = new TelegramBotClient("1234567890:TEST_TOKEN_FOR_TESTS");
-            var telegramWrapper = new TelegramBotClientWrapper(botClient);
+            var telegramWrapper = new TelegramBotClientWrapper(botClient, _loggerFactory.CreateLogger<TelegramBotClientWrapper>());
             var messageService = new Mock<IMessageService>().Object;
-            
+
             _captchaService = new CaptchaService(
                 telegramWrapper,
                 _loggerFactory.CreateLogger<CaptchaService>(),
@@ -57,7 +37,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 new Mock<IViolationTracker>().Object,
                 new Mock<IUserBanService>().Object
             );
-            
+
             // Инициализируем _testMessage из ScenarioContext если он есть
             if (ScenarioContext.Current.ContainsKey("TestMessage"))
             {
@@ -84,7 +64,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             {
                 _testMessage = (Message)ScenarioContext.Current["TestMessage"];
             }
-            
+
             try
             {
                 var request = new CreateCaptchaRequest(
@@ -126,13 +106,13 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             {
                 _testMessage = (Message)ScenarioContext.Current["TestMessage"];
             }
-            
+
             // Проверяем, что _testMessage и From не null
             if (_testMessage?.From == null)
             {
                 throw new InvalidOperationException("_testMessage или _testMessage.From равен null. Убедитесь, что шаг 'пользователь заходит в группу' выполнен.");
             }
-            
+
             // Если капча не была создана, создаем тестовую
             if (_captchaInfo == null)
             {
@@ -149,7 +129,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                     throw new InvalidOperationException($"Ошибка при создании тестовой капчи: {ex.Message}", ex);
                 }
             }
-            
+
             _callbackQuery = new CallbackQuery
             {
                 Id = Guid.NewGuid().ToString(),
@@ -170,13 +150,13 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             {
                 _testMessage = (Message)ScenarioContext.Current["TestMessage"];
             }
-            
+
             // Проверяем, что _testMessage и From не null
             if (_testMessage?.From == null)
             {
                 throw new InvalidOperationException("_testMessage или _testMessage.From равен null. Убедитесь, что шаг 'пользователь заходит в группу' выполнен.");
             }
-            
+
             // Если капча не была создана, создаем тестовую
             if (_captchaInfo == null)
             {
@@ -193,15 +173,15 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                     throw new InvalidOperationException($"Ошибка при создании тестовой капчи: {ex.Message}", ex);
                 }
             }
-            
+
             // Создаем ключ капчи и добавляем капчу в сервис для тестирования
             var key = _captchaService.GenerateKey(_testMessage.Chat.Id, _testMessage.From!.Id);
-            
+
             // Добавляем капчу в сервис через reflection, так как она должна быть там для ValidateCaptchaAsync
             var captchaServiceType = typeof(CaptchaService);
-            var captchaNeededUsersField = captchaServiceType.GetField("_captchaNeededUsers", 
+            var captchaNeededUsersField = captchaServiceType.GetField("_captchaNeededUsers",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
+
             if (captchaNeededUsersField != null)
             {
                 var captchaNeededUsers = captchaNeededUsersField.GetValue(_captchaService);
@@ -210,11 +190,11 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                     dict.TryAdd(key, _captchaInfo);
                 }
             }
-            
+
             // Симулируем обработку callback query через CaptchaService
             var isCorrect = await _captchaService.ValidateCaptchaAsync(key, _captchaInfo.CorrectAnswer);
             isCorrect.Should().BeTrue("Ответ на капчу должен быть правильным");
-            
+
             // Симулируем удаление сообщения с капчей
             await _fakeBot.DeleteMessageAsync(_testMessage.Chat.Id, 12345);
         }
@@ -225,7 +205,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             // Проверяем, что капча была удалена через DeleteMessageAsync
             // В реальной реализации капча удаляется через DeleteMessageAsync, а не через отправку нового сообщения
             var deletedMessages = _fakeBot.DeletedMessages;
-            
+
             // Проверяем, что было выполнено удаление сообщения
             deletedMessages.Should().NotBeEmpty();
         }
@@ -256,7 +236,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // Проверяем, что капча была отправлена даже без прав администратора
             _thrownException.Should().BeNull();
-            
+
             // В реальной реализации здесь была бы проверка, что сообщение о капче было отправлено
             // и что бот имеет необходимые права для отправки сообщений
         }
@@ -266,7 +246,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // Проверяем, что пользователь может пройти капчу
             _thrownException.Should().BeNull();
-            
+
             // В реальной реализации здесь была бы проверка, что CaptchaService работает корректно
             // и что пользователь может успешно пройти проверку
         }
@@ -278,4 +258,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             // Assert.Pass("Bot works in silent mode");
         }
     }
-} 
+}

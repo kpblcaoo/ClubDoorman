@@ -1,0 +1,8 @@
+{
+  "Schema": 4,
+  "Id": 10,
+  "CorrelationId": "EFAA27637622C2B4",
+  "ShortName": "MixedStopWordsLink",
+  "Action": "Delete",
+  "RuleCode": "ModeratedDelete"
+}

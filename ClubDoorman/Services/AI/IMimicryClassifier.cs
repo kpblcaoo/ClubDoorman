@@ -11,4 +11,4 @@ public interface IMimicryClassifier
     /// <param name="messages">Список первых сообщений</param>
     /// <returns>Оценка подозрительности от 0.0 (не подозрительно) до 1.0 (очень подозрительно)</returns>
     double AnalyzeMessages(List<string> messages);
-} 
+}
