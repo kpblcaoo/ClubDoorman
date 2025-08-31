@@ -3,6 +3,9 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services.Messaging;
+using Telegram.Bot.Exceptions;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace ClubDoorman.Services.Telegram;
 
@@ -12,10 +15,12 @@ namespace ClubDoorman.Services.Telegram;
 public class TelegramBotClientWrapper : ITelegramBotClientWrapper
 {
     private readonly TelegramBotClient _bot;
+    private readonly ILogger<TelegramBotClientWrapper> _logger;
 
-    public TelegramBotClientWrapper(TelegramBotClient bot)
+    public TelegramBotClientWrapper(TelegramBotClient bot, ILogger<TelegramBotClientWrapper> logger)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -60,28 +65,97 @@ public class TelegramBotClientWrapper : ITelegramBotClientWrapper
     /// <summary>
     /// Удаляет сообщение из чата
     /// </summary>
-    public async Task<bool> DeleteMessageAsync(
-        ChatId chatId,
-        int messageId,
-        CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteMessageAsync(ChatId chatId, int messageId, CancellationToken cancellationToken = default)
     {
+        var result = await DeleteMessageWithOutcomeAsync(chatId, messageId, cancellationToken);
+        return result.Success;
+    }
+
+    public async Task<DeleteMessageResult> DeleteMessageWithOutcomeAsync(ChatId chatId, int messageId, CancellationToken cancellationToken = default)
+    {
+        var sw = Stopwatch.StartNew();
+    var cid = chatId.Identifier ?? (chatId.Username != null ? 0L : 0L); // fallback to 0 if unknown (should not happen for numeric ids)
+    _logger.LogTrace("DeleteMessageAttempt chat={ChatId} message={MessageId}", cid, messageId);
+        DeleteMessageOutcome outcome = DeleteMessageOutcome.Success;
+        string? error = null;
+        string? raw = null;
         try
         {
-            await _bot.DeleteMessage(
-                chatId,
-                messageId,
-                cancellationToken: cancellationToken);
-            return true;
+            await _bot.DeleteMessage(chatId, messageId, cancellationToken);
         }
-        catch (Exception ex) when (ex.Message.Contains("message to delete not found") || ex.Message.Contains("Bad Request"))
+        catch (ApiRequestException apiEx)
         {
-            // Сообщение уже удалено или недоступно - возвращаем false
-            return false;
+            raw = apiEx.Message;
+            var msg = apiEx.Message.ToLowerInvariant();
+            if (msg.Contains("message to delete not found"))
+            {
+                outcome = DeleteMessageOutcome.NotFoundOrAlreadyDeleted;
+            }
+            else if (apiEx.ErrorCode == 429 || msg.Contains("too many requests"))
+            {
+                outcome = DeleteMessageOutcome.RateLimited;
+                error = Trim(apiEx.Message);
+            }
+            else if (apiEx.ErrorCode == 403 || msg.Contains("forbidden"))
+            {
+                outcome = DeleteMessageOutcome.Forbidden;
+                error = Trim(apiEx.Message);
+            }
+            else if (msg.Contains("can't be deleted") || msg.Contains("bad request"))
+            {
+                outcome = DeleteMessageOutcome.BadRequest;
+                error = Trim(apiEx.Message);
+            }
+            else
+            {
+                outcome = DeleteMessageOutcome.UnexpectedError;
+                error = Trim(apiEx.Message);
+            }
+            LogClassified(outcome, cid, messageId, error, apiEx);
+        }
+        catch (Exception ex) when (ex is OperationCanceledException)
+        {
+            outcome = DeleteMessageOutcome.UnexpectedError; // treat as unexpected here
+            error = "canceled";
+            raw = ex.Message;
+            _logger.LogDebug(ex, "DeleteMessageCanceled chat={ChatId} message={MessageId}", cid, messageId);
         }
         catch (Exception ex)
         {
-            // Другие ошибки - возвращаем false
-            return false;
+            outcome = DeleteMessageOutcome.UnexpectedError;
+            error = Trim(ex.Message);
+            raw = ex.Message;
+            _logger.LogDebug(ex, "DeleteMessageUnexpectedError chat={ChatId} message={MessageId}", cid, messageId);
+        }
+        finally
+        {
+            sw.Stop();
+        }
+    var result = new DeleteMessageResult(cid, messageId, outcome, sw.ElapsedMilliseconds, error, raw);
+        _logger.LogTrace("DeleteMessageResult {Result}", result.ToString());
+        return result;
+
+        static string Trim(string s) => s.Length > 180 ? s[..180] : s;
+        void LogClassified(DeleteMessageOutcome oc, long cId, int mId, string? err, Exception ex)
+        {
+            switch (oc)
+            {
+                case DeleteMessageOutcome.NotFoundOrAlreadyDeleted:
+                    _logger.LogTrace("DeleteMessageNotFound chat={ChatId} message={MessageId}", cId, mId);
+                    break;
+                case DeleteMessageOutcome.BadRequest:
+                    _logger.LogDebug(ex, "DeleteMessageBadRequest chat={ChatId} message={MessageId} err={Error}", cId, mId, err);
+                    break;
+                case DeleteMessageOutcome.Forbidden:
+                    _logger.LogDebug(ex, "DeleteMessageForbidden chat={ChatId} message={MessageId} err={Error}", cId, mId, err);
+                    break;
+                case DeleteMessageOutcome.RateLimited:
+                    _logger.LogDebug(ex, "DeleteMessageRateLimited chat={ChatId} message={MessageId} err={Error}", cId, mId, err);
+                    break;
+                case DeleteMessageOutcome.UnexpectedError:
+                    _logger.LogDebug(ex, "DeleteMessageUnexpected chat={ChatId} message={MessageId} err={Error}", cId, mId, err);
+                    break;
+            }
         }
     }
 
@@ -120,20 +194,7 @@ public class TelegramBotClientWrapper : ITelegramBotClientWrapper
     /// </summary>
     public async Task DeleteMessage(ChatId chatId, int messageId, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            await _bot.DeleteMessage(chatId, messageId, cancellationToken);
-        }
-        catch (Exception ex) when (ex.Message.Contains("message to delete not found") || ex.Message.Contains("Bad Request"))
-        {
-            // Сообщение уже удалено или недоступно - это нормальная ситуация
-            // Не пробрасываем исключение, так как это не является ошибкой
-        }
-        catch (Exception ex)
-        {
-            // Другие ошибки - пробрасываем исключение
-            throw;
-        }
+        var _ = await DeleteMessageWithOutcomeAsync(chatId, messageId, cancellationToken);
     }
 
     /// <summary>
@@ -343,4 +404,4 @@ public class TelegramBotClientWrapper : ITelegramBotClientWrapper
     {
         return await _bot.GetChat(chatId, cancellationToken);
     }
-} 
+}

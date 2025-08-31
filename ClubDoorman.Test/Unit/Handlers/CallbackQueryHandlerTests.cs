@@ -1,6 +1,7 @@
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
+using ClubDoorman.Services.Logging; // for IModerationEventPublisher
 using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using ClubDoorman.Handlers;
@@ -41,6 +42,9 @@ public class CallbackQueryHandlerTests
     private Mock<ILogger<ViolationTracker>> _mockViolationTrackerLogger = null!;
     private Mock<IAppConfig> _mockAppConfig = null!;
     private Mock<IUserBanService> _mockUserBanService = null!;
+    private Mock<ILogChatService> _mockLogChatService = null!;
+    private Mock<ClubDoorman.Services.Logging.IGoldenMasterRecorder> _mockRecorder = null!;
+    private Mock<IModerationEventPublisher> _mockEvents = null!;
 
     [SetUp]
     public void Setup()
@@ -57,7 +61,14 @@ public class CallbackQueryHandlerTests
         _mockViolationTrackerLogger = new Mock<ILogger<ViolationTracker>>();
         _mockAppConfig = new Mock<IAppConfig>();
         _mockUserBanService = new Mock<IUserBanService>();
-        var mockServiceProvider = new Mock<IServiceProvider>();
+        _mockLogChatService = new Mock<ILogChatService>();
+    _mockRecorder = new Mock<ClubDoorman.Services.Logging.IGoldenMasterRecorder>();
+        _mockEvents = new Mock<IModerationEventPublisher>();
+
+    // Default config values for tests
+    const long adminChatId = 555555; // test admin chat id distinct from other test chats
+    _mockAppConfig.SetupGet(x => x.AdminChatId).Returns(adminChatId);
+    _mockAppConfig.SetupGet(x => x.LogAdminChatId).Returns(-20002);
 
         _handler = new CallbackQueryHandler(
             _mockBot.Object,
@@ -70,8 +81,11 @@ public class CallbackQueryHandlerTests
             _mockMessageService.Object,
             new ViolationTracker(_mockViolationTrackerLogger.Object, _mockAppConfig.Object),
             _mockUserBanService.Object,
-            mockServiceProvider.Object,
-            _mockLogger.Object
+            _mockLogChatService.Object,
+            _mockLogger.Object,
+            _mockRecorder.Object,
+            _mockEvents.Object,
+            _mockAppConfig.Object
         );
     }
 
@@ -278,7 +292,7 @@ public class CallbackQueryHandlerTests
                 Id = "test_id",
                 Data = "admin_action",
                 From = new User { Id = 123, FirstName = "Test", Username = "testuser" },
-                Message = new Message { Chat = new Chat { Id = Config.AdminChatId } }
+                Message = new Message { Chat = new Chat { Id =  _mockAppConfig.Object.AdminChatId } }
             }
         };
 
@@ -324,4 +338,4 @@ public class CallbackQueryHandlerTests
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
     }
-} 
+}

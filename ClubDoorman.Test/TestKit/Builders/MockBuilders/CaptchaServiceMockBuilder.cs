@@ -23,7 +23,7 @@ public class CaptchaServiceMockBuilder
     {
         _mock.Setup(x => x.ValidateCaptchaAsync(It.IsAny<string>(), It.IsAny<int>()))
             .ReturnsAsync(true);
-        
+
         return this;
     }
 
@@ -35,7 +35,7 @@ public class CaptchaServiceMockBuilder
     {
         _mock.Setup(x => x.ValidateCaptchaAsync(It.IsAny<string>(), It.IsAny<int>()))
             .ReturnsAsync(false);
-        
+
         return this;
     }
 
@@ -50,4 +50,4 @@ public class CaptchaServiceMockBuilder
     /// <tags>builders, captcha-service, build-object, fluent-api</tags>
     /// </summary>
     public ICaptchaService BuildObject() => Build().Object;
-} 
+}

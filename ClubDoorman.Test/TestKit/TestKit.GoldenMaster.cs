@@ -90,7 +90,7 @@ public static class TestKitGoldenMaster
         string snapshotFileName)
     {
         var json = JsonConvert.SerializeObject(data, Formatting.Indented);
-        
+
         var goldenMasterData = new
         {
             TestName = testName,
@@ -393,12 +393,12 @@ public static class BanScenarioFactory
     public static List<BanScenario> CreateScenarioSet(int count = 20, int baseSeed = 42)
     {
         var scenarios = new List<BanScenario>();
-        
+
         for (int i = 0; i < count; i++)
         {
             var seed = baseSeed + i;
             var builder = new BanScenarioBuilder(seed);
-            
+
             // Чередуем типы сценариев
             var scenarioType = i % 5;
             BanScenario scenario = scenarioType switch
@@ -410,10 +410,10 @@ public static class BanScenarioFactory
                 4 => builder.CreateBotBanScenario(),
                 _ => builder.CreateTemporaryBanScenario()
             };
-            
+
             scenarios.Add(scenario);
         }
-        
+
         return scenarios;
     }
 
@@ -427,7 +427,7 @@ public static class BanScenarioFactory
     public static List<BanScenario> CreateExceptionScenarioSet(int count = 5, int baseSeed = 100)
     {
         var scenarios = new List<BanScenario>();
-        
+
         for (int i = 0; i < count; i++)
         {
             var seed = baseSeed + i;
@@ -436,7 +436,7 @@ public static class BanScenarioFactory
             scenario.ScenarioType = $"ExceptionScenario_{i}";
             scenarios.Add(scenario);
         }
-        
+
         return scenarios;
     }
-} 
+}

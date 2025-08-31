@@ -12,7 +12,7 @@ internal static class OpenAiExtensions
     public static ChatCompletionRequestUserMessage ToUserMessage(this string text) =>
         new() { Content = text };
 
-    public static ChatCompletionRequestUserMessage ToUserMessage(this byte[] imageBytes, string mimeType = "image/jpeg", 
+    public static ChatCompletionRequestUserMessage ToUserMessage(this byte[] imageBytes, string mimeType = "image/jpeg",
         ChatCompletionRequestMessageContentPartImageImageUrlDetail detail = ChatCompletionRequestMessageContentPartImageImageUrlDetail.Low) =>
         new()
         {
@@ -28,4 +28,4 @@ internal static class OpenAiExtensions
                 }
             }
         };
-} 
+}

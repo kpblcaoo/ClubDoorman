@@ -1,0 +1,8 @@
+{
+  "Schema": 4,
+  "Id": 15,
+  "CorrelationId": "117EE796C2DB7D85",
+  "ShortName": "BanlistUser",
+  "Action": "Delete",
+  "RuleCode": "Banlist"
+}

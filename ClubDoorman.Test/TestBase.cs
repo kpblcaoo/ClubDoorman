@@ -133,4 +133,4 @@ public abstract class TestBase
             public static Models.CaptchaInfo Expired() => TestDataFactory.CreateExpiredCaptchaInfo();
         }
     }
-} 
+}

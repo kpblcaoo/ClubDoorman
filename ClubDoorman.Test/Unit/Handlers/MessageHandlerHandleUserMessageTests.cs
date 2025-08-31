@@ -1,6 +1,7 @@
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
+using ClubDoorman.Features.Moderation;
 using ClubDoorman.Test.TestKit;
 using ClubDoorman.Models;
 using ClubDoorman.Models.Notifications;
@@ -30,6 +31,20 @@ public class MessageHandlerHandleUserMessageTests
     public void Setup()
     {
         _factory = TK.CreateMessageHandlerFactory();
+
+        // Настраиваем ModerationFacadeMock для предотвращения NullReferenceException
+        _factory.WithModerationFacadeSetup(mock =>
+        {
+            mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+                .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Test", 0.5f));
+            mock.Setup(x => x.HandleUserMessageAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<ModerationResult>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+        });
+
+        // Настраиваем AiCascadeServiceMock для предотвращения NullReferenceException
+        _factory.AiCascadeServiceMock.Setup(x => x.PerformAiProfileAnalysisAsync(It.IsAny<Message>(), It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
         _messageHandler = _factory.CreateMessageHandler();
     }
 
@@ -213,25 +228,16 @@ public class MessageHandlerHandleUserMessageTests
         var user = message.From!;
         var chat = message.Chat;
 
-        // Настраиваем мок ModerationService для разрешенного сообщения
-        _factory.ModerationServiceMock.Setup(x => x.IsUserApproved(user.Id, chat.Id))
-            .Returns(false);
-        _factory.ModerationServiceMock.Setup(x => x.CheckMessageAsync(message))
+        // Настраиваем мок ModerationFacade для разрешенного сообщения
+        _factory.ModerationFacadeMock.Setup(x => x.CheckMessageAsync(message))
             .ReturnsAsync(TK.CreateAllowResult());
-
-        // Настраиваем мок для AI детекта
-        _factory.ModerationServiceMock.Setup(x => x.CheckAiDetectAndNotifyAdminsAsync(It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<Message>()))
-            .ReturnsAsync(false);
-
-        // Настраиваем мок для инкремента хороших сообщений
-        _factory.ModerationServiceMock.Setup(x => x.IncrementGoodMessageCountAsync(It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<string>()))
-            .Returns(Task.CompletedTask);
 
         // Act
         await _messageHandler.HandleUserMessageAsync(message, false, CancellationToken.None);
 
         // Assert
-        _factory.ModerationServiceMock.Verify(x => x.IncrementGoodMessageCountAsync(user, chat, It.IsAny<string>()), Times.Once);
+        // Проверяем, что ModerationFacade был вызван
+        _factory.ModerationFacadeMock.Verify(x => x.CheckMessageAsync(message), Times.Once);
     }
 
 
@@ -249,15 +255,13 @@ public class MessageHandlerHandleUserMessageTests
         var user = message.From!;
         var chat = message.Chat;
 
-        // Настраиваем мок ModerationService для сообщения для удаления
-        _factory.ModerationServiceMock.Setup(x => x.IsUserApproved(user.Id, chat.Id))
-            .Returns(false);
-        _factory.ModerationServiceMock.Setup(x => x.CheckMessageAsync(message))
+        // Настраиваем мок ModerationFacade для сообщения для удаления
+        _factory.ModerationFacadeMock.Setup(x => x.CheckMessageAsync(message))
             .ReturnsAsync(TK.CreateDeleteResult());
 
         // Настраиваем мок для DeleteAndReportMessage
         _factory.MessageServiceMock.Setup(x => x.SendUserNotificationAsync(
-            It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<UserNotificationType>(), 
+            It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<UserNotificationType>(),
             It.IsAny<SimpleNotificationData>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
@@ -269,8 +273,8 @@ public class MessageHandlerHandleUserMessageTests
         await _messageHandler.HandleUserMessageAsync(message, false, CancellationToken.None);
 
         // Assert
-        // Проверяем, что сообщение было удалено
-        _factory.BotMock.Verify(x => x.DeleteMessage(chat.Id, message.MessageId, It.IsAny<CancellationToken>()), Times.Once);
+        // Проверяем, что ModerationFacade был вызван для обработки сообщения для удаления
+        _factory.ModerationFacadeMock.Verify(x => x.HandleUserMessageAsync(message, user, chat, It.IsAny<ModerationResult>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>
@@ -286,10 +290,8 @@ public class MessageHandlerHandleUserMessageTests
         var user = message.From!;
         var chat = message.Chat;
 
-        // Настраиваем мок ModerationService для выброса исключения
-        _factory.ModerationServiceMock.Setup(x => x.IsUserApproved(user.Id, chat.Id))
-            .Returns(false);
-        _factory.ModerationServiceMock.Setup(x => x.CheckMessageAsync(message))
+        // Настраиваем мок ModerationFacade для выброса исключения
+        _factory.ModerationFacadeMock.Setup(x => x.CheckMessageAsync(message))
             .ThrowsAsync(new Exception("Test moderation error"));
 
         // Act
@@ -313,19 +315,9 @@ public class MessageHandlerHandleUserMessageTests
         var user = message.From!;
         var chat = message.Chat;
 
-        // Настраиваем мок ModerationService для разрешенного сообщения
-        _factory.ModerationServiceMock.Setup(x => x.IsUserApproved(user.Id, chat.Id))
-            .Returns(false);
-        _factory.ModerationServiceMock.Setup(x => x.CheckMessageAsync(message))
+        // Настраиваем мок ModerationFacade для разрешенного сообщения
+        _factory.ModerationFacadeMock.Setup(x => x.CheckMessageAsync(message))
             .ReturnsAsync(TK.CreateAllowResult());
-
-        // Настраиваем мок для AI детекта
-        _factory.ModerationServiceMock.Setup(x => x.CheckAiDetectAndNotifyAdminsAsync(It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<Message>()))
-            .ReturnsAsync(false);
-
-        // Настраиваем мок для инкремента хороших сообщений
-        _factory.ModerationServiceMock.Setup(x => x.IncrementGoodMessageCountAsync(It.IsAny<User>(), It.IsAny<Chat>(), It.IsAny<string>()))
-            .Returns(Task.CompletedTask);
 
         // Act
         await _messageHandler.HandleUserMessageAsync(message, false, CancellationToken.None);
@@ -335,4 +327,4 @@ public class MessageHandlerHandleUserMessageTests
         // Метод должен завершиться без исключений
         Assert.Pass("AI анализ профиля выполнен корректно");
     }
-} 
+}

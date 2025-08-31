@@ -118,7 +118,7 @@ public class MockAiChecks : IAiChecks
     {
         if (_shouldThrowException)
             throw _exceptionToThrow ?? new AiServiceException("Mock error");
-        
+
         // Mock implementation - ничего не делаем
     }
 
@@ -127,12 +127,12 @@ public class MockAiChecks : IAiChecks
         if (_shouldThrowException)
             throw _exceptionToThrow ?? new AiServiceException("Mock error");
 
-        var spamProbability = new SpamProbability 
-        { 
-            Probability = _attentionBaitProbability, 
-            Reason = "Mock attention bait analysis" 
+        var spamProbability = new SpamProbability
+        {
+            Probability = _attentionBaitProbability,
+            Reason = "Mock attention bait analysis"
         };
-        
+
         return ValueTask.FromResult(new SpamPhotoBio(spamProbability, new byte[0], "Mock user bio"));
     }
 
@@ -141,12 +141,12 @@ public class MockAiChecks : IAiChecks
         if (_shouldThrowException)
             throw _exceptionToThrow ?? new AiServiceException("Mock error");
 
-        var spamProbability = new SpamProbability 
-        { 
-            Probability = _attentionBaitProbability, 
-            Reason = "Mock attention bait analysis with message" 
+        var spamProbability = new SpamProbability
+        {
+            Probability = _attentionBaitProbability,
+            Reason = "Mock attention bait analysis with message"
         };
-        
+
         return ValueTask.FromResult(new SpamPhotoBio(spamProbability, new byte[0], "Mock user bio"));
     }
 
@@ -155,57 +155,57 @@ public class MockAiChecks : IAiChecks
         if (_shouldThrowException)
             throw _exceptionToThrow ?? new AiServiceException("Mock error");
 
-        return ValueTask.FromResult(new SpamProbability 
-        { 
-            Probability = _spamProbability, 
-            Reason = "Mock spam analysis" 
+        return ValueTask.FromResult(new SpamProbability
+        {
+            Probability = _spamProbability,
+            Reason = "Mock spam analysis"
         });
     }
 
     public ValueTask<SpamProbability> GetSuspiciousUserSpamProbability(
-        Message message, 
-        User user, 
-        List<string> firstMessages, 
+        Message message,
+        User user,
+        List<string> firstMessages,
         double mimicryScore)
     {
         if (_shouldThrowException)
             throw _exceptionToThrow ?? new AiServiceException("Mock error");
 
-        return ValueTask.FromResult(new SpamProbability 
-        { 
-            Probability = _suspiciousUserSpamProbability, 
-            Reason = "Mock suspicious user analysis" 
+        return ValueTask.FromResult(new SpamProbability
+        {
+            Probability = _suspiciousUserSpamProbability,
+            Reason = "Mock suspicious user analysis"
         });
     }
 
     public ValueTask<SpamProbability> GetMlSuspiciousMessageAnalysis(
-        Message message, 
-        User user, 
+        Message message,
+        User user,
         double mlScore)
     {
         if (_shouldThrowException)
             throw _exceptionToThrow ?? new AiServiceException("Mock error");
 
-        return ValueTask.FromResult(new SpamProbability 
-        { 
-            Probability = _suspiciousUserSpamProbability, 
-            Reason = "Mock ML-AI cascade analysis" 
+        return ValueTask.FromResult(new SpamProbability
+        {
+            Probability = _suspiciousUserSpamProbability,
+            Reason = "Mock ML-AI cascade analysis"
         });
     }
 
     public ValueTask<SpamProbability> GetCascadeAnalysisProbability(
-        Message message, 
-        User user, 
-        double mlScore, 
+        Message message,
+        User user,
+        double mlScore,
         bool mlSpamDecision)
     {
         if (_shouldThrowException)
             throw _exceptionToThrow ?? new AiServiceException("Mock error");
 
-        return ValueTask.FromResult(new SpamProbability 
-        { 
-            Probability = _suspiciousUserSpamProbability, 
-            Reason = "Mock cascade analysis: ML→AI" 
+        return ValueTask.FromResult(new SpamProbability
+        {
+            Probability = _suspiciousUserSpamProbability,
+            Reason = "Mock cascade analysis: ML→AI"
         });
     }
-} 
+}

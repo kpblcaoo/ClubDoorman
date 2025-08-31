@@ -1,33 +1,9 @@
-using ClubDoorman.Services.SuspiciousUsers;
-using ClubDoorman.Services.ChannelModeration;
-using ClubDoorman.Services.Violation;
-using ClubDoorman.Services.UserFlow;
-using ClubDoorman.Services.BadMessage;
-using ClubDoorman.Services.Moderation;
+using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.Core.Configuration;
 using Serilog;
 using Serilog.Events;
-using ClubDoorman.Infrastructure;
-using ClubDoorman.Services;
-using ClubDoorman.Services.LinkFormatting;
-using ClubDoorman.Services.Dispatcher;
-using ClubDoorman.Services.UserJoin;
-using ClubDoorman.Services.Notification;
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Handlers;
-using ClubDoorman.Models.Logging;
-
-using ClubDoorman.Services.Core.Configuration;
-using ClubDoorman.Services.Telegram;
-using ClubDoorman.Services.Statistics;
-using ClubDoorman.Services.AI;
-using ClubDoorman.Services.UserManagement;
-using ClubDoorman.Services.Captcha;
-using ClubDoorman.Services.Commands;
-using ClubDoorman.Services.Handlers;
-using Telegram.Bot;
 using DotNetEnv;
-using ClubDoorman.Services.Messaging;
-using ClubDoorman.Services.TextProcessing;
+using ClubDoorman.Effects;
 
 namespace ClubDoorman;
 
@@ -38,7 +14,7 @@ public class Program
         // Загружаем переменные из .env файла если он существует
         var currentDir = Directory.GetCurrentDirectory();
         var envPath = Path.Combine(currentDir, ".env");
-        
+
         if (File.Exists(envPath))
         {
             Console.WriteLine($"📄 Загружаем переменные из файла: {envPath}");
@@ -49,224 +25,105 @@ public class Program
             Console.WriteLine("📄 Файл .env не найден, используем переменные окружения");
             Console.WriteLine($"🔍 Искали в: {envPath}");
         }
-        
+
         InitData();
-        var host = Host.CreateDefaultBuilder(args)
-            .UseSerilog(
-                (_, _, config) =>
-                {
-                    // Создаем директорию для логов если её нет
-                    var logsDir = "logs";
-                    if (!Directory.Exists(logsDir))
+        var hostBuilder = Host.CreateDefaultBuilder(args)
+                .UseSerilog(
+                    (_, _, config) =>
                     {
-                        Directory.CreateDirectory(logsDir);
-                    }
-                    
-                    config
-                        .MinimumLevel.Verbose()
-                        .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                        .MinimumLevel.Override("System", LogEventLevel.Information)
-                        .Enrich.FromLogContext()
-                        .Enrich.WithProperty("Application", "ClubDoorman")
-                        .WriteTo.Async(a => a.Console())
-                        .WriteTo.Async(a => a.File(
-                            path: Path.Combine(logsDir, "clubdoorman-.log"),
-                            rollingInterval: RollingInterval.Day,
-                            retainedFileCountLimit: 7,
-                            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-                        ))
-                        .WriteTo.Async(a => a.File(
-                            path: Path.Combine(logsDir, "errors-.log"),
-                            rollingInterval: RollingInterval.Day,
-                            retainedFileCountLimit: 30,
-                            restrictedToMinimumLevel: LogEventLevel.Error,
-                            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-                        ))
-                        .WriteTo.Async(a => a.File(
-                            path: Path.Combine(logsDir, "system-.log"),
-                            rollingInterval: RollingInterval.Day,
-                            retainedFileCountLimit: 14,
-                            restrictedToMinimumLevel: LogEventLevel.Information,
-                            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [System] {Message:lj}{NewLine}{Exception}"
-                        ))
-                        .WriteTo.Logger(lc => lc
-                            .Filter.ByIncludingOnly(e => e.Properties.ContainsKey("UserFlow"))
+                        // Создаем директорию для логов если её нет
+                        var logsDir = "logs";
+                        if (!Directory.Exists(logsDir))
+                        {
+                            Directory.CreateDirectory(logsDir);
+                        }
+
+                        // Dynamic logging configuration from environment.
+                        // Base (legacy) var:
+                        //   DOORMAN_LOG_LEVEL: Verbose|Debug|Information|Warning|Error|Fatal  (default: Information)
+                        // New (optional, overrides DOORMAN_LOG_LEVEL for specific sinks):
+                        //   DOORMAN_LOG_LEVEL_CONSOLE
+                        //   DOORMAN_LOG_LEVEL_FILE
+                        // Trace booster:
+                        //   DOORMAN_TRACE_ENABLE=true  (forces FILE level to Verbose, leaves console as‑is)
+                        static LogEventLevel ParseLevel(string? value, LogEventLevel fallback)
+                        {
+                            if (!string.IsNullOrWhiteSpace(value) && Enum.TryParse<LogEventLevel>(value, true, out var lvl))
+                                return lvl;
+                            return fallback;
+                        }
+
+                        var baseLevel = ParseLevel(Environment.GetEnvironmentVariable("DOORMAN_LOG_LEVEL"), LogEventLevel.Information);
+                        var consoleLevel = ParseLevel(Environment.GetEnvironmentVariable("DOORMAN_LOG_LEVEL_CONSOLE"), baseLevel);
+                        var fileLevel = ParseLevel(Environment.GetEnvironmentVariable("DOORMAN_LOG_LEVEL_FILE"), baseLevel);
+                        var traceEnabled = bool.TryParse(Environment.GetEnvironmentVariable("DOORMAN_TRACE_ENABLE"), out var te) && te;
+                        if (traceEnabled && fileLevel > LogEventLevel.Verbose)
+                            fileLevel = LogEventLevel.Verbose; // escalate only file sink for deep diagnostics
+
+                        // Root minimum must be the lowest of all sink minima so that higher-verbosity sinks receive events.
+                        var rootMin = consoleLevel < fileLevel ? consoleLevel : fileLevel;
+
+                        config
+                            .MinimumLevel.Is(rootMin)
+                            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                            .MinimumLevel.Override("System", LogEventLevel.Information)
+                            .Enrich.FromLogContext()
+                            .Enrich.WithProperty("Application", "ClubDoorman")
+                            .Enrich.WithProperty("TraceEnabled", traceEnabled)
+                            // Console sink with its own minimum level (can be higher than file level to reduce noise in stdout)
+                            .WriteTo.Async(a => a.Console(restrictedToMinimumLevel: consoleLevel))
                             .WriteTo.Async(a => a.File(
-                                path: Path.Combine(logsDir, "userflow-.log"),
+                                path: Path.Combine(logsDir, "clubdoorman-.log"),
                                 rollingInterval: RollingInterval.Day,
                                 retainedFileCountLimit: 7,
-                                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [UserFlow] {Message:lj}{NewLine}{Exception}"
+                                restrictedToMinimumLevel: fileLevel,
+                                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
                             ))
-                        );
-                }
-            )
-            .ConfigureServices(services =>
-            {
-                // Регистрация конфигурации приложения
-                services.AddConfigurationServices();
-                services.AddLinkFormattingServices();
-                services.AddDispatcherServices();
-                services.AddUserJoinServices();
-                services.AddNotificationServices();
-                services.AddUserBanServices();
-                services.AddModerationServices();
-                services.AddChannelModerationServices();
-                services.AddSuspiciousUsersServices();
-                services.AddUserFlowServices();
-                services.AddViolationServices();
-                services.AddBadMessageServices();
-
-                // Telegram Bot Client - создаем после регистрации IAppConfig
-                services.AddSingleton<TelegramBotClient>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] TelegramBotClient factory called");
-                    var appConfig = provider.GetRequiredService<IAppConfig>();
-                    logger.LogDebug("[DI] IAppConfig resolved: {AppConfigType}, BotApi: {BotApiPrefix}...", appConfig.GetType().Name, appConfig.BotApi != null ? appConfig.BotApi.Substring(0, Math.Min(appConfig.BotApi.Length, 10)) : "null");
-
-                    // Проверяем конфигурацию бота
-                    if (string.IsNullOrEmpty(appConfig.BotApi))
-                    {
-                        logger.LogError("[DI] DOORMAN_BOT_API is not set or is 'test-bot-token'.");
-                        throw new InvalidOperationException(
-                            "❌ Бот не может запуститься: DOORMAN_BOT_API не настроен или равен 'test-bot-token'. " +
-                            "Установите переменную окружения DOORMAN_BOT_API с валидным токеном бота."
-                        );
+                            .WriteTo.Async(a => a.File(
+                                path: Path.Combine(logsDir, "errors-.log"),
+                                rollingInterval: RollingInterval.Day,
+                                retainedFileCountLimit: 30,
+                                restrictedToMinimumLevel: LogEventLevel.Error,
+                                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                            ))
+                            .WriteTo.Async(a => a.File(
+                                path: Path.Combine(logsDir, "system-.log"),
+                                rollingInterval: RollingInterval.Day,
+                                retainedFileCountLimit: 14,
+                                restrictedToMinimumLevel: LogEventLevel.Information,
+                                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [System] {Message:lj}{NewLine}{Exception}"
+                            ))
+                            .WriteTo.Logger(lc => lc
+                                .Filter.ByIncludingOnly(e => e.Properties.ContainsKey("UserFlow"))
+                                .WriteTo.Async(a => a.File(
+                                    path: Path.Combine(logsDir, "userflow-.log"),
+                                    rollingInterval: RollingInterval.Day,
+                                    retainedFileCountLimit: 7,
+                                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [UserFlow] {Message:lj}{NewLine}{Exception}"
+                                ))
+                            );
                     }
-
-                    logger.LogDebug("[DI] 🤖 Starting bot with token: {BotApiPrefix}...", appConfig.BotApi.Substring(0, Math.Min(appConfig.BotApi.Length, 10)));
-
-                    return new TelegramBotClient(appConfig.BotApi);
-                });
-
-                services.AddHostedService<Worker>(provider =>
+                )
+                .ConfigureServices((ctx, services) =>
                 {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] Worker factory called");
-                    return new Worker(
-                        provider.GetRequiredService<ILogger<Worker>>(),
-                        provider.GetRequiredService<IUpdateDispatcher>(),
-                        provider.GetRequiredService<ICaptchaService>(),
-                        provider.GetRequiredService<IStatisticsService>(),
-                        provider.GetRequiredService<ISpamHamClassifier>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<IBadMessageManager>(),
-                        provider.GetRequiredService<IAiChecks>(),
-                        provider.GetRequiredService<IChatLinkFormatter>(),
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IAppConfig>(),
-                        provider.GetRequiredService<IUserBanService>()
-                    );
-                });
-                // Telegram Bot Client интерфейсы
-                services.AddSingleton<ITelegramBotClient>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] ITelegramBotClient factory called");
-                    return provider.GetRequiredService<TelegramBotClient>();
-                });
-                services.AddTelegramServices();
-                services.AddStatisticsServices();
-                services.AddAIServices();
-                services.AddUserManagementServices();
-                services.AddMessagingServices();
-                services.AddTextProcessingServices();
-                
-                // Классификаторы и менеджеры
+                    // Единая точка регистрации всех сервисов ClubDoorman
+                    services.AddClubDoorman(ctx.Configuration);
 
-                services.AddSingleton<IAiChecks>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IAiChecks factory called");
-                    return new AiChecks(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ILogger<AiChecks>>(),
-                        provider.GetRequiredService<IAppConfig>());
+                    // Логируем статус AI и Mimicry систем после полной инициализации
+                    services.PostConfigure<IAppConfig>(appConfig =>
+                    {
+                        var serviceProvider = services.BuildServiceProvider();
+                        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                        logger.LogDebug("[DI] PostConfigure: IAppConfig loaded. AI/Mimicry/Other system status will be logged here if needed.");
+                    });
                 });
 
 
-                services.AddSingleton<IViolationTracker>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IViolationTracker factory called");
-                    return new ViolationTracker(provider.GetRequiredService<ILogger<ViolationTracker>>(), provider.GetRequiredService<IAppConfig>());
-                });
-
-                
-
-                
-                // Новые сервисы
-
-                services.AddSingleton<IStatisticsService>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IStatisticsService factory called");
-                    return new StatisticsService(
-                        provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                        provider.GetRequiredService<ILogger<StatisticsService>>(),
-                        provider.GetRequiredService<IChatLinkFormatter>());
-                });
-                services.AddCaptchaServices();
-                services.AddHandlersServices();
-                services.AddSingleton<IModerationService>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] IModerationService factory called");
-                    return new ModerationService(
-                        provider.GetRequiredService<ISpamHamClassifier>(),
-                        provider.GetRequiredService<IMimicryClassifier>(),
-                        provider.GetRequiredService<IBadMessageManager>(),
-                        provider.GetRequiredService<IUserManager>(),
-                        provider.GetRequiredService<IAiChecks>(),
-                        provider.GetRequiredService<ISuspiciousUsersStorage>(),
-                        provider.GetRequiredService<ITelegramBotClient>(),
-                        provider.GetRequiredService<IMessageService>(),
-                        provider.GetRequiredService<IUserBanService>(),
-                        provider.GetRequiredService<IUserCleanupService>(),
-                        provider.GetRequiredService<ILogger<ModerationService>>());
-                });
-
-
-
-
-
-                // Централизованная система сообщений (перенесено в MessagingModule)
-                services.Configure<LoggingConfiguration>(options => { });
-
-                // Обработчики обновлений уже зарегистрированы в HandlersModule
-                // Убираем дублирующую регистрацию MessageHandler
-
-                // Новые прокси-сервисы для рефакторинга
-
-                services.AddCommandsServices();
-                        services.AddSingleton<IChannelModerationService>(provider =>
-        {
-            var logger = provider.GetRequiredService<ILogger<Program>>();
-            logger.LogDebug("[DI] IChannelModerationService factory called");
-            return new ChannelModerationService(
-                provider.GetRequiredService<ITelegramBotClientWrapper>(),
-                provider.GetRequiredService<IModerationService>(),
-                provider.GetRequiredService<IUserBanService>(),
-                provider.GetRequiredService<ILogger<ChannelModerationService>>());
-        });
-                services.AddSingleton<IUserJoinService, UserJoinService>();
-
-                // Регистрация сервиса лог-чата (перенесено в MessagingModule)
-
-                // Логируем статус AI и Mimicry систем после полной инициализации
-                services.PostConfigure<IAppConfig>(appConfig =>
-                {
-                    var serviceProvider = services.BuildServiceProvider();
-                    var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-                    logger.LogDebug("[DI] PostConfigure: IAppConfig loaded. AI/Mimicry/Other system status will be logged here if needed.");
-                });
-            })
-            .Build();
+        var host = hostBuilder.Build();
 
         // Логируем статус AI и Mimicry систем после полной инициализации
         var appConfig = host.Services.GetRequiredService<IAppConfig>();
-        
+
         if (appConfig.OpenRouterApi != null)
         {
             Console.WriteLine("🤖 AI анализ: ВКЛЮЧЕН");
@@ -275,7 +132,7 @@ public class Program
         {
             Console.WriteLine("🤖 AI анализ: ОТКЛЮЧЕН (DOORMAN_OPENROUTER_API не настроен)");
         }
-        
+
         if (appConfig.SuspiciousDetectionEnabled)
         {
             Console.WriteLine($"🎭 Система мимикрии: ВКЛЮЧЕНА (порог: {appConfig.MimicryThreshold:F1})");
@@ -284,7 +141,7 @@ public class Program
         {
             Console.WriteLine("🎭 Система мимикрии: ОТКЛЮЧЕНА (DOORMAN_SUSPICIOUS_DETECTION_ENABLE не установлен)");
         }
-        
+
         // Информация о загруженных переменных окружения
         Console.WriteLine("📋 Загруженные переменные окружения:");
         Console.WriteLine($"   • DOORMAN_BOT_API: {(string.IsNullOrEmpty(appConfig.BotApi) ? "не найдено" : "найдено")}");
@@ -294,24 +151,24 @@ public class Program
         Console.WriteLine($"   • DOORMAN_SUSPICIOUS_DETECTION_ENABLE: {appConfig.SuspiciousDetectionEnabled}");
         Console.WriteLine($"   • DOORMAN_MIMICRY_THRESHOLD: {appConfig.MimicryThreshold:F1}");
         Console.WriteLine($"   • DOORMAN_SUSPICIOUS_TO_APPROVED_COUNT: {appConfig.SuspiciousToApprovedMessageCount}");
-        // Остальные свойства пока остаются в Config, будут перенесены в следующих группах
-        Console.WriteLine($"   • DOORMAN_GLOBAL_APPROVAL_MODE: {Config.GlobalApprovalMode}");
-        Console.WriteLine($"   • DOORMAN_BLACKLIST_AUTOBAN_DISABLE: {!Config.BlacklistAutoBan}");
-        Console.WriteLine($"   • DOORMAN_CHANNELS_AUTOBAN_DISABLE: {!Config.ChannelAutoBan}");
-        Console.WriteLine($"   • DOORMAN_BAN_FOLDER_INVITE_USERS: {Config.BanFolderInviteUsers}");
-        Console.WriteLine($"   • DOORMAN_BUTTON_AUTOBAN_DISABLE: {!Config.ButtonAutoBan}");
-        Console.WriteLine($"   • DOORMAN_HIGH_CONFIDENCE_AUTOBAN_DISABLE: {!Config.HighConfidenceAutoBan}");
-        Console.WriteLine($"   • DOORMAN_LOW_CONFIDENCE_HAM_ENABLE: {Config.LowConfidenceHamForward}");
-        Console.WriteLine($"   • DOORMAN_APPROVE_BUTTON: {Config.ApproveButtonEnabled}");
-        Console.WriteLine($"   • DOORMAN_DISABLE_MEDIA_FILTERING: {Config.DisableMediaFiltering}");
-        Console.WriteLine($"   • DOORMAN_DELETE_FORWARDED_MESSAGES: {Config.DeleteForwardedMessages}");
+        // Остальные свойства теперь доступны через IAppConfig
+        Console.WriteLine($"   • DOORMAN_GLOBAL_APPROVAL_MODE: {appConfig.GlobalApprovalMode}");
+        Console.WriteLine($"   • DOORMAN_BLACKLIST_AUTOBAN_DISABLE: {!appConfig.BlacklistAutoBan}");
+        Console.WriteLine($"   • DOORMAN_CHANNELS_AUTOBAN_DISABLE: {!appConfig.ChannelAutoBan}");
+        Console.WriteLine($"   • DOORMAN_BAN_FOLDER_INVITE_USERS: {appConfig.BanFolderInviteUsers}");
+        Console.WriteLine($"   • DOORMAN_BUTTON_AUTOBAN_DISABLE: {!appConfig.ButtonAutoBan}");
+        Console.WriteLine($"   • DOORMAN_HIGH_CONFIDENCE_AUTOBAN_DISABLE: {!appConfig.HighConfidenceAutoBan}");
+        Console.WriteLine($"   • DOORMAN_LOW_CONFIDENCE_HAM_ENABLE: {appConfig.LowConfidenceHamForward}");
+        Console.WriteLine($"   • DOORMAN_APPROVE_BUTTON: {appConfig.ApproveButtonEnabled}");
+        Console.WriteLine($"   • DOORMAN_DISABLE_MEDIA_FILTERING: {appConfig.DisableMediaFiltering}");
+        Console.WriteLine($"   • DOORMAN_DELETE_FORWARDED_MESSAGES: {appConfig.DeleteForwardedMessages}");
         Console.WriteLine($"   • DOORMAN_PRIVATE_START_DISABLE: {!appConfig.IsPrivateStartAllowed()}");
         Console.WriteLine($"   • Отключенные чаты: {appConfig.DisabledChats.Count}");
         Console.WriteLine($"   • Белый список чатов: {appConfig.WhitelistChats.Count}");
         Console.WriteLine($"   • AI-включенные чаты: {appConfig.AiEnabledChats.Count}");
         Console.WriteLine($"   • Группы без VPN-рекламы: {appConfig.NoVpnAdGroups.Count}");
         Console.WriteLine($"   • Группы с отключенной капчей: {appConfig.NoCaptchaGroups.Count}");
-        Console.WriteLine($"   • Чаты с отключенной фильтрацией медиа: {Config.MediaFilteringDisabledChats.Count}");
+        Console.WriteLine($"   • Чаты с отключенной фильтрацией медиа: {appConfig.MediaFilteringDisabledChats.Count}");
 
         await host.RunAsync();
     }

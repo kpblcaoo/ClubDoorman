@@ -1,0 +1,150 @@
+name: Golden Baseline Validation
+
+on:
+  pull_request:
+    branches: [ "*" ]
+  workflow_dispatch: {}
+
+jobs:
+  golden-validation:
+    runs-on: ubuntu-latest
+    env:
+      MSBUILDTERMINALLOGGER: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect local act
+        id: detect_act
+        run: |
+          if [ "${ACT:-}" = "true" ]; then
+            echo "Detected local act run (ACT=true)";
+            echo "skip_upload=true" >> $GITHUB_OUTPUT
+          else
+            echo "Running on GitHub (ACT not true)";
+            echo "skip_upload=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build (Release)
+        run: |
+          if [ -f ClubDoorman.sln ]; then
+            echo "Building solution (without Baseline project yet)"
+            dotnet build ClubDoorman.sln --configuration Release --no-restore || true
+          fi
+          echo "Building main and baseline projects explicitly"
+            dotnet build ClubDoorman/ClubDoorman.csproj --configuration Release --no-restore
+            dotnet build ClubDoorman.Baseline/ClubDoorman.Baseline.csproj --configuration Release --no-restore
+
+      - name: Run baseline harness (regenerates golden layers)
+        run: |
+          echo "Running baseline harness to regenerate golden artifacts"
+          ls -la ClubDoorman.Baseline/ || true
+          dotnet run --project ClubDoorman.Baseline/ClubDoorman.Baseline.csproj -c Release --no-launch-profile
+
+      - name: Detect unintended golden diffs (no fail yet)
+        id: diffcheck
+        run: |
+          echo "Checking for diffs/untracked files inside golden directory after regeneration"
+          status=$(git status --porcelain -- ClubDoorman.Baseline/golden)
+          if [ -n "$status" ]; then
+            echo "Golden artifacts changed (including possible untracked files):" | tee -a $GITHUB_STEP_SUMMARY
+            echo "$status" | tee -a $GITHUB_STEP_SUMMARY
+            git diff --name-status -- ClubDoorman.Baseline/golden || true
+            echo "golden_diff=1" >> $GITHUB_OUTPUT
+            git diff -- ClubDoorman.Baseline/golden > golden.patch || true
+          else
+            echo "No golden diffs detected." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Generate golden diff summary
+        if: steps.diffcheck.outputs.golden_diff == '1'
+        run: |
+          chmod +x scripts/golden_diff_summary.sh
+          ./scripts/golden_diff_summary.sh
+          cat golden-diff-summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload diff summary artifacts
+        if: steps.diffcheck.outputs.golden_diff == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-diff-summary
+          path: |
+            golden-diff-summary.json
+            golden-diff-summary.md
+            golden.patch
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Add PR label (golden-change)
+        if: steps.diffcheck.outputs.golden_diff == '1' && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pr_number=${{ github.event.pull_request.number }}
+          echo "Applying label golden-change to PR #$pr_number"
+          gh pr edit "$pr_number" --add-label golden-change || {
+            echo "gh CLI not available, fallback to REST";
+            curl -s -X POST -H "Authorization: token $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/$pr_number/labels" \
+              -d '{"labels":["golden-change"]}' || true; }
+
+      - name: Run Golden tests only
+        run: |
+          echo "Executing Golden category tests (schema + invariants)"
+          dotnet test ClubDoorman.Test/ClubDoorman.Test.csproj \
+            --no-restore --no-build \
+            --configuration Release \
+            --filter "(Category=GoldenManifest|Category=GoldenV2|Category=GoldenNorm|Category=GoldenAgg|Category=GoldenHygiene)" \
+            --verbosity minimal \
+            --logger "trx;LogFileName=golden-tests.trx"
+
+      # Real artifact uploads only on GitHub (skip under act where ACTIONS_RUNTIME_TOKEN is missing)
+      - name: Upload golden directory
+        if: always() && steps.detect_act.outputs.skip_upload == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-artifacts
+          path: ClubDoorman.Baseline/golden
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload golden test results
+        if: always() && steps.detect_act.outputs.skip_upload == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-tests-trx
+          path: |
+            ClubDoorman.Test/TestResults/golden-tests.trx
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Summary
+        if: always()
+        run: |
+          echo '### Golden Validation Summary' >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.diffcheck.outputs.golden_diff }}" = "1" ]; then
+            echo '*Status:* ❌ Diff detected in golden artifacts.' >> $GITHUB_STEP_SUMMARY
+          else
+            echo '*Status:* ✅ No diffs in golden artifacts.' >> $GITHUB_STEP_SUMMARY
+          fi
+          echo '*Golden tests:* Completed (see artifacts for detailed results).' >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.diffcheck.outputs.golden_diff }}" = "1" ]; then
+            echo '' >> $GITHUB_STEP_SUMMARY
+            echo 'A detailed diff summary was generated (see golden-diff-summary artifact).' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail on golden diff
+        if: steps.diffcheck.outputs.golden_diff == '1'
+        run: |
+          echo "Failing job due to golden diff (after labeling & summary)." >&2
+          exit 1

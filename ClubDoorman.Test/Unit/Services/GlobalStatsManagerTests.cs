@@ -34,13 +34,13 @@ public class GlobalStatsManagerTests
         // Arrange & Act
         var tempDir = Path.GetTempPath();
         var testDataDir = Path.Combine(tempDir, "test_data_global_stats");
-        
+
         if (Directory.Exists(testDataDir))
             Directory.Delete(testDataDir, true);
-        
+
         // Создаем временный сервис с кастомным путем
         var service = new GlobalStatsManager();
-        
+
         // Assert
         Assert.That(Directory.Exists("data"), Is.True);
     }
@@ -51,7 +51,7 @@ public class GlobalStatsManagerTests
         // Arrange
         var chatId = 123456L;
         var chatTitle = "Test Chat";
-        
+
         _factory.WithBotClientSetup(mock =>
             mock.Setup(x => x.GetChatMemberCount(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(100));
@@ -73,12 +73,12 @@ public class GlobalStatsManagerTests
         var chatId = 123456L;
         var oldTitle = "Old Title";
         var newTitle = "New Title";
-        
+
         // Сначала добавляем чат
         _factory.WithBotClientSetup(mock =>
             mock.Setup(x => x.GetChatMemberCount(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(100));
-        
+
         await _service.EnsureChatAsync(chatId, oldTitle, _botClientMock.Object);
 
         // Act - обновляем заголовок
@@ -94,13 +94,13 @@ public class GlobalStatsManagerTests
         // Arrange
         var chatId1 = 123456L;
         var chatId2 = 789012L;
-        
+
         // Добавляем чаты
         _factory.WithBotClientSetup(mock =>
         {
             mock.Setup(x => x.GetChatMemberCount(It.IsAny<ChatId>(), It.IsAny<CancellationToken>())).ReturnsAsync(100);
         });
-        
+
         await _service.EnsureChatAsync(chatId1, "Chat 1", _botClientMock.Object);
         await _service.EnsureChatAsync(chatId2, "Chat 2", _botClientMock.Object);
 
@@ -117,12 +117,12 @@ public class GlobalStatsManagerTests
         // Arrange
         var zeroChatId = 123456L;
         var nonZeroChatId = 789012L;
-        
+
         _factory.WithBotClientSetup(mock =>
         {
             mock.Setup(x => x.GetChatMemberCount(It.IsAny<ChatId>(), It.IsAny<CancellationToken>())).ReturnsAsync(0);
         });
-        
+
         await _service.EnsureChatAsync(zeroChatId, "Zero Chat", _botClientMock.Object);
         await _service.EnsureChatAsync(nonZeroChatId, "Non-Zero Chat", _botClientMock.Object);
 
@@ -206,7 +206,7 @@ public class GlobalStatsManagerTests
         // Assert
         var htmlPath = "data/stats.html";
         Assert.That(File.Exists(htmlPath), Is.True);
-        
+
         var htmlContent = File.ReadAllText(htmlPath);
         Assert.That(htmlContent, Does.Contain("Test Chat"));
     }
@@ -226,7 +226,7 @@ public class GlobalStatsManagerTests
         // Assert
         var jsonPath = "data/global_stats.json";
         Assert.That(File.Exists(jsonPath), Is.True);
-        
+
         var jsonContent = File.ReadAllText(jsonPath);
         Assert.That(jsonContent, Does.Contain("Test Chat"));
     }
@@ -237,13 +237,13 @@ public class GlobalStatsManagerTests
         // Arrange
         var chatId = 123456L;
         var chatTitle = "Test Chat";
-        
+
         _factory.WithBotClientSetup(mock =>
             mock.Setup(x => x.GetChatMemberCount(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Bot API error")));
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
+        Assert.DoesNotThrowAsync(async () =>
             await _service.EnsureChatAsync(chatId, chatTitle, _botClientMock.Object));
     }
 
@@ -253,7 +253,7 @@ public class GlobalStatsManagerTests
         // Arrange
         var chatId = 123456L;
         var chatTitle = "Test Chat";
-        
+
         _factory.WithBotClientSetup(mock =>
         {
             mock.Setup(x => x.GetChatMemberCount(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
@@ -261,11 +261,11 @@ public class GlobalStatsManagerTests
             mock.Setup(x => x.GetChatMemberCount(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Bot API error"));
         });
-        
+
         await _service.EnsureChatAsync(chatId, chatTitle, _botClientMock.Object);
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
+        Assert.DoesNotThrowAsync(async () =>
             await _service.UpdateAllMembersAsync(_botClientMock.Object));
     }
 
@@ -275,7 +275,7 @@ public class GlobalStatsManagerTests
         // Arrange
         var chatId = 123456L;
         var chatTitle = "Test Chat";
-        
+
         _factory.WithBotClientSetup(mock =>
         {
             mock.Setup(x => x.GetChatMemberCount(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
@@ -283,11 +283,11 @@ public class GlobalStatsManagerTests
             mock.Setup(x => x.GetChatMemberCount(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Bot API error"));
         });
-        
+
         await _service.EnsureChatAsync(chatId, chatTitle, _botClientMock.Object);
 
         // Act & Assert
-        Assert.DoesNotThrowAsync(async () => 
+        Assert.DoesNotThrowAsync(async () =>
             await _service.UpdateZeroMemberChatsAsync(_botClientMock.Object));
     }
 
@@ -304,4 +304,4 @@ public class GlobalStatsManagerTests
         }
         catch { }
     }
-} 
+}

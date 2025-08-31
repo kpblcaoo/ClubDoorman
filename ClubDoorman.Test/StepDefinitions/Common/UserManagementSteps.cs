@@ -1,21 +1,4 @@
-using ClubDoorman.Services.UserBan;
-using NUnit.Framework;
-using TechTalk.SpecFlow;
-using ClubDoorman.Models;
-using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Test.TestInfrastructure;
-using ClubDoorman.TestInfrastructure;
-using ClubDoorman.Test.TestData;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot;
-using Moq;
-using Microsoft.Extensions.Logging;
-using FluentAssertions;
-using ClubDoorman.Services.UserManagement;
-using ClubDoorman.Services.Captcha;
-
+﻿
 namespace ClubDoorman.Test.StepDefinitions.Common
 {
     [Binding]
@@ -31,7 +14,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void BeforeScenario()
         {
             _fakeBot = new FakeTelegramClient();
-            _loggerFactory = LoggerFactory.Create(builder => 
+            _loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddConsole();
                 builder.SetMinimumLevel(LogLevel.Debug);
@@ -62,7 +45,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             // В тестовой среде симулируем предоставление доступа
             // В реальной реализации здесь была бы проверка через UserManager
-            
+
             // Для демонстрации - симулируем успешное предоставление доступа
             var userId = _testMessage.From!.Id;
             // В реальной реализации: var isApproved = _userManager.Approved(userId, _testMessage.Chat.Id);
@@ -73,7 +56,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void ThenCaptchaIsNotShown()
         {
             // Проверяем, что капча не была показана
-            
+
             // В реальной реализации здесь была бы проверка, что CaptchaService не был вызван
             // или что сообщение о капче не было отправлено
         }
@@ -85,4 +68,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             // В реальной реализации здесь была бы проверка логов или состояния
         }
     }
-} 
+}

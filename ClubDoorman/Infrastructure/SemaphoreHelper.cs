@@ -1,5 +1,5 @@
 using ClubDoorman.Services.Messaging;
-﻿namespace ClubDoorman.Infrastructure;
+namespace ClubDoorman.Infrastructure;
 
 internal static class SemaphoreHelper
 {

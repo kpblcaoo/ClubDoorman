@@ -1,0 +1,8 @@
+{
+  "Schema": 4,
+  "Id": 13,
+  "CorrelationId": "0EABC0ECF91457C7",
+  "ShortName": "ReplyBase",
+  "Action": "Allow",
+  "RuleCode": "ModeratedAllow"
+}

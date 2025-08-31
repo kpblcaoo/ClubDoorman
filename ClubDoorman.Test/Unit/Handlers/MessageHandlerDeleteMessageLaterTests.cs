@@ -2,23 +2,17 @@ using ClubDoorman.Services.UserBan;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using ClubDoorman.Handlers;
-using ClubDoorman.Services;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Test.TestKit;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Telegram.Bot.Types;
-using Times = Moq.Times;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Telegram;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
-/// <summary>
-/// Тесты для метода DeleteMessageLater в MessageHandler
-/// <tags>unit, handlers, delete-message, async, timing</tags>
-/// </summary>
 [TestFixture]
 [Category("unit")]
 [Category("handlers")]
@@ -29,7 +23,7 @@ public class MessageHandlerDeleteMessageLaterTests
     private MessageHandler _messageHandler = null!;
 
     [SetUp]
-    public void Setup()
+    public void SetUp()
     {
         _factory = new MessageHandlerTestFactory();
         _messageHandler = _factory.CreateMessageHandler();
@@ -38,201 +32,85 @@ public class MessageHandlerDeleteMessageLaterTests
     [Test]
     public void DeleteMessageLater_WithCustomTimeout_SchedulesMessageDeletion()
     {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        var customTimeout = TimeSpan.FromMilliseconds(100); // Короткий таймаут для теста
-        var cancellationToken = CancellationToken.None;
-
-        // Act
-        _messageHandler.DeleteMessageLater(message, customTimeout, cancellationToken);
-
-        // Assert
-        // Проверяем, что метод выполнился без исключений
-        // В реальном тесте нужно было бы дождаться выполнения и проверить вызов _bot.DeleteMessage
-        Assert.Pass("Метод выполнился без исключений");
+        var (_, _, message) = TK.Specialized.Messages.TextOnlyScenario();
+        var custom = TimeSpan.FromMilliseconds(80);
+        _messageHandler.DeleteMessageLater(message, custom, CancellationToken.None);
+        Assert.Pass();
     }
 
     [Test]
-    public void DeleteMessageLater_WithDefaultTimeout_UsesFiveMinutesDefault()
+    public void DeleteMessageLater_WithDefaultTimeout_UsesFiveMinutes()
     {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        var cancellationToken = CancellationToken.None;
-
-        // Act
-        _messageHandler.DeleteMessageLater(message, default, cancellationToken);
-
-        // Assert
-        // Проверяем, что метод выполнился без исключений с дефолтным таймаутом
-        Assert.Pass("Метод выполнился без исключений с дефолтным таймаутом");
+        var (_, _, message) = TK.Specialized.Messages.TextOnlyScenario();
+        _messageHandler.DeleteMessageLater(message, default, CancellationToken.None);
+        Assert.Pass();
     }
 
     [Test]
-    public void DeleteMessageLater_WithCancellationToken_RespectsCancellation()
+    public void DeleteMessageLater_WithNullMessage_NoThrow()
     {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        var timeout = TimeSpan.FromSeconds(1);
-        var cancellationTokenSource = new CancellationTokenSource();
-        var cancellationToken = cancellationTokenSource.Token;
-
-        // Act
-        _messageHandler.DeleteMessageLater(message, timeout, cancellationToken);
-        
-        // Отменяем операцию сразу
-        cancellationTokenSource.Cancel();
-
-        // Assert
-        // Проверяем, что метод выполнился без исключений и отмена обработана корректно
-        Assert.Pass("Метод выполнился без исключений, отмена обработана");
+        Assert.DoesNotThrow(() => _messageHandler.DeleteMessageLater(null!, TimeSpan.FromMilliseconds(10), CancellationToken.None));
     }
 
     [Test]
-    public void DeleteMessageLater_WithNullMessage_HandlesGracefully()
+    public void DeleteMessageLater_WithZeroTimeout_NoThrow()
     {
-        // Arrange
-        Message? message = null;
-        var timeout = TimeSpan.FromMilliseconds(100);
-        var cancellationToken = CancellationToken.None;
-
-        // Act & Assert
-        Assert.DoesNotThrow(() => _messageHandler.DeleteMessageLater(message!, timeout, cancellationToken),
-            "Метод должен обрабатывать null сообщение без исключений");
+        var (_, _, message) = TK.Specialized.Messages.TextOnlyScenario();
+        _messageHandler.DeleteMessageLater(message, TimeSpan.Zero, CancellationToken.None);
+        Assert.Pass();
     }
 
     [Test]
-    public void DeleteMessageLater_WithZeroTimeout_ExecutesImmediately()
+    public void DeleteMessageLater_WithNegativeTimeout_NoThrow()
     {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        var zeroTimeout = TimeSpan.Zero;
-        var cancellationToken = CancellationToken.None;
-
-        // Act
-        _messageHandler.DeleteMessageLater(message, zeroTimeout, cancellationToken);
-
-        // Assert
-        // Проверяем, что метод выполнился без исключений с нулевым таймаутом
-        Assert.Pass("Метод выполнился без исключений с нулевым таймаутом");
+        var (_, _, message) = TK.Specialized.Messages.TextOnlyScenario();
+        _messageHandler.DeleteMessageLater(message, TimeSpan.FromMilliseconds(-10), CancellationToken.None);
+        Assert.Pass();
     }
 
     [Test]
-    public void DeleteMessageLater_WithNegativeTimeout_HandlesGracefully()
+    public async Task DeleteMessageLater_WithShortTimeout_InvokesDelete()
     {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        var negativeTimeout = TimeSpan.FromMilliseconds(-100);
-        var cancellationToken = CancellationToken.None;
-
-        // Act
-        _messageHandler.DeleteMessageLater(message, negativeTimeout, cancellationToken);
-
-        // Assert
-        // Проверяем, что метод выполнился без исключений с отрицательным таймаутом
-        Assert.Pass("Метод выполнился без исключений с отрицательным таймаутом");
-    }
-
-    [Test]
-    public async Task DeleteMessageLater_WithShortTimeout_ActuallyDeletesMessage()
-    {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        var shortTimeout = TimeSpan.FromMilliseconds(50); // Очень короткий таймаут
-        var cancellationToken = CancellationToken.None;
-
-        // Настраиваем мок для проверки вызова DeleteMessage
+        var (_, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
         _factory.WithBotSetup(mock =>
         {
-            mock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
+            mock.Setup(x => x.DeleteMessageWithOutcomeAsync(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((ChatId c, int m, CancellationToken ct) => new DeleteMessageResult((long)c.Identifier!, m, DeleteMessageOutcome.Success, 3, null, null));
         });
-
-        // Act
-        _messageHandler.DeleteMessageLater(message, shortTimeout, cancellationToken);
-
-        // Ждем немного больше таймаута
-        await Task.Delay(100, cancellationToken);
-
-        // Assert
-        _factory.BotMock.Verify(
-            x => x.DeleteMessage(It.Is<ChatId>(c => c.Identifier == chat.Id), message.MessageId, It.IsAny<CancellationToken>()),
-            Times.Once,
-            "DeleteMessage должен быть вызван один раз"
-        );
+        _messageHandler.DeleteMessageLater(message, TimeSpan.FromMilliseconds(40), CancellationToken.None);
+        await Task.Delay(120);
+        _factory.BotMock.Verify(x => x.DeleteMessageWithOutcomeAsync(It.Is<ChatId>(c => (long)c.Identifier! == chat.Id), message.MessageId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
-    public async Task DeleteMessageLater_WhenBotThrowsException_LogsWarning()
+    public async Task DeleteMessageLater_WhenDeleteFails_LogsWarning()
     {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        var shortTimeout = TimeSpan.FromMilliseconds(50);
-        var cancellationToken = CancellationToken.None;
-        var expectedException = new InvalidOperationException("Test exception");
-
-        // Настраиваем мок для выброса исключения
+        var (_, _, message) = TK.Specialized.Messages.TextOnlyScenario();
         _factory.WithBotSetup(mock =>
         {
-            mock.Setup(x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(expectedException);
+            mock.Setup(x => x.DeleteMessageWithOutcomeAsync(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((ChatId c, int m, CancellationToken ct) => new DeleteMessageResult((long)c.Identifier!, m, DeleteMessageOutcome.UnexpectedError, 5, "boom", "raw"));
         });
-
-        // Act
-        _messageHandler.DeleteMessageLater(message, shortTimeout, cancellationToken);
-
-        // Ждем немного больше таймаута
-        await Task.Delay(100, cancellationToken);
-
-        // Assert
+        _messageHandler.DeleteMessageLater(message, TimeSpan.FromMilliseconds(30), CancellationToken.None);
+        await Task.Delay(120);
         _factory.LoggerMock.Verify(
             x => x.Log(
                 LogLevel.Warning,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => true),
-                expectedException,
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ),
-            Times.Once,
-            "Должно быть залогировано предупреждение с исключением"
-        );
+                It.Is<It.IsAnyType>((v, _) => v!.ToString()!.Contains("Не удалось удалить сообщение")),
+                It.IsAny<Exception?>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.AtLeastOnce);
     }
 
     [Test]
-    public async Task DeleteMessageLater_WhenCancelled_DoesNotDeleteMessage()
+    public async Task DeleteMessageLater_WhenCancelled_DoesNotInvokeDelete()
     {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        var timeout = TimeSpan.FromMilliseconds(100);
-        var cancellationTokenSource = new CancellationTokenSource();
-        var cancellationToken = cancellationTokenSource.Token;
-
-        // Act
-        _messageHandler.DeleteMessageLater(message, timeout, cancellationToken);
-        
-        // Отменяем операцию сразу
-        cancellationTokenSource.Cancel();
-
-        // Ждем немного больше таймаута
-        await Task.Delay(150, CancellationToken.None);
-
-        // Assert
-        _factory.BotMock.Verify(
-            x => x.DeleteMessage(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
-            Times.Never,
-            "DeleteMessage не должен быть вызван при отмене операции"
-        );
+        var (_, _, message) = TK.Specialized.Messages.TextOnlyScenario();
+        var cts = new CancellationTokenSource();
+        _messageHandler.DeleteMessageLater(message, TimeSpan.FromMilliseconds(100), cts.Token);
+        cts.Cancel();
+        await Task.Delay(150);
+        _factory.BotMock.Verify(x => x.DeleteMessageWithOutcomeAsync(It.IsAny<ChatId>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
-
-    [Test]
-    public void DeleteMessageLater_WithDifferentMessageTypes_HandlesAllTypes()
-    {
-        // Arrange
-        var (user, chat, message) = TK.Specialized.Messages.TextOnlyScenario();
-        var timeout = TimeSpan.FromMilliseconds(10);
-        var cancellationToken = CancellationToken.None;
-
-        // Act & Assert
-        Assert.DoesNotThrow(() => _messageHandler.DeleteMessageLater(message, timeout, cancellationToken),
-            "Метод должен обрабатывать сообщение корректно");
-    }
-} 
+}

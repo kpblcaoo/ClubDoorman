@@ -341,4 +341,4 @@ public class UpdateDispatcherTests
             }
         };
     }
-} 
+}

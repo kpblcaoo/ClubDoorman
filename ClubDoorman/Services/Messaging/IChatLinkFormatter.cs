@@ -13,7 +13,7 @@ public interface IChatLinkFormatter
     /// <param name="chat">Объект чата</param>
     /// <returns>Markdown ссылка или жирный текст</returns>
     string GetChatLink(Chat chat);
-    
+
     /// <summary>
     /// Форматирует ссылку на чат в Markdown по ID и названию
     /// </summary>
@@ -21,4 +21,4 @@ public interface IChatLinkFormatter
     /// <param name="chatTitle">Название чата</param>
     /// <returns>Markdown ссылка или жирный текст</returns>
     string GetChatLink(long chatId, string? chatTitle);
-} 
+}

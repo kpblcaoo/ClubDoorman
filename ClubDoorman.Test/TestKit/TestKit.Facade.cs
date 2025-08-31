@@ -2,8 +2,7 @@ using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Test.TestInfrastructure;
+using ClubDoorman.TestInfrastructure;
 using ClubDoorman.Test.TestData;
 using ClubDoorman.Handlers;
 using ClubDoorman.Test.TestKit.Builders;
@@ -16,6 +15,7 @@ using Moq;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Test.TestInfrastructure;
 
 namespace ClubDoorman.Test.TestKit
 {
@@ -55,19 +55,19 @@ namespace ClubDoorman.Test.TestKit
         /// Создает фабрику для CallbackQueryHandler
         /// <tags>factory, callback-query-handler, test-infrastructure</tags>
         /// </summary>
-        public static CallbackQueryHandlerTestFactory CreateCallbackQueryHandlerFactory() => new();
+        // public static CallbackQueryHandlerTestFactory CreateCallbackQueryHandlerFactory() => new();
 
         /// <summary>
         /// Создает фабрику для ChatMemberHandler
         /// <tags>factory, chat-member-handler, test-infrastructure</tags>
         /// </summary>
-        public static ChatMemberHandlerTestFactory CreateChatMemberHandlerFactory() => new();
+        // public static ChatMemberHandlerTestFactory CreateChatMemberHandlerFactory() => new();
 
         /// <summary>
         /// Создает фабрику для ServiceChatDispatcher
         /// <tags>factory, service-chat-dispatcher, test-infrastructure</tags>
         /// </summary>
-        public static ServiceChatDispatcherTestFactory CreateServiceChatDispatcherFactory() => new();
+        // public static ServiceChatDispatcherTestFactory CreateServiceChatDispatcherFactory() => new();
 
         /// <summary>
         /// Создает базовую конфигурацию приложения
@@ -85,25 +85,25 @@ namespace ClubDoorman.Test.TestKit
         /// Создает фабрику для AiChecks
         /// <tags>factory, ai-checks, ai, test-infrastructure</tags>
         /// </summary>
-        public static AiChecksTestFactory CreateAiChecksFactory() => new();
+        // public static AiChecksTestFactory CreateAiChecksFactory() => new();
 
         /// <summary>
         /// Создает фабрику для StatisticsService
         /// <tags>factory, statistics-service, test-infrastructure</tags>
         /// </summary>
-        public static StatisticsServiceTestFactory CreateStatisticsServiceFactory() => new();
+        // public static StatisticsServiceTestFactory CreateStatisticsServiceFactory() => new();
 
         /// <summary>
         /// Создает фабрику для SpamHamClassifier
         /// <tags>factory, spam-ham-classifier, ml, test-infrastructure</tags>
         /// </summary>
-        public static SpamHamClassifierTestFactory CreateSpamHamClassifierFactory() => new();
+        // public static SpamHamClassifierTestFactory CreateSpamHamClassifierFactory() => new();
 
         /// <summary>
         /// Создает фабрику для MimicryClassifier
         /// <tags>factory, mimicry-classifier, ml, test-infrastructure</tags>
         /// </summary>
-        public static MimicryClassifierTestFactory CreateMimicryClassifierFactory() => new();
+        // public static MimicryClassifierTestFactory CreateMimicryClassifierFactory() => new();
 
         #endregion
 
@@ -114,54 +114,48 @@ namespace ClubDoorman.Test.TestKit
         /// <tags>builder, moderation-service, mocks, fluent-api</tags>
         /// </summary>
         public static Builders.MockBuilders.ModerationServiceMockBuilder CreateModerationServiceMock() => Builders.MockBuilders.TestKitMockBuilders.CreateModerationServiceMock();
-        
+
         /// <summary>
         /// Создает билдер для мока IUserManager
         /// <tags>builder, user-manager, mocks, fluent-api</tags>
         /// </summary>
         public static Builders.MockBuilders.UserManagerMockBuilder CreateUserManagerMock() => Builders.MockBuilders.TestKitMockBuilders.CreateUserManagerMock();
-        
+
         /// <summary>
         /// Создает билдер для мока ICaptchaService
         /// <tags>builder, captcha-service, mocks, fluent-api</tags>
         /// </summary>
         public static Builders.MockBuilders.CaptchaServiceMockBuilder CreateCaptchaServiceMock() => Builders.MockBuilders.TestKitMockBuilders.CreateCaptchaServiceMock();
-        
+
         /// <summary>
         /// Создает билдер для мока IAiChecks
         /// <tags>builder, ai-checks, mocks, fluent-api</tags>
         /// </summary>
         public static Builders.MockBuilders.AiChecksMockBuilder CreateAiChecksMock() => Builders.MockBuilders.TestKitMockBuilders.CreateAiChecksMock();
-        
+
         /// <summary>
         /// Создает билдер для мока ITelegramBotClientWrapper
         /// <tags>builder, telegram-bot, mocks, fluent-api</tags>
         /// </summary>
         public static Builders.MockBuilders.TelegramBotMockBuilder CreateTelegramBotMock() => Builders.MockBuilders.TestKitMockBuilders.CreateTelegramBotMock();
-        
+
         /// <summary>
         /// Создает билдер для мока IMessageService
         /// <tags>builders, message-service, mocks, fluent-api</tags>
         /// </summary>
         public static Builders.MockBuilders.MessageServiceMockBuilder CreateMessageServiceMock() => Builders.MockBuilders.TestKitMockBuilders.CreateMessageServiceMock();
-        
-        /// <summary>
-        /// Создает билдер для мока MessageHandler
-        /// <tags>builders, message-handler, mocks, fluent-api</tags>
-        /// </summary>
-        public static Builders.MockBuilders.MessageHandlerMockBuilder CreateMessageHandlerMock() => Builders.MockBuilders.TestKitMockBuilders.CreateMessageHandlerMock();
-        
+
         /// <summary>
         /// Создает билдер для NotificationService
         /// <tags>builders, notification-service, fluent-api</tags>
         /// </summary>
-        public static NotificationServiceBuilder CreateNotificationServiceBuilder() => new();
-        
+
+
         /// <summary>
-        /// Создает билдер для UserJoinService
-        /// <tags>builders, user-join-service, fluent-api</tags>
+        /// Создает билдер для UserJoinFacade
+        /// <tags>builders, user-join-facade, fluent-api</tags>
         /// </summary>
-        public static UserJoinServiceBuilder CreateUserJoinServiceBuilder() => new();
+        public static UserJoinFacadeBuilder CreateUserJoinFacadeBuilder() => new();
 
         #endregion
 
@@ -192,72 +186,72 @@ namespace ClubDoorman.Test.TestKit
 
         #endregion
 
-            #region Bogus Methods
+        #region Bogus Methods
 
-    /// <summary>
-    /// Создает реалистичного пользователя с помощью Bogus
-    /// </summary>
-    public static Telegram.Bot.Types.User CreateRealisticUser(long? userId = null) => 
-        Infra.TestKitBogus.CreateRealisticUser(userId);
-        
-    public static Telegram.Bot.Types.User CreateSuspiciousUser(long? userId = null) => 
-        Infra.TestKitBogus.CreateSuspiciousUser(userId);
+        /// <summary>
+        /// Создает реалистичного пользователя с помощью Bogus
+        /// </summary>
+        public static Telegram.Bot.Types.User CreateRealisticUser(long? userId = null) =>
+            Infra.TestKitBogus.CreateRealisticUser(userId);
 
-    /// <summary>
-    /// Создает реалистичное сообщение с помощью Bogus
-    /// </summary>
-    public static Telegram.Bot.Types.Message CreateRealisticMessage() => 
-        Infra.TestKitBogus.CreateRealisticMessage();
-        
-    public static Telegram.Bot.Types.Message CreateBotMessage() => 
-        Infra.TestKitBogus.CreateBotMessage();
-        
-    public static Telegram.Bot.Types.Message CreateStartCommandMessage() => 
-        Infra.TestKitBogus.CreateStartCommandMessage();
+        public static Telegram.Bot.Types.User CreateSuspiciousUser(long? userId = null) =>
+            Infra.TestKitBogus.CreateSuspiciousUser(userId);
 
-    /// <summary>
-    /// Создает спам-сообщение с помощью Bogus
-    /// </summary>
-    public static Telegram.Bot.Types.Message CreateBogusSpamMessage() => 
-        TestKitBogus.CreateRealisticSpamMessage();
+        /// <summary>
+        /// Создает реалистичное сообщение с помощью Bogus
+        /// </summary>
+        public static Telegram.Bot.Types.Message CreateRealisticMessage() =>
+            Infra.TestKitBogus.CreateRealisticMessage();
 
-    #endregion
+        public static Telegram.Bot.Types.Message CreateBotMessage() =>
+            Infra.TestKitBogus.CreateBotMessage();
 
-    #region Builder Methods
+        public static Telegram.Bot.Types.Message CreateStartCommandMessage() =>
+            Infra.TestKitBogus.CreateStartCommandMessage();
 
-    /// <summary>
-    /// Создает builder для сообщения Telegram
-    /// <tags>builders, message, telegram, fluent-api</tags>
-    /// </summary>
-    public static Builders.MessageBuilder BuildMessage() => Builders.TestKitBuilders.CreateMessage();
-    
-    /// <summary>
-    /// Создает builder для пользователя Telegram
-    /// <tags>builders, user, telegram, fluent-api</tags>
-    /// </summary>
-    public static Builders.UserBuilder BuildUser() => Builders.TestKitBuilders.CreateUser();
-    
-    /// <summary>
-    /// Создает builder для чата Telegram
-    /// <tags>builders, chat, telegram, fluent-api</tags>
-    /// </summary>
-    public static Builders.ChatBuilder BuildChat() => Builders.TestKitBuilders.CreateChat();
-    
-    /// <summary>
-    /// Создает builder для результата модерации
-    /// <tags>builders, moderation-result, moderation, fluent-api</tags>
-    /// </summary>
-    public static Builders.ModerationResultBuilder BuildModerationResult() => Builders.TestKitBuilders.CreateModerationResult();
-    
-    /// <summary>
-    /// Создает builder для сложных тестовых сценариев
-    /// <tags>builders, scenario, complex, fluent-api</tags>
-    /// </summary>
-    public static Builders.ScenarioBuilder BuildScenario() => new Builders.ScenarioBuilder();
-    
-    public static Builders.ChatFullInfoBuilder BuildChatFullInfo() => Builders.TestKitBuilders.CreateChatFullInfo();
+        /// <summary>
+        /// Создает спам-сообщение с помощью Bogus
+        /// </summary>
+        public static Telegram.Bot.Types.Message CreateBogusSpamMessage() =>
+            TestKitBogus.CreateRealisticSpamMessage();
 
-    #endregion
+        #endregion
+
+        #region Builder Methods
+
+        /// <summary>
+        /// Создает builder для сообщения Telegram
+        /// <tags>builders, message, telegram, fluent-api</tags>
+        /// </summary>
+        public static Builders.MessageBuilder BuildMessage() => Builders.TestKitBuilders.CreateMessage();
+
+        /// <summary>
+        /// Создает builder для пользователя Telegram
+        /// <tags>builders, user, telegram, fluent-api</tags>
+        /// </summary>
+        public static Builders.UserBuilder BuildUser() => Builders.TestKitBuilders.CreateUser();
+
+        /// <summary>
+        /// Создает builder для чата Telegram
+        /// <tags>builders, chat, telegram, fluent-api</tags>
+        /// </summary>
+        public static Builders.ChatBuilder BuildChat() => Builders.TestKitBuilders.CreateChat();
+
+        /// <summary>
+        /// Создает builder для результата модерации
+        /// <tags>builders, moderation-result, moderation, fluent-api</tags>
+        /// </summary>
+        public static Builders.ModerationResultBuilder BuildModerationResult() => Builders.TestKitBuilders.CreateModerationResult();
+
+        /// <summary>
+        /// Создает builder для сложных тестовых сценариев
+        /// <tags>builders, scenario, complex, fluent-api</tags>
+        /// </summary>
+        public static Builders.ScenarioBuilder BuildScenario() => new Builders.ScenarioBuilder();
+
+        public static Builders.ChatFullInfoBuilder BuildChatFullInfo() => Builders.TestKitBuilders.CreateChatFullInfo();
+
+        #endregion
 
         #region Convenience Methods
 
@@ -267,9 +261,9 @@ namespace ClubDoorman.Test.TestKit
         public static MessageHandler CreateMessageHandlerWithDefaults()
         {
             var factory = CreateMessageHandlerFactory();
-            
+
             // Базовая настройка AppConfig
-            factory.WithAppConfigSetup(mock => 
+            factory.WithAppConfigSetup(mock =>
             {
                 mock.Setup(x => x.NoCaptchaGroups).Returns(new HashSet<long>());
                 mock.Setup(x => x.NoVpnAdGroups).Returns(new HashSet<long>());
@@ -299,7 +293,7 @@ namespace ClubDoorman.Test.TestKit
         /// Создает FakeTelegramClient для тестов
         /// </summary>
         public static FakeTelegramClient CreateFakeClient() => TestKitTelegram.CreateFakeClient();
-        
+
         /// <summary>
         /// Создает MessageEnvelope с автоматическим MessageId
         /// </summary>
@@ -307,14 +301,14 @@ namespace ClubDoorman.Test.TestKit
             long userId = 12345,
             long chatId = 67890,
             string text = "Test message") => TestKitTelegram.CreateEnvelope(userId, chatId, text);
-        
+
         /// <summary>
         /// Создает спам-сценарий с FakeTelegramClient
         /// </summary>
         public static (FakeTelegramClient fakeClient, MessageEnvelope envelope, Message message, Update update) CreateSpamScenario(
             long userId = 12345,
             long chatId = 67890) => TestKitTelegram.CreateSpamScenario(userId, chatId);
-        
+
         /// <summary>
         /// Создает полный тестовый сценарий с FakeTelegramClient
         /// </summary>
@@ -322,14 +316,14 @@ namespace ClubDoorman.Test.TestKit
             long userId = 12345,
             long chatId = 67890,
             string text = "Test message") => TestKitTelegram.CreateFullScenario(userId, chatId, text);
-        
+
         /// <summary>
         /// Создает сценарий нового участника с FakeTelegramClient
         /// </summary>
         public static (FakeTelegramClient fakeClient, MessageEnvelope envelope, Message message, Update update) CreateNewUserScenario(
             long userId = 12345,
             long chatId = 67890) => TestKitTelegram.CreateNewUserScenario(userId, chatId);
-        
+
         /// <summary>
         /// Сбрасывает счетчик MessageId (для изоляции тестов)
         /// </summary>
@@ -337,4 +331,4 @@ namespace ClubDoorman.Test.TestKit
 
         #endregion
     }
-} 
+}

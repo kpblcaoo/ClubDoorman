@@ -1,24 +1,41 @@
+using AutoFixture;
+using AutoFixture.AutoMoq;
+
+using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.ChannelModeration;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
 using ClubDoorman.Services.Violation;
 using ClubDoorman.Services.UserFlow;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
-using AutoFixture;
-using AutoFixture.AutoMoq;
-using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Models;
 using ClubDoorman.Handlers;
+using ClubDoorman.Features.Moderation;
+
+using ClubDoorman.Services;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Models;
+using ClubDoorman.Models.Notifications;
+using ClubDoorman.Test.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using Moq;
+using NUnit.Framework;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Statistics;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
+using ClubDoorman.Features.UserJoin;
+using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Handlers;
 
 namespace ClubDoorman.Test.TestKit.Infra;
@@ -57,8 +74,8 @@ public static class TestKitAutoFixture
         fixture.Customize<ILogger<MessageHandler>>(composer => composer
             .FromFactory(() => NullLogger<MessageHandler>.Instance));
 
-        fixture.Customize<ILogger<ModerationService>>(composer => composer
-            .FromFactory(() => NullLogger<ModerationService>.Instance));
+        fixture.Customize<ILogger<IModerationService>>(composer => composer
+            .FromFactory(() => NullLogger<IModerationService>.Instance));
 
         fixture.Customize<ILogger<CaptchaService>>(composer => composer
             .FromFactory(() => NullLogger<CaptchaService>.Instance));
@@ -95,9 +112,6 @@ public static class TestKitAutoFixture
                 var aiChecks = TK.CreateMockAiChecks().Object;
                 var globalStatsManager = new GlobalStatsManager();
                 var statisticsService = TK.CreateMockStatisticsService().Object;
-                var serviceProvider = new Mock<IServiceProvider>();
-                serviceProvider.Setup(x => x.GetService(typeof(IChannelModerationService)))
-                    .Returns(TK.CreateMock<IChannelModerationService>().Object);
                 var userFlowLogger = new Mock<IUserFlowLogger>().Object;
                 var messageService = TK.CreateMockMessageService().Object;
                 var chatLinkFormatter = new Mock<IChatLinkFormatter>().Object;
@@ -106,12 +120,52 @@ public static class TestKitAutoFixture
                 var violationTracker = new ViolationTracker(new Mock<ILogger<ViolationTracker>>().Object, appConfig);
                 var logger = new Mock<ILogger<MessageHandler>>().Object;
                 var userBanService = TK.CreateMockUserBanService().Object;
+                var channelModerationService = TK.CreateMock<IChannelModerationService>().Object;
+                var startCommandHandler = new Mock<StartCommandHandler>(
+                    Mock.Of<ITelegramBotClientWrapper>(),
+                    Mock.Of<ILogger<StartCommandHandler>>(),
+                    Mock.Of<IMessageService>(),
+                    Mock.Of<IAppConfig>()).Object;
+                // Используем интерфейс вместо конкретного класса чтобы избежать проблем с Castle DynamicProxy при изменениях конструктора
+                var suspiciousCommandHandler = new Mock<ISuspiciousCommandHandler>().Object;
+                var logChatService = TK.CreateMock<ILogChatService>().Object;
+                var commandRouter = TK.CreateMock<ICommandRouter>().Object;
+                var aiCascadeService = TK.CreateMock<IAiCascadeService>().Object;
+                var notificationService = TK.CreateMock<INotificationService>().Object;
+                var forwardingService = TK.CreateMock<ClubDoorman.Services.Notifications.IForwardingService>().Object;
+                var buttonsService = TK.CreateMock<ClubDoorman.Services.Notifications.IButtonsService>().Object;
+                var joinedUserFlags = TK.CreateMock<IJoinedUserFlags>().Object;
+                var userIndex = TK.CreateMock<IUserIndex>().Object;
+
+                // Минимальный pipeline: базовая модерация + финальное действие
+                var eventsPublisher = TK.CreateMock<IModerationEventPublisher>();
+                var moderationFacade = TK.CreateMock<IModerationFacade>();
+                moderationFacade.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
+                    .ReturnsAsync(new ModerationResult(ModerationAction.Allow, "Fixture allow"));
+                var baseStep = new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(
+                    moderationFacade.Object,
+                    userFlowLogger,
+                    eventsPublisher.Object,
+                    TK.CreateMock<ILogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>>().Object);
+                var finalStep = new ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep(
+                    moderationFacade.Object,
+                    eventsPublisher.Object,
+                    TK.CreateMock<ILogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FinalModerationActionStep>>().Object);
+                var pipeline = new ClubDoorman.Services.Handlers.Pipeline.MessagePipeline(
+                    new ClubDoorman.Services.Handlers.Pipeline.IMessageStep[] { baseStep, finalStep },
+                    TK.CreateMock<ILogger<ClubDoorman.Services.Handlers.Pipeline.MessagePipeline>>().Object);
 
                 return new MessageHandler(
-                    bot, moderationService, captchaService, userManager, classifier,
-                    badMessageManager, aiChecks, globalStatsManager, statisticsService,
-                    serviceProvider.Object, userFlowLogger, messageService, chatLinkFormatter,
-                    botPermissionsService, appConfig, violationTracker, logger, userBanService);
+                    bot,
+                    appConfig,
+                    channelModerationService,
+                    commandRouter,
+                    logger,
+                    botPermissionsService,
+                    new GoldenMasterRecorder(Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }), TK.CreateMock<ILogger<GoldenMasterRecorder>>().Object),
+                    eventsPublisher.Object,
+                    Microsoft.Extensions.Options.Options.Create(new LoggingFlagsOptions { GoldenMasterEnabled = false }),
+                    pipeline);
             })
             .OmitAutoProperties());
 
@@ -158,15 +212,6 @@ public static class TestKitAutoFixture
     }
 
     /// <summary>
-    /// Создает ModerationService с автозависимостями
-    /// <tags>autofixture, moderation-service, dependencies, test-infrastructure</tags>
-    /// </summary>
-    public static ModerationService CreateModerationService()
-    {
-        return _fixture.Create<ModerationService>();
-    }
-
-    /// <summary>
     /// Создает список реалистичных пользователей
     /// <tags>autofixture, users, realistic, test-infrastructure</tags>
     /// </summary>
@@ -197,11 +242,11 @@ public static class TestKitAutoFixture
         var user = TestKitBogus.CreateRealisticUser();
         var chat = TestKitBogus.CreateRealisticGroup();
         var message = TestKitBogus.CreateRealisticMessage();
-        
+
         // Связываем объекты
         message.From = user;
         message.Chat = chat;
-        
+
         return (user, chat, message);
     }
 
@@ -213,7 +258,7 @@ public static class TestKitAutoFixture
     /// Создает произвольное количество объектов (от 1 до 5)
     /// <tags>autofixture, random-count, flexible, test-infrastructure</tags>
     /// </summary>
-    public static IEnumerable<T> CreateSome<T>() 
+    public static IEnumerable<T> CreateSome<T>()
     {
         var count = new Random().Next(1, 6); // 1-5 объектов
         return CreateMany<T>(count);
@@ -262,27 +307,27 @@ public static class TestKitAutoFixture
     }
 
     #endregion
-    
+
     #region Backward Compatibility Methods
-    
+
     /// <summary>
     /// Создает CaptchaService с автозависимостями
     /// <tags>autofixture, captcha-service, dependencies, test-infrastructure</tags>
     /// </summary>
     public static ICaptchaService CreateCaptchaService() => _fixture.Create<ICaptchaService>();
-    
+
     /// <summary>
     /// Создает UserManager с автозависимостями
     /// <tags>autofixture, user-manager, dependencies, test-infrastructure</tags>
     /// </summary>
     public static IUserManager CreateUserManager() => _fixture.Create<IUserManager>();
-    
+
     /// <summary>
     /// Создает Update объект
     /// <tags>autofixture, update, telegram, test-infrastructure</tags>
     /// </summary>
     public static Telegram.Bot.Types.Update CreateUpdate() => _fixture.Create<Telegram.Bot.Types.Update>();
-    
+
     /// <summary>
     /// Создает MessageUpdate
     /// <tags>autofixture, message-update, telegram, test-infrastructure</tags>
@@ -293,7 +338,7 @@ public static class TestKitAutoFixture
         update.Message = TestKitBogus.CreateRealisticMessage();
         return update;
     }
-    
+
     /// <summary>
     /// Создает CallbackQueryUpdate
     /// <tags>autofixture, callback-query-update, telegram, test-infrastructure</tags>
@@ -304,28 +349,28 @@ public static class TestKitAutoFixture
         update.CallbackQuery = _fixture.Create<Telegram.Bot.Types.CallbackQuery>();
         return update;
     }
-    
+
     /// <summary>
     /// Создает много сообщений
     /// <tags>autofixture, many-messages, collection, test-infrastructure</tags>
     /// </summary>
-    public static List<Telegram.Bot.Types.Message> CreateManyMessages(int count = 3) => 
+    public static List<Telegram.Bot.Types.Message> CreateManyMessages(int count = 3) =>
         Enumerable.Range(0, count).Select(_ => TestKitBogus.CreateRealisticMessage()).ToList();
-    
+
     /// <summary>
     /// Создает много пользователей
     /// <tags>autofixture, many-users, collection, test-infrastructure</tags>
     /// </summary>
-    public static List<Telegram.Bot.Types.User> CreateManyUsers(int count = 3) => 
+    public static List<Telegram.Bot.Types.User> CreateManyUsers(int count = 3) =>
         Enumerable.Range(0, count).Select(_ => TestKitBogus.CreateRealisticUser()).ToList();
-    
+
     /// <summary>
     /// Создает много спам-сообщений
     /// <tags>autofixture, many-spam-messages, collection, test-infrastructure</tags>
     /// </summary>
-    public static List<Telegram.Bot.Types.Message> CreateManySpamMessages(int count = 3) => 
+    public static List<Telegram.Bot.Types.Message> CreateManySpamMessages(int count = 3) =>
         Enumerable.Range(0, count).Select(_ => TestKitBogus.CreateSpamMessage()).ToList();
-    
+
     /// <summary>
     /// Создает объект с фикстурой для кастомизации
     /// <tags>autofixture, customization, fixture, test-infrastructure</tags>
@@ -338,4 +383,4 @@ public static class TestKitAutoFixture
     }
 
     #endregion
-} 
+}

@@ -4,12 +4,13 @@ using ClubDoorman.Services.UserBan;
 using ClubDoorman.Handlers;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services.Telegram;
+using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Effects;
 
 namespace ClubDoorman.Test.Unit.Services;
 
@@ -24,20 +25,26 @@ public class ChannelModerationServiceTests
     private Mock<IUserBanService> _userBanServiceMock = null!;
     private Mock<ILogger<ChannelModerationService>> _loggerMock = null!;
     private ChannelModerationService _service = null!;
+    private Mock<IAppConfig> _appConfigMock = null!;
 
-        [SetUp]
+    [SetUp]
     public void Setup()
     {
         _botMock = new Mock<ITelegramBotClientWrapper>();
         _moderationServiceMock = new Mock<IModerationService>();
         _userBanServiceMock = new Mock<IUserBanService>();
         _loggerMock = new Mock<ILogger<ChannelModerationService>>();
+    _appConfigMock = new Mock<IAppConfig>();
+    _appConfigMock.SetupGet(x => x.ChannelAutoBan).Returns(false);
 
         _service = new ChannelModerationService(
             _botMock.Object,
             _moderationServiceMock.Object,
             _userBanServiceMock.Object,
-            _loggerMock.Object);
+            _loggerMock.Object,
+            new Mock<IChannelModerationEffectsBuilder>().Object,
+            new Mock<IEffectBus>().Object,
+            _appConfigMock.Object);
     }
 
     [Test]
@@ -49,7 +56,7 @@ public class ChannelModerationServiceTests
         {
             new ChatMemberOwner { User = new User { Id = 123 } }
         };
-        
+
         _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
 
@@ -69,7 +76,7 @@ public class ChannelModerationServiceTests
         {
             new ChatMemberOwner { User = new User { Id = 456 } }
         };
-        
+
         _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
 
@@ -89,7 +96,7 @@ public class ChannelModerationServiceTests
         {
             new ChatMemberOwner { User = new User { Id = 123 } }
         };
-        
+
         _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
         _botMock.Setup(x => x.GetChatAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
@@ -108,7 +115,7 @@ public class ChannelModerationServiceTests
         // Arrange
         var message = CreateTestMessage();
         message.IsAutomaticForward = true;
-        
+
         _botMock.Setup(x => x.GetChatAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Chat { Id = 1, Type = ChatType.Supergroup });
 
@@ -128,7 +135,7 @@ public class ChannelModerationServiceTests
         {
             new ChatMemberOwner { User = new User { Id = 456 } }
         };
-        
+
         _botMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(channelAdmins);
         _botMock.Setup(x => x.GetChatAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>()))
@@ -151,4 +158,4 @@ public class ChannelModerationServiceTests
             Text = "Test message"
         };
     }
-} 
+}

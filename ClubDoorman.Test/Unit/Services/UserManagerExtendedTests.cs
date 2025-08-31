@@ -474,7 +474,7 @@ public class UserManagerExtendedTests
         // Act & Assert
         var exception = Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _userManagerMock.Object.RefreshBanlist());
-        
+
         Assert.That(exception.Message, Is.EqualTo("Network error"));
         _userManagerMock.Verify(x => x.RefreshBanlist(), Times.Once);
     }
@@ -709,4 +709,4 @@ public class UserManagerExtendedTests
     }
 
     #endregion
-} 
+}

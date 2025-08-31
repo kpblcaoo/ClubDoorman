@@ -6,7 +6,7 @@ public static class UserJoinModule
 {
     public static IServiceCollection AddUserJoinServices(this IServiceCollection services)
     {
-        services.AddScoped<IFolderInviteService, FolderInviteService>();
+        services.AddSingleton<IFolderInviteService, FolderInviteService>();
         return services;
     }
 }

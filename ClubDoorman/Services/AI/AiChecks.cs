@@ -23,22 +23,22 @@ public class AiChecks : IAiChecks
     private readonly IAppConfig _appConfig;
     private readonly OpenAiClient? _api;
     private readonly JsonSerializerOptions _jsonOptions = new() { Converters = { new JsonStringEnumConverter() } };
-    
+
     // Retry policy для обработки временных ошибок API
     private readonly ResiliencePipeline _retry = new ResiliencePipelineBuilder()
         .AddRetry(new RetryStrategyOptions() { Delay = TimeSpan.FromMilliseconds(50) })
         .AddTimeout(TimeSpan.FromSeconds(30)) // Таймаут 30 секунд на HTTP запросы
         .Build();
-    
+
     const string Model = "google/gemini-2.5-flash";
-    
+
     public AiChecks(ITelegramBotClientWrapper bot, ILogger<AiChecks> logger, IAppConfig appConfig)
     {
         _bot = bot;
         _logger = logger;
         _appConfig = appConfig;
         _api = _appConfig.OpenRouterApi == null ? null : CustomProviders.OpenRouter(_appConfig.OpenRouterApi);
-        
+
         if (_api == null)
         {
             _logger.LogWarning("🤖 AI анализ ОТКЛЮЧЕН: DOORMAN_OPENROUTER_API не настроен или равен 'test-api-key'");
@@ -58,9 +58,9 @@ public class AiChecks : IAiChecks
     {
         if (string.IsNullOrWhiteSpace(messageText))
             return false;
-            
+
         var text = messageText.Trim().ToLowerInvariant();
-        
+
         var boringGreetings = new[]
         {
             "привет", "hi", "hello", "здравствуйте", "добрый день", "добрый вечер",
@@ -71,11 +71,11 @@ public class AiChecks : IAiChecks
             "доброго дня", "доброго вечера", "доброго утра", "всем привет",
             "всех приветствую", "всем хай", "всем здравствуйте"
         };
-        
+
         // Сначала проверяем точное совпадение (включая пунктуацию)
         if (boringGreetings.Contains(text))
             return true;
-        
+
         // Потом убираем знаки препинания и проверяем снова
         var textWithoutPunctuation = text.TrimEnd('.', '!', '?', ',');
         return boringGreetings.Contains(textWithoutPunctuation);
@@ -99,7 +99,7 @@ public class AiChecks : IAiChecks
     {
         return await GetAttentionBaitProbability(user, null, ifChanged);
     }
-    
+
     /// <summary>
     /// Получает вероятность того, что профиль создан для привлечения внимания/спама (с учетом первого сообщения)
     /// </summary>
@@ -120,11 +120,11 @@ public class AiChecks : IAiChecks
         var cached = MemoryCache.Default.Get(CacheKey(user.Id)) as SpamPhotoBio;
         if (cached != null)
         {
-            _logger.LogDebug("🤖 AI анализ профиля: найден кэш для пользователя {UserId}: вероятность={Probability}, фото={PhotoSize} байт", 
+            _logger.LogDebug("🤖 AI анализ профиля: найден кэш для пользователя {UserId}: вероятность={Probability}, фото={PhotoSize} байт",
                 user.Id, cached.SpamProbability.Probability, cached.Photo.Length);
             return cached;
         }
-        
+
         _logger.LogDebug("🤖 AI анализ профиля: кэш не найден для пользователя {UserId}, выполняем анализ", user.Id);
 
         var probability = new SpamProbability();
@@ -134,12 +134,12 @@ public class AiChecks : IAiChecks
         try
         {
             _logger.LogDebug("🤖 AI анализ профиля: получаем информацию о пользователе {UserId}", user.Id);
-            
+
             // Используем ChatFullInfo для получения Bio и Photo
             var userChat = await _bot.GetChatFullInfo(user.Id);
-            _logger.LogDebug("🤖 AI анализ профиля: GetChatFullInfo получен для пользователя {UserId}: Bio={Bio}, Photo={Photo}", 
+            _logger.LogDebug("🤖 AI анализ профиля: GetChatFullInfo получен для пользователя {UserId}: Bio={Bio}, Photo={Photo}",
                 user.Id, userChat.Bio ?? "null", userChat.Photo?.ToString() ?? "null");
-            
+
             // Строим профиль без привязанного канала (временно отключено)
             var sb = new StringBuilder();
             sb.Append($"Имя: {Utils.FullName(user)}");
@@ -155,9 +155,9 @@ public class AiChecks : IAiChecks
             // Загружаем фото профиля если есть
             if (userChat.Photo != null)
             {
-                _logger.LogDebug("🤖 AI анализ профиля: загружаем фото для пользователя {UserId}, FileId: {FileId}", 
+                _logger.LogDebug("🤖 AI анализ профиля: загружаем фото для пользователя {UserId}, FileId: {FileId}",
                     user.Id, userChat.Photo.BigFileId);
-                    
+
                 try
                 {
                     using var ms = new MemoryStream();
@@ -166,8 +166,8 @@ public class AiChecks : IAiChecks
                     pic = photoBytes;
                     photoMessage = photoBytes.ToUserMessage(mimeType: "image/jpg");
                     sb.Append($"\nФото: прикреплено");
-                    
-                    _logger.LogDebug("🤖 AI анализ профиля: фото загружено для пользователя {UserId}, размер: {Size} байт", 
+
+                    _logger.LogDebug("🤖 AI анализ профиля: фото загружено для пользователя {UserId}, размер: {Size} байт",
                         user.Id, photoBytes.Length);
                 }
                 catch (Exception ex)
@@ -222,15 +222,15 @@ public class AiChecks : IAiChecks
                 "Ты — модератор Telegram-группы. Твоя задача — по данным профиля определить, направлен ли аккаунт на само-продвижение или привлечение к сторонним платным/эротическим ресурсам. ОБЯЗАТЕЛЬНО отвечай на русском языке! Объяснения должны быть КРАТКИМИ (максимум 2-3 предложения) и по делу.".ToSystemMessage(),
                 prompt.ToUserMessage(),
             };
-            
+
             if (photoMessage != null)
                 messages.Add(photoMessage);
 
-            _logger.LogDebug("🤖 AI анализ профиля: отправляем запрос в API для пользователя {UserId}, количество сообщений: {MessagesCount}", 
+            _logger.LogDebug("🤖 AI анализ профиля: отправляем запрос в API для пользователя {UserId}, количество сообщений: {MessagesCount}",
                 user.Id, messages.Count);
-            _logger.LogDebug("🔍 ОТПРАВКА В AI: messages.Count={Count}, photoMessage={PhotoMessage}", 
+            _logger.LogDebug("🔍 ОТПРАВКА В AI: messages.Count={Count}, photoMessage={PhotoMessage}",
                 messages.Count, photoMessage != null ? "ЕСТЬ" : "НЕТ");
-                
+
             var response = await _retry.ExecuteAsync(
                 async token => await _api.Chat.CreateChatCompletionAsAsync<SpamProbability>(
                     messages: messages,
@@ -244,7 +244,7 @@ public class AiChecks : IAiChecks
             if (response.Value1 != null)
             {
                 probability = response.Value1;
-                _logger.LogInformation("AI анализ профиля пользователя {UserId}: {Probability} - {Reason}", 
+                _logger.LogInformation("AI анализ профиля пользователя {UserId}: {Probability} - {Reason}",
                     user.Id, probability.Probability, probability.Reason);
             }
         }
@@ -271,27 +271,27 @@ public class AiChecks : IAiChecks
 
         try
         {
-            _logger.LogDebug("🤖 AI анализ профиля: GetEroticPhotoBaitProbability для пользователя {UserId}, Photo: {Photo}", 
+            _logger.LogDebug("🤖 AI анализ профиля: GetEroticPhotoBaitProbability для пользователя {UserId}, Photo: {Photo}",
                 user.Id, userChat.Photo?.ToString() ?? "null");
-                
+
             var photo = userChat.Photo!;
             using var ms = new MemoryStream();
             await _bot.GetInfoAndDownloadFile(photo.BigFileId, ms);
             var photoBytes = ms.ToArray();
             pic = photoBytes;
-            
-            _logger.LogDebug("🤖 AI анализ профиля: фото загружено в GetEroticPhotoBaitProbability для пользователя {UserId}, размер: {Size} байт", 
+
+            _logger.LogDebug("🤖 AI анализ профиля: фото загружено в GetEroticPhotoBaitProbability для пользователя {UserId}, размер: {Size} байт",
                 user.Id, photoBytes.Length);
-            
+
             var photoMessage = photoBytes.ToUserMessage(mimeType: "image/jpg");
             var prompt = "Проанализируй, выглядит ли эта аватарка пользователя сексуализированно или развратно. Отвечай вероятностью от 0 до 1.";
-            
-            var messages = new List<ChatCompletionRequestMessage> 
-            { 
-                prompt.ToUserMessage(), 
-                photoMessage 
+
+            var messages = new List<ChatCompletionRequestMessage>
+            {
+                prompt.ToUserMessage(),
+                photoMessage
             };
-            
+
             var response = await _retry.ExecuteAsync(
                 async token => await _api.Chat.CreateChatCompletionAsAsync<SpamProbability>(
                     messages: messages,
@@ -301,11 +301,11 @@ public class AiChecks : IAiChecks
                     cancellationToken: token
                 )
             );
-            
+
             if (response.Value1 != null)
             {
                 probability = response.Value1;
-                _logger.LogInformation("AI анализ фото профиля пользователя {UserId}: {Probability}", 
+                _logger.LogInformation("AI анализ фото профиля пользователя {UserId}: {Probability}",
                     user.Id, probability.Probability);
             }
         }
@@ -376,7 +376,7 @@ public class AiChecks : IAiChecks
 
             if (response.Value1 != null)
             {
-                _logger.LogDebug("AI анализ сообщения: {Probability} - {Reason}", 
+                _logger.LogDebug("AI анализ сообщения: {Probability} - {Reason}",
                     response.Value1.Probability, response.Value1.Reason);
                 return response.Value1;
             }
@@ -407,14 +407,14 @@ public class AiChecks : IAiChecks
             return new SpamProbability();
         }
     }
-    
+
     /// <summary>
     /// Специальный анализ сообщений от подозрительных пользователей с расширенным контекстом
     /// </summary>
     public async ValueTask<SpamProbability> GetSuspiciousUserSpamProbability(
-        Message message, 
-        global::Telegram.Bot.Types.User user, 
-        List<string> firstMessages, 
+        Message message,
+        global::Telegram.Bot.Types.User user,
+        List<string> firstMessages,
         double mimicryScore)
     {
         if (_api == null)
@@ -429,7 +429,7 @@ public class AiChecks : IAiChecks
             var userName = Utils.FullName(user);
             var username = user.Username != null ? $"@{user.Username}" : "нет";
             var firstMessagesText = string.Join("', '", firstMessages.Take(5));
-            
+
             // Получаем расширенную информацию о пользователе как в основном методе
             var userChat = await _bot.GetChatFullInfo(user.Id);
             var bioInfo = !string.IsNullOrEmpty(userChat.Bio) ? $"\n• Биография: {userChat.Bio}" : "";
@@ -505,7 +505,7 @@ public class AiChecks : IAiChecks
 
             if (response.Value1 != null)
             {
-                _logger.LogDebug("🔍 Специальный AI анализ подозрительного пользователя: {Probability} - {Reason}", 
+                _logger.LogDebug("🔍 Специальный AI анализ подозрительного пользователя: {Probability} - {Reason}",
                     response.Value1.Probability, response.Value1.Reason);
                 return response.Value1;
             }
@@ -525,9 +525,9 @@ public class AiChecks : IAiChecks
     /// Каскадный анализ ML -> AI: комплексная проверка профиля + сообщения + ML результата
     /// </summary>
     public async ValueTask<SpamProbability> GetCascadeAnalysisProbability(
-        Message message, 
-        global::Telegram.Bot.Types.User user, 
-        double mlScore, 
+        Message message,
+        global::Telegram.Bot.Types.User user,
+        double mlScore,
         bool mlSpamDecision)
     {
         if (_api == null)
@@ -547,7 +547,7 @@ public class AiChecks : IAiChecks
 
             var userName = Utils.FullName(user);
             var username = user.Username != null ? $"@{user.Username}" : "нет";
-            
+
             // Получаем расширенную информацию о профиле
             var userChat = await _bot.GetChatFullInfo(user.Id);
             var bioInfo = !string.IsNullOrEmpty(userChat.Bio) ? $"\n• Биография: {userChat.Bio}" : "\n• Биография: отсутствует";
@@ -609,8 +609,8 @@ public class AiChecks : IAiChecks
                     await _bot.GetInfoAndDownloadFile(userChat.Photo.BigFileId, ms);
                     var photoBytes = ms.ToArray();
                     photoMessage = photoBytes.ToUserMessage(mimeType: "image/jpg");
-                    
-                    _logger.LogDebug("🤖 Каскадный AI анализ: добавлено фото профиля ({Size} байт) для пользователя {UserId}", 
+
+                    _logger.LogDebug("🤖 Каскадный AI анализ: добавлено фото профиля ({Size} байт) для пользователя {UserId}",
                         photoBytes.Length, user.Id);
                 }
                 catch (Exception ex)
@@ -618,7 +618,7 @@ public class AiChecks : IAiChecks
                     _logger.LogWarning(ex, "Не удалось загрузить фото профиля для каскадного анализа пользователя {UserId}", user.Id);
                 }
             }
-            
+
             // Добавляем фото к сообщениям если загружено
             if (photoMessage != null)
             {
@@ -635,9 +635,9 @@ public class AiChecks : IAiChecks
                 )
             );
 
-            _logger.LogInformation("🤖🔗 Каскадный AI анализ завершен: пользователь {UserId}, ML={MlScore}, AI={AiScore}, причина={Reason}", 
+            _logger.LogInformation("🤖🔗 Каскадный AI анализ завершен: пользователь {UserId}, ML={MlScore}, AI={AiScore}, причина={Reason}",
                 user.Id, mlScore, response.Value1?.Probability ?? 0, response.Value1?.Reason ?? "не указана");
-            
+
             return response.Value1 ?? new SpamProbability();
         }
         catch (Exception ex)
@@ -652,7 +652,7 @@ public class AiChecks : IAiChecks
         return mlScore switch
         {
             > 0.5 => "высокая уверенность в спаме",
-            > 0 => "слабая склонность к спаму", 
+            > 0 => "слабая склонность к спаму",
             > -0.3 => "очень низкая уверенность",
             > -0.6 => "склонность к легитимности",
             _ => "уверенность в легитимности"
@@ -661,7 +661,7 @@ public class AiChecks : IAiChecks
 
     private void CacheResult(long userId, SpamPhotoBio result)
     {
-        _logger.LogDebug("🤖 AI анализ профиля: кэшируем результат для пользователя {UserId}: вероятность={Probability}, фото={PhotoSize} байт", 
+        _logger.LogDebug("🤖 AI анализ профиля: кэшируем результат для пользователя {UserId}: вероятность={Probability}, фото={PhotoSize} байт",
             userId, result.SpamProbability.Probability, result.Photo.Length);
         var cacheItem = new CacheItem(CacheKey(userId), result);
         var policy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddHours(24) };
@@ -676,4 +676,4 @@ public class SpamProbability
     public string Reason { get; set; } = "";
 }
 
-public sealed record SpamPhotoBio(SpamProbability SpamProbability, byte[] Photo, string NameBio); 
+public sealed record SpamPhotoBio(SpamProbability SpamProbability, byte[] Photo, string NameBio);

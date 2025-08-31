@@ -22,7 +22,7 @@ public class MessageService : IMessageService
     private readonly ILoggingConfigurationService _configService;
     private readonly IServiceChatDispatcher _serviceChatDispatcher;
     private readonly IAppConfig _appConfig;
-    
+
     public MessageService(
         ITelegramBotClientWrapper bot,
         ILogger<MessageService> logger,
@@ -38,7 +38,7 @@ public class MessageService : IMessageService
         _serviceChatDispatcher = serviceChatDispatcher ?? throw new ArgumentNullException(nameof(serviceChatDispatcher));
         _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
     }
-    
+
     /// <summary>
     /// Отправить уведомление в админский чат
     /// </summary>
@@ -55,7 +55,7 @@ public class MessageService : IMessageService
             throw;
         }
     }
-    
+
     /// <summary>
     /// Отправить уведомление в лог-чат
     /// </summary>
@@ -72,7 +72,7 @@ public class MessageService : IMessageService
             throw;
         }
     }
-    
+
     /// <summary>
     /// Отправить уведомление пользователю
     /// </summary>
@@ -82,7 +82,7 @@ public class MessageService : IMessageService
         {
             var template = _templates.GetUserTemplate(type);
             string message;
-            
+
             // Если data является NotificationData, используем FormatNotificationTemplate
             if (data is NotificationData notificationData)
             {
@@ -92,14 +92,14 @@ public class MessageService : IMessageService
             {
                 message = _templates.FormatTemplate(template, data);
             }
-            
+
             await _bot.SendMessage(
                 chat.Id,
                 message,
                 parseMode: ParseMode.Html,
                 cancellationToken: cancellationToken
             );
-            
+
             _logger.LogDebug("Отправлено уведомление пользователю {UserId} в чате {ChatId} типа {Type}", user.Id, chat.Id, type);
         }
         catch (Exception ex)
@@ -108,7 +108,7 @@ public class MessageService : IMessageService
             throw;
         }
     }
-    
+
     /// <summary>
     /// Отправляет пользовательское уведомление и возвращает отправленное сообщение
     /// </summary>
@@ -118,7 +118,7 @@ public class MessageService : IMessageService
         {
             var template = _templates.GetUserTemplate(type);
             string message;
-            
+
             // Если data является NotificationData, используем FormatNotificationTemplate
             if (data is NotificationData notificationData)
             {
@@ -128,14 +128,14 @@ public class MessageService : IMessageService
             {
                 message = _templates.FormatTemplate(template, data);
             }
-            
+
             var sent = await _bot.SendMessage(
                 chat.Id,
                 message,
                 parseMode: ParseMode.Html,
                 cancellationToken: cancellationToken
             );
-            
+
             _logger.LogDebug("Отправлено уведомление с реплаем пользователю {UserId} в чате {ChatId} типа {Type}", user.Id, chat.Id, type);
             return sent;
         }
@@ -155,7 +155,7 @@ public class MessageService : IMessageService
         {
             var template = _templates.GetUserTemplate(type);
             string message;
-            
+
             // Если data является NotificationData, используем FormatNotificationTemplate
             if (data is NotificationData notificationData)
             {
@@ -165,9 +165,9 @@ public class MessageService : IMessageService
             {
                 message = _templates.FormatTemplate(template, data);
             }
-            
+
             _logger.LogDebug("Отправляем сообщение в Telegram API с replyParameters.MessageId = {ReplyMessageId}", replyParameters.MessageId);
-            
+
             // Попробуем сначала отправить с реплаем
             try
             {
@@ -178,15 +178,15 @@ public class MessageService : IMessageService
                     replyParameters: replyParameters,
                     cancellationToken: cancellationToken
                 );
-                
-                _logger.LogDebug("Отправлено уведомление с реплаем на сообщение {ReplyMessageId} пользователю {UserId} в чате {ChatId} типа {Type}. Получен ответ: MessageId={SentMessageId}", 
+
+                _logger.LogDebug("Отправлено уведомление с реплаем на сообщение {ReplyMessageId} пользователю {UserId} в чате {ChatId} типа {Type}. Получен ответ: MessageId={SentMessageId}",
                     replyParameters.MessageId, user.Id, chat.Id, type, sent.MessageId);
                 return sent;
             }
             catch (Exception replyEx)
             {
                 _logger.LogWarning(replyEx, "Не удалось отправить с реплаем, пробуем без реплая. ReplyMessageId={ReplyMessageId}", replyParameters.MessageId);
-                
+
                 // Если не получилось с реплаем, отправляем без реплая
                 var sent = await _bot.SendMessage(
                     chat.Id,
@@ -194,15 +194,15 @@ public class MessageService : IMessageService
                     parseMode: ParseMode.Html,
                     cancellationToken: cancellationToken
                 );
-                
-                _logger.LogDebug("Отправлено уведомление БЕЗ реплая пользователю {UserId} в чате {ChatId} типа {Type}. Получен ответ: MessageId={SentMessageId}", 
+
+                _logger.LogDebug("Отправлено уведомление БЕЗ реплая пользователю {UserId} в чате {ChatId} типа {Type}. Получен ответ: MessageId={SentMessageId}",
                     user.Id, chat.Id, type, sent.MessageId);
                 return sent;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Ошибка при отправке уведомления с реплаем на сообщение {ReplyMessageId} пользователю {UserId} в чате {ChatId} типа {Type}", 
+            _logger.LogError(ex, "Ошибка при отправке уведомления с реплаем на сообщение {ReplyMessageId} пользователю {UserId} в чате {ChatId} типа {Type}",
                 replyParameters.MessageId, user.Id, chat.Id, type);
             throw;
         }
@@ -214,7 +214,7 @@ public class MessageService : IMessageService
     public async Task<Message?> SendWelcomeMessageAsync(SendWelcomeMessageRequest request)
     {
         // Проверяем, отключены ли приветствия
-        if (Config.DisableWelcome)
+    if (_appConfig.DisableWelcome)
         {
             _logger.LogDebug("Приветственные сообщения отключены (DOORMAN_DISABLE_WELCOME=true)");
             return null;
@@ -224,13 +224,13 @@ public class MessageService : IMessageService
         var displayName = !string.IsNullOrEmpty(request.User.FirstName)
             ? System.Net.WebUtility.HtmlEncode(Utils.FullName(request.User))
             : (!string.IsNullOrEmpty(request.User.Username) ? "@" + request.User.Username : "гость");
-        
+
         var mention = $"<a href=\"tg://user?id={request.User.Id}\">{displayName}</a>";
-        
+
         // Заглушка для рекламы (если группа не в исключениях)
         var isNoAdGroup = IsNoAdGroup(request.Chat.Id);
         var vpnAd = isNoAdGroup ? "" : "\n\n\n📍 <b>Место для рекламы</b> \n <i>...</i>";
-        
+
         string greetMsg;
         string mediaWarning;
         if (ChatSettingsManager.GetChatType(request.Chat.Id) == "announcement")
@@ -240,7 +240,7 @@ public class MessageService : IMessageService
         }
         else
         {
-            mediaWarning = Config.IsMediaFilteringDisabledForChat(request.Chat.Id) ? ", стикеры, документы" : ", изображения, стикеры, документы";
+            mediaWarning = _appConfig.IsMediaFilteringDisabledForChat(request.Chat.Id) ? ", стикеры, документы" : ", изображения, стикеры, документы";
             greetMsg = $"👋 {mention}\n\n<b>Внимание!</b> первые три сообщения проходят антиспам-проверку, эмодзи{mediaWarning} и реклама запрещены — они могут удаляться автоматически. Не просите писать в ЛС!{vpnAd}";
         }
 
@@ -248,7 +248,7 @@ public class MessageService : IMessageService
             request.User, request.Chat, request.Reason, 0, mediaWarning, vpnAd);
         var sent = await SendUserNotificationWithReplyAsync(
             request.User, request.Chat, UserNotificationType.CaptchaWelcome, captchaWelcomeData, request.CancellationToken);
-        
+
         // Удаляем приветствие через 20 секунд
         _ = Task.Run(async () =>
         {
@@ -272,7 +272,7 @@ public class MessageService : IMessageService
     public async Task<Message?> SendWelcomeMessageAsync(User user, Chat chat, string reason = "приветствие", CancellationToken cancellationToken = default)
     {
         // Проверяем, отключены ли приветствия
-        if (Config.DisableWelcome)
+    if (_appConfig.DisableWelcome)
         {
             _logger.LogDebug("Приветственные сообщения отключены (DOORMAN_DISABLE_WELCOME=true)");
             return null;
@@ -282,13 +282,13 @@ public class MessageService : IMessageService
         var displayName = !string.IsNullOrEmpty(user.FirstName)
             ? System.Net.WebUtility.HtmlEncode(Utils.FullName(user))
             : (!string.IsNullOrEmpty(user.Username) ? "@" + user.Username : "гость");
-        
+
         var mention = $"<a href=\"tg://user?id={user.Id}\">{displayName}</a>";
-        
+
         // Заглушка для рекламы (если группа не в исключениях)
         var isNoAdGroup = IsNoAdGroup(chat.Id);
         var vpnAd = isNoAdGroup ? "" : "\n\n\n📍 <b>Место для рекламы</b> \n <i>...</i>";
-        
+
         string greetMsg;
         string mediaWarning;
         if (ChatSettingsManager.GetChatType(chat.Id) == "announcement")
@@ -298,7 +298,7 @@ public class MessageService : IMessageService
         }
         else
         {
-            mediaWarning = Config.IsMediaFilteringDisabledForChat(chat.Id) ? ", стикеры, документы" : ", изображения, стикеры, документы";
+            mediaWarning = _appConfig.IsMediaFilteringDisabledForChat(chat.Id) ? ", стикеры, документы" : ", изображения, стикеры, документы";
             greetMsg = $"👋 {mention}\n\n<b>Внимание!</b> первые три сообщения проходят антиспам-проверку, эмодзи{mediaWarning} и реклама запрещены — они могут удаляться автоматически.\n\n⚠️ <b>Важно:</b> банальные приветствия без цели удаляются автоматически. Пишите конкретные вопросы!\n\nНе просите писать в ЛС!{vpnAd}";
         }
 
@@ -306,7 +306,7 @@ public class MessageService : IMessageService
             user, chat, reason, 0, mediaWarning, vpnAd);
         var sent = await SendUserNotificationWithReplyAsync(
             user, chat, UserNotificationType.CaptchaWelcome, captchaWelcomeData, cancellationToken);
-        
+
         // Удаляем приветствие через 20 секунд
         _ = Task.Run(async () =>
         {
@@ -331,7 +331,7 @@ public class MessageService : IMessageService
     {
         return _appConfig.NoVpnAdGroups.Contains(chatId);
     }
-    
+
     public async Task<Message?> ForwardToAdminWithNotificationAsync(Message originalMessage, AdminNotificationType type, NotificationData data, CancellationToken cancellationToken = default)
     {
         try
@@ -343,11 +343,11 @@ public class MessageService : IMessageService
                 originalMessage.MessageId,
                 cancellationToken: cancellationToken
             );
-            
+
             // Отправляем уведомление с реплаем
             var template = _templates.GetAdminTemplate(type);
             var message = _templates.FormatNotificationTemplate(template, data);
-            
+
             var notification = await _bot.SendMessage(
                 _appConfig.AdminChatId,
                 message,
@@ -355,7 +355,7 @@ public class MessageService : IMessageService
                 replyParameters: forward,
                 cancellationToken: cancellationToken
             );
-            
+
             _logger.LogDebug("Переслано сообщение в админский чат с уведомлением типа {Type}", type);
             return notification;
         }
@@ -365,7 +365,7 @@ public class MessageService : IMessageService
             return null;
         }
     }
-    
+
     public async Task<Message?> ForwardToLogWithNotificationAsync(Message originalMessage, LogNotificationType type, NotificationData data, CancellationToken cancellationToken = default)
     {
         try
@@ -377,11 +377,11 @@ public class MessageService : IMessageService
                 originalMessage.MessageId,
                 cancellationToken: cancellationToken
             );
-            
+
             // Отправляем уведомление с реплаем
             var template = _templates.GetLogTemplate(type);
             var message = _templates.FormatNotificationTemplate(template, data);
-            
+
             var notification = await _bot.SendMessage(
                 _appConfig.LogAdminChatId,
                 message,
@@ -389,7 +389,7 @@ public class MessageService : IMessageService
                 replyParameters: forward,
                 cancellationToken: cancellationToken
             );
-            
+
             _logger.LogDebug("Переслано сообщение в лог-чат с уведомлением типа {Type}", type);
             return notification;
         }
@@ -399,8 +399,8 @@ public class MessageService : IMessageService
             return null;
         }
     }
-    
-        /// <summary>
+
+    /// <summary>
     /// Отправить уведомление об ошибке используя Request объект
     /// </summary>
     public async Task SendErrorNotificationAsync(SendErrorNotificationRequest request)
@@ -408,16 +408,16 @@ public class MessageService : IMessageService
         try
         {
             var errorData = new ErrorNotificationData(
-                request.Exception, 
-                request.Context, 
-                request.User, 
+                request.Exception,
+                request.Context,
+                request.User,
                 request.Chat);
-            
+
             await SendAdminNotificationAsync(
-                AdminNotificationType.SystemError, 
-                errorData, 
+                AdminNotificationType.SystemError,
+                errorData,
                 request.CancellationToken);
-            
+
             _logger.LogDebug("Отправлено уведомление об ошибке в контексте {Context}", request.Context);
         }
         catch (Exception ex)
@@ -426,14 +426,14 @@ public class MessageService : IMessageService
             throw;
         }
     }
-    
+
     public async Task SendAiProfileAnalysisAsync(AiProfileAnalysisData data, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger.LogDebug("🤖 MessageService.SendAiProfileAnalysisAsync: начало обработки для пользователя {UserId}, PhotoBytes: {PhotoBytesLength}",
                 data.User.Id, data.PhotoBytes?.Length ?? 0);
-            
+
             // Используем диспетчер для определения типа чата
             if (_serviceChatDispatcher.ShouldSendToAdminChat(data))
             {
@@ -445,7 +445,7 @@ public class MessageService : IMessageService
                 _logger.LogDebug("🤖 MessageService: отправляем в лог-чат");
                 await _serviceChatDispatcher.SendToLogChatAsync(data, cancellationToken);
             }
-            
+
             _logger.LogDebug("Отправлено AI уведомление о профиле для пользователя {User} через диспетчер", Utils.FullName(data.User));
         }
         catch (Exception ex)
@@ -453,7 +453,7 @@ public class MessageService : IMessageService
             _logger.LogError(ex, "Ошибка при отправке AI уведомления о профиле для пользователя {User}", Utils.FullName(data.User));
         }
     }
-    
+
     /// <summary>
     /// Отправляет сообщение капчи используя Request объект
     /// </summary>
@@ -469,7 +469,7 @@ public class MessageService : IMessageService
                 replyMarkup: request.ReplyMarkup,
                 cancellationToken: request.CancellationToken
             );
-            
+
             _logger.LogDebug("Отправлено сообщение капчи в чат {ChatId}", request.Chat.Id);
             return sent;
         }
@@ -479,7 +479,7 @@ public class MessageService : IMessageService
             throw;
         }
     }
-    
+
     /// <summary>
     /// Получить доступ к шаблонам сообщений
     /// </summary>
@@ -487,4 +487,4 @@ public class MessageService : IMessageService
     {
         return _templates;
     }
-} 
+}

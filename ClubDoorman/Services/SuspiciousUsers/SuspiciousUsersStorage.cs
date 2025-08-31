@@ -26,7 +26,7 @@ public class SuspiciousUsersStorage : ISuspiciousUsersStorage
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _filePath = Path.Combine("data", "suspicious_users.json");
-        
+
         _suspiciousUsers = LoadFromFile();
     }
 
@@ -53,7 +53,7 @@ public class SuspiciousUsersStorage : ISuspiciousUsersStorage
             var data = JsonSerializer.Deserialize<Dictionary<long, Dictionary<long, SuspiciousUserInfo>>>(json);
             var count = data?.Values.Sum(g => g.Count) ?? 0;
             _logger.LogInformation("Загружено {Count} подозрительных пользователей из файла", count);
-            
+
             return data ?? new Dictionary<long, Dictionary<long, SuspiciousUserInfo>>();
         }
         catch (Exception ex)
@@ -80,9 +80,9 @@ public class SuspiciousUsersStorage : ISuspiciousUsersStorage
             // JsonSerializerOptions is recreated on every serialization call, causing unnecessary allocations
             // This can impact performance when saving suspicious users frequently
             // TODO: Cache JsonSerializerOptions as static readonly field to improve performance
-            var json = JsonSerializer.Serialize(_suspiciousUsers, new JsonSerializerOptions 
-            { 
-                WriteIndented = true 
+            var json = JsonSerializer.Serialize(_suspiciousUsers, new JsonSerializerOptions
+            {
+                WriteIndented = true
             });
             File.WriteAllText(_filePath, json);
             _logger.LogDebug("Список подозрительных пользователей сохранен в файл");
@@ -130,15 +130,15 @@ public class SuspiciousUsersStorage : ISuspiciousUsersStorage
 
             var isNew = !_suspiciousUsers[chatId].ContainsKey(userId);
             _suspiciousUsers[chatId][userId] = info;
-            
+
             SaveToFile();
-            
+
             if (isNew)
             {
-                _logger.LogInformation("Пользователь {UserId} добавлен в подозрительные для чата {ChatId}", 
+                _logger.LogInformation("Пользователь {UserId} добавлен в подозрительные для чата {ChatId}",
                     userId, chatId);
             }
-            
+
             return isNew;
         }
     }
@@ -154,25 +154,25 @@ public class SuspiciousUsersStorage : ISuspiciousUsersStorage
         lock (_lock)
         {
             var removed = false;
-            
+
             if (_suspiciousUsers.TryGetValue(chatId, out var chatUsers))
             {
                 removed = chatUsers.Remove(userId);
-                
+
                 // Удаляем пустую группу
                 if (chatUsers.Count == 0)
                 {
                     _suspiciousUsers.Remove(chatId);
                 }
             }
-            
+
             if (removed)
             {
                 SaveToFile();
-                _logger.LogInformation("Пользователь {UserId} удален из подозрительных для чата {ChatId}", 
+                _logger.LogInformation("Пользователь {UserId} удален из подозрительных для чата {ChatId}",
                     userId, chatId);
             }
-            
+
             return removed;
         }
     }
@@ -196,11 +196,11 @@ public class SuspiciousUsersStorage : ISuspiciousUsersStorage
             {
                 var updatedInfo = info with { MessagesSinceSuspicious = messageCount };
                 chatUsers[userId] = updatedInfo;
-                
+
                 SaveToFile();
                 return true;
             }
-            
+
             return false;
         }
     }
@@ -221,13 +221,13 @@ public class SuspiciousUsersStorage : ISuspiciousUsersStorage
             {
                 var updatedInfo = info with { AiDetectEnabled = enabled };
                 chatUsers[userId] = updatedInfo;
-                
+
                 SaveToFile();
-                _logger.LogInformation("AI детект для пользователя {UserId} в чате {ChatId}: {Status}", 
+                _logger.LogInformation("AI детект для пользователя {UserId} в чате {ChatId}: {Status}",
                     userId, chatId, enabled ? "включен" : "выключен");
                 return true;
             }
-            
+
             return false;
         }
     }
@@ -247,7 +247,7 @@ public class SuspiciousUsersStorage : ISuspiciousUsersStorage
             {
                 return info;
             }
-            
+
             return null;
         }
     }
@@ -300,8 +300,8 @@ public class SuspiciousUsersStorage : ISuspiciousUsersStorage
                 .SelectMany(g => g.Values)
                 .Count(info => info.AiDetectEnabled);
             var groupsCount = _suspiciousUsers.Count;
-            
+
             return (totalSuspicious, withAiDetect, groupsCount);
         }
     }
-} 
+}

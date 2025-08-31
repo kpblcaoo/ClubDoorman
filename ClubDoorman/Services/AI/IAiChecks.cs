@@ -31,17 +31,17 @@ public interface IAiChecks
     /// Получает вероятность того, что подозрительный пользователь отправил спам
     /// </summary>
     ValueTask<SpamProbability> GetSuspiciousUserSpamProbability(
-        Message message, 
-        User user, 
-        List<string> firstMessages, 
+        Message message,
+        User user,
+        List<string> firstMessages,
         double mimicryScore);
 
     /// <summary>
     /// Каскадный анализ ML -> AI: комплексная проверка профиля + сообщения + ML результата
     /// </summary>
     ValueTask<SpamProbability> GetCascadeAnalysisProbability(
-        Message message, 
-        User user, 
-        double mlScore, 
+        Message message,
+        User user,
+        double mlScore,
         bool mlSpamDecision);
-} 
+}

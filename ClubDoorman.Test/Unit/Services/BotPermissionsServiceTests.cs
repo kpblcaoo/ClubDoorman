@@ -1,7 +1,5 @@
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Infrastructure;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -22,20 +20,26 @@ public class BotPermissionsServiceTests : TestBase
     private readonly Mock<ITelegramBotClientWrapper> _mockBot;
     private readonly Mock<ILogger<BotPermissionsService>> _mockLogger;
     private readonly BotPermissionsService _service;
+    private readonly Mock<IAppConfig> _mockAppConfig;
+    private const long AdminChatIdConst = 123456789; // formerly Config.AdminChatId test value
+    private const long LogAdminChatIdConst = 223456789; // deterministic test value
 
     public BotPermissionsServiceTests()
     {
         _mockBot = new Mock<ITelegramBotClientWrapper>();
         _mockLogger = new Mock<ILogger<BotPermissionsService>>();
-        _service = new BotPermissionsService(_mockBot.Object, _mockLogger.Object);
+    _mockAppConfig = new Mock<IAppConfig>();
+    _mockAppConfig.SetupGet(x => x.AdminChatId).Returns(AdminChatIdConst);
+    _mockAppConfig.SetupGet(x => x.LogAdminChatId).Returns(LogAdminChatIdConst);
+    _service = new BotPermissionsService(_mockBot.Object, _mockLogger.Object, _mockAppConfig.Object);
     }
 
     [Test]
     public void Constructor_WithNullBot_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
-            new BotPermissionsService(null!, _mockLogger.Object));
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new BotPermissionsService(null!, _mockLogger.Object, _mockAppConfig.Object));
         Assert.That(exception.ParamName, Is.EqualTo("bot"));
     }
 
@@ -43,8 +47,8 @@ public class BotPermissionsServiceTests : TestBase
     public void Constructor_WithNullLogger_ThrowsArgumentNullException()
     {
         // Act & Assert
-        var exception = Assert.Throws<ArgumentNullException>(() => 
-            new BotPermissionsService(_mockBot.Object, null!));
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new BotPermissionsService(_mockBot.Object, null!, _mockAppConfig.Object));
         Assert.That(exception.ParamName, Is.EqualTo("logger"));
     }
 
@@ -52,7 +56,7 @@ public class BotPermissionsServiceTests : TestBase
     public void Constructor_WithValidParameters_CreatesInstance()
     {
         // Act
-        var service = new BotPermissionsService(_mockBot.Object, _mockLogger.Object);
+    var service = new BotPermissionsService(_mockBot.Object, _mockLogger.Object, _mockAppConfig.Object);
 
         // Assert
         Assert.That(service, Is.Not.Null);
@@ -74,7 +78,7 @@ public class BotPermissionsServiceTests : TestBase
             ChatMemberStatus.Creator => new ChatMemberOwner(),
             _ => new ChatMemberMember()
         };
-        
+
         _mockBot.Setup(x => x.BotId).Returns(456L);
         _mockBot.Setup(x => x.GetChatMember(chatId, 456L, It.IsAny<CancellationToken>()))
             .ReturnsAsync(chatMember);
@@ -93,7 +97,7 @@ public class BotPermissionsServiceTests : TestBase
         // Arrange
         var chatId = 2000L;
         var exception = new Exception("Test exception");
-        
+
         _mockBot.Setup(x => x.BotId).Returns(456L);
         _mockBot.Setup(x => x.GetChatMember(chatId, 456L, It.IsAny<CancellationToken>()))
             .ThrowsAsync(exception);
@@ -121,7 +125,7 @@ public class BotPermissionsServiceTests : TestBase
         // Arrange
         var chat = new Chat { Id = chatId, Type = ChatType.Group };
         var chatMember = new ChatMemberMember();
-        
+
         _mockBot.Setup(x => x.GetChat(chatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);
         _mockBot.Setup(x => x.BotId).Returns(456L);
         _mockBot.Setup(x => x.GetChatMember(chatId, 456L, It.IsAny<CancellationToken>()))
@@ -138,10 +142,10 @@ public class BotPermissionsServiceTests : TestBase
     public async Task IsSilentModeAsync_ForAdminChat_ReturnsFalse()
     {
         // Arrange
-        var adminChatId = Config.AdminChatId;
+    var adminChatId = AdminChatIdConst;
 
         // Act
-        var result = await _service.IsSilentModeAsync(adminChatId);
+    var result = await _service.IsSilentModeAsync(adminChatId);
 
         // Assert
         Assert.That(result, Is.False);
@@ -152,10 +156,10 @@ public class BotPermissionsServiceTests : TestBase
     public async Task IsSilentModeAsync_ForLogAdminChat_ReturnsFalse()
     {
         // Arrange
-        var logAdminChatId = Config.LogAdminChatId;
+    var logAdminChatId = LogAdminChatIdConst;
 
         // Act
-        var result = await _service.IsSilentModeAsync(logAdminChatId);
+    var result = await _service.IsSilentModeAsync(logAdminChatId);
 
         // Assert
         Assert.That(result, Is.False);
@@ -168,7 +172,7 @@ public class BotPermissionsServiceTests : TestBase
         // Arrange
         var chatId = 4000L;
         var chat = new Chat { Id = chatId, Type = ChatType.Private };
-        
+
         _mockBot.Setup(x => x.GetChat(chatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);
 
         // Act
@@ -187,7 +191,7 @@ public class BotPermissionsServiceTests : TestBase
         // Arrange
         var chatId = 5000L;
         var exception = new Exception("Test exception");
-        
+
         _mockBot.Setup(x => x.GetChat(chatId, It.IsAny<CancellationToken>())).ThrowsAsync(exception);
 
         // Act
@@ -212,7 +216,7 @@ public class BotPermissionsServiceTests : TestBase
         var chatId = 6000L;
         var chat = new Chat { Id = chatId, Type = ChatType.Group };
         var chatMember = new ChatMemberAdministrator();
-        
+
         _mockBot.Setup(x => x.GetChat(chatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);
         _mockBot.Setup(x => x.BotId).Returns(456L);
         _mockBot.Setup(x => x.GetChatMember(chatId, 456L, It.IsAny<CancellationToken>()))
@@ -232,7 +236,7 @@ public class BotPermissionsServiceTests : TestBase
         var chatId = 7000L;
         var chat = new Chat { Id = chatId, Type = ChatType.Group };
         var chatMember = new ChatMemberMember();
-        
+
         _mockBot.Setup(x => x.GetChat(chatId, It.IsAny<CancellationToken>())).ReturnsAsync(chat);
         _mockBot.Setup(x => x.BotId).Returns(456L);
         _mockBot.Setup(x => x.GetChatMember(chatId, 456L, It.IsAny<CancellationToken>()))
@@ -252,7 +256,7 @@ public class BotPermissionsServiceTests : TestBase
         var chatId = 8000L;
         var botId = 456L;
         var chatMember = new ChatMemberAdministrator();
-        
+
         _mockBot.Setup(x => x.BotId).Returns(botId);
         _mockBot.Setup(x => x.GetChatMember(chatId, botId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(chatMember);
@@ -281,14 +285,14 @@ public class BotPermissionsServiceTests : TestBase
         var chatId = 9000L;
         var botId = 456L;
         var chatMember = new ChatMemberAdministrator();
-        
+
         _mockBot.Setup(x => x.BotId).Returns(botId);
         _mockBot.Setup(x => x.GetChatMember(chatId, botId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(chatMember);
 
         // Act - первый вызов для кэширования
         await _service.GetBotChatMemberAsync(chatId);
-        
+
         // Второй вызов должен использовать кэш
         var result = await _service.GetBotChatMemberAsync(chatId);
 
@@ -305,7 +309,7 @@ public class BotPermissionsServiceTests : TestBase
         var botId = 456L;
         var chatMember = new ChatMemberAdministrator();
         var cancellationToken = new CancellationToken();
-        
+
         _mockBot.Setup(x => x.BotId).Returns(botId);
         _mockBot.Setup(x => x.GetChatMember(chatId, botId, cancellationToken))
             .ReturnsAsync(chatMember);
@@ -317,4 +321,4 @@ public class BotPermissionsServiceTests : TestBase
         Assert.That(result, Is.EqualTo(chatMember));
         _mockBot.Verify(x => x.GetChatMember(chatId, botId, cancellationToken), Times.Once);
     }
-} 
+}

@@ -1,18 +1,4 @@
-using ClubDoorman.Services.UserBan;
-using NUnit.Framework;
-using TechTalk.SpecFlow;
-using ClubDoorman.Models;
-using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
-using ClubDoorman.Test.TestInfrastructure;
-using ClubDoorman.TestInfrastructure;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot;
-using Moq;
-using Microsoft.Extensions.Logging;
-using FluentAssertions;
-
+﻿
 namespace ClubDoorman.Test.StepDefinitions.Common
 {
     [Binding]
@@ -28,7 +14,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void BeforeScenario()
         {
             _fakeBot = new FakeTelegramClient();
-            _loggerFactory = LoggerFactory.Create(builder => 
+            _loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddConsole();
                 builder.SetMinimumLevel(LogLevel.Debug);
@@ -53,7 +39,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 Date = DateTime.UtcNow
             };
             ScenarioContext.Current["TestMessage"] = _testMessage;
-            
+
             // Симулируем права администратора
             ScenarioContext.Current["HasAdminRights"] = true;
         }
@@ -68,7 +54,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 Date = DateTime.UtcNow
             };
             ScenarioContext.Current["TestMessage"] = _testMessage;
-            
+
             // Симулируем тихий режим без прав администратора
             ScenarioContext.Current["HasAdminRights"] = false;
             ScenarioContext.Current["QuietMode"] = true;
@@ -84,7 +70,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 Date = DateTime.UtcNow
             };
             ScenarioContext.Current["TestMessage"] = _testMessage;
-            
+
             // Симулируем включенную капчу
             ScenarioContext.Current["CaptchaEnabled"] = true;
         }
@@ -95,9 +81,9 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             try
             {
                 // Симулируем присоединение пользователя
-                var hasAdminRights = ScenarioContext.Current.ContainsKey("HasAdminRights") && 
+                var hasAdminRights = ScenarioContext.Current.ContainsKey("HasAdminRights") &&
                                    (bool)ScenarioContext.Current["HasAdminRights"];
-                
+
                 if (hasAdminRights)
                 {
                     // С правами администратора
@@ -119,7 +105,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                     From = _testMessage.From,
                     Text = "🔐 Капча: Пожалуйста, подтвердите, что вы не бот"
                 };
-                
+
                 var sentMessage = new SentMessage(
                     _testMessage.Chat.Id,
                     "🔐 Капча: Пожалуйста, подтвердите, что вы не бот",
@@ -127,7 +113,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                     null,
                     captchaMessage
                 );
-                
+
                 _fakeBot.SentMessages.Add(sentMessage);
             }
             catch (Exception ex)
@@ -158,7 +144,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             var captchaMessages = _fakeBot.SentMessages
                 .Where(m => m.Text.Contains("Капча") || m.Text.Contains("капча") || m.Text.Contains("captcha"))
                 .ToList();
-            
+
             captchaMessages.Should().NotBeEmpty();
         }
 
@@ -166,7 +152,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void ThenTheBotCanDeleteMessages()
         {
             // Проверяем, что бот может удалять сообщения
-            var canDelete = ScenarioContext.Current.ContainsKey("CanDeleteMessages") && 
+            var canDelete = ScenarioContext.Current.ContainsKey("CanDeleteMessages") &&
                            (bool)ScenarioContext.Current["CanDeleteMessages"];
             canDelete.Should().BeTrue();
         }
@@ -175,7 +161,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void ThenTheBotCanRestrictUsers()
         {
             // Проверяем, что бот может ограничивать пользователей
-            var canRestrict = ScenarioContext.Current.ContainsKey("CanRestrictUsers") && 
+            var canRestrict = ScenarioContext.Current.ContainsKey("CanRestrictUsers") &&
                              (bool)ScenarioContext.Current["CanRestrictUsers"];
             canRestrict.Should().BeTrue();
         }
@@ -187,7 +173,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             var captchaMessages = _fakeBot.SentMessages
                 .Where(m => m.Text.Contains("Капча") || m.Text.Contains("капча") || m.Text.Contains("captcha"))
                 .ToList();
-            
+
             captchaMessages.Should().NotBeEmpty();
         }
 
@@ -195,7 +181,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void ThenTheBotCannotDeleteMessagesDirectly()
         {
             // Проверяем, что бот НЕ может удалять сообщения напрямую
-            var canDelete = ScenarioContext.Current.ContainsKey("CanDeleteMessages") && 
+            var canDelete = ScenarioContext.Current.ContainsKey("CanDeleteMessages") &&
                            (bool)ScenarioContext.Current["CanDeleteMessages"];
             canDelete.Should().BeFalse();
         }
@@ -204,7 +190,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         public void ThenTheBotUsesAlternativeModerationMethods()
         {
             // Проверяем использование альтернативных методов модерации
-            var quietMode = ScenarioContext.Current.ContainsKey("QuietMode") && 
+            var quietMode = ScenarioContext.Current.ContainsKey("QuietMode") &&
                            (bool)ScenarioContext.Current["QuietMode"];
             quietMode.Should().BeTrue();
         }
@@ -232,4 +218,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             _thrownException.Should().BeNull();
         }
     }
-} 
+}

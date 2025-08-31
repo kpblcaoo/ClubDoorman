@@ -21,12 +21,12 @@ public class ChatLinkFormatter : IChatLinkFormatter
     public string GetChatLink(Chat chat)
     {
         var escapedTitle = Markdown.Escape(chat.Title ?? DefaultTitle);
-        
+
         if (!string.IsNullOrEmpty(chat.Username))
         {
             return FormatPublicChatLink(escapedTitle, chat.Username);
         }
-        
+
         return FormatPrivateChatLink(escapedTitle, chat.Id);
     }
 
@@ -36,14 +36,14 @@ public class ChatLinkFormatter : IChatLinkFormatter
     public string GetChatLink(long chatId, string? chatTitle)
     {
         var escapedTitle = Markdown.Escape(chatTitle ?? DefaultTitle);
-        
+
         // Специальная обработка для username в названии
         if (chatTitle?.StartsWith("@") == true)
         {
             var username = chatTitle[1..];
             return FormatPublicChatLink(escapedTitle, username);
         }
-        
+
         return FormatPrivateChatLink(escapedTitle, chatId);
     }
 
@@ -55,15 +55,15 @@ public class ChatLinkFormatter : IChatLinkFormatter
     private static string FormatPrivateChatLink(string escapedTitle, long chatId)
     {
         var formattedId = chatId.ToString();
-        
+
         if (formattedId.StartsWith(SupergroupPrefix))
         {
             // Супергруппа: убираем префикс -100 и создаем ссылку на приватный чат
             var cleanId = formattedId[SupergroupPrefix.Length..];
             return $"[{escapedTitle}]({TelegramBaseUrl}/c/{cleanId})";
         }
-        
+
         // Обычная группа или канал без username - показываем как жирный текст
         return $"*{escapedTitle}*";
     }
-} 
+}

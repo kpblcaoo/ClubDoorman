@@ -12,27 +12,27 @@ public class SendErrorNotificationRequest
     /// Исключение, которое произошло
     /// </summary>
     public Exception Exception { get; }
-    
+
     /// <summary>
     /// Контекст, в котором произошла ошибка
     /// </summary>
     public string Context { get; }
-    
+
     /// <summary>
     /// Пользователь, связанный с ошибкой (опционально)
     /// </summary>
     public User? User { get; }
-    
+
     /// <summary>
     /// Чат, связанный с ошибкой (опционально)
     /// </summary>
     public Chat? Chat { get; }
-    
+
     /// <summary>
     /// Токен отмены операции
     /// </summary>
     public CancellationToken CancellationToken { get; }
-    
+
     /// <summary>
     /// Создает новый запрос на отправку уведомления об ошибке
     /// </summary>
@@ -54,4 +54,4 @@ public class SendErrorNotificationRequest
         Chat = chat;
         CancellationToken = cancellationToken;
     }
-} 
+}

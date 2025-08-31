@@ -19,6 +19,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using ClubDoorman.Services.Handlers;
+using ClubDoorman.Services.Statistics;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
@@ -36,25 +37,38 @@ public class MessageHandlerGoldenMasterTests
     private MessageHandler _messageHandler;
     private MessageHandlerTestFactory _factory;
     private IUserBanService _userBanService;
-    
+
     [SetUp]
     public void Setup()
     {
         _factory = new MessageHandlerTestFactory();
-        
+
         // Настраиваем AppConfig для тестов
         _factory.AppConfigMock.Setup(x => x.LogAdminChatId).Returns(123456789L);
         _factory.AppConfigMock.Setup(x => x.RepeatedViolationsBanToAdminChat).Returns(false);
-        
+
         // Настраиваем UserManager для HandleBlacklistBan
         _factory.UserManagerMock.Setup(x => x.RemoveApproval(It.IsAny<long>(), It.IsAny<long?>(), It.IsAny<bool>())).Returns(false);
-        
+
         // Настраиваем ServiceProvider для возврата IChannelModerationService
         _factory.ServiceProviderMock.Setup(x => x.GetService(typeof(IChannelModerationService)))
             .Returns(_factory.ChannelModerationServiceMock.Object);
-        
+
         _messageHandler = _factory.CreateMessageHandlerWithRealUserBanService();
-        _userBanService = _factory.CreateRealUserBanService();
+
+        // Создаем UserBanService с моком BotMock вместо реального ITelegramBotClientWrapper
+        _userBanService = new UserBanService(
+            _factory.BotMock.Object, // Используем мок вместо реального клиента
+            _factory.MessageServiceMock.Object,
+            _factory.UserFlowLoggerMock.Object,
+            _factory.UserBanServiceLoggerMock.Object,
+            _factory.ViolationTrackerMock.Object,
+            _factory.AppConfigMock.Object,
+            _factory.StatisticsServiceMock.Object,
+            new GlobalStatsManager(),
+            _factory.UserManagerMock.Object,
+            _factory.UserCleanupServiceMock.Object
+        );
     }
 
     /// <summary>
@@ -70,10 +84,10 @@ public class MessageHandlerGoldenMasterTests
 
         // Act: Вызываем метод напрямую
         await _userBanService.BanUserForLongNameAsync(
-            message, 
-            user, 
-            reason, 
-            banDuration, 
+            message,
+            user,
+            reason,
+            banDuration,
             CancellationToken.None);
 
         // Assert: Проверяем все внешние вызовы
@@ -99,8 +113,8 @@ public class MessageHandlerGoldenMasterTests
             x => x.ForwardToLogWithNotificationAsync(
                 message,
                 LogNotificationType.BanForLongName,
-                It.Is<AutoBanNotificationData>(data => 
-                    data.User.Id == user.Id && 
+                It.Is<AutoBanNotificationData>(data =>
+                    data.User.Id == user.Id &&
                     data.Chat.Id == chat.Id &&
                     data.Reason == reason),
                 CancellationToken.None),
@@ -129,10 +143,10 @@ public class MessageHandlerGoldenMasterTests
 
         // Act: Вызываем метод напрямую
         await _userBanService.BanUserForLongNameAsync(
-            message, 
-            user, 
-            reason, 
-            banDuration, 
+            message,
+            user,
+            reason,
+            banDuration,
             CancellationToken.None);
 
         // Assert: Проверяем все внешние вызовы
@@ -158,8 +172,8 @@ public class MessageHandlerGoldenMasterTests
             x => x.ForwardToLogWithNotificationAsync(
                 message,
                 LogNotificationType.BanForLongName,
-                It.Is<AutoBanNotificationData>(data => 
-                    data.User.Id == user.Id && 
+                It.Is<AutoBanNotificationData>(data =>
+                    data.User.Id == user.Id &&
                     data.Chat.Id == chat.Id &&
                     data.Reason == reason),
                 CancellationToken.None),
@@ -188,10 +202,10 @@ public class MessageHandlerGoldenMasterTests
 
         // Act: Вызываем метод напрямую
         await _userBanService.BanUserForLongNameAsync(
-            message, 
-            user, 
-            reason, 
-            banDuration, 
+            message,
+            user,
+            reason,
+            banDuration,
             CancellationToken.None);
 
         // Assert: Проверяем, что бан НЕ вызывался
@@ -209,8 +223,8 @@ public class MessageHandlerGoldenMasterTests
         _factory.MessageServiceMock.Verify(
             x => x.SendAdminNotificationAsync(
                 AdminNotificationType.PrivateChatBanAttempt,
-                It.Is<ErrorNotificationData>(data => 
-                    data.User.Id == user.Id && 
+                It.Is<ErrorNotificationData>(data =>
+                    data.User.Id == user.Id &&
                     data.Chat.Id == chat.Id &&
                     data.Context == "Бан за длинное имя"),
                 CancellationToken.None),
@@ -218,15 +232,15 @@ public class MessageHandlerGoldenMasterTests
             "Должно отправиться уведомление администратору о попытке бана в приватном чате");
 
         // Assert: Проверяем логирование предупреждения
-                    _factory.UserBanServiceLoggerMock.Verify(
-                x => x.Log(
-                    LogLevel.Warning,
-                    It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Попытка бана за длинное имя в приватном чате")),
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-                Times.Once,
-                "Должно залогироваться предупреждение о попытке бана в приватном чате");
+        _factory.UserBanServiceLoggerMock.Verify(
+    x => x.Log(
+        LogLevel.Warning,
+        It.IsAny<EventId>(),
+        It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Попытка бана за длинное имя в приватном чате")),
+        It.IsAny<Exception>(),
+        It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+    Times.Once,
+    "Должно залогироваться предупреждение о попытке бана в приватном чате");
     }
 
     /// <summary>
@@ -306,8 +320,8 @@ public class MessageHandlerGoldenMasterTests
             x => x.ForwardToAdminWithNotificationAsync(
                 message,
                 AdminNotificationType.ChannelMessage,
-                It.Is<ChannelMessageNotificationData>(data => 
-                    data.SenderChat.Id == senderChat.Id && 
+                It.Is<ChannelMessageNotificationData>(data =>
+                    data.SenderChat.Id == senderChat.Id &&
                     data.Chat.Id == targetChat.Id),
                 CancellationToken.None),
             Times.Once,
@@ -350,8 +364,8 @@ public class MessageHandlerGoldenMasterTests
         _factory.MessageServiceMock.Verify(
             x => x.SendLogNotificationAsync(
                 LogNotificationType.AutoBanKnownSpam,
-                It.Is<AutoBanNotificationData>(data => 
-                    data.User.Id == user.Id && 
+                It.Is<AutoBanNotificationData>(data =>
+                    data.User.Id == user.Id &&
                     data.Chat.Id == chat.Id &&
                     data.Reason == reason),
                 CancellationToken.None),
@@ -527,7 +541,7 @@ public class MessageHandlerGoldenMasterTests
     {
         // Arrange: Используем сценарий с пользователем из одобренных
         var (user, chat, message) = TK.Specialized.BanTests.HandleBlacklistBanApprovedUserScenario();
-        
+
         // Настраиваем UserCleanupService для возврата true при удалении из одобренных
         _factory.UserCleanupServiceMock.Setup(x => x.RemoveUserFromGlobalApproval(user.Id, "Автобан по блэклисту")).Returns(true);
 
@@ -561,7 +575,7 @@ public class MessageHandlerGoldenMasterTests
     {
         // Arrange: Используем готовый сценарий из TestKit
         var (user, chat, message) = TK.Specialized.BanTests.HandleBlacklistBanScenario();
-        
+
         // Настраиваем логгер для вывода Debug сообщений (помогает покрытию)
         _factory.LoggerMock.Setup(x => x.IsEnabled(LogLevel.Debug)).Returns(true);
         _factory.LoggerMock.Setup(x => x.Log(
@@ -574,7 +588,7 @@ public class MessageHandlerGoldenMasterTests
             {
                 Console.WriteLine($"[DEBUG] {state}");
             });
-        
+
         // Настраиваем MessageService для выброса исключения при получении шаблона
         _factory.MessageServiceMock.Setup(x => x.GetTemplates())
             .Throws(new Exception("Template error"));
@@ -621,7 +635,7 @@ public class MessageHandlerGoldenMasterTests
     {
         // Arrange: Используем готовый сценарий из TestKit
         var (user, chat, message, banDuration, reason) = TK.Specialized.BanTests.TemporaryBanScenario();
-        
+
         // Настраиваем Bot для выброса исключения при бане
         _factory.BotMock.Setup(x => x.BanChatMember(
             It.IsAny<ChatId>(),
@@ -683,7 +697,7 @@ public class MessageHandlerGoldenMasterTests
     {
         // Arrange: Используем готовый сценарий из TestKit
         var (user, chat, message, banDuration, reason) = TK.Specialized.BanTests.TemporaryBanScenario();
-        
+
         // Настраиваем Bot для выброса исключения при удалении сообщения
         _factory.BotMock.Setup(x => x.DeleteMessage(
             It.IsAny<ChatId>(),
@@ -746,7 +760,7 @@ public class MessageHandlerGoldenMasterTests
     {
         // Arrange: Используем готовый сценарий из TestKit
         var (user, chat, message, reason) = TK.Specialized.BanTests.AutoBanScenario();
-        
+
         // Настраиваем исключения для различных операций
         _factory.MessageServiceMock.Setup(x => x.SendLogNotificationAsync(
             It.IsAny<LogNotificationType>(),
@@ -833,4 +847,4 @@ public class MessageHandlerGoldenMasterTests
             Times.Once,
             "Должен сброситься счетчик похожих символов");
     }
-} 
+}

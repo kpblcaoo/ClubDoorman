@@ -1,0 +1,22 @@
+{
+  "ChatId": -1001234567890,
+  "Payload": {
+    "Id": 16,
+    "Type": "Message",
+    "Message": {
+      "MessageId": 0,
+      "ChatId": -1001234567890,
+      "Type": 2,
+      "Title": "GoldenBaselineChat",
+      "From": {
+        "Id": "U0013",
+        "IsBot": false,
+        "Username": "u_9b041b1f"
+      },
+      "Text": "😀😀😀😀😀😀😀😀😀😀 ok"
+    }
+  },
+  "Type": "Message",
+  "UserId": "U0013",
+  "handler": "MessageHandler"
+}

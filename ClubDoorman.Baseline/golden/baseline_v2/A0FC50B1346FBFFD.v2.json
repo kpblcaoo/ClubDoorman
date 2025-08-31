@@ -1,0 +1,8 @@
+{
+  "Schema": 2,
+  "CorrelationId": "A0FC50B1346FBFFD",
+  "Id": 6,
+  "ShortName": "BenignControl",
+  "Action": "Allow",
+  "RuleCode": "ModeratedAllow"
+}

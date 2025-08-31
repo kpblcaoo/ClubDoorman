@@ -37,7 +37,7 @@ public class UserBanServiceTestsModern
     private Mock<IStatisticsService> _statisticsServiceMock = null!;
     private Mock<GlobalStatsManager> _globalStatsManagerMock = null!;
     private Mock<IUserManager> _userManagerMock = null!;
-    
+
     private IUserBanService _userBanService = null!;
 
     [SetUp]
@@ -262,13 +262,13 @@ public class UserBanServiceTestsModern
             {
                 var message = messages.First();
                 message.Chat = chat;
-                
+
                 await _userBanService.BanUserForLongNameAsync(message, user, "Edge case", TimeSpan.FromMinutes(1), CancellationToken.None);
-                
+
                 _botMock.Verify(x => x.BanChatMember(chat.Id, user.Id, It.IsAny<DateTime?>(), true, It.IsAny<CancellationToken>()), Times.AtLeastOnce);
             }
         }
     }
 
     #endregion
-} 
+}

@@ -1,0 +1,8 @@
+{
+  "Schema": 2,
+  "CorrelationId": "45C95440B2A59BAA",
+  "Id": 11,
+  "ShortName": "MediaEarlyDefault",
+  "Action": "Delete",
+  "RuleCode": "ModeratedDelete"
+}

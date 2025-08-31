@@ -14,6 +14,9 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Handlers;
 using ClubDoorman.Services.UserJoin;
+using ClubDoorman.Services.Logging;
+using ClubDoorman.Models.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ClubDoorman.Services.Handlers;
 
@@ -30,7 +33,11 @@ public class ChatMemberHandler : IUpdateHandler
     private readonly IAppConfig _appConfig;
     private readonly IUserCleanupService _userCleanupService;
     private readonly IFolderInviteService _folderInviteService;
+    private readonly IGoldenMasterRecorder _gm;
+    private readonly IModerationEventPublisher _events;
+    private readonly LoggingFlagsOptions? _flags;
 
+    // Primary DI constructor (Golden Master + flags required)
     public ChatMemberHandler(
         ITelegramBotClientWrapper bot,
         IUserManager userManager,
@@ -39,7 +46,10 @@ public class ChatMemberHandler : IUpdateHandler
         IMessageService messageService,
         IAppConfig appConfig,
         IUserCleanupService userCleanupService,
-        IFolderInviteService folderInviteService)
+    IFolderInviteService folderInviteService,
+    IGoldenMasterRecorder gm,
+    IModerationEventPublisher eventsPublisher,
+    IOptions<LoggingFlagsOptions> flagsOptions)
     {
         _bot = bot;
         _userManager = userManager;
@@ -49,58 +59,84 @@ public class ChatMemberHandler : IUpdateHandler
         _appConfig = appConfig;
         _userCleanupService = userCleanupService;
         _folderInviteService = folderInviteService;
+    _gm = gm;
+    _events = eventsPublisher ?? throw new ArgumentNullException(nameof(eventsPublisher));
+        _flags = flagsOptions?.Value;
     }
+
+    // Legacy simplified constructor removed (used NullGoldenMasterRecorder). Tests must pass IGoldenMasterRecorder explicitly now.
 
     public bool CanHandle(Update update) => update.Type == UpdateType.ChatMember;
 
     public async Task HandleAsync(Update update, CancellationToken cancellationToken = default)
     {
+        using var scope = _logger.BeginScope(new Dictionary<string, object?>
+        {
+            ["opId"] = Guid.NewGuid(),
+            ["updateType"] = update.Type.ToString(),
+            ["chatId"] = update.ChatMember?.Chat.Id,
+            ["userId"] = update.ChatMember?.From?.Id
+        });
+        string? gmCorrelation = null;
+        try
+        {
+            gmCorrelation = _gm.TryRecordInput(update, nameof(ChatMemberHandler), update.ChatMember?.Chat.Id, update.ChatMember?.From?.Id);
+            if (gmCorrelation != null)
+            {
+                using var corrScope = _logger.BeginScope(new Dictionary<string, object?> { ["gmCorrelation"] = gmCorrelation });
+                _logger.LogTrace("ChatMemberHandler: GM correlation established {Correlation}", gmCorrelation);
+            }
+        }
+        catch { }
         var chatMember = update.ChatMember;
         Debug.Assert(chatMember != null);
         var newChatMember = chatMember.NewChatMember;
         ChatSettingsManager.EnsureChatInConfig(chatMember.Chat.Id, chatMember.Chat.Title);
-        
+
         // Проверка whitelist - если активен, работаем только в разрешённых чатах
         if (!_appConfig.IsChatAllowed(chatMember.Chat.Id))
         {
             _logger.LogDebug("Чат {ChatId} ({ChatTitle}) не в whitelist - игнорируем изменение участника", chatMember.Chat.Id, chatMember.Chat.Title);
+            _events.Publish(gmCorrelation, new ModerationEvent("not_allowed_chat"));
             return;
         }
-        
+
         // Игнорируем изменения, сделанные самим ботом
         if (chatMember.From?.Id == _bot.BotId)
         {
             _logger.LogDebug("Игнорируем изменение статуса участника, сделанное самим ботом");
+            _events.Publish(gmCorrelation, new ModerationEvent("self_change_ignore"));
             return;
         }
-        
+
         switch (newChatMember.Status)
         {
             case ChatMemberStatus.Member:
-            {
-                _logger.LogDebug("New chat member new {@New} old {@Old}", newChatMember, chatMember.OldChatMember);
-                if (chatMember.OldChatMember.Status == ChatMemberStatus.Left)
                 {
-                    var u = newChatMember.User;
-                    _logger.LogInformation("==================== НОВЫЙ УЧАСТНИК ====================\nПользователь {User} (id={UserId}, username={Username}) зашел в группу '{ChatTitle}' (id={ChatId})\n========================================================", 
-                        (u.FirstName + (string.IsNullOrEmpty(u.LastName) ? "" : " " + u.LastName)), u.Id, u.Username ?? "-", chatMember.Chat.Title ?? "-", chatMember.Chat.Id);
-                    
-                    // Проверяем вход через папку
-                    var wasBannedForFolderInvite = await _folderInviteService.HandleFolderInviteAsync(chatMember, cancellationToken);
-                    
-                    // Если пользователь не был забанен за вход через папку, запускаем обычный IntroFlow
-                    if (!wasBannedForFolderInvite)
+                    _logger.LogDebug("New chat member new {@New} old {@Old}", newChatMember, chatMember.OldChatMember);
+                    if (chatMember.OldChatMember.Status == ChatMemberStatus.Left)
                     {
-                        // Запускаем IntroFlow через сервис
-                        _ = Task.Run(async () =>
+                        var u = newChatMember.User;
+                        _logger.LogInformation("==================== НОВЫЙ УЧАСТНИК ====================\nПользователь {User} (id={UserId}, username={Username}) зашел в группу '{ChatTitle}' (id={ChatId})\n========================================================",
+                            (u.FirstName + (string.IsNullOrEmpty(u.LastName) ? "" : " " + u.LastName)), u.Id, u.Username ?? "-", chatMember.Chat.Title ?? "-", chatMember.Chat.Id);
+
+                        // Проверяем вход через папку
+                        var wasBannedForFolderInvite = await _folderInviteService.HandleFolderInviteAsync(chatMember, cancellationToken);
+
+                        // Если пользователь не был забанен за вход через папку, запускаем обычный IntroFlow
+                        if (!wasBannedForFolderInvite)
                         {
-                            await Task.Delay(TimeSpan.FromSeconds(2));
-                            await _introFlowService.ProcessNewUserAsync(null, newChatMember.User, chatMember.Chat);
-                        });
+                            // Запускаем IntroFlow через сервис
+                            _ = Task.Run(async () =>
+                            {
+                                await Task.Delay(TimeSpan.FromSeconds(2));
+                                await _introFlowService.ProcessNewUserAsync(null, newChatMember.User, chatMember.Chat);
+                            });
+                        }
                     }
+                    _events.Publish(gmCorrelation, new ModerationEvent("new_member", Extra: newChatMember.User.Id.ToString()));
+                    break;
                 }
-                break;
-            }
             case ChatMemberStatus.Kicked
             or ChatMemberStatus.Restricted:
                 var user = newChatMember.User;
@@ -109,7 +145,7 @@ public class ChatMemberHandler : IUpdateHandler
                 var tailMessage = string.IsNullOrWhiteSpace(lastMessage)
                     ? ""
                     : $" Его/её последним сообщением было:\n```\n{lastMessage}\n```";
-                
+
                 // Удаляем из списка доверенных
                 if (_userCleanupService.RemoveUserFromAllApprovals(user.Id, "Получение ограничений"))
                 {
@@ -121,18 +157,20 @@ public class ChatMemberHandler : IUpdateHandler
                         cancellationToken
                     );
                 }
-                
+
                 var restrictedData = new UserRestrictedNotificationData(
-                    user, chatMember.Chat, "пользователь получил ограничения", 0, lastMessage, chatMember.Chat.Title ?? "");
+                    user, chatMember.Chat, "пользователь получил ограничения", 0, lastMessage ?? string.Empty, chatMember.Chat.Title ?? "");
                 await _messageService.SendAdminNotificationAsync(
                     AdminNotificationType.UserRestricted,
                     restrictedData,
                     cancellationToken
                 );
+                _events.Publish(gmCorrelation, new ModerationEvent("restricted", Extra: user.Id.ToString()));
                 break;
         }
+    _events.Publish(gmCorrelation, new ModerationEvent("other_status", Status: newChatMember.Status.ToString()));
     }
 
     private static string FullName(string firstName, string? lastName) =>
         string.IsNullOrEmpty(lastName) ? firstName : $"{firstName} {lastName}";
-} 
+}

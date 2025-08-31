@@ -11,7 +11,7 @@ namespace ClubDoorman.Test.TestKit.Builders;
 public class UserBuilder
 {
     private User _user = TestKitBogus.CreateRealisticUser();
-    
+
     /// <summary>
     /// Устанавливает ID пользователя
     /// <tags>builders, user, id, fluent-api</tags>
@@ -21,7 +21,7 @@ public class UserBuilder
         _user.Id = userId;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает username пользователя
     /// <tags>builders, user, username, fluent-api</tags>
@@ -31,7 +31,7 @@ public class UserBuilder
         _user.Username = username;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает имя пользователя
     /// <tags>builders, user, firstname, fluent-api</tags>
@@ -41,7 +41,7 @@ public class UserBuilder
         _user.FirstName = firstName;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает пользователя как бота
     /// <tags>builders, user, bot, fluent-api</tags>
@@ -53,7 +53,7 @@ public class UserBuilder
         _user.Username = "test_bot";
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает пользователя как обычного пользователя
     /// <tags>builders, user, regular, fluent-api</tags>
@@ -63,7 +63,7 @@ public class UserBuilder
         _user.IsBot = false;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает пользователя как подозрительного
     /// <tags>builders, user, suspicious, fluent-api</tags>
@@ -75,7 +75,7 @@ public class UserBuilder
         _user.IsBot = false;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает пользователя как нарушающего правила
     /// <tags>builders, user, violating, fluent-api</tags>
@@ -87,7 +87,7 @@ public class UserBuilder
         _user.IsBot = false;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает пользователя как нового
     /// <tags>builders, user, new, fluent-api</tags>
@@ -99,7 +99,7 @@ public class UserBuilder
         _user.IsBot = false;
         return this;
     }
-    
+
     /// <summary>
     /// Устанавливает пользователя с очень длинным именем для тестирования бана
     /// <tags>builders, user, long-name, ban-test, fluent-api</tags>
@@ -111,16 +111,16 @@ public class UserBuilder
         _user.Username = "very_long_username_that_exceeds_maximum_length_and_should_be_banned_by_moderation_rules";
         return this;
     }
-    
+
     /// <summary>
     /// Строит пользователя
     /// <tags>builders, user, build, fluent-api</tags>
     /// </summary>
     public User Build() => _user;
-    
+
     /// <summary>
     /// Неявное преобразование в User
     /// <tags>builders, user, conversion, fluent-api</tags>
     /// </summary>
     public static implicit operator User(UserBuilder builder) => builder.Build();
-} 
+}

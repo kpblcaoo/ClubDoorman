@@ -28,10 +28,10 @@ public class LoggingConfigurationService : ILoggingConfigurationService
         // Проверяем общие настройки
         if (destination.HasFlag(NotificationDestination.AdminChat) && !_configuration.TelegramNotifications.AdminNotifications)
             return false;
-        
+
         if (destination.HasFlag(NotificationDestination.LogChat) && !_configuration.TelegramNotifications.LogNotifications)
             return false;
-        
+
         if (destination.HasFlag(NotificationDestination.UserChat) && !_configuration.TelegramNotifications.UserNotifications)
             return false;
 
@@ -41,7 +41,7 @@ public class LoggingConfigurationService : ILoggingConfigurationService
     public NotificationDestination GetAdminNotificationDestinations(AdminNotificationType type)
     {
         var typeName = type.ToString();
-        
+
         if (_configuration.TelegramNotifications.NotificationTypes.AdminNotifications.TryGetValue(typeName, out var destinations))
         {
             return destinations;
@@ -50,18 +50,18 @@ public class LoggingConfigurationService : ILoggingConfigurationService
         // Значения по умолчанию
         return type switch
         {
-            AdminNotificationType.AutoBan or AdminNotificationType.AutoBanBlacklist or AdminNotificationType.AutoBanFromBlacklist 
+            AdminNotificationType.AutoBan or AdminNotificationType.AutoBanBlacklist or AdminNotificationType.AutoBanFromBlacklist
                 => NotificationDestination.FileLog,
-            
-            AdminNotificationType.SystemError 
+
+            AdminNotificationType.SystemError
                 => NotificationDestination.AdminChat | NotificationDestination.LogChat | NotificationDestination.FileLog,
-            
+
             AdminNotificationType.ChannelMessage or AdminNotificationType.BanChannel or AdminNotificationType.BanForLongName
                 => NotificationDestination.AdminChat | NotificationDestination.LogChat | NotificationDestination.FileLog,
-            
+
             AdminNotificationType.SilentMode
                 => NotificationDestination.AdminChat | NotificationDestination.LogChat | NotificationDestination.FileLog,
-            
+
             _ => NotificationDestination.AdminChat | NotificationDestination.FileLog
         };
     }
@@ -69,7 +69,7 @@ public class LoggingConfigurationService : ILoggingConfigurationService
     public NotificationDestination GetLogNotificationDestinations(LogNotificationType type)
     {
         var typeName = type.ToString();
-        
+
         if (_configuration.TelegramNotifications.NotificationTypes.LogNotifications.TryGetValue(typeName, out var destinations))
         {
             return destinations;
@@ -80,10 +80,10 @@ public class LoggingConfigurationService : ILoggingConfigurationService
         {
             LogNotificationType.AutoBanBlacklist or LogNotificationType.AutoBanFromBlacklist or LogNotificationType.AutoBanKnownSpam or LogNotificationType.BanForLongName or LogNotificationType.BanChannel
                 => NotificationDestination.LogChat | NotificationDestination.FileLog,
-            
+
             LogNotificationType.CriticalError
                 => NotificationDestination.LogChat | NotificationDestination.FileLog,
-            
+
             _ => NotificationDestination.LogChat | NotificationDestination.FileLog
         };
     }
@@ -91,7 +91,7 @@ public class LoggingConfigurationService : ILoggingConfigurationService
     public NotificationDestination GetUserNotificationDestinations(UserNotificationType type)
     {
         var typeName = type.ToString();
-        
+
         if (_configuration.TelegramNotifications.NotificationTypes.UserNotifications.TryGetValue(typeName, out var destinations))
         {
             return destinations;
@@ -104,4 +104,4 @@ public class LoggingConfigurationService : ILoggingConfigurationService
     public bool IsFileLoggingEnabled() => _configuration.FileLogging.Enabled;
 
     public bool IsTelegramNotificationsEnabled() => _configuration.TelegramNotifications.Enabled;
-} 
+}

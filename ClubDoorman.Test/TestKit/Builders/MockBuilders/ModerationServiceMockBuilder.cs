@@ -1,7 +1,6 @@
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Services.UserBan;
 using ClubDoorman.Services;
-using ClubDoorman.Services.UserBan;
 using ClubDoorman.Models;
 using Moq;
 
@@ -89,7 +88,7 @@ public class ModerationServiceMockBuilder
     {
         _mock.Setup(x => x.CheckMessageAsync(It.IsAny<Message>()))
             .ReturnsAsync(new ModerationResult(_defaultAction, _defaultReason, _defaultConfidence));
-        
+
         return _mock;
     }
 
@@ -98,4 +97,4 @@ public class ModerationServiceMockBuilder
     /// <tags>builders, moderation-service, build-object, fluent-api</tags>
     /// </summary>
     public IModerationService BuildObject() => Build().Object;
-} 
+}

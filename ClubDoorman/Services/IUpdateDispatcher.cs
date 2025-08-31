@@ -11,4 +11,4 @@ public interface IUpdateDispatcher
     /// Обрабатывает обновление, находя подходящий обработчик
     /// </summary>
     Task DispatchAsync(Update update, CancellationToken cancellationToken = default);
-} 
+}

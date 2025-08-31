@@ -29,7 +29,7 @@ public class SuspiciousUsersStorageTests
         _factory = new SuspiciousUsersStorageTestFactory();
         _storage = _factory.CreateSuspiciousUsersStorage();
         _loggerMock = _factory.LoggerMock;
-        
+
         // Очищаем данные перед каждым тестом  
         var allUsers = _storage.GetAiDetectUsers();
         foreach (var (userId, chatId) in allUsers)
@@ -543,4 +543,4 @@ public class SuspiciousUsersStorageTests
     #endregion
 
 
-} 
+}

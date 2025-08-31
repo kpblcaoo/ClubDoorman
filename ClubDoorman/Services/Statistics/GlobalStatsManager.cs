@@ -8,15 +8,22 @@ namespace ClubDoorman.Services.Statistics;
 
 public class GlobalStatsManager
 {
-    private readonly string _jsonPath = "data/global_stats.json";
-    private readonly string _htmlPath = "data/stats.html";
+    private readonly string _baseDir;
+    private readonly string _jsonPath;
+    private readonly string _htmlPath;
+    private readonly string _globalJsonPath;
     private readonly object _lock = new();
     private StatsRoot _stats;
 
     public GlobalStatsManager()
     {
-        if (!Directory.Exists("data"))
-            Directory.CreateDirectory("data");
+        // If DOORMAN_DATA_ROOT is set (e.g. golden baseline harness), write stats inside that sandbox instead of repo-level /data.
+        var envRoot = Environment.GetEnvironmentVariable("DOORMAN_DATA_ROOT");
+        _baseDir = string.IsNullOrWhiteSpace(envRoot) ? "data" : Path.Combine(envRoot!, "stats-data");
+        Directory.CreateDirectory(_baseDir);
+        _jsonPath = Path.Combine(_baseDir, "global_stats.json");
+        _htmlPath = Path.Combine(_baseDir, "stats.html");
+        _globalJsonPath = Path.Combine(_baseDir, "stats_global.json");
         _stats = Load();
     }
 
@@ -88,9 +95,9 @@ public class GlobalStatsManager
                     Save();
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                // Можно логировать ошибку
+                // ignored
             }
         }
     }
@@ -153,7 +160,7 @@ public class GlobalStatsManager
                 total_captcha_shown = totalCaptcha,
                 total_chats = totalChats
             };
-            File.WriteAllText("data/stats_global.json", JsonSerializer.Serialize(global, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(_globalJsonPath, JsonSerializer.Serialize(global, new JsonSerializerOptions { WriteIndented = true }));
         }
     }
 
@@ -200,4 +207,4 @@ public class ChatStat
     public int Members { get; set; } = 0;
     public int CaptchaShown { get; set; } = 0;
     public int Bans { get; set; } = 0;
-} 
+}

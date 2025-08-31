@@ -1,0 +1,23 @@
+{
+  "ChatId": -1001234567891,
+  "Payload": {
+    "Id": 18,
+    "Type": "Message",
+    "Message": {
+      "MessageId": 0,
+      "ChatId": -1001234567891,
+      "Type": 2,
+      "Title": "GoldenAnnouncementChat",
+      "From": {
+        "Id": "U0014",
+        "IsBot": false,
+        "Username": "u_3c50be11"
+      },
+      "Text": "",
+      "MediaKind": "photo"
+    }
+  },
+  "Type": "Message",
+  "UserId": "U0014",
+  "handler": "MessageHandler"
+}

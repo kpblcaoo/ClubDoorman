@@ -2,6 +2,7 @@ using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.BadMessage;
 using ClubDoorman.Services.Moderation;
 using Microsoft.Extensions.DependencyInjection;
+using ClubDoorman.Services.Notifications;
 
 namespace ClubDoorman.Services.AI;
 
@@ -22,7 +23,10 @@ public static class AIModule
         services.AddSingleton<IMimicryClassifier, MimicryClassifier>();
         services.AddSingleton<IBadMessageManager, BadMessageManager>();
         services.AddSingleton<ISuspiciousUsersStorage, SuspiciousUsersStorage>();
-        
+        services.AddSingleton<IAiCascadeService, AiCascadeService>();
+        services.AddSingleton<IButtonsService, ButtonsService>();
+        services.AddSingleton<IForwardingService, ForwardingService>();
+
         return services;
     }
-} 
+}

@@ -1,6 +1,5 @@
 using ClubDoorman.Services.SuspiciousUsers;
 using ClubDoorman.Services.Moderation;
-using ClubDoorman.Services.UserBan;
 using NUnit.Framework;
 using TechTalk.SpecFlow;
 using ClubDoorman.Models;
@@ -25,18 +24,18 @@ namespace ClubDoorman.Test.StepDefinitions.Common
     [Category("BDD")]
     public class SuspiciousCommandSteps
     {
-        private Message _testMessage = null!;
-        private Exception? _thrownException;
-        private FakeTelegramClient _fakeBot = null!;
-        private ILoggerFactory _loggerFactory = null!;
-        private MessageHandler _messageHandler = null!;
-        private MessageHandlerTestFactory _factory = null!;
+        protected Message _testMessage = null!;
+        protected Exception? _thrownException;
+        protected FakeTelegramClient _fakeBot = null!;
+        protected ILoggerFactory _loggerFactory = null!;
+        protected MessageHandler _messageHandler = null!;
+        protected MessageHandlerTestFactory _factory = null!;
 
         [BeforeScenario]
         public void BeforeScenario()
         {
             _fakeBot = new FakeTelegramClient();
-            _loggerFactory = LoggerFactory.Create(builder => 
+            _loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddConsole();
                 builder.SetMinimumLevel(LogLevel.Debug);
@@ -53,12 +52,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Given(@"I am an administrator")]
         public void GivenIAmAnAdministrator()
         {
-            _testMessage = new Message
-            {
-                From = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
-                Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
-                Date = DateTime.UtcNow
-            };
+            var adminId = TestAdmin.AdminUserId;
+            _testMessage = new Message { From = new User { Id = adminId, FirstName = "AdminUser", Username = "admin" }, Chat = new Chat { Id = TestAdmin.AdminChatId, Title = "Admin Chat", Type = ChatType.Group }, Date = DateTime.UtcNow };
             ScenarioContext.Current["TestMessage"] = _testMessage;
             ScenarioContext.Current["IsAdmin"] = true;
         }
@@ -66,17 +61,62 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Given(@"I am not an administrator")]
         public void GivenIAmNotAnAdministrator()
         {
-            _testMessage = new Message
-            {
-                From = new User { Id = 987654321, FirstName = "RegularUser", Username = "user" },
-                Chat = new Chat { Id = 123456789, Title = "Admin Chat", Type = ChatType.Group },
-                Date = DateTime.UtcNow
-            };
+            _testMessage = new Message { From = new User { Id = TestAdmin.NonAdminUserId, FirstName = "RegularUser", Username = "user" }, Chat = new Chat { Id = TestAdmin.AdminChatId, Title = "Admin Chat", Type = ChatType.Group }, Date = DateTime.UtcNow };
             ScenarioContext.Current["TestMessage"] = _testMessage;
             ScenarioContext.Current["IsAdmin"] = false;
-            
+
             // Пересоздаем MessageHandler с новым значением isAdmin
             GivenIHaveAMessageHandler();
+            _fakeBot.TestContextCurrentUserId = null; // убираем пользователя из сценарных админов
+            // Явно задаем список админов чата (без текущего пользователя)
+            _fakeBot.SetupChatAdministrators(123456789,
+                new ChatMemberOwner { User = new User { Id = 123, FirstName = "TestOwner", Username = "testowner" } },
+                new ChatMemberAdministrator
+                {
+                    User = new User { Id = 456, FirstName = "TestAdmin", Username = "testadmin" },
+                    IsAnonymous = false,
+                    CanManageChat = true,
+                    CanDeleteMessages = true,
+                    CanManageVideoChats = true,
+                    CanRestrictMembers = true,
+                    CanPromoteMembers = true,
+                    CanChangeInfo = true,
+                    CanInviteUsers = true,
+                    CustomTitle = "Admin"
+                });
+
+            // Настраиваем список администраторов чата (бот видит только настоящего админа 123456789)
+            _fakeBot.SetupChatAdministrators(123456789, new ChatMemberAdministrator
+            {
+                User = new User { Id = 123456789, FirstName = "AdminUser", Username = "admin" },
+                CanManageChat = true,
+                CanDeleteMessages = true,
+                CanManageVideoChats = true,
+                CanRestrictMembers = true,
+                CanPromoteMembers = true,
+                CanChangeInfo = true,
+                CanInviteUsers = true
+            });
+
+            // Регистрируем обработчик /check команды (используется в этом сценарии)
+            var checkHandler = new CheckCommandHandler(
+                _fakeBot,
+                _factory.ClassifierMock.Object,
+                _factory.MessageServiceMock.Object,
+                _factory.BotPermissionsServiceMock.Object,
+                _factory.AppConfigMock.Object,
+                _loggerFactory.CreateLogger<CheckCommandHandler>());
+            var commandRouter = new CommandRouter(new List<ICommandHandler> { checkHandler }, _loggerFactory.CreateLogger<CommandRouter>());
+            _factory.WithCommandRouterSetup(mock =>
+            {
+                mock.Reset();
+                mock.Setup(x => x.HandleCommandAsync(It.IsAny<Message>(), It.IsAny<CancellationToken>()))
+                    .Returns<Message, CancellationToken>((message, ct) => commandRouter.HandleCommandAsync(message, ct));
+            });
+
+            // Пересоздаем handler, чтобы он захватил обновленный CommandRouter
+            _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
+            ScenarioContext.Current["MessageHandler"] = _messageHandler;
         }
 
         [Given(@"I have a message handler")]
@@ -84,7 +124,8 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         {
             _factory.WithStandardMocks();
 
-            _factory.WithAppConfigSetup(mock => {
+            _factory.WithAppConfigSetup(mock =>
+            {
                 mock.Setup(x => x.AdminChatId).Returns(123456789);
                 mock.Setup(x => x.LogAdminChatId).Returns(123456789);
                 mock.Setup(x => x.IsChatAllowed(It.IsAny<long>())).Returns(true);
@@ -93,13 +134,14 @@ namespace ClubDoorman.Test.StepDefinitions.Common
 
             // Определяем isAdmin из последнего вызова GivenIAmAnAdministrator или GivenIAmNotAnAdministrator
             var isAdmin = ScenarioContext.Current.ContainsKey("IsAdmin") && (bool)ScenarioContext.Current["IsAdmin"];
-            
+
             // Используем TestKit для создания правильного мока BotPermissionsService
             var botPermMock = isAdmin
                 ? TestKit.TestKit.CreateBotPermissionsServiceMockForChat(123456789)
                 : TestKit.TestKit.CreateBotPermissionsServiceMock(false);
-            
-            _factory.WithBotPermissionsServiceSetup(mock => {
+
+            _factory.WithBotPermissionsServiceSetup(mock =>
+            {
                 mock.Reset();
                 // Настраиваем мок для проверки прав БОТА (а не пользователя) в чате
                 mock.Setup(x => x.IsBotAdminAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
@@ -109,12 +151,13 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             });
 
             // Настраиваем MessageService для перехвата уведомлений
-            _factory.WithMessageServiceSetup(mock => {
+            _factory.WithMessageServiceSetup(mock =>
+            {
                 mock.Setup(x => x.SendUserNotificationAsync(
-                    It.IsAny<User>(), 
-                    It.IsAny<Chat>(), 
-                    It.IsAny<UserNotificationType>(), 
-                    It.IsAny<object>(), 
+                    It.IsAny<User>(),
+                    It.IsAny<Chat>(),
+                    It.IsAny<UserNotificationType>(),
+                    It.IsAny<object>(),
                     It.IsAny<CancellationToken>()))
                     .Callback<User, Chat, UserNotificationType, object, CancellationToken>((user, chat, type, data, token) =>
                     {
@@ -129,6 +172,45 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             });
 
             _messageHandler = _factory.CreateMessageHandlerWithFake(_fakeBot);
+            // Передаём текущего пользователя в fake bot, чтобы он считался админом при необходимости
+            if (_testMessage?.From != null)
+            {
+                if (ScenarioContext.Current.ContainsKey("IsAdmin") && (bool)ScenarioContext.Current["IsAdmin"])
+                {
+                    _fakeBot.TestContextCurrentUserId = _testMessage.From.Id;
+                }
+            }
+
+            // Настраиваем реальный обработчик /check внутри CommandRouterMock, если ещё не настроен
+            if (!_factory.CommandRouterMock.Setups.Any(s => s.ToString().Contains("/check")))
+            {
+                var loggerFactory = LoggerFactory.Create(b => b.AddConsole());
+                var checkHandler = new CheckCommandHandler(
+                    _factory.BotMock.Object,
+                    _factory.ClassifierMock.Object,
+                    _factory.MessageServiceMock.Object,
+                    _factory.BotPermissionsServiceMock.Object,
+                    _factory.AppConfigMock.Object,
+                    loggerFactory.CreateLogger<CheckCommandHandler>());
+
+                // Настраиваем получения админов для успешного прохождения проверки прав (только в админ сценариях)
+                var isAdminScenario = ScenarioContext.Current.ContainsKey("IsAdmin") && (bool)ScenarioContext.Current["IsAdmin"];
+                if (isAdminScenario)
+                {
+                    long adminUserId = TestAdmin.AdminUserId;
+                    _factory.BotMock.Setup(x => x.GetChatAdministratorsAsync(It.IsAny<ChatId>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ChatMember[] { new ChatMemberOwner { User = new User { Id = 1, FirstName = "Owner" } }, new ChatMemberAdministrator { User = new User { Id = adminUserId, FirstName = "AdminUser" } } });
+                    Console.WriteLine($"[DEBUG] SuspiciousCommandSteps: BotMock admins configured with adminUserId={adminUserId}");
+                }
+
+                _factory.CommandRouterMock
+                    .Setup(x => x.HandleCommandAsync(It.Is<Message>(m => m.Text != null && m.Text.StartsWith("/check")), It.IsAny<CancellationToken>()))
+                    .Returns<Message, CancellationToken>(async (msg, ct) => { await checkHandler.HandleAsync(msg, ct); return true; });
+
+                // Для всех прочих команд возвращаем false (если не настроено ранее)
+                _factory.CommandRouterMock
+                    .Setup(x => x.HandleCommandAsync(It.Is<Message>(m => m.Text != null && !m.Text.StartsWith("/check")), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(false);
+            }
             ScenarioContext.Current["MessageHandler"] = _messageHandler;
         }
 
@@ -158,7 +240,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 3
             );
 
-            _factory.WithSuspiciousUsersStorageSetup(mock => 
+            _factory.WithSuspiciousUsersStorageSetup(mock =>
             {
                 // GetSuspiciousUsers не существует в апстриме
                 mock.Setup(x => x.IsSuspicious(111111111, 123456789)).Returns(true);
@@ -171,7 +253,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
         [Given(@"there are no suspicious users in the system")]
         public void GivenThereAreNoSuspiciousUsersInTheSystem()
         {
-            _factory.WithSuspiciousUsersStorageSetup(mock => 
+            _factory.WithSuspiciousUsersStorageSetup(mock =>
             {
                 // GetSuspiciousUsers не существует в апстриме
                 mock.Setup(x => x.IsSuspicious(It.IsAny<long>(), It.IsAny<long>())).Returns(false);
@@ -189,7 +271,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 2
             );
 
-            _factory.WithSuspiciousUsersStorageSetup(mock => 
+            _factory.WithSuspiciousUsersStorageSetup(mock =>
             {
                 mock.Setup(x => x.IsSuspicious(333333333, 123456789)).Returns(true);
                 mock.Setup(x => x.GetSuspiciousUser(333333333, 123456789)).Returns(suspiciousUser);
@@ -258,7 +340,7 @@ namespace ClubDoorman.Test.StepDefinitions.Common
                 Text = command
             };
             ScenarioContext.Current["TestMessage"] = _testMessage;
-            
+
             // Сразу обрабатываем команду
             try
             {
@@ -441,4 +523,4 @@ namespace ClubDoorman.Test.StepDefinitions.Common
             lastMessage.Text.Should().Contain("добавлен");
         }
     }
-} 
+}

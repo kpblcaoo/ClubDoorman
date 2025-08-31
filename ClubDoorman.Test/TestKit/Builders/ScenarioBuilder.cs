@@ -13,7 +13,7 @@ public class ScenarioBuilder
     private User? _user;
     private Chat? _chat;
     private Message? _message;
-    
+
     /// <summary>
     /// Настраивает пользователя для сценария
     /// <tags>builders, scenario, user, fluent-api</tags>
@@ -25,7 +25,7 @@ public class ScenarioBuilder
         _user = userBuilder.Build();
         return this;
     }
-    
+
     /// <summary>
     /// Настраивает чат для сценария
     /// <tags>builders, scenario, chat, fluent-api</tags>
@@ -37,7 +37,7 @@ public class ScenarioBuilder
         _chat = chatBuilder.Build();
         return this;
     }
-    
+
     /// <summary>
     /// Настраивает сообщение для сценария
     /// <tags>builders, scenario, message, fluent-api</tags>
@@ -49,7 +49,7 @@ public class ScenarioBuilder
         _message = messageBuilder.Build();
         return this;
     }
-    
+
     /// <summary>
     /// Создает спам-сценарий (подозрительный пользователь + спам-сообщение)
     /// <tags>builders, scenario, spam, fluent-api</tags>
@@ -65,7 +65,7 @@ public class ScenarioBuilder
             .Build();
         return this;
     }
-    
+
     /// <summary>
     /// Создает сценарий бана (нарушающий пользователь + причина бана)
     /// <tags>builders, scenario, ban, fluent-api</tags>
@@ -81,7 +81,7 @@ public class ScenarioBuilder
             .Build();
         return this;
     }
-    
+
     /// <summary>
     /// Создает сценарий капчи (новый пользователь + требование капчи)
     /// <tags>builders, scenario, captcha, fluent-api</tags>
@@ -97,7 +97,7 @@ public class ScenarioBuilder
             .Build();
         return this;
     }
-    
+
     /// <summary>
     /// Создает сценарий канала (сообщение от канала)
     /// <tags>builders, scenario, channel, fluent-api</tags>
@@ -112,7 +112,7 @@ public class ScenarioBuilder
             .Build();
         return this;
     }
-    
+
     /// <summary>
     /// Строит сценарий
     /// <tags>builders, scenario, build, fluent-api</tags>
@@ -126,7 +126,7 @@ public class ScenarioBuilder
             .FromUser(_user)
             .InChat(_chat)
             .Build();
-            
+
         return new TestScenario
         {
             User = _user,

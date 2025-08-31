@@ -19,16 +19,16 @@ public static class HandlersModule
         services.AddSingleton<IUpdateDispatcher, UpdateDispatcher>();
         services.AddSingleton<IntroFlowService>();
         services.AddSingleton<IBotPermissionsService, BotPermissionsService>();
-        
+
         // Регистрируем MessageHandler только один раз для каждого интерфейса
         services.AddSingleton<IUpdateHandler, MessageHandler>();
-        services.AddSingleton<IMessageHandler, MessageHandler>();
-        
+        //   services.AddSingleton<IMessageHandler, MessageHandler>();
+
         services.AddSingleton<IUpdateHandler, CallbackQueryHandler>();
         services.AddSingleton<CallbackQueryHandler>();
         services.AddSingleton<IUpdateHandler, ChatMemberHandler>();
         services.AddSingleton<ChatMemberHandler>();
-        
+
         return services;
     }
-} 
+}

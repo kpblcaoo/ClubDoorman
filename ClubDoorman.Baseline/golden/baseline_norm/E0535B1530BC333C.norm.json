@@ -1,0 +1,8 @@
+{
+  "Schema": 4,
+  "Id": 14,
+  "CorrelationId": "E0535B1530BC333C",
+  "ShortName": "ReplyWithLink",
+  "Action": "Delete",
+  "RuleCode": "ModeratedDelete"
+}

@@ -141,4 +141,4 @@ public class WorkerTests
         Assert.That(userToKeyMethod, Is.Not.Null, "UserToKey method should be accessible");
         Assert.That(adminDisplayNameMethod, Is.Not.Null, "AdminDisplayName method should be accessible");
     }
-} 
+}

@@ -52,4 +52,4 @@ public interface ICaptchaService
     /// Банит пользователей, которые не прошли капчу вовремя
     /// </summary>
     Task BanExpiredCaptchaUsersAsync();
-} 
+}

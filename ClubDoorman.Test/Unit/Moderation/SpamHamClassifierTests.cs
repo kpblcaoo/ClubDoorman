@@ -84,7 +84,7 @@ public class SpamHamClassifierTests : TestBase
             .ThrowsAsync(new NullReferenceException());
 
         // Act & Assert
-        var exception = Assert.ThrowsAsync<NullReferenceException>(async () => 
+        var exception = Assert.ThrowsAsync<NullReferenceException>(async () =>
             await _classifierMock.Object.IsSpam(message.Text!));
     }
 
@@ -322,4 +322,4 @@ public class SpamHamClassifierTests : TestBase
         // Assert
         Assert.Pass("Concurrent AddHam calls executed successfully");
     }
-} 
+}

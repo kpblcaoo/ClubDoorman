@@ -11,9 +11,9 @@ public interface ILogChatService
     /// Отправить уведомление в лог-чат с правильным форматированием
     /// </summary>
     Task SendLogNotificationAsync(Message message, string reason, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Обработать бан пользователя из лог-чата (без добавления в автобан)
     /// </summary>
     Task HandleLogBanAsync(long chatId, long userId, string adminName, CancellationToken cancellationToken = default);
-} 
+}

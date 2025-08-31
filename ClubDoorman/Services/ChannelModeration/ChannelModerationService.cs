@@ -1,6 +1,7 @@
 using ClubDoorman.Services.ChannelModeration;
 using ClubDoorman.Services.Moderation;
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Models;
 using ClubDoorman.Services.UserBan;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,8 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ClubDoorman.Services.Telegram;
 using ClubDoorman.Services.Messaging;
+// Builder now resides in the same namespace folder (no .Effects subfolder)
+using ClubDoorman.Effects;
 
 namespace ClubDoorman.Services.ChannelModeration;
 
@@ -21,6 +24,9 @@ public class ChannelModerationService : IChannelModerationService
     private readonly IModerationService _moderationService;
     private readonly IUserBanService _userBanService;
     private readonly ILogger<ChannelModerationService> _logger;
+    private readonly IChannelModerationEffectsBuilder? _channelEffectsBuilder;
+    private readonly IEffectBus? _effectBus;
+    private readonly IAppConfig _appConfig;
 
     /// <summary>
     /// Создает экземпляр ChannelModerationService
@@ -34,12 +40,18 @@ public class ChannelModerationService : IChannelModerationService
         ITelegramBotClientWrapper bot,
         IModerationService moderationService,
         IUserBanService userBanService,
-        ILogger<ChannelModerationService> logger)
+        ILogger<ChannelModerationService> logger,
+        IChannelModerationEffectsBuilder? channelEffectsBuilder = null,
+        IEffectBus? effectBus = null,
+        IAppConfig? appConfig = null)
     {
         _bot = bot ?? throw new ArgumentNullException(nameof(bot));
         _moderationService = moderationService ?? throw new ArgumentNullException(nameof(moderationService));
         _userBanService = userBanService ?? throw new ArgumentNullException(nameof(userBanService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _channelEffectsBuilder = channelEffectsBuilder; // может быть null на ранних этапах миграции
+        _effectBus = effectBus; // может быть null если эффекты отключены
+        _appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
     }
 
     /// <summary>
@@ -53,7 +65,7 @@ public class ChannelModerationService : IChannelModerationService
         var chat = message.Chat;
         var senderChat = message.SenderChat!;
 
-        _logger.LogDebug("🔍 Обрабатываем сообщение от канала {ChannelTitle} в чате {ChatTitle}", 
+        _logger.LogDebug("🔍 Обрабатываем сообщение от канала {ChannelTitle} в чате {ChatTitle}",
             senderChat.Title, chat.Title);
 
         // Разрешаем сообщения от самого чата
@@ -70,15 +82,16 @@ public class ChannelModerationService : IChannelModerationService
             return;
         }
 
-        // Проверяем, следует ли разрешить сообщение без модерации
+        // Проверяем, следует ли разрешить сообщение без модерации (legacy bypass – сохраняем без изменений логики)
         if (await ShouldAllowChannelMessageAsync(message, cancellationToken))
         {
             _logger.LogDebug("✅ Сообщение от канала {ChannelTitle} разрешено без модерации", senderChat.Title);
-            return;
+            return; // В legacy не выполнялись side-effects / модерация для таких сообщений
         }
 
         // Автобан каналов если включен
-        if (Config.ChannelAutoBan)
+    var channelAutoBan = _appConfig.ChannelAutoBan;
+        if (channelAutoBan)
         {
             _logger.LogInformation("🚫 Автобан канала {ChannelTitle} включен - баним", senderChat.Title);
             await _userBanService.AutoBanChannelAsync(message, cancellationToken);
@@ -88,16 +101,34 @@ public class ChannelModerationService : IChannelModerationService
             // Проверяем, одобрен ли пользователь (если есть информация о пользователе)
             if (message.From != null && _moderationService.IsUserApproved(message.From.Id, chat.Id))
             {
-                _logger.LogDebug("✅ Пользователь {UserId} уже одобрен в чате {ChatId}, пропускаем модерацию канала {ChannelTitle}", 
+                _logger.LogDebug("✅ Пользователь {UserId} уже одобрен в чате {ChatId}, пропускаем модерацию канала {ChannelTitle}",
                     message.From.Id, chat.Id, senderChat.Title);
                 return;
             }
-            
+
             // Модерация содержимого для неизвестных каналов
-            _logger.LogInformation("🔍 Модерация содержимого сообщения от канала {ChannelTitle} в чате {ChatTitle}", 
+            _logger.LogInformation("🔍 Модерация содержимого сообщения от канала {ChannelTitle} в чате {ChatTitle}",
                 senderChat.Title, chat.Title);
-            
-            await ModerateChannelMessageContentAsync(message, cancellationToken);
+
+            // Модерация содержимого (теперь только через effects pipeline; legacy switch удалён)
+            _logger.LogInformation("🔍 Модерируем (effects) сообщение от канала {ChannelTitle} в чате {ChatTitle}",
+                senderChat.Title, chat.Title);
+            if (_channelEffectsBuilder == null || _effectBus == null)
+            {
+                _logger.LogError("[ChannelEffects] Builder или EffectBus не зарегистрированы – действие проигнорировано (legacy switch удалён)");
+                return;
+            }
+            try
+            {
+                var moderationResult = await _moderationService.CheckMessageAsync(message);
+                var effects = _channelEffectsBuilder.BuildChannelEffects(message, moderationResult);
+                _logger.LogInformation("[ChannelEffects] Executing {Count} effect(s) (Action={Action})", effects.Length, moderationResult.Action);
+                await _effectBus.ExecuteAsync(effects, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[ChannelEffects] Ошибка при модерации канала (legacy path недоступен)");
+            }
         }
     }
 
@@ -120,22 +151,22 @@ public class ChannelModerationService : IChannelModerationService
         {
             var senderChat = message.SenderChat!;
             var channelAdmins = await _bot.GetChatAdministratorsAsync(senderChat.Id, cancellationToken);
-            
-            var isOwner = channelAdmins.Any(admin => 
-                admin.User.Id == message.From.Id && 
+
+            var isOwner = channelAdmins.Any(admin =>
+                admin.User.Id == message.From.Id &&
                 admin.Status == ChatMemberStatus.Creator);
-            
+
             if (isOwner)
             {
-                _logger.LogDebug("✅ Пользователь {UserId} является владельцем канала {ChannelTitle}", 
+                _logger.LogDebug("✅ Пользователь {UserId} является владельцем канала {ChannelTitle}",
                     message.From.Id, senderChat.Title);
             }
             else
             {
-                _logger.LogDebug("❌ Пользователь {UserId} не является владельцем канала {ChannelTitle}", 
+                _logger.LogDebug("❌ Пользователь {UserId} не является владельцем канала {ChannelTitle}",
                     message.From.Id, senderChat.Title);
             }
-            
+
             return isOwner;
         }
         catch (Exception ex)
@@ -158,22 +189,22 @@ public class ChannelModerationService : IChannelModerationService
         {
             var chat = message.Chat;
             var senderChat = message.SenderChat!;
-            
+
             // Проверяем, является ли это обсуждением канала
             if (chat.Type == ChatType.Supergroup && message.IsAutomaticForward)
             {
-                _logger.LogDebug("✅ Чат {ChatTitle} является обсуждением канала {ChannelTitle}", 
+                _logger.LogDebug("✅ Чат {ChatTitle} является обсуждением канала {ChannelTitle}",
                     chat.Title, senderChat.Title);
                 return true;
             }
-            
+
             // Проверяем связанный чат через ChatFullInfo
             try
             {
                 var chatFullInfo = await _bot.GetChatFullInfo(chat.Id, cancellationToken);
                 if (chatFullInfo.LinkedChatId == senderChat.Id)
                 {
-                    _logger.LogDebug("✅ Чат {ChatTitle} связан с каналом {ChannelTitle}", 
+                    _logger.LogDebug("✅ Чат {ChatTitle} связан с каналом {ChannelTitle}",
                         chat.Title, senderChat.Title);
                     return true;
                 }
@@ -182,12 +213,12 @@ public class ChannelModerationService : IChannelModerationService
             {
                 _logger.LogDebug(ex, "Не удалось получить ChatFullInfo для чата {ChatId}", chat.Id);
             }
-            
+
             return false;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "⚠️ Не удалось проверить связь чата {ChatId} с каналом {ChannelId}", 
+            _logger.LogWarning(ex, "⚠️ Не удалось проверить связь чата {ChatId} с каналом {ChannelId}",
                 message.Chat.Id, message.SenderChat?.Id);
             return false;
         }
@@ -207,85 +238,14 @@ public class ChannelModerationService : IChannelModerationService
         {
             return true;
         }
-        
+
         // 2. Проверяем, является ли отправитель владельцем канала
         if (await IsChannelOwnerAsync(message, cancellationToken))
         {
             return true;
         }
-        
+
         return false;
     }
 
-    /// <summary>
-    /// Модерирует содержимое сообщения от канала
-    /// <tags>channel, moderation, content</tags>
-    /// </summary>
-    /// <param name="message">Сообщение от канала</param>
-    /// <param name="cancellationToken">Токен отмены</param>
-    private async Task ModerateChannelMessageContentAsync(Message message, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var senderChat = message.SenderChat!;
-            var chat = message.Chat;
-            
-            _logger.LogInformation("🔍 Модерируем содержимое сообщения от канала {ChannelTitle} в чате {ChatTitle}", 
-                senderChat.Title, chat.Title);
-            
-            // Проверяем содержимое сообщения через ModerationService
-            var moderationResult = await _moderationService.CheckMessageAsync(message);
-            
-            switch (moderationResult.Action)
-            {
-                case ModerationAction.Allow:
-                    _logger.LogDebug("✅ Содержимое сообщения от канала {ChannelTitle} разрешено: {Reason}", 
-                        senderChat.Title, moderationResult.Reason);
-                    
-                    // Засчитываем хорошее сообщение для одобрения пользователя
-                    if (message.From != null)
-                    {
-                        var allowedMessageText = message.Text ?? message.Caption ?? "";
-                        
-                        // Проверяем AI детект для подозрительных пользователей
-                        var aiDetectBlocked = await _moderationService.CheckAiDetectAndNotifyAdminsAsync(message.From, chat, message);
-                        
-                        // Засчитываем хорошее сообщение только если пользователь не был заблокирован AI детектом
-                        if (!aiDetectBlocked)
-                        {
-                            await _moderationService.IncrementGoodMessageCountAsync(message.From, chat, allowedMessageText);
-                        }
-                    }
-                    break;
-                
-                case ModerationAction.Delete:
-                    _logger.LogInformation("🗑️ Удаляем сообщение от канала {ChannelTitle}: {Reason}", 
-                        senderChat.Title, moderationResult.Reason);
-                    await _bot.DeleteMessage(chat.Id, message.MessageId, cancellationToken);
-                    break;
-                
-                case ModerationAction.Report:
-                    _logger.LogInformation("📋 Отправляем сообщение от канала {ChannelTitle} в админ-чат: {Reason}", 
-                        senderChat.Title, moderationResult.Reason);
-                    // Здесь можно добавить отправку в админ-чат
-                    break;
-                
-                case ModerationAction.Ban:
-                    _logger.LogWarning("🚫 Баним канал {ChannelTitle} за содержимое: {Reason}", 
-                        senderChat.Title, moderationResult.Reason);
-                    await _userBanService.AutoBanChannelAsync(message, cancellationToken);
-                    break;
-                
-                default:
-                    _logger.LogInformation("❓ Неизвестное действие модерации для канала {ChannelTitle}: {Action}", 
-                        senderChat.Title, moderationResult.Action);
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "❌ Ошибка при модерации содержимого сообщения от канала {ChannelTitle}", 
-                message.SenderChat?.Title);
-        }
-    }
-} 
+}

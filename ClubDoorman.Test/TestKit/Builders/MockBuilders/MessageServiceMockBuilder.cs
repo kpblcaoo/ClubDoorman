@@ -29,7 +29,7 @@ public class MessageServiceMockBuilder
                 It.IsAny<object>(),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        
+
         return this;
     }
 
@@ -44,7 +44,7 @@ public class MessageServiceMockBuilder
                 It.IsAny<NotificationData>(),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        
+
         return this;
     }
 
@@ -61,7 +61,7 @@ public class MessageServiceMockBuilder
                 It.IsAny<object>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Message { Text = "User notification with reply" });
-        
+
         return this;
     }
 
@@ -78,13 +78,13 @@ public class MessageServiceMockBuilder
                 It.IsAny<object>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Message service error"));
-        
+
         _mock.Setup(x => x.SendAdminNotificationAsync(
                 It.IsAny<AdminNotificationType>(),
                 It.IsAny<NotificationData>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Message service error"));
-        
+
         return this;
     }
 
@@ -99,4 +99,4 @@ public class MessageServiceMockBuilder
     /// <tags>builders, message-service, build-object, fluent-api</tags>
     /// </summary>
     public IMessageService BuildObject() => Build().Object;
-} 
+}

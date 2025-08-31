@@ -227,4 +227,4 @@ public class MockAiChecksTests
         Assert.That(attentionResult.SpamProbability.Probability, Is.EqualTo(0.4));
         Assert.That(suspiciousResult.Probability, Is.EqualTo(0.6));
     }
-} 
+}
