@@ -4,6 +4,7 @@ services:
     container_name: doorman
     depends_on:
       - rabbitmq
+      - clickhouse
     environment:
       - TZ=Europe/Moscow
       - DOORMAN_CLUB_SERVICE_TOKEN=${DOORMAN_CLUB_SERVICE_TOKEN:-test_token}
@@ -18,6 +19,17 @@ services:
       - DOORMAN_RABBITMQ__PREFETCH=${DOORMAN_RABBITMQ__PREFETCH:-50}
       - DOORMAN_RABBITMQ__PUBLISH_TIMEOUT_SECONDS=${DOORMAN_RABBITMQ__PUBLISH_TIMEOUT_SECONDS:-5}
       - DOORMAN_RABBITMQ__EVENT_EXCHANGE=${DOORMAN_RABBITMQ__EVENT_EXCHANGE:-spampyre.events}
+      - DOORMAN_CLICKHOUSE__ENABLED=${DOORMAN_CLICKHOUSE__ENABLED:-false}
+      - DOORMAN_CLICKHOUSE__URL=${DOORMAN_CLICKHOUSE__URL:-http://clickhouse:8123}
+      - DOORMAN_CLICKHOUSE__DATABASE=${DOORMAN_CLICKHOUSE__DATABASE:-tg}
+      - DOORMAN_CLICKHOUSE__RAW_TABLE=${DOORMAN_CLICKHOUSE__RAW_TABLE:-tg.messages_raw}
+      - DOORMAN_CLICKHOUSE__INGEST_SOURCE=${DOORMAN_CLICKHOUSE__INGEST_SOURCE:-live}
+      - DOORMAN_CLICKHOUSE__BATCH_SIZE=${DOORMAN_CLICKHOUSE__BATCH_SIZE:-500}
+      - DOORMAN_CLICKHOUSE__FLUSH_MS=${DOORMAN_CLICKHOUSE__FLUSH_MS:-500}
+      - DOORMAN_CLICKHOUSE__CHANNEL_CAPACITY=${DOORMAN_CLICKHOUSE__CHANNEL_CAPACITY:-5000}
+      - DOORMAN_CLICKHOUSE__MAX_RETRY=${DOORMAN_CLICKHOUSE__MAX_RETRY:-3}
+      - DOORMAN_CLICKHOUSE__RETRY_DELAY=${DOORMAN_CLICKHOUSE__RETRY_DELAY:-2}
+      - DOORMAN_CLICKHOUSE__HTTP_TIMEOUT=${DOORMAN_CLICKHOUSE__HTTP_TIMEOUT:-10}
     volumes:
       - ./ClubDoorman/data:/app/data
     restart: unless-stopped
@@ -35,5 +47,21 @@ services:
       - rabbitmq-data:/var/lib/rabbitmq
     restart: unless-stopped
 
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: clickhouse
+    environment:
+      CLICKHOUSE_DB: ${DOORMAN_CLICKHOUSE__DATABASE:-tg}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - clickhouse-logs:/var/log/clickhouse-server
+    restart: unless-stopped
+
 volumes:
   rabbitmq-data:
+  clickhouse-data:
+  clickhouse-logs:

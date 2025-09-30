@@ -28,6 +28,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Models; // ModerationResult, ModerationAction, CaptchaInfo
+using ClubDoorman.Services.ClickHouse;
 
 namespace ClubDoorman.Test.Unit.Handlers;
 
@@ -86,6 +87,8 @@ public class MessageHandlerSemanticsTests
         // Build real pipeline with migrated steps (10-220) so semantics for moderation + AI analysis are emitted via pipeline (legacy path removed).
     var loggerFactory = LoggerFactory.Create(b => { });
     var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var clickHouseOptions = Options.Create(new ClickHouseOptions());
+        var clickHouseSink = NullClickHouseMessageSink.Instance;
         var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
         {
             new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
@@ -98,6 +101,7 @@ public class MessageHandlerSemanticsTests
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep(clickHouseSink, clickHouseOptions, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
@@ -388,6 +392,8 @@ public class MessageHandlerSemanticsTests
         // Build full pipeline (10-220) for this manually constructed handler
         var loggerFactory = LoggerFactory.Create(b => { });
         var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var clickHouseOptions2 = Options.Create(new ClickHouseOptions());
+        var clickHouseSink2 = NullClickHouseMessageSink.Instance;
         var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
         {
             new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
@@ -400,6 +406,7 @@ public class MessageHandlerSemanticsTests
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep(clickHouseSink2, clickHouseOptions2, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
@@ -469,6 +476,8 @@ public class MessageHandlerSemanticsTests
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
         var loggerFactory = LoggerFactory.Create(b => { });
         var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var clickHouseOptions3 = Options.Create(new ClickHouseOptions());
+        var clickHouseSink3 = NullClickHouseMessageSink.Instance;
         var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
         {
             new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
@@ -481,6 +490,7 @@ public class MessageHandlerSemanticsTests
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacadeApproved.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep(clickHouseSink3, clickHouseOptions3, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacadeApproved.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
@@ -577,6 +587,8 @@ public class MessageHandlerSemanticsTests
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
         var loggerFactory = LoggerFactory.Create(b => { });
         var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var clickHouseOptions4 = Options.Create(new ClickHouseOptions());
+        var clickHouseSink4 = NullClickHouseMessageSink.Instance;
         var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
         {
             new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
@@ -589,6 +601,7 @@ public class MessageHandlerSemanticsTests
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep(clickHouseSink4, clickHouseOptions4, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
@@ -658,6 +671,8 @@ public class MessageHandlerSemanticsTests
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
         var loggerFactory = LoggerFactory.Create(b => { });
         var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var clickHouseOptions5 = Options.Create(new ClickHouseOptions());
+        var clickHouseSink5 = NullClickHouseMessageSink.Instance;
         var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
         {
             new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
@@ -670,6 +685,7 @@ public class MessageHandlerSemanticsTests
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep(clickHouseSink5, clickHouseOptions5, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
@@ -740,6 +756,8 @@ public class MessageHandlerSemanticsTests
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
         var loggerFactory = LoggerFactory.Create(b => { });
         var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var clickHouseOptions6 = Options.Create(new ClickHouseOptions());
+        var clickHouseSink6 = NullClickHouseMessageSink.Instance;
         var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
         {
             new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
@@ -752,6 +770,7 @@ public class MessageHandlerSemanticsTests
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep(clickHouseSink6, clickHouseOptions6, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
@@ -822,6 +841,8 @@ public class MessageHandlerSemanticsTests
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
         var loggerFactory = LoggerFactory.Create(b => { });
         var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var clickHouseOptions7 = Options.Create(new ClickHouseOptions());
+        var clickHouseSink7 = NullClickHouseMessageSink.Instance;
         var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
         {
             new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
@@ -834,6 +855,7 @@ public class MessageHandlerSemanticsTests
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep(clickHouseSink7, clickHouseOptions7, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),
@@ -904,6 +926,8 @@ public class MessageHandlerSemanticsTests
     var eventsPub = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
         var loggerFactory = LoggerFactory.Create(b => { });
         var gmEvents = new GoldenMasterModerationEventPublisher(recorder, new NullLogger<GoldenMasterModerationEventPublisher>());
+        var clickHouseOptions8 = Options.Create(new ClickHouseOptions());
+        var clickHouseSink8 = NullClickHouseMessageSink.Instance;
         var steps = new List<ClubDoorman.Services.Handlers.Pipeline.IMessageStep>
         {
             new ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep(commandRouter.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.CommandStep>()),
@@ -916,6 +940,7 @@ public class MessageHandlerSemanticsTests
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManager.Object, userBanService.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep(clickHouseSink8, clickHouseOptions8, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManager.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacade.Object, userFlowLogger.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascade.Object, gmEvents, loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),

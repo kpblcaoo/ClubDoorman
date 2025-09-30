@@ -1,4 +1,5 @@
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.ClickHouse;
 using ClubDoorman.Services.Core.Configuration;
 using ClubDoorman.Services.Messaging;
 using Microsoft.Extensions.Options;
@@ -17,6 +18,7 @@ public class AppConfig : IAppConfig
     private readonly IOptions<ChatAccessOptions> _chatAccessOptions;
     private readonly IOptions<AiOptions> _aiOptions;
     private readonly IOptions<RabbitMqOptions> _rabbitMqOptions;
+    private readonly IOptions<ClickHouseOptions> _clickHouseOptions;
     private readonly IOptions<TestHarnessOptions>? _testHarnessOptions;
 
     public AppConfig(
@@ -28,6 +30,7 @@ public class AppConfig : IAppConfig
         IOptions<ChatAccessOptions> chatAccessOptions,
         IOptions<AiOptions> aiOptions,
         IOptions<RabbitMqOptions> rabbitMqOptions,
+        IOptions<ClickHouseOptions> clickHouseOptions,
         IOptions<TestHarnessOptions>? testHarnessOptions)
     {
         _autoBanOptions = autoBanOptions;
@@ -38,6 +41,7 @@ public class AppConfig : IAppConfig
         _chatAccessOptions = chatAccessOptions;
         _aiOptions = aiOptions;
         _rabbitMqOptions = rabbitMqOptions;
+        _clickHouseOptions = clickHouseOptions;
         _testHarnessOptions = testHarnessOptions ?? Microsoft.Extensions.Options.Options.Create(new TestHarnessOptions());
         Effects = new EffectsConfiguration();
     }
@@ -272,6 +276,11 @@ public class AppConfig : IAppConfig
     /// Настройки интеграции RabbitMQ.
     /// </summary>
     public RabbitMqOptions RabbitMq => _rabbitMqOptions.Value;
+
+    /// <summary>
+    /// Настройки ClickHouse.
+    /// </summary>
+    public ClickHouseOptions ClickHouse => _clickHouseOptions.Value;
 
     // === ТЕСТОВЫЕ / GOLDEN НАСТРОЙКИ ===
 

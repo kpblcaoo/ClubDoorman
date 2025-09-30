@@ -146,6 +146,13 @@ If you're willing to do the heavy lifting of translating all the text of this bo
 - `DOORMAN_RABBITMQ__PREFETCH` и `DOORMAN_RABBITMQ__PUBLISH_TIMEOUT_SECONDS` - настройки производительности очереди
 - `DOORMAN_RABBITMQ__EVENT_EXCHANGE` - exchange для событий модерации (зарезервировано под будущую отправку)
 - `RABBITMQ_DEFAULT_USER` / `RABBITMQ_DEFAULT_PASS` - учётные данные брокера в docker-compose (используются, только если поднимаете локальный RabbitMQ)
+- `DOORMAN_CLICKHOUSE__ENABLED` - включить потоковую выгрузку сообщений в ClickHouse (по умолчанию `false`)
+- `DOORMAN_CLICKHOUSE__URL` - HTTP endpoint ClickHouse (например `http://clickhouse:8123`)
+- `DOORMAN_CLICKHOUSE__DATABASE` и `DOORMAN_CLICKHOUSE__RAW_TABLE` - база и таблица для сырой ленты (`tg.messages_raw` по умолчанию)
+- `DOORMAN_CLICKHOUSE__BATCH_SIZE` / `DOORMAN_CLICKHOUSE__FLUSH_MS` / `DOORMAN_CLICKHOUSE__CHANNEL_CAPACITY` - параметры буфера вставки (размер батча, период флашей и ёмкость очереди)
+- `DOORMAN_CLICKHOUSE__INGEST_SOURCE` - метка источника (проставляется в поле `ingest_source`, дефолт `live`)
+- `DOORMAN_CLICKHOUSE__USERNAME` / `DOORMAN_CLICKHOUSE__PASSWORD` - опциональные креды для HTTP Basic Auth
+- `DOORMAN_CLICKHOUSE__INCLUDE_PRIVATE` - включать ли приватные чаты в аналитику (по умолчанию `false`)
 
 ### Docker Compose
 
@@ -166,6 +173,7 @@ services:
 
 ```bash
 docker compose up -d rabbitmq
+docker compose up -d clickhouse
 docker compose up -d doorman
 ```
 
@@ -175,11 +183,24 @@ docker compose up -d doorman
 DOORMAN_BOT_API=1234567890:AAAA-YOUR-TOKEN-HERE
 DOORMAN_ADMIN_CHAT=-1001234567890
 DOORMAN_RABBITMQ__ENABLED=true
+DOORMAN_CLICKHOUSE__ENABLED=true
+DOORMAN_CLICKHOUSE__URL=http://clickhouse:8123
+DOORMAN_CLICKHOUSE__DATABASE=tg
+DOORMAN_CLICKHOUSE__RAW_TABLE=tg.messages_raw
+DOORMAN_CLICKHOUSE__BATCH_SIZE=500
 RABBITMQ_DEFAULT_USER=guest
 RABBITMQ_DEFAULT_PASS=guest
 ```
 
-Такой конфиг поднимет локальный RabbitMQ с веб-панелью на `http://localhost:15672/` и автоматически подключит бота к очереди `spampyre.pipeline.input`.
+Перед запуском ingestion один раз создайте таблицы и представления в ClickHouse:
+
+```bash
+cat scripts/init_clickhouse.sql | clickhouse-client -h localhost
+```
+
+Скрипт разворачивает сырую ленту `tg.messages_raw`, агрегаты на минутных бакетах (`tg.metrics_minute`) и материализованное представление для Grafana (`tg.metrics_minute_v`).
+
+Такой конфиг поднимет локальный RabbitMQ с веб-панелью на `http://localhost:15672/` и ClickHouse на `http://localhost:8123`, автоматически подключит бота к очереди `spampyre.pipeline.input` и включит выгрузку сообщений в таблицу `tg.messages_raw`.
 **Важно понимать:**
 - Бот **не банит** пользователей за сообщения, только удаляет подозрительные
 - Ложные срабатывания отслеживаются и исправляются

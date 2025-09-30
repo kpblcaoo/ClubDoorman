@@ -27,6 +27,7 @@ using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Messaging;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Notifications;
+using ClubDoorman.Services.ClickHouse;
 
 namespace ClubDoorman.TestInfrastructure;
 
@@ -56,6 +57,7 @@ public class FakeServicesFactory
             Options.Create(new ChatAccessOptions()),
             Options.Create(new AiOptions()),
             Options.Create(new RabbitMqOptions()),
+            Options.Create(new ClickHouseOptions()),
             Options.Create(new TestHarnessOptions())
         );
     }
@@ -226,6 +228,7 @@ public class FakeServicesFactory
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep(userManagerMock.Object, new Mock<IUserBanService>().Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep(moderationFacadeMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep(userFlowLoggerMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+            new ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep(ClubDoorman.Services.ClickHouse.NullClickHouseMessageSink.Instance, Options.Create(new ClubDoorman.Services.ClickHouse.ClickHouseOptions()), _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(userManagerMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep(moderationFacadeMock.Object, userFlowLoggerMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>()),
             new ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep(aiCascadeServiceMock.Object, eventsPublisher, _loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>()),

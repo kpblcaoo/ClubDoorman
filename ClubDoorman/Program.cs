@@ -169,6 +169,12 @@ public class Program
         Console.WriteLine($"   • Группы без VPN-рекламы: {appConfig.NoVpnAdGroups.Count}");
         Console.WriteLine($"   • Группы с отключенной капчей: {appConfig.NoCaptchaGroups.Count}");
         Console.WriteLine($"   • Чаты с отключенной фильтрацией медиа: {appConfig.MediaFilteringDisabledChats.Count}");
+        Console.WriteLine($"   • DOORMAN_CLICKHOUSE__ENABLED: {appConfig.ClickHouse.Enabled}");
+        if (appConfig.ClickHouse.Enabled)
+        {
+            Console.WriteLine($"   • ClickHouse endpoint: {appConfig.ClickHouse.Url ?? "(not set)"}");
+            Console.WriteLine($"   • ClickHouse batch size: {appConfig.ClickHouse.BatchSize}, flush ms: {appConfig.ClickHouse.FlushIntervalMilliseconds}");
+        }
 
         await host.RunAsync();
     }

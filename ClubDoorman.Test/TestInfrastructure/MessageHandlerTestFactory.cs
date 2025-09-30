@@ -36,6 +36,7 @@ using ClubDoorman.Features.AdminOps;
 using ClubDoorman.Services.Handlers;
 using ClubDoorman.Test.TestInfrastructure;
 using ClubDoorman.Services.Handlers.Pipeline; // added for IMessagePipeline, IMessageStep
+using ClubDoorman.Services.ClickHouse;
 
 
 namespace ClubDoorman.Test.TestInfrastructure;
@@ -687,6 +688,10 @@ public class MessageHandlerTestFactory
                 UserFlowLoggerMock.Object,
                 eventsMock.Object,
                 loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>()),
+                new ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep(
+                    NullClickHouseMessageSink.Instance,
+                    Options.Create(new ClickHouseOptions()),
+                    loggerFactory.CreateLogger<ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep>()),
             // 140 Club member skip
             new ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep(
                 UserManagerMock.Object,

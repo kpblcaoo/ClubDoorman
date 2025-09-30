@@ -1,4 +1,5 @@
 using ClubDoorman.Infrastructure;
+using ClubDoorman.Services.ClickHouse;
 
 namespace ClubDoorman.Services.Core.Configuration;
 
@@ -218,6 +219,11 @@ public interface IAppConfig
     /// Настройки интеграции RabbitMQ для конвейера сообщений.
     /// </summary>
     RabbitMqOptions RabbitMq { get; }
+
+    /// <summary>
+    /// Настройки интеграции ClickHouse для аналитики.
+    /// </summary>
+    ClickHouseOptions ClickHouse { get; }
 
     // === ТЕСТОВЫЕ / GOLDEN НАСТРОЙКИ ===
 

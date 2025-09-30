@@ -9,6 +9,7 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.AI;
 using ClubDoorman.Services.TextProcessing;
 using ClubDoorman.Services.Core.Configuration;
+using ClubDoorman.Services.ClickHouse;
 
 namespace ClubDoorman.Services.AI;
 
@@ -56,6 +57,7 @@ public class SpamHamClassifier : ISpamHamClassifier
         Microsoft.Extensions.Options.Options.Create(new ChatAccessOptions()),
         Microsoft.Extensions.Options.Options.Create(new AiOptions()),
         Microsoft.Extensions.Options.Options.Create(new RabbitMqOptions()),
+        Microsoft.Extensions.Options.Options.Create(new ClickHouseOptions()),
         Microsoft.Extensions.Options.Options.Create(new TestHarnessOptions())))
     { }
 

@@ -1,3 +1,5 @@
+using ClubDoorman.Services.ClickHouse;
+
 namespace ClubDoorman.Services.Core.Configuration;
 
 /// <summary>
@@ -142,6 +144,33 @@ public static class ConfigurationHelper
             PublishTimeoutSeconds = publishTimeout,
             EventExchange = Environment.GetEnvironmentVariable("DOORMAN_RABBITMQ__EVENT_EXCHANGE") ?? "spampyre.events"
         };
+    }
+
+    /// <summary>
+    /// Загружает настройки ClickHouse для аналитики.
+    /// </summary>
+    public static ClickHouseOptions LoadClickHouseOptions()
+    {
+        var options = new ClickHouseOptions
+        {
+            Enabled = GetEnvironmentBool("DOORMAN_CLICKHOUSE__ENABLED"),
+            Url = Environment.GetEnvironmentVariable("DOORMAN_CLICKHOUSE__URL"),
+            Database = Environment.GetEnvironmentVariable("DOORMAN_CLICKHOUSE__DATABASE") ?? "tg",
+            RawTable = Environment.GetEnvironmentVariable("DOORMAN_CLICKHOUSE__RAW_TABLE") ?? "tg.messages_raw",
+            IngestSource = Environment.GetEnvironmentVariable("DOORMAN_CLICKHOUSE__INGEST_SOURCE") ?? "live",
+            BatchSize = GetEnvironmentInt("DOORMAN_CLICKHOUSE__BATCH_SIZE", 500),
+            FlushIntervalMilliseconds = GetEnvironmentInt("DOORMAN_CLICKHOUSE__FLUSH_MS", 500),
+            ChannelCapacity = GetEnvironmentInt("DOORMAN_CLICKHOUSE__CHANNEL_CAPACITY", 5000),
+            MaxRetryAttempts = GetEnvironmentInt("DOORMAN_CLICKHOUSE__MAX_RETRY", 3),
+            RetryDelaySeconds = GetEnvironmentInt("DOORMAN_CLICKHOUSE__RETRY_DELAY", 2),
+            HttpTimeoutSeconds = GetEnvironmentInt("DOORMAN_CLICKHOUSE__HTTP_TIMEOUT", 10),
+            Username = Environment.GetEnvironmentVariable("DOORMAN_CLICKHOUSE__USERNAME"),
+            Password = Environment.GetEnvironmentVariable("DOORMAN_CLICKHOUSE__PASSWORD"),
+            IncludePrivateChats = GetEnvironmentBool("DOORMAN_CLICKHOUSE__INCLUDE_PRIVATE")
+        };
+
+        options.Normalize();
+        return options;
     }
 
     /// <summary>

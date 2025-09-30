@@ -26,6 +26,7 @@ using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.ChannelModeration;
 using ClubDoorman.Services.Logging;
 using ClubDoorman.Services.RabbitMq;
+using ClubDoorman.Services.ClickHouse;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -139,6 +140,7 @@ public static class ServiceCollectionExtensions
         services.AddAIServices();
         services.AddUserManagementServices();
         services.AddMessagingServices();
+        services.AddClickHouseServices();
     services.AddRabbitMqServices();
         services.AddTextProcessingServices();
         services.AddCaptchaServices();
@@ -160,6 +162,7 @@ public static class ServiceCollectionExtensions
     services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.BanlistCheckStep>(); // 110
     services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.AlreadyApprovedStep>(); // 120
     services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.FirstMessageLogStep>(); // 130
+    services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.ClickHouseIngestStep>(); // 135
     services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.ClubMemberSkipStep>(); // 140
     services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.BaseModerationStep>(); // 200
     services.AddSingleton<Services.Handlers.Pipeline.IMessageStep, ClubDoorman.Services.Handlers.Pipeline.Steps.AiProfileAnalysisStep>(); // 210

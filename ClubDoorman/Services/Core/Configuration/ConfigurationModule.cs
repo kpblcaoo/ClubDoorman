@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using ClubDoorman.Services.ClickHouse;
 
 namespace ClubDoorman.Services.Core.Configuration;
 
@@ -100,6 +101,25 @@ public static class ConfigurationModule
             options.PrefetchCount = loaded.PrefetchCount;
             options.PublishTimeoutSeconds = loaded.PublishTimeoutSeconds;
             options.EventExchange = loaded.EventExchange;
+        });
+
+        services.Configure<ClickHouseOptions>(options =>
+        {
+            var loaded = ConfigurationHelper.LoadClickHouseOptions();
+            options.Enabled = loaded.Enabled;
+            options.Url = loaded.Url;
+            options.Database = loaded.Database;
+            options.RawTable = loaded.RawTable;
+            options.IngestSource = loaded.IngestSource;
+            options.BatchSize = loaded.BatchSize;
+            options.FlushIntervalMilliseconds = loaded.FlushIntervalMilliseconds;
+            options.ChannelCapacity = loaded.ChannelCapacity;
+            options.MaxRetryAttempts = loaded.MaxRetryAttempts;
+            options.RetryDelaySeconds = loaded.RetryDelaySeconds;
+            options.HttpTimeoutSeconds = loaded.HttpTimeoutSeconds;
+            options.Username = loaded.Username;
+            options.Password = loaded.Password;
+            options.IncludePrivateChats = loaded.IncludePrivateChats;
         });
 
         services.Configure<TestHarnessOptions>(options =>
