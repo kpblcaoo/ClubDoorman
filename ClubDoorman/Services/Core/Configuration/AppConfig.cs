@@ -16,6 +16,7 @@ public class AppConfig : IAppConfig
     private readonly IOptions<CoreOptions> _coreOptions;
     private readonly IOptions<ChatAccessOptions> _chatAccessOptions;
     private readonly IOptions<AiOptions> _aiOptions;
+    private readonly IOptions<RabbitMqOptions> _rabbitMqOptions;
     private readonly IOptions<TestHarnessOptions>? _testHarnessOptions;
 
     public AppConfig(
@@ -25,8 +26,9 @@ public class AppConfig : IAppConfig
         IOptions<ChatFilteringOptions> chatFilteringOptions,
         IOptions<CoreOptions> coreOptions,
         IOptions<ChatAccessOptions> chatAccessOptions,
-    IOptions<AiOptions> aiOptions,
-    IOptions<TestHarnessOptions>? testHarnessOptions)
+        IOptions<AiOptions> aiOptions,
+        IOptions<RabbitMqOptions> rabbitMqOptions,
+        IOptions<TestHarnessOptions>? testHarnessOptions)
     {
         _autoBanOptions = autoBanOptions;
         _violationThresholdOptions = violationThresholdOptions;
@@ -35,7 +37,8 @@ public class AppConfig : IAppConfig
         _coreOptions = coreOptions;
         _chatAccessOptions = chatAccessOptions;
         _aiOptions = aiOptions;
-    _testHarnessOptions = testHarnessOptions ?? Microsoft.Extensions.Options.Options.Create(new TestHarnessOptions());
+        _rabbitMqOptions = rabbitMqOptions;
+        _testHarnessOptions = testHarnessOptions ?? Microsoft.Extensions.Options.Options.Create(new TestHarnessOptions());
         Effects = new EffectsConfiguration();
     }
 
@@ -264,6 +267,11 @@ public class AppConfig : IAppConfig
     /// Конфигурация эффектов модерации
     /// </summary>
     public EffectsConfiguration Effects { get; }
+
+    /// <summary>
+    /// Настройки интеграции RabbitMQ.
+    /// </summary>
+    public RabbitMqOptions RabbitMq => _rabbitMqOptions.Value;
 
     // === ТЕСТОВЫЕ / GOLDEN НАСТРОЙКИ ===
 

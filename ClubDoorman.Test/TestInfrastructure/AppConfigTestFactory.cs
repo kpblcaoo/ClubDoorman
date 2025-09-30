@@ -25,7 +25,8 @@ public static class AppConfigTestFactory
         mock.Setup(x => x.SuspiciousToApprovedMessageCount).Returns(3);
         mock.Setup(x => x.AdminChatId).Returns(123456789);
         mock.Setup(x => x.LogAdminChatId).Returns(123456789);
-        mock.Setup(x => x.AiEnabledChats).Returns(new HashSet<long> { 123456789 });
+    mock.Setup(x => x.AiEnabledChats).Returns(new HashSet<long> { 123456789 });
+    mock.Setup(x => x.RabbitMq).Returns(new RabbitMqOptions());
     mock.Setup(x => x.GoldenBaselineMode).Returns(false);
     mock.Setup(x => x.TestBlacklistUserIds).Returns(new HashSet<long>());
 
@@ -60,7 +61,8 @@ public static class AppConfigTestFactory
         mock.Setup(x => x.SuspiciousToApprovedMessageCount).Returns(3);
         mock.Setup(x => x.AdminChatId).Returns(123456789);
         mock.Setup(x => x.LogAdminChatId).Returns(123456789);
-        mock.Setup(x => x.AiEnabledChats).Returns(new HashSet<long>());
+    mock.Setup(x => x.AiEnabledChats).Returns(new HashSet<long>());
+    mock.Setup(x => x.RabbitMq).Returns(new RabbitMqOptions());
     mock.Setup(x => x.GoldenBaselineMode).Returns(false);
     mock.Setup(x => x.TestBlacklistUserIds).Returns(new HashSet<long>());
 
@@ -104,7 +106,8 @@ public static class AppConfigTestFactory
         mock.Setup(x => x.SuspiciousToApprovedMessageCount).Returns(suspiciousToApprovedMessageCount);
         mock.Setup(x => x.AdminChatId).Returns(adminChatId);
         mock.Setup(x => x.LogAdminChatId).Returns(logAdminChatId);
-        mock.Setup(x => x.AiEnabledChats).Returns(aiEnabledChats ?? new HashSet<long> { adminChatId });
+    mock.Setup(x => x.AiEnabledChats).Returns(aiEnabledChats ?? new HashSet<long> { adminChatId });
+    mock.Setup(x => x.RabbitMq).Returns(new RabbitMqOptions());
     mock.Setup(x => x.GoldenBaselineMode).Returns(false);
     mock.Setup(x => x.TestBlacklistUserIds).Returns(new HashSet<long>());
 

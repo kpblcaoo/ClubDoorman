@@ -214,6 +214,11 @@ public interface IAppConfig
     /// </summary>
     EffectsConfiguration Effects { get; }
 
+    /// <summary>
+    /// Настройки интеграции RabbitMQ для конвейера сообщений.
+    /// </summary>
+    RabbitMqOptions RabbitMq { get; }
+
     // === ТЕСТОВЫЕ / GOLDEN НАСТРОЙКИ ===
 
     /// <summary>

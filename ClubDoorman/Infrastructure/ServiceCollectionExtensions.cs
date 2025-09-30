@@ -25,6 +25,7 @@ using ClubDoorman.Effects;
 using ClubDoorman.Infrastructure;
 using ClubDoorman.Services.ChannelModeration;
 using ClubDoorman.Services.Logging;
+using ClubDoorman.Services.RabbitMq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -138,6 +139,7 @@ public static class ServiceCollectionExtensions
         services.AddAIServices();
         services.AddUserManagementServices();
         services.AddMessagingServices();
+    services.AddRabbitMqServices();
         services.AddTextProcessingServices();
         services.AddCaptchaServices();
     services.AddHandlersServices();
@@ -181,7 +183,8 @@ public static class ServiceCollectionExtensions
                 provider.GetRequiredService<ITelegramBotClientWrapper>(),
                 provider.GetRequiredService<IMessageService>(),
                 provider.GetRequiredService<IAppConfig>(),
-                provider.GetRequiredService<IUserBanService>()
+                provider.GetRequiredService<IUserBanService>(),
+                provider.GetRequiredService<IRabbitMqUpdatePublisher>()
             );
         });
 

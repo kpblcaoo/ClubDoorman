@@ -30,6 +30,7 @@
     <PackageReference Include="Serilog.Formatting.Compact" Version="2.0.0" />
     <PackageReference Include="System.Runtime.Caching" Version="8.0.0" />
     <PackageReference Include="Telegram.Bot" Version="22.4.4" />
+  <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
     <!-- AI проверки профилей -->
     <PackageReference Include="tryAGI.OpenAI" Version="4.2.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="8.0.0" />

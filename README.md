@@ -140,6 +140,12 @@ If you're willing to do the heavy lifting of translating all the text of this bo
 - `DOORMAN_CHANNELS_AUTOBAN_DISABLE` - отключить бан сообщений от каналов
 - `DOORMAN_APPROVE_BUTTON` - добавить кнопку "это свой" к удалённым сообщениям
 - `DOORMAN_LOOKALIKE_AUTOBAN_DISABLE` - отключить бан маскирующихся слов
+- `DOORMAN_RABBITMQ__ENABLED` - включить передачу обновлений через очередь (по умолчанию `false`)
+- `DOORMAN_RABBITMQ__URI` - URI брокера RabbitMQ, например `amqp://user:pass@rabbitmq:5672/`
+- `DOORMAN_RABBITMQ__INPUT_QUEUE` и `DOORMAN_RABBITMQ__DLQ` - имена основной и DLQ очередей
+- `DOORMAN_RABBITMQ__PREFETCH` и `DOORMAN_RABBITMQ__PUBLISH_TIMEOUT_SECONDS` - настройки производительности очереди
+- `DOORMAN_RABBITMQ__EVENT_EXCHANGE` - exchange для событий модерации (зарезервировано под будущую отправку)
+- `RABBITMQ_DEFAULT_USER` / `RABBITMQ_DEFAULT_PASS` - учётные данные брокера в docker-compose (используются, только если поднимаете локальный RabbitMQ)
 
 ### Docker Compose
 
@@ -156,17 +162,24 @@ services:
       - DOORMAN_ADMIN_CHAT=-1001234567890
 ```
 
-## 🎯 Команды админки
+В репозитории уже есть `docker-compose.yml`, где бот и очередь настроены для совместной работы. Минимальный пример запуска:
 
-Все команды вызываются ответом на сообщение:
-- `/spam` - добавить сообщение в датасет спама
-- `/ham` - добавить сообщение в датасет не-спама  
-- `/check` - проверить сообщение через все фильтры
+```bash
+docker compose up -d rabbitmq
+docker compose up -d doorman
+```
 
-## 🧪 Опыт использования
+Ключевые переменные читаются из `.env` рядом с compose-файлом. Пример `.env`:
 
-В первый день бот может показаться строгим к новичкам, но это временно. После написания 3 обычных сообщений пользователи попадают в доверенные, и фильтрация прекращается.
+```env
+DOORMAN_BOT_API=1234567890:AAAA-YOUR-TOKEN-HERE
+DOORMAN_ADMIN_CHAT=-1001234567890
+DOORMAN_RABBITMQ__ENABLED=true
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=guest
+```
 
+Такой конфиг поднимет локальный RabbitMQ с веб-панелью на `http://localhost:15672/` и автоматически подключит бота к очереди `spampyre.pipeline.input`.
 **Важно понимать:**
 - Бот **не банит** пользователей за сообщения, только удаляет подозрительные
 - Ложные срабатывания отслеживаются и исправляются

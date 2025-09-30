@@ -55,6 +55,7 @@ public class SpamHamClassifier : ISpamHamClassifier
         Microsoft.Extensions.Options.Options.Create(new CoreOptions()),
         Microsoft.Extensions.Options.Options.Create(new ChatAccessOptions()),
         Microsoft.Extensions.Options.Options.Create(new AiOptions()),
+        Microsoft.Extensions.Options.Options.Create(new RabbitMqOptions()),
         Microsoft.Extensions.Options.Options.Create(new TestHarnessOptions())))
     { }
 

@@ -22,6 +22,7 @@ using ClubDoorman.Services.AI;
 using ClubDoorman.Services.UserManagement;
 using ClubDoorman.Services.Captcha;
 using ClubDoorman.Services.Messaging;
+using ClubDoorman.Services.RabbitMq;
 
 namespace ClubDoorman;
 
@@ -38,7 +39,8 @@ internal sealed class Worker(
     ITelegramBotClientWrapper bot,
     IMessageService messageService,
     IAppConfig appConfig,
-    IUserBanService userBanService
+    IUserBanService userBanService,
+    IRabbitMqUpdatePublisher rabbitMqUpdatePublisher
 ) : BackgroundService
 {
     // Классы CaptchaInfo и Stats перенесены в Models
@@ -59,6 +61,7 @@ internal sealed class Worker(
     private readonly IMessageService _messageService = messageService;
     private readonly IAppConfig _appConfig = appConfig;
     private readonly IUserBanService _userBanService = userBanService;
+    private readonly IRabbitMqUpdatePublisher _rabbitMqPublisher = rabbitMqUpdatePublisher;
     private readonly GlobalStatsManager _globalStatsManager = new();
     private User _me = default!;
 
@@ -193,7 +196,7 @@ internal sealed class Worker(
                     _logger.LogDebug("2+ message from an album, it could not have any text/caption, skip");
                     continue;
                 }
-                await _updateDispatcher.DispatchAsync(update, stoppingToken);
+                await DispatchOrPublishAsync(update, stoppingToken);
             }
             catch (Exception e)
             {
@@ -203,11 +206,35 @@ internal sealed class Worker(
         return offset;
     }
 
+    private async Task DispatchOrPublishAsync(Update update, CancellationToken cancellationToken)
+    {
+        if (update == null)
+        {
+            _logger.LogWarning("DispatchOrPublishAsync: update is null, skipping");
+            return;
+        }
+
+        if (!_appConfig.RabbitMq.Enabled)
+        {
+            await _updateDispatcher.DispatchAsync(update, cancellationToken);
+            return;
+        }
+
+        var publishContext = new UpdatePublishContext(Guid.NewGuid(), gmCorrelation: null, DateTimeOffset.UtcNow);
+        await _rabbitMqPublisher.PublishAsync(update, publishContext, cancellationToken);
+    }
+
     // Метод HandleUpdate удален - логика перенесена в MessageHandler и CallbackQueryHandler через UpdateDispatcher
 
     private async Task AutoBanAsync(Message message, string reason, CancellationToken stoppingToken)
     {
         var user = message.From;
+
+        if (user == null)
+        {
+            _logger.LogWarning("AutoBanAsync: message {MessageId} has no user, skipping ban", message.MessageId);
+            return;
+        }
 
         // Используем UserBanService для централизованного бана
         await _userBanService.BanUserAsync(message.Chat, user, BanTypeEnum.AutoBan, reason, message, stoppingToken);
@@ -216,6 +243,12 @@ internal sealed class Worker(
     private async Task AutoBanWithLogging(Message message, string reason, CancellationToken stoppingToken)
     {
         var user = message.From;
+
+        if (user == null)
+        {
+            _logger.LogWarning("AutoBanWithLogging: message {MessageId} has no user, skipping ban", message.MessageId);
+            return;
+        }
 
         // Используем UserBanService для централизованного бана из блэклиста
         await _userBanService.BanUserAsync(message.Chat, user, BanTypeEnum.Blacklist, reason, message, stoppingToken);

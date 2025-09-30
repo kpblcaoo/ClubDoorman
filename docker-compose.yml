@@ -2,6 +2,8 @@ services:
   doorman:
     build: .
     container_name: doorman
+    depends_on:
+      - rabbitmq
     environment:
       - TZ=Europe/Moscow
       - DOORMAN_CLUB_SERVICE_TOKEN=${DOORMAN_CLUB_SERVICE_TOKEN:-test_token}
@@ -9,6 +11,29 @@ services:
       - DOORMAN_ADMIN_CHAT=${DOORMAN_ADMIN_CHAT:-123456789}
       - DOORMAN_BLACKLIST_AUTOBAN_DISABLE=${DOORMAN_BLACKLIST_AUTOBAN_DISABLE:-true}
       - DOORMAN_LOW_CONFIDENCE_HAM_ENABLE=${DOORMAN_LOW_CONFIDENCE_HAM_ENABLE:-false}
+      - DOORMAN_RABBITMQ__ENABLED=${DOORMAN_RABBITMQ__ENABLED:-false}
+      - DOORMAN_RABBITMQ__URI=amqp://${RABBITMQ_DEFAULT_USER:-guest}:${RABBITMQ_DEFAULT_PASS:-guest}@rabbitmq:5672/
+      - DOORMAN_RABBITMQ__INPUT_QUEUE=${DOORMAN_RABBITMQ__INPUT_QUEUE:-spampyre.pipeline.input}
+      - DOORMAN_RABBITMQ__DLQ=${DOORMAN_RABBITMQ__DLQ:-spampyre.pipeline.dlq}
+      - DOORMAN_RABBITMQ__PREFETCH=${DOORMAN_RABBITMQ__PREFETCH:-50}
+      - DOORMAN_RABBITMQ__PUBLISH_TIMEOUT_SECONDS=${DOORMAN_RABBITMQ__PUBLISH_TIMEOUT_SECONDS:-5}
+      - DOORMAN_RABBITMQ__EVENT_EXCHANGE=${DOORMAN_RABBITMQ__EVENT_EXCHANGE:-spampyre.events}
     volumes:
       - ./ClubDoorman/data:/app/data
     restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    restart: unless-stopped
+
+volumes:
+  rabbitmq-data:

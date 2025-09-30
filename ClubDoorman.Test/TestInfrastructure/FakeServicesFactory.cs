@@ -55,6 +55,7 @@ public class FakeServicesFactory
             Options.Create(new CoreOptions()),
             Options.Create(new ChatAccessOptions()),
             Options.Create(new AiOptions()),
+            Options.Create(new RabbitMqOptions()),
             Options.Create(new TestHarnessOptions())
         );
     }

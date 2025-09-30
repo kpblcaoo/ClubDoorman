@@ -90,6 +90,18 @@ public static class ConfigurationModule
             options.AiEnabledChats = loaded.AiEnabledChats;
         });
 
+        services.Configure<RabbitMqOptions>(options =>
+        {
+            var loaded = ConfigurationHelper.LoadRabbitMqOptions();
+            options.Enabled = loaded.Enabled;
+            options.Uri = loaded.Uri;
+            options.InputQueue = loaded.InputQueue;
+            options.DeadLetterQueue = loaded.DeadLetterQueue;
+            options.PrefetchCount = loaded.PrefetchCount;
+            options.PublishTimeoutSeconds = loaded.PublishTimeoutSeconds;
+            options.EventExchange = loaded.EventExchange;
+        });
+
         services.Configure<TestHarnessOptions>(options =>
         {
             var loaded = ConfigurationHelper.LoadTestHarnessOptions();

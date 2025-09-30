@@ -46,7 +46,7 @@ public static class ConfigurationHelper
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(x => long.TryParse(x.Trim(), out var id) ? id : (long?)null)
             .Where(x => x.HasValue)
-            .Select(x => x.Value)
+            .Select(x => x!.Value)
             .ToHashSet();
     }
 
@@ -108,6 +108,39 @@ public static class ConfigurationHelper
         return new ChatFilteringOptions
         {
             MediaFilteringDisabledChats = GetEnvironmentChatList("DOORMAN_MEDIA_FILTERING_DISABLED_CHATS")
+        };
+    }
+
+    /// <summary>
+    /// Загружает настройки RabbitMQ для конвейера сообщений.
+    /// </summary>
+    public static RabbitMqOptions LoadRabbitMqOptions()
+    {
+        var prefetch = GetEnvironmentInt("DOORMAN_RABBITMQ__PREFETCH", 50);
+        if (prefetch <= 0)
+        {
+            prefetch = 50;
+        }
+        if (prefetch > ushort.MaxValue)
+        {
+            prefetch = ushort.MaxValue;
+        }
+
+        var publishTimeout = GetEnvironmentInt("DOORMAN_RABBITMQ__PUBLISH_TIMEOUT_SECONDS", 5);
+        if (publishTimeout <= 0)
+        {
+            publishTimeout = 5;
+        }
+
+        return new RabbitMqOptions
+        {
+            Enabled = GetEnvironmentBool("DOORMAN_RABBITMQ__ENABLED"),
+            Uri = Environment.GetEnvironmentVariable("DOORMAN_RABBITMQ__URI"),
+            InputQueue = Environment.GetEnvironmentVariable("DOORMAN_RABBITMQ__INPUT_QUEUE") ?? "spampyre.pipeline.input",
+            DeadLetterQueue = Environment.GetEnvironmentVariable("DOORMAN_RABBITMQ__DLQ") ?? "spampyre.pipeline.dlq",
+            PrefetchCount = (ushort)prefetch,
+            PublishTimeoutSeconds = publishTimeout,
+            EventExchange = Environment.GetEnvironmentVariable("DOORMAN_RABBITMQ__EVENT_EXCHANGE") ?? "spampyre.events"
         };
     }
 
