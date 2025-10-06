@@ -43,8 +43,8 @@ SELECT
     toStartOfMinute(event_ts) AS bucket,
     countState()                                AS msg_cnt_state,
     uniqExactState(from_id)                     AS uniq_senders_state,
-    sumState(has_url)                           AS url_cnt_state,
-    sumState(has_media)                         AS media_cnt_state,
+    sumState(toUInt64(has_url))                 AS url_cnt_state,
+    sumState(toUInt64(has_media))               AS media_cnt_state,
     avgState(text_len)                          AS text_len_avg_state
 FROM tg.messages_raw
 GROUP BY chat_id, bucket;

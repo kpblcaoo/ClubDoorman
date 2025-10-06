@@ -187,16 +187,20 @@ DOORMAN_CLICKHOUSE__ENABLED=true
 DOORMAN_CLICKHOUSE__URL=http://clickhouse:8123
 DOORMAN_CLICKHOUSE__DATABASE=tg
 DOORMAN_CLICKHOUSE__RAW_TABLE=tg.messages_raw
+DOORMAN_CLICKHOUSE__USERNAME=doorman
+DOORMAN_CLICKHOUSE__PASSWORD=change-me
 DOORMAN_CLICKHOUSE__BATCH_SIZE=500
 RABBITMQ_DEFAULT_USER=guest
 RABBITMQ_DEFAULT_PASS=guest
 ```
 
-Перед запуском ingestion один раз создайте таблицы и представления в ClickHouse:
+Перед запуском ingestion заполните `.env` (или экспортируйте переменные окружения) для ClickHouse и выполните инициализацию:
 
 ```bash
-cat scripts/init_clickhouse.sql | clickhouse-client -h localhost
+./scripts/init_clickhouse.sh
 ```
+
+Скрипт поднимает контейнер `clickhouse`, создаёт таблицы/представления и не изменяет `.env`. Если каких-то переменных не хватает, он предложит добавить их вручную и завершит работу без побочных эффектов.
 
 Скрипт разворачивает сырую ленту `tg.messages_raw`, агрегаты на минутных бакетах (`tg.metrics_minute`) и материализованное представление для Grafana (`tg.metrics_minute_v`).
 

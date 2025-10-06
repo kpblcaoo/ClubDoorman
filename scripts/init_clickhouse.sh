@@ -3,8 +3,10 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${ROOT_DIR}/.env"
-ENV_TEMPLATE="${ROOT_DIR}/ClubDoorman/env.example"
 SCHEMA_FILE="${ROOT_DIR}/scripts/init_clickhouse.sql"
+
+declare -a optional_suggestions=()
+declare -a required_missing=()
 
 log() {
     printf '[init-clickhouse] %s\n' "$*"
@@ -15,87 +17,95 @@ fatal() {
     exit 1
 }
 
-ensure_env_file() {
-    if [[ ! -f "${ENV_FILE}" ]]; then
-        if [[ ! -f "${ENV_TEMPLATE}" ]]; then
-            fatal "Cannot find env template at ${ENV_TEMPLATE}"
+add_unique() {
+    local entry="$1"
+    local array_name="$2"
+    local -n ref="${array_name}"
+
+    for existing in "${ref[@]-}"; do
+        if [[ "${existing}" == "${entry}" ]]; then
+            return
         fi
-        log "Creating .env from template"
-        cp "${ENV_TEMPLATE}" "${ENV_FILE}"
-    else
-        create_env_backup
-    fi
+    done
+
+    ref+=("${entry}")
 }
 
-create_env_backup() {
-    local timestamp backup
-    timestamp="$(date +%Y%m%d-%H%M%S)"
-    backup="${ENV_FILE}.bak-${timestamp}"
-    cp "${ENV_FILE}" "${backup}"
-    log "Created .env backup at ${backup}"
-}
-
-read_env_var() {
-    local key="$1"
+load_env_file() {
     if [[ -f "${ENV_FILE}" ]]; then
-        grep -m1 "^${key}=" "${ENV_FILE}" | cut -d'=' -f2- || true
-    fi
-}
-
-update_env_var() {
-    local key="$1"
-    local value="$2"
-    if grep -q "^${key}=" "${ENV_FILE}"; then
-        # Use | as delimiter to avoid escaping URLs
-        sed -i "s|^${key}=.*|${key}=${value}|" "${ENV_FILE}"
+        log "Loading environment from .env"
+        set +u
+        set -o allexport
+        # shellcheck source=/dev/null
+        source "${ENV_FILE}"
+        set +o allexport
+        set -u
     else
-        printf '%s=%s\n' "${key}" "${value}" >>"${ENV_FILE}"
+        log ".env not found, relying on current shell environment"
     fi
 }
 
-ensure_env_default() {
+get_optional_env() {
     local key="$1"
     local default="$2"
-    local current
-    current="$(read_env_var "${key}")"
+    local current="${!key-}"
+
     if [[ -z "${current}" ]]; then
-        update_env_var "${key}" "${default}"
-        current="${default}"
-        log "Added ${key}=${default} to .env"
+        add_unique "${key}=${default}" optional_suggestions
+        printf '%s' "${default}"
+    else
+        printf '%s' "${current}"
     fi
-    printf '%s' "${current}"
+}
+
+note_required_missing() {
+    local entry="$1"
+    add_unique "${entry}" required_missing
 }
 
 generate_password() {
-    tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24
+    local pw=""
+    local old_pipefail
+    old_pipefail="$(set +o | grep pipefail)"
+    set +o pipefail
+    while [[ ${#pw} -lt 24 ]]; do
+        pw=$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24 || true)
+    done
+    eval "$old_pipefail"
+    printf '%s' "${pw}"
 }
 
-ensure_env_file
+load_env_file
 
-# Ensure base values
-CLICKHOUSE_ENABLED_CURRENT="$(read_env_var "DOORMAN_CLICKHOUSE__ENABLED")"
-if [[ -z "${CLICKHOUSE_ENABLED_CURRENT}" ]]; then
-    update_env_var "DOORMAN_CLICKHOUSE__ENABLED" "true"
-    CLICKHOUSE_ENABLED_CURRENT="true"
-    log "Added DOORMAN_CLICKHOUSE__ENABLED=true"
-else
-    log "Keeping existing DOORMAN_CLICKHOUSE__ENABLED=${CLICKHOUSE_ENABLED_CURRENT}"
-fi
-CLICKHOUSE_URL="$(ensure_env_default "DOORMAN_CLICKHOUSE__URL" "http://clickhouse:8123")"
-CLICKHOUSE_DB="$(ensure_env_default "DOORMAN_CLICKHOUSE__DATABASE" "tg")"
-CLICKHOUSE_TABLE="$(ensure_env_default "DOORMAN_CLICKHOUSE__RAW_TABLE" "tg.messages_raw")"
-ensure_env_default "DOORMAN_CLICKHOUSE__INGEST_SOURCE" "local"
-CLICKHOUSE_USER="$(ensure_env_default "DOORMAN_CLICKHOUSE__USERNAME" "doorman")"
+# Collect optional defaults (suggest but don't mutate)
+get_optional_env "DOORMAN_CLICKHOUSE__ENABLED" "true" >/dev/null
+CLICKHOUSE_URL="$(get_optional_env "DOORMAN_CLICKHOUSE__URL" "http://clickhouse:8123")"
+CLICKHOUSE_DB="$(get_optional_env "DOORMAN_CLICKHOUSE__DATABASE" "tg")"
+CLICKHOUSE_TABLE="$(get_optional_env "DOORMAN_CLICKHOUSE__RAW_TABLE" "tg.messages_raw")"
+get_optional_env "DOORMAN_CLICKHOUSE__INGEST_SOURCE" "local" >/dev/null
+CLICKHOUSE_USER="$(get_optional_env "DOORMAN_CLICKHOUSE__USERNAME" "doorman")"
 
 if [[ ! "${CLICKHOUSE_USER}" =~ ^[a-zA-Z0-9_]+$ ]]; then
     fatal "DOORMAN_CLICKHOUSE__USERNAME must contain only letters, numbers or underscores"
 fi
 
-CLICKHOUSE_PASS="$(read_env_var "DOORMAN_CLICKHOUSE__PASSWORD")"
+CLICKHOUSE_PASS="${DOORMAN_CLICKHOUSE__PASSWORD-}"
 if [[ -z "${CLICKHOUSE_PASS}" ]]; then
-    CLICKHOUSE_PASS="$(generate_password)"
-    update_env_var "DOORMAN_CLICKHOUSE__PASSWORD" "${CLICKHOUSE_PASS}"
-    log "Generated random DOORMAN_CLICKHOUSE__PASSWORD"
+    suggested_pass="$(generate_password)"
+    note_required_missing "DOORMAN_CLICKHOUSE__PASSWORD=${suggested_pass}"
+fi
+
+if (( ${#required_missing[@]} > 0 )); then
+    log "Missing required environment values; no changes were made."
+    printf '[init-clickhouse] Please add the following to your .env (or export them) and rerun:\n'
+    for entry in "${required_missing[@]}"; do
+        printf '  %s\n' "${entry}"
+    done
+    exit 1
+fi
+
+if [[ ! "${CLICKHOUSE_PASS}" =~ ^[A-Za-z0-9_-]+$ ]]; then
+    fatal "DOORMAN_CLICKHOUSE__PASSWORD must contain only letters, numbers, underscores, or hyphens"
 fi
 
 if [[ ! -f "${SCHEMA_FILE}" ]]; then
@@ -137,10 +147,17 @@ SQL
 
 log "ClickHouse initialization complete"
 cat <<EOF
-[init-clickhouse] Connection details written to .env:
+[init-clickhouse] ClickHouse connection details (no files were modified):
   DOORMAN_CLICKHOUSE__URL=${CLICKHOUSE_URL}
   DOORMAN_CLICKHOUSE__DATABASE=${CLICKHOUSE_DB}
   DOORMAN_CLICKHOUSE__RAW_TABLE=${CLICKHOUSE_TABLE}
   DOORMAN_CLICKHOUSE__USERNAME=${CLICKHOUSE_USER}
   DOORMAN_CLICKHOUSE__PASSWORD=${CLICKHOUSE_PASS}
 EOF
+
+if (( ${#optional_suggestions[@]} > 0 )); then
+    printf '[init-clickhouse] Consider appending the following to your .env for future runs:\n'
+    for entry in "${optional_suggestions[@]}"; do
+        printf '  %s\n' "${entry}"
+    done
+fi
