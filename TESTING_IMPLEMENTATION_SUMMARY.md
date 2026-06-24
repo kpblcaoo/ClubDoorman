@@ -39,7 +39,6 @@
 ✅ AiChecks (2 зависимости)
 ✅ StatisticsService (2 зависимости)
 ✅ ApprovedUsersStorage (1 зависимость)
-✅ ApprovedUsersStorageV2 (1 зависимость)
 ✅ SuspiciousUsersStorage (1 зависимость)
 ```
 
@@ -161,4 +160,4 @@ public void CreateModerationService_WithFactory_ReturnsWorkingService()
 
 *Отчет создан: $(date)*
 *Ветка: feature/tdd-testing-focus*
-*Коммиты: 3 новых коммита с тестированием* 
+*Коммиты: 3 новых коммита с тестированием*

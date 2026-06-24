@@ -40,11 +40,18 @@ ClubDoorman/logs/
 
 # Golden transient semantics (never commit)
 *.sem.json
+ClubDoorman.Baseline/Golden/
+
+# Local orchestration notes
+docs/project-state-sync-plan.md
 
 # Temporary test files
 *.tmp
 *.temp
 test-*.jsonscripts/test_factory_generator/__pycache__/
+
+# Windows alternate data stream metadata copied to Linux
+*Zone.Identifier
 
 # Security - never commit real tokens
 test_bot.sh

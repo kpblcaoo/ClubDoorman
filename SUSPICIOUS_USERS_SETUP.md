@@ -41,9 +41,24 @@ docker-compose restart
 
 ## Админские команды
 
+Текстовый обработчик `/suspicious` сейчас поддерживает только:
+
 - `/suspicious stats` - статистика системы
 - `/suspicious list` - список пользователей с AI детектом  
 - `/suspicious help` - справка
+
+Действия по конкретному suspicious-пользователю доступны через inline-кнопки в админском уведомлении:
+
+- `✅ Одобрить` - снять ограничения и одобрить пользователя
+- `🚫 Забанить` - забанить пользователя и очистить из списков
+- `🔍 AI анализ вкл/выкл` - переключить AI-детект для пользователя
+
+Не реализовано как текстовые команды на данный момент:
+
+- `/suspicious ai <on|off> <userId> <chatId>`
+- `/suspicious approve <userId> <chatId>`
+- `/suspicious ban <userId> <chatId>`
+- `/suspicious cleanup <userId> <chatId>`
 
 ## Уведомления в админ-чат
 
@@ -103,4 +118,4 @@ docker-compose restart
 🔍 Анализ подозрительности: система включена=True
 ```
 
-Если `система включена=False` → проверить переменную `DOORMAN_SUSPICIOUS_DETECTION_ENABLE` 
+Если `система включена=False` → проверить переменную `DOORMAN_SUSPICIOUS_DETECTION_ENABLE`
