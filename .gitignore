@@ -85,6 +85,7 @@ archive/
 archived/
 /html/
 /latex/
+.opencode/
 
 # Local AI/code graph build state
 **/graphify-out/cache/
