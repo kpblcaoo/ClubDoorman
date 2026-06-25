@@ -145,7 +145,7 @@ DOORMAN_BAN_FOLDER_INVITE_USERS=false
 ```
 act pull_request -j golden-validation -W .github/workflows/golden-validation.yml
 ```
-Перед запуском убедитесь в наличии .NET 9 (см. скрипт `./dotnet-install.sh`).
+Перед запуском убедитесь в наличии .NET 9 (см. скрипт `../../scripts/dotnet-install.sh`).
 
 Процедура осознанного обновления golden:
 1. Изменить код.
