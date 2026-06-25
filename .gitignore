@@ -85,3 +85,18 @@ archive/
 archived/
 /html/
 /latex/
+
+# Local AI/code graph build state
+**/graphify-out/cache/
+**/graphify-out/.graphify_*
+**/graphify-out/manifest.json
+**/graphify-out/cost.json
+
+**/.understand-anything/.understandignore
+**/.understand-anything/config.json
+**/.understand-anything/meta.json
+**/.understand-anything/fingerprints.json
+**/.understand-anything/session-context.md
+**/.understand-anything/intermediate/
+**/.understand-anything/tmp/
+**/.understand-anything/.trash-*/
