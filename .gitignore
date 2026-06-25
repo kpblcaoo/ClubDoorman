@@ -83,8 +83,8 @@ scripts/testkit-sql-indexer/testkit_index_*.txt
 
 venv/
 .venv/
-archive/
-archived/
+/archive/
+/archived/
 /html/
 /latex/
 .opencode/

@@ -215,6 +215,23 @@ Inline-действия в админских уведомлениях:
 - **Планы и отключение рекламы:** [momai.dev/antispambot](https://momai.dev/antispambot)
 - **Документация:** [telegra.ph/GateTroitsBot-04-19](https://telegra.ph/GateTroitsBot-04-19)
 
+## 📚 Документация
+
+- [Архитектура](docs/ARCHITECTURE.md)
+- [Тестирование](docs/TESTING.md)
+- [Инструкция по разработке](docs/development-instructions.ru.md)
+- [Сценарии](docs/scenarios/)
+
+### Функции
+
+- [Бан за вход через папки](docs/folder-invite-ban.md)
+- [AI проверки профилей](docs/ai-profile-checks.md)
+- [Система подозрительных пользователей — настройка](docs/suspicious-users-setup.md)
+
+### Архив
+
+- [Рабочие журналы и исторические документы](docs/archive/README.md)
+
 ## 🙏 Благодарности
 
 - [lols.bot](https://lols.bot/) - за борьбу со спамерами и API для бан-листов

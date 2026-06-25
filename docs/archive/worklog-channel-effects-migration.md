@@ -35,7 +35,7 @@ Purpose: Safe, staged migration of channel moderation path to unified effects pi
 - No new tests yet for flag path (next immediate task).
 - Keep legacy code untouched until Stage 4 passes parity validation.
 - Remove "мусор" (temporary scaffolding + this file) at Stage 6.
- - Parallel refactor: see `WORKLOG_MESSAGE_PIPELINE.md` for user message pipeline extraction (kept separate to avoid scope mixing).
+ - Parallel refactor: see `worklog-message-pipeline.md` for user message pipeline extraction (kept separate to avoid scope mixing).
 
 ## Next Action
 Proceed with Stage 2: introduce tests guarding behavior with `DOORMAN_CHANNEL_EFFECTS_ENABLE=1` (after initial Message Pipeline structural steps to avoid test churn overlap).
